@@ -20,6 +20,10 @@ services:
     depends_on:
       - postgres
 
+    ports:
+      - "8000:8000"
+      - "5173:5173"
+
   nginx:
     image: nginx:alpine
 

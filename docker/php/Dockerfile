@@ -22,6 +22,12 @@ ARG GID=1000
 RUN groupmod -o -g ${GID} www-data \
     && usermod -o -u ${UID} -g ${GID} www-data
 
+# Домашняя директория пользователя
+ENV HOME=/home/www-data
+
+RUN mkdir -p ${HOME} \
+    && chown -R www-data:www-data ${HOME}
+
 WORKDIR /var/www/html
 
 USER www-data
