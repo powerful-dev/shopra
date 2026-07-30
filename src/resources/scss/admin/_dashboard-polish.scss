@@ -1,0 +1,495 @@
+/* Dashboard polish: values below intentionally mirror the approved prototype proportions. */
+
+.shopra-admin-shell a,.shopra-login-page a {
+
+    color: inherit;
+    text-decoration: none;
+
+}
+
+.shopra-page-container {
+
+    max-width: none;
+    margin: 0;
+
+}
+
+.shopra-welcome {
+
+    align-items: flex-end;
+    padding: 34px 2px 27px;
+
+}
+
+.shopra-welcome p,.shopra-card-heading p,.shopra-placeholder p {
+
+    margin-bottom: 7px;
+    font-weight: 760;
+    letter-spacing: .09em;
+
+}
+
+.shopra-welcome h1 {
+
+    font-size: clamp(26px,2.3vw,36px);
+    font-weight: 720;
+    letter-spacing: -.045em;
+    line-height: 1.15;
+
+}
+
+.shopra-welcome small {
+
+    display: block;
+    margin-top: 7px;
+    line-height: 1.4;
+
+}
+
+.shopra-button {
+
+    gap: 8px;
+    padding: 0 14px;
+    border-color: var(--shopra-line);
+    color: #46403b;
+    font-weight: 680;
+    line-height: 1;
+
+}
+
+.shopra-button:hover {
+
+    border-color: #d6c7bb;
+    background: #fcfaf8;
+
+}
+
+.shopra-stat-card {
+
+    min-height: 112px;
+    border-radius: 15px !important;
+    background: rgba(255,255,255,.91) !important;
+    box-shadow: var(--shopra-shadow) !important;
+    transition: transform .17s ease,box-shadow .17s ease;
+
+}
+
+.shopra-stat-card:hover {
+
+    transform: translateY(-2px);
+    box-shadow: 0 15px 42px rgba(70,47,31,.08) !important;
+
+}
+
+.shopra-stat-card strong {
+
+    margin-top: 4px;
+    margin-bottom: 0;
+    font-size: clamp(20px,1.75vw,27px);
+    font-weight: 730;
+
+}
+
+.shopra-stat-card p {
+
+    margin-top: 3px;
+    color: #8b5d43;
+    font-size: 9px;
+    font-weight: 650;
+
+}
+
+.shopra-stat-card p.is-positive {
+
+    color: var(--shopra-green);
+
+}
+
+.shopra-stat-icon.is-warm {
+
+    background: #fbf0e7;
+    color: #b85d27;
+
+}
+
+.shopra-dashboard-grid {
+
+    grid-template-columns: minmax(360px,.93fr) minmax(480px,1.47fr);
+    gap: 12px;
+    margin-top: 12px;
+
+}
+
+.shopra-bottom-grid {
+
+    grid-template-columns: minmax(0,1.65fr) minmax(260px,.75fr);
+    gap: 12px;
+    margin-top: 12px;
+
+}
+
+.shopra-dashboard-card {
+
+    overflow: hidden;
+    padding: 0;
+    border-radius: 15px !important;
+    background: rgba(255,255,255,.94) !important;
+
+}
+
+.shopra-card-heading {
+
+    min-height: 67px;
+    margin: 0;
+    padding: 16px 18px 10px;
+    gap: 18px;
+
+}
+
+.shopra-card-heading h2,.shopra-setup h2 {
+
+    font-weight: 720;
+    letter-spacing: -.025em;
+
+}
+
+.shopra-card-heading p {
+
+    margin-bottom: 3px;
+    font-size: 8px;
+
+}
+
+.shopra-text-link {
+
+    padding: 4px;
+    font-weight: 680;
+
+}
+
+.shopra-orders {
+
+    padding: 0 10px 11px;
+
+}
+
+.shopra-order {
+
+    min-height: 54px;
+    grid-template-columns: 48px minmax(120px,1fr) auto auto;
+    padding: 6px 8px;
+    border-top: 1px solid #f1ede9;
+    border-bottom: 0;
+    border-radius: 0;
+    gap: 8px;
+    transition: background .15s ease;
+
+}
+
+.shopra-order:hover {
+
+    border-radius: 9px;
+    background: #faf8f6;
+
+}
+
+.shopra-order>b {
+
+    color: #4c4641;
+    font-size: 10px;
+    font-weight: 700;
+
+}
+
+.shopra-order strong {
+
+    color: #2c2926;
+    font-size: 10px;
+    font-weight: 680;
+
+}
+
+.shopra-order small {
+
+    color: #9b948e;
+    font-size: 8px;
+
+}
+
+.shopra-order em {
+
+    color: #2d2926;
+    font-size: 10px;
+    font-weight: 400;
+
+}
+
+.shopra-status {
+
+    min-width: 58px;
+    padding: 4px 6px;
+    border-radius: 7px;
+    font-size: 8px;
+    font-weight: 680;
+
+}
+
+.shopra-order u {
+
+    display: none;
+
+}
+
+.shopra-range-switch {
+
+    position: static;
+    margin: 16px 18px 0 auto;
+    width: max-content;
+    background: #faf8f6;
+
+}
+
+.shopra-range-switch button {
+
+    height: 26px;
+    min-height: 26px;
+    font-size: 9px;
+
+}
+
+.shopra-chart {
+
+    min-height: 258px;
+    padding: 0 16px 14px 55px;
+
+}
+
+.shopra-chart svg {
+
+    height: 208px;
+
+}
+
+.shopra-chart-y {
+
+    top: 31px;
+    left: 16px;
+    height: 153px;
+    font-size: 8px;
+
+}
+
+.shopra-chart-labels {
+
+    margin: -10px 4px 0;
+    font-size: 8px;
+
+}
+
+.shopra-chart-callout {
+
+    top: 29px;
+    right: 8%;
+    padding: 7px 10px;
+    border-color: var(--shopra-line);
+    border-radius: 9px;
+    background: rgba(255,255,255,.95);
+    box-shadow: 0 8px 24px rgba(73,48,31,.08);
+
+}
+
+.shopra-chart-callout strong {
+
+    color: var(--shopra-ink);
+
+}
+
+.shopra-quick-actions {
+
+    gap: 8px;
+    padding: 0 13px 14px;
+
+}
+
+.shopra-quick-actions a {
+
+    min-height: 55px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 10px;
+    background: #fff;
+    color: #49433e;
+    font-size: 9px;
+    font-weight: 650;
+    line-height: 1.25;
+    text-align: center;
+
+}
+
+.shopra-quick-actions span {
+
+    display: grid;
+    place-items: center;
+    width: 29px;
+    height: 29px;
+    flex: 0 0 auto;
+    border-radius: 8px;
+    background: var(--shopra-accent-soft);
+    color: var(--shopra-accent);
+
+}
+
+.shopra-setup {
+
+    padding: 17px;
+    border-color: #ead8ca !important;
+    background: linear-gradient(145deg,#fffaf6,#f8eee7) !important;
+
+}
+
+.shopra-setup-top {
+
+    gap: 8px;
+    color: var(--shopra-accent);
+
+}
+
+.shopra-setup-top>span {
+
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: #fff;
+
+}
+
+.shopra-setup-top p {
+
+    flex: 1;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+
+}
+
+.shopra-setup-top>b {
+
+    display: none;
+
+}
+
+.shopra-setup h2 {
+
+    margin-top: 13px;
+
+}
+
+.shopra-setup-list {
+
+    overflow: hidden;
+    border-top: 1px solid rgba(196,158,131,.28);
+
+}
+
+.shopra-setup-step {
+
+    grid-template-columns: 22px minmax(0,1fr) 15px;
+    gap: 7px;
+    min-height: 48px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(196,158,131,.2);
+
+}
+
+.shopra-setup-check {
+
+    width: 22px;
+    height: 22px;
+    border-color: #d8bda9;
+    color: var(--shopra-accent);
+
+}
+
+.shopra-setup-step.is-done .shopra-setup-check {
+
+    border-color: #b8d3bd;
+    background: #eef7ef;
+
+}
+
+.shopra-setup-step strong {
+
+    font-size: 10px;
+    font-weight: 680;
+
+}
+
+.shopra-setup-step small {
+
+    color: #8c8178;
+    font-size: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+}
+
+.shopra-setup-step em {
+
+    margin-left: 5px;
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: rgba(255,255,255,.78);
+    color: #8a5b40;
+    font-size: 7px;
+    font-weight: 700;
+
+}
+
+.shopra-setup-toggle {
+
+    width: 100%;
+    justify-content: center;
+    padding: 9px 0 0;
+    font-size: 9px;
+
+}
+
+.shopra-placeholder {
+
+    border-radius: 18px !important;
+
+}
+
+.shopra-create-shop {
+
+    max-width: 620px;
+
+}
+
+.shopra-nav-item {
+
+    font-weight: 570;
+
+}
+
+.shopra-nav-item.is-active {
+
+    font-weight: 690;
+
+}
+
+.shopra-avatar {
+
+    font-size: 13px;
+
+}
+
+.shopra-setup-mini i b {
+
+    width: 72%;
+
+}

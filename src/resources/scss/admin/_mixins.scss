@@ -1,0 +1,26 @@
+// ==========================================================================
+// Reusable mixins
+// ==========================================================================
+
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@mixin grid-center {
+    display: grid;
+    place-items: center;
+}
+
+@mixin surface-card {
+    border: 1px solid var(--shopra-line);
+    background: var(--shopra-paper);
+    box-shadow: var(--shopra-shadow);
+}
+
+@mixin truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

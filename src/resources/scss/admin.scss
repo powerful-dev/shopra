@@ -1,0 +1,9 @@
+// Shopra admin stylesheet entry point.
+// Import order intentionally preserves the cascade of the original admin.css.
+
+@use "admin/tokens";
+@use "admin/mixins";
+@use "admin/core";
+@use "admin/responsive";
+@use "admin/dashboard-polish";
+@use "admin/dashboard-polish-responsive";

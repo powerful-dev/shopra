@@ -1,0 +1,132 @@
+@use "tokens" as *;
+
+@media (max-width: $breakpoint-desktop) {
+
+    .shopra-dashboard-grid {
+
+        grid-template-columns: 1fr 1.25fr;
+
+    }
+
+    .shopra-quick-actions {
+
+        grid-template-columns: repeat(3,1fr);
+
+    }
+
+}
+
+@media (max-width: $breakpoint-tablet) {
+
+    .shopra-dashboard-grid,.shopra-bottom-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+    .shopra-metrics {
+
+        grid-template-columns: repeat(2,minmax(0,1fr));
+
+    }
+
+}
+
+@media (max-width: $breakpoint-mobile) {
+
+    .shopra-welcome {
+
+        padding-top: 25px;
+
+    }
+
+    .shopra-welcome h1 {
+
+        font-size: 27px;
+
+    }
+
+    .shopra-dashboard-grid {
+
+        min-width: 0;
+
+    }
+
+    .shopra-order {
+
+        grid-template-columns: minmax(130px,1fr) auto 18px;
+        padding: 9px 7px;
+
+    }
+
+    .shopra-order>b {
+
+        display: none;
+
+    }
+
+    .shopra-order em {
+
+        grid-column: 2;
+        grid-row: 1;
+
+    }
+
+    .shopra-order .shopra-status {
+
+        grid-column: 2;
+        grid-row: 2;
+        justify-self: end;
+        min-width: 0;
+
+    }
+
+    .shopra-order u {
+
+        display: block;
+        grid-column: 3;
+        grid-row: 1 / span 2;
+        color: #a59e98;
+
+    }
+
+    .shopra-chart {
+
+        min-height: 230px;
+        padding-left: 42px;
+
+    }
+
+    .shopra-chart-y {
+
+        left: 10px;
+
+    }
+
+    .shopra-chart-labels span:nth-child(even) {
+
+        display: none;
+
+    }
+
+    .shopra-chart-callout {
+
+        right: 4%;
+
+    }
+
+    .shopra-quick-actions {
+
+        grid-template-columns: repeat(2,1fr);
+
+    }
+
+    .shopra-quick-actions a {
+
+        justify-content: flex-start;
+        padding: 8px 10px;
+        text-align: left;
+
+    }
+
+}
