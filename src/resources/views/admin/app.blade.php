@@ -8,6 +8,9 @@
     @vite('resources/js/admin.jsx')
 </head>
 <body>
-    <div id="admin-app"></div>
+    <div 
+        id="admin-app"
+        data-store-url="{{ route('home') }}">
+    </div>
 </body>
 </html>
