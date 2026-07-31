@@ -15,7 +15,7 @@ export default function DashboardPage() {
 
     return (
         <PageContainer>
-            <DashboardWelcome date={dashboardData.date} name={user.name.split(' ')[0]} />
+            <DashboardWelcome name={user?.name?.split(' ')[0] ?? 'Администратор'} />
             <section className="shopra-metrics">{dashboardData.metrics.map((metric) => <StatCard key={metric.label} metric={metric} />)}</section>
             <section className="shopra-dashboard-grid"><DashboardCard title="Последние заказы" kicker="Заказы" action={<Link to="/admin/orders" className="shopra-text-link">Все заказы<span uk-icon="icon: arrow-right; ratio: 0.68" /></Link>}><RecentOrders orders={dashboardData.orders} /></DashboardCard><DashboardCard title="Продажи" kicker="Статистика" className="shopra-chart-card"><SalesChart series={dashboardData.sales} /></DashboardCard></section>
             <section className="shopra-bottom-grid"><DashboardCard title="Быстрые действия" kicker="Магазин"><QuickActions /></DashboardCard><SetupProgress tasks={dashboardData.setupTasks} /></section>

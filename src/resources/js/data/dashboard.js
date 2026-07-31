@@ -4,7 +4,6 @@ import OrdersInProcessIcon from '../components/icons/OrdersInProcessIcon';
 import ProductsIcon from '../components/icons/ProductsIcon';
 
 export const dashboardData = {
-    date: 'Суббота, 25 июля',
     metrics: [
         { label: 'Новые заказы', value: '12', detail: '+3 за сегодня', icon: OrdersIcon, tone: 'copper' },
         { label: 'Продажи за сегодня', value: '27 430 ₴', detail: '+18.2% к вчера', icon: AnalyticsIcon, tone: 'green' },

@@ -1,15 +1,16 @@
 import EyeIcon from '../icons/EyeIcon';
 import OpenLinkIcon from '../icons/OpenLinkIcon';
 import CalendarIcon from '../icons/CalendarIcon';
+import { useLocalDateTime } from '../../hooks/useLocalDateTime';
 
+export default function DashboardWelcome({ name }) {
+    const { greeting, dateLabel } = useLocalDateTime();
 
-
-export default function DashboardWelcome({ date, name }) {
     return (
         <section className="shopra-welcome">
             <div>
-                <p>{date}</p>
-                <h1>Доброе утро, {name}! <span>👋</span></h1>
+                <p>{dateLabel}</p>
+                <h1>{greeting}, {name}! <span>👋</span></h1>
                 <small>Вот что происходит в вашем магазине сегодня.</small>
             </div>
             <div className="shopra-welcome-actions">
@@ -18,10 +19,6 @@ export default function DashboardWelcome({ date, name }) {
                     Посмотреть магазин
                     <OpenLinkIcon/>
                 </button>
-                <span className="shopra-button shopra-button-secondary">
-                    <CalendarIcon/>
-                    25 июля 2026 г.
-                </span>
             </div>
         </section>
     );
