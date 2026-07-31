@@ -28,7 +28,6 @@ export default function Header({ onMenuClick }) {
                         <button className="shopra-help-button" type="button" aria-label="Помощь">
                             <HelpIcon/>
                         </button>
-                        <select className="uk-select shopra-store-select" aria-label="Выбрать магазин"><option>Мой магазин</option><option>BartBag</option><option>Solomiya Artisan</option></select>
                     </div>
                 </div>
             </header>
