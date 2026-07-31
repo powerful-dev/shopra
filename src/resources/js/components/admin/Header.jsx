@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import Brand from './Brand/Brand';
+import AlarmIcon from '../icons/AlarmIcon';
+import HelpIcon from '../icons/HelpIcon';
 
 export default function Header({ onMenuClick }) {
     const [activePopover, setActivePopover] = useState(null);
@@ -17,8 +19,15 @@ export default function Header({ onMenuClick }) {
                 <div className="shopra-topbar-inner">
                     <div className="shopra-search"><span uk-icon="icon: search; ratio: 0.82" /><input type="search" placeholder="Поиск по панели" onFocus={() => setActivePopover('search')} aria-label="Поиск по панели" />{activePopover === 'search' && <div className="shopra-popover shopra-search-popover"><p>Начните вводить запрос для поиска по панели.</p></div>}</div>
                     <div className="shopra-top-actions">
-                        <div className="shopra-popover-wrap"><button className="shopra-icon-button" type="button" aria-label="Уведомления" onClick={() => setActivePopover((value) => value === 'notifications' ? null : 'notifications')}><span uk-icon="icon: bell; ratio: 0.88" /><i /></button>{activePopover === 'notifications' && <NotificationPopover />}</div>
-                        <button className="shopra-help-button" type="button" aria-label="Помощь" uk-icon="icon: question; ratio: 0.86" />
+                        <div className="shopra-popover-wrap">
+                            <button className="shopra-icon-button" type="button" aria-label="Уведомления" onClick={() => setActivePopover((value) => value === 'notifications' ? null : 'notifications')}>
+                                <AlarmIcon/>
+                                <i class="notify-dot"></i>
+                            </button>{activePopover === 'notifications' && <NotificationPopover />}
+                        </div>
+                        <button className="shopra-help-button" type="button" aria-label="Помощь">
+                            <HelpIcon/>
+                        </button>
                         <select className="uk-select shopra-store-select" aria-label="Выбрать магазин"><option>Мой магазин</option><option>BartBag</option><option>Solomiya Artisan</option></select>
                     </div>
                 </div>
