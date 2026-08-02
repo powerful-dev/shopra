@@ -10,6 +10,10 @@ export default function AdminLayout() {
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+    if (user?.id) {
+        window.__SHOPRA_ADMIN_ID__ = user.id;
+    }
+
     const signOut = async () => {
         await logout();
         navigate('/admin/login', { replace: true });

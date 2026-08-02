@@ -24,3 +24,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+@mixin d-none {
+    display: none;
+}

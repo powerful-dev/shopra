@@ -302,3 +302,42 @@ Implement only what is required for the current task.
 Avoid implementing future functionality unless explicitly requested.
 
 Use placeholders or mock data where appropriate instead of introducing unfinished business logic.
+
+---
+
+### SCSS Organization
+
+To keep the styling architecture clean, scalable, and maintainable, follow these conventions:
+
+* Every new admin page must have its own dedicated SCSS file (for example: `_dashboard.scss`, `_administrators.scss`, `_orders.scss`).
+* Each page-specific SCSS file must be imported into the main SCSS entry file.
+* Shared components, common layouts, utilities, and reusable styles belong in `_core.scss`.
+* Page-specific SCSS files should contain only styles unique to that page.
+
+#### Existing SCSS Architecture
+
+The project already includes the following shared SCSS files:
+
+* `_tokens.scss` – design tokens (colors, spacing, typography, border radius, shadows, etc.).
+* `_mixins.scss` – reusable mixins and helper functions.
+* `_responsive.scss` – responsive breakpoints and responsive helper mixins.
+* `_core.scss` – shared UI components and common application styles.
+
+When implementing new styles:
+
+* Always reuse variables from `_tokens.scss` instead of hardcoding values.
+* Always use existing mixins from `_mixins.scss` whenever applicable.
+* Use the responsive utilities defined in `_responsive.scss` instead of writing arbitrary media queries.
+* Before creating new variables, mixins, or helper classes, check whether an appropriate solution already exists.
+
+#### SCSS Style Guidelines
+
+* Follow the existing nested SCSS style used throughout `_core.scss`.
+* Keep selectors properly nested and avoid unnecessarily long flat selectors.
+* Avoid duplicating or overriding styles from `_core.scss` unless absolutely necessary.
+* If a style becomes reusable across multiple pages, move it into `_core.scss`.
+* Maintain consistent naming conventions across all SCSS files.
+* Do not use `!important` unless there is no reasonable alternative.
+* Before adding new styles, check whether an existing reusable component or class can be extended instead of creating duplicate rules.
+
+The goal is to keep the styling system modular, reusable, and easy to maintain as the admin panel continues to grow.

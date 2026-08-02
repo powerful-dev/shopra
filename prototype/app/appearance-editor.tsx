@@ -3,6 +3,7 @@
 import {
   ArrowDown,
   ArrowUp,
+  Bold,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -11,7 +12,10 @@ import {
   Heart,
   Image as ImageIcon,
   Instagram,
+  Italic,
   LayoutGrid,
+  Link2,
+  List,
   Menu,
   Monitor,
   Palette,
@@ -30,7 +34,7 @@ import {
   X,
   Youtube,
 } from "lucide-react";
-import { useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 type Editor = "style" | "top" | "header" | "hero" | "showcase" | "text" | "banner" | "footer" | "add";
 type Widget = { id: number; type: "showcase" | "text" | "banner" };
@@ -49,6 +53,8 @@ const mobileHeaderOptions: { id: MobileHeaderItem; label: string }[] = [
   { id: "cart", label: "Корзина" },
   { id: "menu", label: "Меню" },
 ];
+
+const defaultHeaderMenuItems = ["Каталог", "Новинки", "Сумки", "Рюкзаки", "Аксессуары"];
 
 const fontPresets = [
   { id: "modern", name: "Современный", heading: "Manrope", body: "Inter" },
@@ -119,6 +125,8 @@ function EditorModal({
   setSearchSize,
   mobileHeaderItems,
   setMobileHeaderItems,
+  headerMenuItems,
+  setHeaderMenuItems,
   showcaseLayout,
   setShowcaseLayout,
   showcaseEyebrow,
@@ -147,6 +155,8 @@ function EditorModal({
   setSearchSize: (value: SearchSize) => void;
   mobileHeaderItems: MobileHeaderItem[];
   setMobileHeaderItems: (value: MobileHeaderItem[] | ((items: MobileHeaderItem[]) => MobileHeaderItem[])) => void;
+  headerMenuItems: string[];
+  setHeaderMenuItems: (value: string[] | ((items: string[]) => string[])) => void;
   showcaseLayout: ShowcaseLayout;
   setShowcaseLayout: (value: ShowcaseLayout) => void;
   showcaseEyebrow: string;
@@ -173,6 +183,14 @@ function EditorModal({
   const [draggedSlideId, setDraggedSlideId] = useState<string | null>(null);
   const [draggedPageId, setDraggedPageId] = useState<number | null>(null);
   const [draggedMobileItem, setDraggedMobileItem] = useState<MobileHeaderItem | null>(null);
+  const [draggedHeaderMenuItem, setDraggedHeaderMenuItem] = useState<string | null>(null);
+  const pageEditorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (pageCreatorOpen && pageEditorRef.current) {
+      pageEditorRef.current.innerHTML = pageText;
+    }
+  }, [pageCreatorOpen, editingPageId]);
   const [galleryItems, setGalleryItems] = useState<GalleryEntry[]>(
     products.map(([name, price, tone], index) => ({ id: `product-${index}`, name, meta: price, tone })),
   );
@@ -217,6 +235,17 @@ function EditorModal({
     if (editingPageId === null) return;
     setPages((items) => items.filter((item) => item.id !== editingPageId));
     closePageEditor();
+  };
+
+  const formatPageText = (command: "bold" | "italic" | "insertUnorderedList" | "createLink", value?: string) => {
+    pageEditorRef.current?.focus();
+    document.execCommand(command, false, value);
+    setPageText(pageEditorRef.current?.innerHTML ?? "");
+  };
+
+  const addPageLink = () => {
+    const url = window.prompt("Вставьте ссылку");
+    if (url?.trim()) formatPageText("createLink", url.trim());
   };
 
   const selectShowcaseMode = (mode: "products" | "categories") => {
@@ -299,6 +328,30 @@ function EditorModal({
     setDraggedMobileItem(null);
   };
 
+  const moveHeaderMenuItem = (index: number, direction: number) => {
+    const target = index + direction;
+    if (target < 0 || target >= headerMenuItems.length) return;
+    setHeaderMenuItems((items) => {
+      const next = [...items];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
+  const reorderHeaderMenuItem = (targetItem: string) => {
+    if (!draggedHeaderMenuItem || draggedHeaderMenuItem === targetItem) return;
+    setHeaderMenuItems((items) => {
+      const from = items.indexOf(draggedHeaderMenuItem);
+      const to = items.indexOf(targetItem);
+      if (from < 0 || to < 0) return items;
+      const next = [...items];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+    setDraggedHeaderMenuItem(null);
+  };
+
   return (
     <div className="ae-backdrop" onClick={close}>
       <section className="ae-modal uk-animation-slide-top-small" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
@@ -313,6 +366,10 @@ function EditorModal({
                   ["forest", "Лес", "#1d2921", "#58705d", "#e7ece7"],
                   ["navy", "Чернильный", "#172333", "#45627d", "#e5ebef"],
                   ["mono", "Графит", "#171717", "#686868", "#eeeeee"],
+                  ["wine", "Бордо", "#2f2024", "#91465b", "#f1e5e8"],
+                  ["sand", "Светлый песок", "#2b2823", "#a47a45", "#f3eadc"],
+                  ["sea", "Морская", "#183032", "#2f7775", "#e2efee"],
+                  ["plum", "Сливовая", "#2d2531", "#745d7c", "#ece6ef"],
                 ].map(([id, name, a, b, c]) => (
                   <button className={palette === id ? "active" : ""} onClick={() => setPalette(id)} key={id}>
                     <span><i style={{ background: a }} /><i style={{ background: b }} /><i style={{ background: c }} /></span>
@@ -423,7 +480,32 @@ function EditorModal({
               </div>
               {mobileHeaderItems.length < mobileHeaderOptions.length && <div className="ae-mobile-icon-add"><small>Добавить иконку</small><span>{mobileHeaderOptions.filter((option) => !mobileHeaderItems.includes(option.id)).map((option) => <button type="button" key={option.id} onClick={() => setMobileHeaderItems((items) => [...items, option.id])}><Plus size={13} />{option.label}</button>)}</span></div>}
             </section>
-            <section className="ae-settings"><h3>Меню магазина</h3><div className="ae-list">{["Каталог", "Новинки", "О нас", "Доставка и оплата"].map(x => <div key={x}><GripVertical size={15} /><span>{x}</span><button>•••</button></div>)}</div><button className="ae-addline"><Plus size={14} /> Добавить пункт</button></section>
+            <section className="ae-settings">
+              <h3>Навигация по каталогу</h3>
+              <p>Перетаскивайте разделы — порядок сразу изменится в шапке магазина.</p>
+              <div className="ae-list ae-sortable-list ae-header-menu">
+                {headerMenuItems.map((item, index) => (
+                  <div
+                    draggable
+                    className={draggedHeaderMenuItem === item ? "is-dragging" : ""}
+                    key={item}
+                    onDragStart={() => setDraggedHeaderMenuItem(item)}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={() => reorderHeaderMenuItem(item)}
+                    onDragEnd={() => setDraggedHeaderMenuItem(null)}
+                  >
+                    <GripVertical className="ae-drag-handle" size={15} />
+                    <span>{item}</span>
+                    <span className="ae-header-menu-actions">
+                      <button type="button" aria-label={`Поднять ${item}`} disabled={index === 0} onClick={() => moveHeaderMenuItem(index, -1)}><ArrowUp size={14} /></button>
+                      <button type="button" aria-label={`Опустить ${item}`} disabled={index === headerMenuItems.length - 1} onClick={() => moveHeaderMenuItem(index, 1)}><ArrowDown size={14} /></button>
+                      <button type="button" aria-label={`Редактировать ${item}`}>•••</button>
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <button className="ae-addline"><Plus size={14} /> Добавить раздел каталога</button>
+            </section>
           </>}
 
           {(editor === "hero" || editor === "banner") && <>
@@ -592,8 +674,8 @@ function EditorModal({
               </button>
             </section>
             <section className="ae-settings">
-              <h3>Страницы магазина</h3>
-              <p>Нужные страницы создаются прямо здесь и сразу появляются внизу сайта.</p>
+              <h3>Страницы внизу сайта</h3>
+              <p>Создавайте обычные информационные страницы. Они появятся только в футере и не будут перегружать шапку.</p>
               <div className="ae-pages">
                 {pages.map((page) => (
                   <button
@@ -609,7 +691,7 @@ function EditorModal({
                     aria-label={`Редактировать страницу ${page.title}`}
                   >
                     <i><Check size={12} /></i>
-                    <span className="ae-page-copy"><b>{page.title}</b><small>{page.text ? "Страница создана" : "Добавьте текст страницы"}</small></span>
+                    <span className="ae-page-copy"><b>{page.title}</b><small>{page.text ? "Опубликована в футере" : "Добавьте текст страницы"}</small></span>
                     <span className="ae-page-actions"><Pencil size={13} /><GripVertical size={14} /></span>
                   </button>
                 ))}
@@ -639,9 +721,24 @@ function EditorModal({
                   <input className="uk-input" value={pageTitle} placeholder="Например, Гарантия" onChange={(event) => setPageTitle(event.target.value)} />
                 </Field>
                 <Field label="Текст страницы">
-                  <textarea className="uk-textarea" rows={9} value={pageText} placeholder="Введите текст страницы…" onChange={(event) => setPageText(event.target.value)} />
+                  <div className="ae-rich-editor">
+                    <div className="ae-rich-toolbar" aria-label="Форматирование текста">
+                      <button type="button" title="Полужирный" aria-label="Полужирный" onMouseDown={(event) => { event.preventDefault(); formatPageText("bold"); }}><Bold size={15} /></button>
+                      <button type="button" title="Курсив" aria-label="Курсив" onMouseDown={(event) => { event.preventDefault(); formatPageText("italic"); }}><Italic size={15} /></button>
+                      <button type="button" title="Список" aria-label="Маркированный список" onMouseDown={(event) => { event.preventDefault(); formatPageText("insertUnorderedList"); }}><List size={16} /></button>
+                      <button type="button" title="Ссылка" aria-label="Добавить ссылку" onMouseDown={(event) => { event.preventDefault(); addPageLink(); }}><Link2 size={15} /></button>
+                    </div>
+                    <div
+                      ref={pageEditorRef}
+                      className="ae-rich-content"
+                      contentEditable
+                      suppressContentEditableWarning
+                      data-placeholder="Введите текст страницы…"
+                      onInput={(event) => setPageText(event.currentTarget.innerHTML)}
+                    />
+                  </div>
                 </Field>
-                <small className="ae-page-hint">Заголовок и текст страницы сразу обновятся в нижней части сайта.</small>
+                <small className="ae-page-hint">Выделите текст, чтобы сделать его жирным, курсивным, списком или ссылкой.</small>
               </div>
               <footer>
                 {editingPageId !== null && <button type="button" className="danger" onClick={deletePage}><Trash2 size={14} /> Удалить страницу</button>}
@@ -726,6 +823,7 @@ export function AppearanceEditor() {
   const [headerLayout, setHeaderLayout] = useState<HeaderLayout>("left");
   const [searchSize, setSearchSize] = useState<SearchSize>("compact");
   const [mobileHeaderItems, setMobileHeaderItems] = useState<MobileHeaderItem[]>(["search", "account", "cart", "menu"]);
+  const [headerMenuItems, setHeaderMenuItems] = useState<string[]>(defaultHeaderMenuItems);
   const [showcaseLayout, setShowcaseLayout] = useState<ShowcaseLayout>("grid");
   const [showcaseEyebrow, setShowcaseEyebrow] = useState("Выбор покупателей");
   const [showcaseTitle, setShowcaseTitle] = useState("Популярные товары");
@@ -759,7 +857,7 @@ export function AppearanceEditor() {
       <div className="preview-stage">
         <div className={`store-preview ${device} theme-${palette} corners-${corners} font-${fontPreset}`}>
           <div className="store-top">Бесплатная доставка от 2 500 ₴<Edit onClick={() => setEditor("top")}>Изменить</Edit></div>
-          <header className={`store-header header-layout-${headerLayout} search-${searchSize}`}><Edit onClick={() => setEditor("header")}>Настроить шапку</Edit><div className="header-row"><div className="store-logo"><small>ATELIER</small><b>No. 7</b></div><a><Phone size={13} /> +380 67 123 45 67</a>{searchSize !== "icon" && <label>Поиск товаров <Search size={14} /></label>}<span className="header-actions">{searchSize === "icon" && <Search className="desktop-action desktop-search-action" size={17} />}<Heart className="desktop-action" size={16} /><UserRound className="desktop-action" size={17} /><ShoppingBag className="desktop-action" size={17} />{mobileHeaderItems.map((item) => <MobileHeaderGlyph item={item} className="mobile-header-icon" size={18} key={item} />)}</span></div><nav>{["Каталог", "Новинки", "Сумки", "Рюкзаки", "Аксессуары", "О нас", "Доставка и оплата"].map(x => <a key={x}>{x}</a>)}</nav></header>
+          <header className={`store-header header-layout-${headerLayout} search-${searchSize}`}><Edit onClick={() => setEditor("header")}>Настроить шапку</Edit><div className="header-row"><div className="store-logo"><small>ATELIER</small><b>No. 7</b></div><a><Phone size={13} /> +380 67 123 45 67</a>{searchSize !== "icon" && <label>Поиск товаров <Search size={14} /></label>}<span className="header-actions">{searchSize === "icon" && <Search className="desktop-action desktop-search-action" size={17} />}<Heart className="desktop-action" size={16} /><UserRound className="desktop-action" size={17} /><ShoppingBag className="desktop-action" size={17} />{mobileHeaderItems.map((item) => <MobileHeaderGlyph item={item} className="mobile-header-icon" size={18} key={item} />)}</span></div><nav>{headerMenuItems.map(x => <a key={x}>{x}</a>)}</nav></header>
           <section className="store-hero"><Edit onClick={() => setEditor("hero")}>Настроить баннер</Edit><div><small>Новая коллекция · 2026</small><h2>Кожа, которая живёт вместе с вами</h2><p>Сумки и аксессуары ручной работы для города и путешествий.</p><span><button>Смотреть коллекцию</button><button>О мастерской</button></span></div><aside><i /><b /><ShoppingBag size={56} /></aside><em><i /><i /><i /></em></section>
           {widgets.map((widget, index) => <WidgetBlock key={widget.id} widget={widget} index={index} edit={setEditor} move={move} remove={(id) => setWidgets(x => x.filter(w => w.id !== id))} bannerTextColor={bannerTextColor} showcaseLayout={showcaseLayout} showcaseEyebrow={showcaseEyebrow} showcaseTitle={showcaseTitle} showcaseLink={showcaseLink} />)}
           <button className="add-widget" onClick={() => setEditor("add")}><Plus size={16} /> Добавить виджет</button>
@@ -767,6 +865,6 @@ export function AppearanceEditor() {
         </div>
       </div>
     </div>
-    {editor && <EditorModal editor={editor} close={() => setEditor(null)} add={add} palette={palette} setPalette={setPalette} corners={corners} setCorners={setCorners} fontPreset={fontPreset} setFontPreset={setFontPreset} headerLayout={headerLayout} setHeaderLayout={setHeaderLayout} searchSize={searchSize} setSearchSize={setSearchSize} mobileHeaderItems={mobileHeaderItems} setMobileHeaderItems={setMobileHeaderItems} showcaseLayout={showcaseLayout} setShowcaseLayout={setShowcaseLayout} showcaseEyebrow={showcaseEyebrow} setShowcaseEyebrow={setShowcaseEyebrow} showcaseTitle={showcaseTitle} setShowcaseTitle={setShowcaseTitle} showcaseLink={showcaseLink} setShowcaseLink={setShowcaseLink} bannerTextColor={bannerTextColor} setBannerTextColor={setBannerTextColor} pages={footerPages} setPages={setFooterPages} />}
+    {editor && <EditorModal editor={editor} close={() => setEditor(null)} add={add} palette={palette} setPalette={setPalette} corners={corners} setCorners={setCorners} fontPreset={fontPreset} setFontPreset={setFontPreset} headerLayout={headerLayout} setHeaderLayout={setHeaderLayout} searchSize={searchSize} setSearchSize={setSearchSize} mobileHeaderItems={mobileHeaderItems} setMobileHeaderItems={setMobileHeaderItems} headerMenuItems={headerMenuItems} setHeaderMenuItems={setHeaderMenuItems} showcaseLayout={showcaseLayout} setShowcaseLayout={setShowcaseLayout} showcaseEyebrow={showcaseEyebrow} setShowcaseEyebrow={setShowcaseEyebrow} showcaseTitle={showcaseTitle} setShowcaseTitle={setShowcaseTitle} showcaseLink={showcaseLink} setShowcaseLink={setShowcaseLink} bannerTextColor={bannerTextColor} setBannerTextColor={setBannerTextColor} pages={footerPages} setPages={setFooterPages} />}
   </section>;
 }

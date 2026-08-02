@@ -25,11 +25,17 @@ import {
   Sparkles,
   Store,
   Truck,
+  Users,
   X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AppearanceEditor } from "./appearance-editor";
+import { DeliveryPage } from "./delivery-page";
+import { DiscountsPage } from "./discounts-page";
+import { OrdersPage } from "./orders-page";
+import { PaymentPage } from "./payment-page";
 import { ProductsPage } from "./products-page";
+import { StatisticsPage } from "./statistics-page";
 
 type IconType = typeof Home;
 
@@ -51,6 +57,7 @@ const navItems: NavItem[] = [
   { label: "Внешний вид магазина", icon: Palette },
   { label: "Товары", icon: Box },
   { label: "Заказы", icon: ShoppingCart },
+  { label: "Пользователи", icon: Users },
   { label: "Доставка", icon: Truck },
   { label: "Оплата", icon: CreditCard },
   { label: "Скидки и распродажи", icon: BadgePercent },
@@ -105,6 +112,10 @@ const moduleCopy: Record<string, { title: string; text: string }> = {
   Заказы: {
     title: "Заказы",
     text: "Обрабатывайте новые заказы и отслеживайте их статусы.",
+  },
+  Пользователи: {
+    title: "Пользователи",
+    text: "Покупатели, их контакты и история заказов — в одном понятном разделе.",
   },
   Доставка: {
     title: "Доставка",
@@ -175,6 +186,7 @@ const orders = [
   },
 ];
 
+const todayData = [2, 4, 3, 7, 5, 9, 8, 11, 13];
 const weekData = [4, 7, 15, 11, 17, 13, 12, 16, 27];
 const monthData = [7, 11, 9, 16, 13, 19, 17, 22, 20, 28, 25, 31];
 
@@ -215,8 +227,8 @@ function SideNavigation({
   );
 }
 
-function DashboardChart({ period }: { period: "7" | "30" }) {
-  const data = period === "7" ? weekData : monthData;
+function DashboardChart({ period }: { period: "today" | "7" | "30" }) {
+  const data = period === "today" ? todayData : period === "7" ? weekData : monthData;
   const points = useMemo(() => {
     const max = Math.max(...data);
     return data
@@ -240,7 +252,7 @@ function DashboardChart({ period }: { period: "7" | "30" }) {
         className="sales-chart"
         viewBox="0 0 500 220"
         role="img"
-        aria-label={`График продаж за ${period === "7" ? "7" : "30"} дней`}
+        aria-label={period === "today" ? "График продаж за сегодня" : `График продаж за ${period} дней`}
       >
         <defs>
           <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
@@ -266,16 +278,18 @@ function DashboardChart({ period }: { period: "7" | "30" }) {
         })}
       </svg>
       <div className="chart-labels">
-        {(period === "7"
-          ? ["19 июл.", "20 июл.", "21 июл.", "22 июл.", "23 июл.", "24 июл.", "25 июл."]
-          : ["26 июн.", "1 июл.", "6 июл.", "11 июл.", "16 июл.", "21 июл.", "25 июл."]
+        {(period === "today"
+          ? ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "Сейчас"]
+          : period === "7"
+            ? ["26 июл.", "27 июл.", "28 июл.", "29 июл.", "30 июл.", "31 июл.", "1 авг."]
+            : ["3 июл.", "8 июл.", "13 июл.", "18 июл.", "23 июл.", "28 июл.", "1 авг."]
         ).map((label) => (
           <span key={label}>{label}</span>
         ))}
       </div>
       <div className="chart-callout">
-        <span>Сегодня</span>
-        <strong>{period === "7" ? "27 430 ₴" : "31 240 ₴"}</strong>
+        <span>{period === "today" ? "Сейчас" : "1 августа"}</span>
+        <strong>{period === "today" ? "13 780 ₴" : period === "7" ? "27 430 ₴" : "31 240 ₴"}</strong>
       </div>
     </div>
   );
@@ -284,7 +298,6 @@ function DashboardChart({ period }: { period: "7" | "30" }) {
 export default function HomePage() {
   const [active, setActive] = useState("Главная");
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [period, setPeriod] = useState<"7" | "30">("7");
   const [modal, setModal] = useState<string | null>(null);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -476,11 +489,6 @@ export default function HomePage() {
             <button type="button" className="help-button" aria-label="Помощь">
               <CircleHelp size={20} />
             </button>
-            <select className="store-select uk-select" aria-label="Выбрать магазин">
-              <option>Мой магазин</option>
-              <option>BartBag</option>
-              <option>Solomiya Artisan</option>
-            </select>
           </div>
         </div>
 
@@ -488,7 +496,7 @@ export default function HomePage() {
           <>
             <section className="welcome-row">
               <div>
-                <p className="eyebrow">Суббота, 25 июля</p>
+                <p className="eyebrow">Суббота, 1 августа</p>
                 <h1>Доброе утро, Иван! <span>👋</span></h1>
                 <p>Вот что происходит в вашем магазине сегодня.</p>
               </div>
@@ -498,11 +506,10 @@ export default function HomePage() {
                   Посмотреть магазин
                   <ExternalLink size={14} />
                 </button>
-                <button type="button" className="date-button uk-button">
+                <span className="today-date">
                   <CalendarDays size={17} />
-                  25 июля 2026 г.
-                  <ChevronDown size={14} />
-                </button>
+                  Сегодня, 1 августа 2026 г.
+                </span>
               </div>
             </section>
 
@@ -576,19 +583,11 @@ export default function HomePage() {
               <article className="panel chart-panel uk-card uk-card-default">
                 <div className="panel-head">
                   <div>
-                    <p className="panel-kicker">Динамика</p>
-                    <h2>График продаж</h2>
-                  </div>
-                  <div className="range-switch" role="group" aria-label="Период графика">
-                    <button type="button" className={period === "7" ? "active" : ""} onClick={() => setPeriod("7")}>
-                      7 дней
-                    </button>
-                    <button type="button" className={period === "30" ? "active" : ""} onClick={() => setPeriod("30")}>
-                      30 дней
-                    </button>
+                    <p className="panel-kicker">Сегодня, 1 августа</p>
+                    <h2>Продажи за сегодня</h2>
                   </div>
                 </div>
-                <DashboardChart period={period} />
+                <DashboardChart period="today" />
               </article>
             </section>
 
@@ -689,6 +688,16 @@ export default function HomePage() {
           <AppearanceEditor />
         ) : active === "Товары" ? (
           <ProductsPage startCreating={startProductCreation} />
+        ) : active === "Заказы" ? (
+          <OrdersPage />
+        ) : active === "Доставка" ? (
+          <DeliveryPage />
+        ) : active === "Оплата" ? (
+          <PaymentPage />
+        ) : active === "Скидки и распродажи" ? (
+          <DiscountsPage />
+        ) : active === "Статистика" ? (
+          <StatisticsPage />
         ) : active === "Настройки" ? (
           <section className="module-page shopra-settings uk-animation-fade">
             <div className="module-hero">

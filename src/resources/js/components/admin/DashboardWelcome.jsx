@@ -8,14 +8,14 @@ export default function DashboardWelcome({ name }) {
     const homeUrl = document.getElementById('admin-app')?.dataset.storeUrl;
 
     return (
-        <section className="shopra-welcome">
+        <section class="shopra-header-actions">
             <div>
                 <p>{dateLabel}</p>
                 <h1>{greeting}, {name}! <span>👋</span></h1>
                 <small>Вот что происходит в вашем магазине сегодня.</small>
             </div>
-            {homeUrl.length > 0 && (
-                <div className="shopra-welcome-actions">
+            {homeUrl && (
+                <div class="shopra-header-actions-actions">
                     <a
                         className="shopra-button shopra-button-secondary"
                         href={homeUrl}
@@ -28,7 +28,6 @@ export default function DashboardWelcome({ name }) {
                     </a>
                 </div>
             )}
-
         </section>
     );
 }

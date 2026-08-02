@@ -16,6 +16,7 @@ export default function Sidebar({ user, onNavigate, onLogout }) {
 
     const adminNavigation = [
         { label: 'Главная', path: '/admin/dashboard', icon: HomeIcon },
+        { label: 'Администраторы', path: '/admin/administrators', icon: SettingsIcon },
         { label: 'Внешний вид магазина', path: '/admin/appearance', icon: AppearanceIcon },
         { label: 'Товары', path: '/admin/products', icon: ProductsIcon },
         { label: 'Заказы', path: '/admin/orders', icon: OrdersIcon, badge: '8' },

@@ -13,6 +13,8 @@ import CreateShopPage from './pages/CreateShopPage';
 import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
 import PlaceholderPage from './pages/PlaceholderPage';
+import AdministratorsPage from './pages/AdministratorsPage';
+import AdminEditPage from './pages/AdminEditPage';
 import { placeholders } from './data/adminNavigation';
 
 
@@ -30,6 +32,9 @@ function AdminApp() {
             <Route element={<RequireAuth><AdminLayout /></RequireAuth>}>
                 <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="/admin/dashboard" element={<DashboardPage />} />
+                <Route path="/admin/administrators" element={<AdministratorsPage />} />
+                <Route path="/admin/administrators/new" element={<AdminEditPage />} />
+                <Route path="/admin/administrators/:id" element={<AdminEditPage />} />
                 <Route path="/admin/shops/create" element={<CreateShopPage />} />
                 {Object.entries(placeholders).map(([slug, [title, description]]) => <Route key={slug} path={`/admin/${slug}`} element={<PlaceholderPage title={title} description={description} />} />)}
             </Route>
