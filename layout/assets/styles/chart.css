@@ -1,0 +1,99 @@
+
+/* Chart styles (from prototype) */
+.chart-wrap {
+  position: relative;
+  min-height: 258px;
+  padding: 0 16px 14px 55px;
+}
+
+.sales-chart {
+  width: 100%;
+  height: 208px;
+  overflow: visible;
+}
+
+.chart-grid {
+  stroke: #eeeae6;
+  stroke-width: 1;
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.4;
+}
+
+.chart-dot {
+  fill: white;
+  stroke: var(--color-accent);
+  stroke-width: 2.2;
+  transition: r 150ms ease, fill 150ms ease;
+}
+
+.chart-dot:hover {
+  r: 7;
+  fill: var(--color-accent-hover);
+}
+
+.chart-y {
+  position: absolute;
+  top: 31px;
+  left: 16px;
+  height: 153px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #a19b95;
+  font-size:11px;
+}
+
+.chart-labels {
+  display: flex;
+  justify-content: space-between;
+  margin: -10px 4px 0;
+  color: #9f9891;
+  font-size:11px;
+}
+
+.chart-callout {
+  position: absolute;
+  top: 29px;
+  right: 8%;
+  display: flex;
+  flex-direction: column;
+  padding: 7px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 24px rgba(73, 48, 31, 0.08);
+}
+
+.chart-callout span {
+  color: var(--color-secondary);
+  font-size:11px;
+}
+
+.chart-callout strong {
+  font-size:12px;
+}
+
+@media (max-width: 576px) {
+  .chart-wrap {
+    min-height: 230px;
+    padding-left: 42px;
+  }
+
+  .chart-y {
+    left: 10px;
+  }
+
+  .chart-labels span:nth-child(even) {
+    display: none;
+  }
+
+  .chart-callout {
+    right: 4%;
+  }
+}

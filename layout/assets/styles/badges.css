@@ -1,0 +1,110 @@
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.38rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.77rem;
+  font-weight: 700;
+}
+
+.status-badge.success {
+  background: rgba(47, 124, 75, 0.12);
+  color: var(--color-success);
+}
+
+.status-badge.warning {
+  background: rgba(193, 122, 29, 0.13);
+  color: var(--color-warning);
+}
+
+.status-badge.info {
+  background: rgba(63, 111, 168, 0.12);
+  color: var(--color-info);
+}
+
+.status-badge.danger {
+  background: rgba(200, 60, 59, 0.13);
+  color: var(--color-danger);
+}
+
+.status-badge {
+  width: fit-content;
+  max-width: none;
+  min-width: 62px;
+  box-sizing: border-box;
+  justify-content: center;
+  justify-self: start;
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 680;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.status-badge--new {
+  background: #fff0e7;
+  color: #b84f18;
+}
+
+.status-badge--paid {
+  background: #eaf6ec;
+  color: #2e8b45;
+}
+
+.status-badge--pending {
+  background: #fff7e6;
+  color: #b67a2f;
+}
+
+.removable-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.removable-badge {
+  min-height: 29px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 9px;
+  border: 1px solid #ead1c1;
+  border-radius: 8px;
+  background: #fff5ee;
+  color: #9a431b;
+  font-size: 12px;
+  font-weight: 680;
+  line-height: 1.2;
+}
+
+.removable-badge__remove {
+  width: 17px;
+  height: 17px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #d7642c;
+  cursor: pointer;
+}
+
+.removable-badge__remove:hover {
+  background: #f5ddcf;
+}
+
+.removable-badge__remove:focus-visible {
+  outline: 2px solid #d7642c;
+  outline-offset: 1px;
+}
+
+.removable-badge--compact {
+  min-height: 27px;
+  padding: 0 7px;
+  font-size: 11px;
+}

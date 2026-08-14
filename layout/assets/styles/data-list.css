@@ -1,0 +1,183 @@
+/* Universal data list styles (generic names for reuse across pages) */
+.data-list {
+  padding: 0 8px 8px;
+}
+
+.data-list__item {
+  width: 100%;
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: 56px minmax(140px, 1fr) auto minmax(80px, auto);
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-top: 1px solid rgba(241, 237, 233, 1);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background 150ms ease, border-radius 150ms ease;
+}
+
+.data-list__item:focus,
+.data-list__item:hover {
+  border-radius: 9px;
+  background: #faf8f6;
+  outline: none;
+}
+
+.data-list__id {
+  color: #4c4641;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.data-list__meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.data-list__meta strong {
+  overflow: hidden;
+  color: #2c2926;
+  font-size: 12px;
+  font-weight: 680;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-list__meta small {
+  color: #9b948e;
+  font-size: 11px;
+}
+
+.data-list__amount {
+  color: #2d2926;
+  font-size: 12px;
+  white-space: nowrap;
+  font-weight: 650;
+}
+
+/* Normalized typography for dense multi-column lists. */
+.data-list--uniform-typography .data-list__item {
+  color: #5d554f;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.data-list--uniform-typography .data-list__item strong {
+  color: #524a44;
+  font-size: 11px;
+  font-weight: 680;
+  line-height: 1.2;
+}
+
+.data-list--uniform-typography .data-list__item > span:first-child > strong {
+  color: #413b36;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.data-list--uniform-typography .data-list__item small {
+  color: #958c85;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.data-list--uniform-typography .data-list__item > span:last-child > strong {
+  color: #49413c;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Universal panel header styles (from prototype) */
+.panel-head {
+  min-height: 67px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px 18px 10px;
+}
+
+.panel-head.compact {
+  min-height: 58px;
+}
+
+.panel-head h2 {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 15px;
+  font-weight: 720;
+  letter-spacing: -0.025em;
+}
+
+.panel-kicker {
+  margin: 0 0 3px;
+  color: var(--color-accent);
+  font-size:11px;
+  font-weight: 760;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.panel-desc {
+  margin-top: 6px;
+  color: var(--color-secondary);
+  font-size: 13px;
+}
+
+.text-link {
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--color-accent);
+  font-size:12px;
+  font-weight: 680;
+  cursor: pointer;
+}
+
+.data-list__chevron {
+  display: none;
+  color: #8c8178;
+}
+
+@media (max-width: 1400px) {
+  .data-list__item {
+    grid-template-columns: 48px minmax(110px, 1fr) auto minmax(70px, auto);
+    gap: 7px;
+    padding-inline: 8px;
+  }
+}
+
+@media (max-width: 576px) {
+  .data-list__item {
+    grid-template-columns: minmax(130px, 1fr) auto 18px;
+    padding: 9px 7px;
+  }
+
+  .data-list__id {
+    display: none;
+  }
+
+  .data-list__amount {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .data-list__item > .status-badge {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+    justify-self: end;
+  }
+
+  .data-list__chevron {
+    display: block;
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    transform: rotate(-90deg);
+  }
+}

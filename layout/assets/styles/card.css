@@ -1,0 +1,7 @@
+.card-accent-gradient {
+  background: radial-gradient(
+    circle at 91% 10%,
+    rgba(215, 132, 82, 0.15),
+    transparent 19rem
+  ), #fff;
+}

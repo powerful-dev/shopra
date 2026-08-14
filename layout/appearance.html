@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopra — Внешний вид магазина</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@500;600&family=Inter:wght@400;600;700&family=Lato:wght@400;700&family=Libre+Baskerville:wght@400;700&family=Manrope:wght@500;600;700&family=Merriweather:wght@400;700&family=Montserrat:wght@500;600;700&family=Nunito:wght@500;600;700&family=Open+Sans:wght@400;600;700&family=Playfair+Display:wght@500;600&family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./assets/js/tailwind-config.js"></script>
+    <link rel="stylesheet" href="./assets/styles/shopra.css">
+    <link rel="stylesheet" href="./assets/styles/tokens.css">
+    <link rel="stylesheet" href="./assets/styles/sidebar.css">
+    <link rel="stylesheet" href="./assets/styles/forms.css">
+    <link rel="stylesheet" href="./assets/styles/buttons.css">
+    <link rel="stylesheet" href="./assets/styles/badges.css">
+    <link rel="stylesheet" href="./assets/styles/header-tokens.css">
+    <link rel="stylesheet" href="./assets/styles/popover.css">
+    <link rel="stylesheet" href="./assets/styles/switch.css">
+    <link rel="stylesheet" href="./assets/styles/checkbox.css">
+    <link rel="stylesheet" href="./assets/styles/modal.css">
+    <link rel="stylesheet" href="./assets/styles/tinymce-editor.css">
+</head>
+<body class="min-h-screen overflow-x-hidden bg-[var(--color-page-bg)] text-[var(--color-primary)]">
+<div class="min-h-screen pl-[var(--sidebar-width)] max-lg:pl-0">
+        <div class="fixed inset-0 z-[90] bg-[rgba(35,27,21,0.34)] backdrop-blur-[5px] !hidden lg:!hidden"
+            data-mobile-overlay hidden></div>
+
+        <aside class="sidebar-shell flex h-screen flex-col overflow-hidden max-lg:!z-[100] max-lg:!-translate-x-full max-lg:!w-[min(310px,88vw)] max-lg:!min-w-0 max-lg:!border-r-0 max-lg:!bg-white max-lg:!p-[18px] max-lg:!pt-[22px] max-lg:!backdrop-blur-none max-lg:transition-transform max-lg:duration-200 max-lg:ease-out max-lg:will-change-transform"
+            data-mobile-drawer>
+            <div class="mb-[22px] hidden items-center justify-between px-2 max-lg:flex">
+                <a href="./index.html" class="flex items-center gap-[11px]">
+                    <span class="relative flex h-[34px] w-[30px] items-center justify-center text-[color:var(--sidebar-active-text)]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-[19px] w-[19px]"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                        <span class="absolute top-[13px] text-[10px] font-[800] leading-none">S</span>
+                    </span>
+                    <span class="text-[21px] font-[750] tracking-[-0.045em] text-[color:var(--sidebar-text-strong)]">Shopra</span>
+                </a>
+                <button type="button" class="grid h-[39px] w-[39px] place-items-center rounded-[10px] border border-transparent bg-transparent p-0 hover:border-[color:var(--color-border)] hover:bg-white" aria-label="Закрыть меню" data-mobile-menu-close>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="px-[18px] pb-[26px] pt-[28px] max-lg:hidden">
+                <a href="./index.html" class="flex items-center gap-[11px]">
+                    <span
+                        class="relative flex h-[34px] w-[30px] items-center justify-center text-[color:var(--sidebar-active-text)]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                            class="sidebar-icon h-[19px] w-[19px]">
+                            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                            <path d="M3 6h18"></path>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                        <span class="absolute top-[13px] text-[10px] font-[800] leading-none">S</span>
+                    </span>
+                    <span
+                        class="text-[21px] font-[650] tracking-[-0.045em] text-[color:var(--sidebar-text-strong)]">Shopra</span>
+                </a>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto px-[10px] pb-[14px] max-lg:px-0" data-mobile-menu-nav>
+                <div class="space-y-[4px]">
+                    <a class="sidebar-nav-link" href="./index.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></span>
+                        <span class="leading-none">Главная</span>
+                    </a>
+                    <a class="sidebar-nav-link active" href="./appearance.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg></span>
+                        <span class="leading-none">Внешний вид</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./products.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg></span>
+                        <span class="leading-none">Товары</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./orders.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg></span>
+                        <span class="leading-none">Заказы</span><span class="sidebar-nav-badge">8</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./users.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
+                        <span class="leading-none">Пользователи</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./delivery.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path>
+                                <path d="M15 18H9"></path>
+                                <path
+                                    d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14">
+                                </path>
+                                <circle cx="17" cy="18" r="2"></circle>
+                                <circle cx="7" cy="18" r="2"></circle>
+                            </svg></span>
+                        <span class="leading-none">Доставка</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./payment.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                                <line x1="2" x2="22" y1="10" y2="10"></line>
+                            </svg></span>
+                        <span class="leading-none">Оплата</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./discounts.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z">
+                                </path>
+                                <path d="m15 9-6 6"></path>
+                                <path d="M9 9h.01"></path>
+                                <path d="M15 15h.01"></path>
+                            </svg></span>
+                        <span class="leading-none">Скидки</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./statistics.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 16v5"></path>
+                                <path d="M16 14v7"></path>
+                                <path d="M20 10v11"></path>
+                                <path d="m22 3-8.646 8.646a.5.5 0 0 1-.708 0L9.354 8.354a.5.5 0 0 0-.707 0L2 15"></path>
+                                <path d="M4 18v3"></path>
+                                <path d="M8 14v7"></path>
+                            </svg></span>
+                        <span class="leading-none">Статистика</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./domain.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"></path>
+                                <path
+                                    d="M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17">
+                                </path>
+                                <path d="M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"></path>
+                                <circle cx="12" cy="12" r="10"></circle>
+                            </svg></span>
+                        <span class="leading-none">Домен</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./settings.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z">
+                                </path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg></span>
+                        <span class="leading-none">Настройки</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="relative border-t border-[color:var(--sidebar-border)] px-[18px] pb-[18px] pt-[14px] max-lg:px-0 max-lg:pb-0">
+                <div class="popover max-lg:hidden" data-popover data-popover-placement="top-end">
+                    <button type="button"
+                        class="popover__trigger flex w-full items-center gap-[10px] rounded-[13px] border border-[color:var(--sidebar-border)] bg-[color:var(--sidebar-surface)] p-[10px] text-left shadow-[0_5px_18px_rgba(63,44,29,0.035)]"
+                        data-popover-trigger aria-expanded="false" aria-haspopup="menu">
+                        <span
+                            class="flex h-[34px] w-[34px] flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#c18461] to-[#82441f] text-[13px] font-[750] text-white">AJ</span>
+                        <span class="min-w-0 flex-1">
+                            <span
+                                class="block truncate text-[12px] font-semibold text-[color:var(--sidebar-text-strong)]">Alex
+                                Johnson</span>
+                            <span class="mt-[1px] block text-[12px] text-[color:var(--sidebar-text-muted)]">Owner</span>
+                        </span>
+                    </button>
+
+                    <div class="popover__content w-full" data-popover-content hidden>
+                        <a href="#" class="popover__item" data-popover-close>
+                            <span
+                                class="flex h-5 w-5 items-center justify-center text-[color:var(--sidebar-active-text)]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                    <polyline points="16 17 21 12 16 7"></polyline>
+                                    <line x1="21" x2="9" y1="12" y2="12"></line>
+                                </svg>
+                            </span>
+                            <span>Выйти</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-[10px] rounded-[12px] bg-[#faf7f4] px-[11px] py-[10px] text-[12px] text-[#685e56]">
+                    <div class="flex items-center justify-between">
+                        <span class="inline-flex items-center gap-[6px]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-sparkles" aria-hidden="true">
+                                <path
+                                    d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z">
+                                </path>
+                                <path d="M20 3v4"></path>
+                                <path d="M22 5h-4"></path>
+                                <path d="M4 17v2"></path>
+                                <path d="M5 18H3"></path>
+                            </svg>
+                            Магазин готов
+                        </span>
+                        <strong class="text-[12px] text-[#8c3510]">50%</strong>
+                    </div>
+                    <div class="mt-2 h-[5px] overflow-hidden rounded-full bg-[#eadfd7]" role="progressbar"
+                        aria-label="Готовность магазина" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+                        <span class="block h-full w-1/2 rounded-[inherit] bg-gradient-to-r from-[#bb4e18] to-[#e28950]"></span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <header
+            class="sticky top-0 z-40 h-[var(--header-height)] bg-[var(--color-page-bg)] max-lg:hidden">
+            <div
+                class="page-container flex h-full items-center justify-between border-b border-[color:var(--color-header-border)]">
+                <div class="flex items-center gap-4">
+                    <label
+                        class="hidden items-center gap-2 rounded-2xl border border-[color:var(--color-border)] bg-[color:var(--color-surface-muted)] px-3 py-2 text-sm text-[color:var(--color-secondary)] sm:flex">
+                        <svg class="h-4 w-4 text-[color:var(--color-secondary)]" width="16.4" height="16.4"
+                            viewBox="0 0 20 20" aria-hidden="true">
+                            <circle fill="none" stroke="#000" stroke-width="1.1" cx="9" cy="9" r="7"></circle>
+                            <path fill="none" stroke="#000" stroke-width="1.1" d="M14,14 L18,18 L14,14 Z"></path>
+                        </svg>
+                        <input
+                            class="w-44 border-0 bg-transparent outline-none text-sm text-[color:var(--color-secondary)]"
+                            placeholder="Поиск по панели" />
+                    </label>
+                </div>
+                <div class="flex items-center gap-[9px]">
+                    <div class="relative" data-notifications>
+                        <button type="button"
+                            class="relative grid h-[39px] w-[39px] cursor-pointer place-items-center rounded-[10px] border border-transparent bg-white p-0 transition-colors duration-150 hover:border-[color:var(--color-border)]"
+                            aria-label="Уведомления" aria-expanded="false" aria-controls="dashboard-notifications"
+                            data-notifications-trigger data-notifications-placement="desktop">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="lucide lucide-bell">
+                                <path d="M10.268 21a2 2 0 0 0 3.464 0"></path>
+                                <path
+                                    d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326">
+                                </path>
+                            </svg>
+                            <i class="absolute right-2 top-2 h-[6px] w-[6px] rounded-full border-[1.5px] border-[color:var(--color-page-bg)] bg-[color:var(--color-accent)]"></i>
+                        </button>
+
+                        <div id="dashboard-notifications"
+                            class="absolute right-[-42px] top-12 z-50 w-80 overflow-hidden rounded-[15px] border border-[color:var(--color-border)] bg-white shadow-[0_18px_55px_rgba(58,38,24,0.14)] max-lg:fixed max-lg:right-3 max-lg:top-[68px] max-lg:z-[110] max-lg:w-[calc(100vw-24px)] !hidden"
+                            data-notifications-dropdown hidden>
+                            <div class="flex items-center justify-between border-b border-[color:var(--color-border)] px-4 pb-[11px] pt-[15px]">
+                                <strong class="text-[13px]">Уведомления</strong>
+                                <span class="text-[12px] font-bold text-[color:var(--color-accent)]">2 новых</span>
+                            </div>
+                            <button type="button" class="flex w-full cursor-pointer items-center gap-[10px] border-0 border-b border-[#f1ede9] bg-white px-4 py-3 text-left hover:bg-[#fcfaf8]">
+                                <span class="grid h-[34px] w-[34px] flex-none place-items-center rounded-[9px] bg-[#f9eee7] text-[color:var(--color-accent)]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                                </span>
+                                <span class="flex flex-col">
+                                    <strong class="text-[12px]">Новый заказ #1024</strong>
+                                    <small class="text-[12px] text-[#77716b]">Анна Смирнова · 3 520 ₴</small>
+                                </span>
+                            </button>
+                            <button type="button" class="flex w-full cursor-pointer items-center gap-[10px] border-0 border-b border-[#f1ede9] bg-white px-4 py-3 text-left hover:bg-[#fcfaf8]">
+                                <span class="grid h-[34px] w-[34px] flex-none place-items-center rounded-[9px] bg-[#eef8ee] text-[#2e8b45]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-box"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
+                                </span>
+                                <span class="flex flex-col">
+                                    <strong class="text-[12px]">Заканчивается товар</strong>
+                                    <small class="text-[12px] text-[#77716b]">Кожаная сумка Forest · 2 шт.</small>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button"
+                        class="grid h-[39px] w-[39px] cursor-pointer place-items-center rounded-[10px] border border-transparent bg-white p-0 transition-colors duration-150 hover:border-[color:var(--color-border)]"
+                        aria-label="Помощь">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-circle-help">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <path d="M12 17h.01"></path>
+                        </svg>
+                    </button>
+                </div>
+
+
+            </div>
+        </header>
+
+        <header class="sticky top-0 z-40 hidden h-[62px] items-center justify-between border-b border-[color:var(--color-border)] bg-white px-[18px] max-lg:flex">
+            <button type="button" class="grid h-[39px] w-[39px] place-items-center rounded-[10px] border border-transparent bg-white p-0 hover:border-[color:var(--color-border)]" aria-label="Открыть меню" aria-expanded="false" data-mobile-menu-trigger>
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>
+            </button>
+            <a href="./index.html" class="flex items-center gap-[11px]" aria-label="Shopra">
+                <span class="relative flex h-[34px] w-[30px] items-center justify-center text-[color:var(--sidebar-active-text)]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-[19px] w-[19px]"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                    <span class="absolute top-[13px] text-[10px] font-[800] leading-none">S</span>
+                </span>
+                <span class="text-[21px] font-[750] tracking-[-0.045em] text-[color:var(--sidebar-text-strong)]">Shopra</span>
+            </a>
+            <button type="button" class="relative grid h-[39px] w-[39px] place-items-center rounded-[10px] border border-transparent bg-white p-0 hover:border-[color:var(--color-border)]" aria-label="Уведомления" aria-expanded="false" aria-controls="dashboard-notifications" data-notifications-trigger data-notifications-placement="mobile">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg>
+                <i class="absolute right-2 top-2 h-[6px] w-[6px] rounded-full border-[1.5px] border-[color:var(--color-page-bg)] bg-[color:var(--color-accent)]"></i>
+            </button>
+        </header>
+
+        <main class="min-w-0 flex-1">
+            <div class="page-container max-sm:!mx-[13px] sm:max-lg:!mx-5">
+<section class="uk-animation-fade py-[30px] pb-[10px] max-[760px]:pt-[21px]">
+<header class="mb-5 flex items-end justify-between gap-6 max-[1180px]:flex-col max-[1180px]:items-start">
+<div>
+<p class="shopra-eyebrow">Магазин · Внешний вид</p>
+<h1 class="mb-[5px] mt-1 text-[32px] font-[760] tracking-[-0.05em]">Внешний вид магазина</h1>
+<p class="m-0 text-[13px] text-[color:var(--muted)]">Настройте внешний вид и главную страницу прямо здесь — без переходов между разделами.</p>
+</div>
+<div class="flex items-center gap-2 max-[1180px]:w-full max-[1180px]:justify-end max-[760px]:grid max-[760px]:grid-cols-2">
+<button class="inline-flex min-h-10 items-center justify-center gap-[6px] rounded-[10px] border border-[color:var(--line-strong)] bg-white px-[14px] py-0 text-xs font-bold">Предпросмотр</button>
+<button class="inline-flex min-h-10 items-center justify-center gap-[6px] rounded-[10px] border border-[color:var(--accent)] bg-[color:var(--accent)] px-[14px] py-0 text-xs font-bold text-white">
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save">
+<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z">
+</path>
+<path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7">
+</path>
+<path d="M7 3v4a1 1 0 0 0 1 1h7">
+</path>
+</svg> Сохранить</button>
+</div>
+</header>
+<button type="button" class="shopra-style-card shopra-theme-copper" data-modal-trigger aria-controls="style-elements-modal" aria-haspopup="dialog">
+<span>
+<svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-palette">
+<circle cx="13.5" cy="6.5" r=".5" fill="currentColor">
+</circle>
+<circle cx="17.5" cy="10.5" r=".5" fill="currentColor">
+</circle>
+<circle cx="8.5" cy="7.5" r=".5" fill="currentColor">
+</circle>
+<circle cx="6.5" cy="12.5" r=".5" fill="currentColor">
+</circle>
+<path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z">
+</path>
+</svg>
+</span>
+<div>
+<b>Цвета и стиль элементов</b>
+<small>Палитра, шрифты и форма кнопок, карточек и полей</small>
+</div>
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+<strong>Редакционный<!-- --> · <!-- -->Скруглённые</strong>
+<em>
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil">
+<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z">
+</path>
+<path d="m15 5 4 4">
+</path>
+</svg> Настроить</em>
+</button>
+<div class="overflow-hidden rounded-[17px] border border-[color:var(--line)] bg-[#ebe9e6] shadow-[0_14px_45px_rgba(57,41,31,0.07)]">
+<div class="grid h-[53px] grid-cols-[1fr_auto_1fr] items-center border-b border-[#dfdbd7] bg-white px-[14px] max-[760px]:grid-cols-[1fr_auto]">
+<span class="text-xs font-bold text-[#6d6863]">Главная страница</span>
+<div class="flex rounded-[9px] border border-[color:var(--line)] bg-[#faf9f7] p-[3px]">
+<button type="button" class="grid h-[31px] w-[31px] place-items-center rounded-[7px] border-0 bg-[#f3eee9] p-0 text-[color:var(--accent-dark)]" data-preview-device="desktop" aria-label="Предпросмотр для компьютера" aria-pressed="true">
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-monitor">
+<rect width="20" height="14" x="2" y="3" rx="2">
+</rect>
+<line x1="8" x2="16" y1="21" y2="21">
+</line>
+<line x1="12" x2="12" y1="17" y2="21">
+</line>
+</svg>
+</button>
+<button type="button" class="grid h-[31px] w-[31px] place-items-center rounded-[7px] border-0 bg-transparent p-0 text-[#6e6863]" data-preview-device="mobile" aria-label="Предпросмотр для телефона" aria-pressed="false">
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-smartphone">
+<rect width="14" height="20" x="5" y="2" rx="2" ry="2">
+</rect>
+<path d="M12 18h.01">
+</path>
+</svg>
+</button>
+</div>
+<small class="justify-self-end text-[11px] text-[#887f77] max-[760px]:hidden">Нажмите на блок, чтобы изменить</small>
+</div>
+<div class="max-h-[calc(100vh-220px)] min-h-[680px] overflow-auto bg-[#e8e6e3] p-[21px] max-[760px]:min-h-[620px] max-[760px]:p-[11px]">
+<div class="shopra-store-preview shopra-desktop shopra-theme-copper shopra-corners-round shopra-font-editorial" data-store-preview>
+<div class="shopra-store-top">Бесплатная доставка от 2 500 ₴<button type="button" class="shopra-ae-edit" data-modal-trigger aria-controls="top-banner-modal" aria-haspopup="dialog">
+<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil">
+<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z">
+</path>
+<path d="m15 5 4 4">
+</path>
+</svg>Изменить</button>
+</div>
+<header class="shopra-store-header shopra-header-layout-left shopra-search-compact">
+<button type="button" class="shopra-ae-edit" data-modal-trigger aria-controls="store-header-modal" aria-haspopup="dialog">
+<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil">
+<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z">
+</path>
+<path d="m15 5 4 4">
+</path>
+</svg>Настроить шапку</button>
+<div class="shopra-header-row">
+<div class="shopra-store-logo">
+<small>ATELIER</small>
+<b>No. 7</b>
+</div>
+<a>
+<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-phone">
+<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+</path>
+</svg> +380 67 123 45 67</a>
+<label>Поиск товаров <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search">
+<circle cx="11" cy="11" r="8">
+</circle>
+<path d="m21 21-4.3-4.3">
+</path>
+</svg>
+</label>
+<span class="shopra-header-actions">
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart shopra-desktop-action">
+<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z">
+</path>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round shopra-desktop-action">
+<circle cx="12" cy="8" r="5">
+</circle>
+<path d="M20 21a8 8 0 0 0-16 0">
+</path>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag shopra-desktop-action">
+<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z">
+</path>
+<path d="M3 6h18">
+</path>
+<path d="M16 10a4 4 0 0 1-8 0">
+</path>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search shopra-mobile-header-icon">
+<circle cx="11" cy="11" r="8">
+</circle>
+<path d="m21 21-4.3-4.3">
+</path>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round shopra-mobile-header-icon">
+<circle cx="12" cy="8" r="5">
+</circle>
+<path d="M20 21a8 8 0 0 0-16 0">
+</path>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag shopra-mobile-header-icon">
+<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z">
+</path>
+<path d="M3 6h18">
+</path>
+<path d="M16 10a4 4 0 0 1-8 0">
+</path>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu shopra-mobile-header-icon">
+<line x1="4" x2="20" y1="12" y2="12">
+</line>
+<line x1="4" x2="20" y1="6" y2="6">
+</line>
+<line x1="4" x2="20" y1="18" y2="18">
+</line>
+</svg>
+</span>
+</div>
+<nav>
+<a>Каталог</a>
+<a>Новинки</a>
+<a>Сумки</a>
+<a>Рюкзаки</a>
+<a>Аксессуары</a>
+</nav>
+</header>
+<section class="shopra-store-hero">
+<button type="button" class="shopra-ae-edit" data-modal-trigger aria-controls="hero-banner-modal" aria-haspopup="dialog">
+<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil">
+<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z">
+</path>
+<path d="m15 5 4 4">
+</path>
+</svg>Настроить баннер</button>
+<div>
+<small>Новая коллекция · 2026</small>
+<h2>Кожа, которая живёт вместе с вами</h2>
+<p>Сумки и аксессуары ручной работы для города и путешествий.</p>
+<span>
+<button>Смотреть коллекцию</button>
+<button>О мастерской</button>
+</span>
+</div>
+<aside>
+<i>
+</i>
+<b>
+</b>
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag">
+<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z">
+</path>
+<path d="M3 6h18">
+</path>
+<path d="M16 10a4 4 0 0 1-8 0">
+</path>
+</svg>
+</aside>
+<em>
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</em>
+</section>
+<section class="shopra-store-widget shopra-store-showcase shopra-showcase-grid">
+<div class="shopra-store-tools">
+<button type="button" class="shopra-store-tool-drag" title="Перетащить виджет" aria-label="Перетащить виджет">
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical">
+<circle cx="9" cy="12" r="1">
+</circle>
+<circle cx="9" cy="5" r="1">
+</circle>
+<circle cx="9" cy="19" r="1">
+</circle>
+<circle cx="15" cy="12" r="1">
+</circle>
+<circle cx="15" cy="5" r="1">
+</circle>
+<circle cx="15" cy="19" r="1">
+</circle>
+</svg>
+</button>
+<button type="button" title="Поднять выше" aria-label="Поднять выше">
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up">
+<path d="m5 12 7-7 7 7">
+</path>
+<path d="M12 19V5">
+</path>
+</svg>
+</button>
+<button type="button" title="Опустить ниже" aria-label="Опустить ниже">
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down">
+<path d="M12 5v14">
+</path>
+<path d="m19 12-7 7-7-7">
+</path>
+</svg>
+</button>
+<button type="button" title="Настроить" aria-label="Настроить" data-modal-trigger aria-controls="showcase-modal" aria-haspopup="dialog">
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil">
+<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z">
+</path>
+<path d="m15 5 4 4">
+</path>
+</svg>
+</button>
+<button type="button" title="Удалить" aria-label="Удалить">
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2">
+<path d="M3 6h18">
+</path>
+<path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6">
+</path>
+<path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2">
+</path>
+<line x1="10" x2="10" y1="11" y2="17">
+</line>
+<line x1="14" x2="14" y1="11" y2="17">
+</line>
+</svg>
+</button>
+</div>
+<header>
+<div>
+<small>Выбор покупателей</small>
+<h3>Популярные товары</h3>
+</div>
+<a>Смотреть все</a>
+</header>
+<div class="shopra-showcase-products">
+<div class="shopra-product-grid">
+<article>
+<div class="shopra-product-photo shopra-green">
+<svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag">
+<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z">
+</path>
+<path d="M3 6h18">
+</path>
+<path d="M16 10a4 4 0 0 1-8 0">
+</path>
+</svg>
+<button aria-label="Добавить Сумка Moss в избранное">
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart">
+<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z">
+</path>
+</svg>
+</button>
+</div>
+<p>Сумка Moss</p>
+<b>3 290 ₴</b>
+</article>
+<article>
+<div class="shopra-product-photo shopra-brown">
+<svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag">
+<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z">
+</path>
+<path d="M3 6h18">
+</path>
+<path d="M16 10a4 4 0 0 1-8 0">
+</path>
+</svg>
+<button aria-label="Добавить Рюкзак Bruno в избранное">
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart">
+<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z">
+</path>
+</svg>
+</button>
+</div>
+<p>Рюкзак Bruno</p>
+<b>4 890 ₴</b>
+</article>
+<article>
+<div class="shopra-product-photo shopra-wine">
+<svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag">
+<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z">
+</path>
+<path d="M3 6h18">
+</path>
+<path d="M16 10a4 4 0 0 1-8 0">
+</path>
+</svg>
+<button aria-label="Добавить Кошелёк Mini в избранное">
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart">
+<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z">
+</path>
+</svg>
+</button>
+</div>
+<p>Кошелёк Mini</p>
+<b>1 290 ₴</b>
+</article>
+<article>
+<div class="shopra-product-photo shopra-sand">
+<svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag">
+<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z">
+</path>
+<path d="M3 6h18">
+</path>
+<path d="M16 10a4 4 0 0 1-8 0">
+</path>
+</svg>
+<button aria-label="Добавить Сумка Terra в избранное">
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart">
+<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z">
+</path>
+</svg>
+</button>
+</div>
+<p>Сумка Terra</p>
+<b>3 790 ₴</b>
+</article>
+</div>
+</div>
+</section>
+<section class="shopra-store-widget shopra-store-text">
+<div class="shopra-store-tools">
+<button type="button" class="shopra-store-tool-drag" title="Перетащить виджет" aria-label="Перетащить виджет">
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical">
+<circle cx="9" cy="12" r="1">
+</circle>
+<circle cx="9" cy="5" r="1">
+</circle>
+<circle cx="9" cy="19" r="1">
+</circle>
+<circle cx="15" cy="12" r="1">
+</circle>
+<circle cx="15" cy="5" r="1">
+</circle>
+<circle cx="15" cy="19" r="1">
+</circle>
+</svg>
+</button>
+<button type="button" title="Поднять выше" aria-label="Поднять выше">
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up">
+<path d="m5 12 7-7 7 7">
+</path>
+<path d="M12 19V5">
+</path>
+</svg>
+</button>
+<button type="button" title="Опустить ниже" aria-label="Опустить ниже">
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down">
+<path d="M12 5v14">
+</path>
+<path d="m19 12-7 7-7-7">
+</path>
+</svg>
+</button>
+<button type="button" title="Настроить" aria-label="Настроить" data-modal-trigger aria-controls="handmade-modal" aria-haspopup="dialog">
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil">
+<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z">
+</path>
+<path d="m15 5 4 4">
+</path>
+</svg>
+</button>
+<button type="button" title="Удалить" aria-label="Удалить">
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2">
+<path d="M3 6h18">
+</path>
+<path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6">
+</path>
+<path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2">
+</path>
+<line x1="10" x2="10" y1="11" y2="17">
+</line>
+<line x1="14" x2="14" y1="11" y2="17">
+</line>
+</svg>
+</button>
+</div>
+<small>Ручная работа</small>
+<h3>Вещи, которые становятся только лучше со временем</h3>
+<p>Мы работаем с натуральной кожей и собираем каждое изделие вручную — спокойно, точно и с вниманием к деталям.</p>
+<button>Узнать о мастерской</button>
+</section>
+<section class="shopra-store-widget shopra-store-banner" style="--banner-text-color:#ffffff">
+<div class="shopra-store-tools">
+<button type="button" class="shopra-store-tool-drag" title="Перетащить виджет" aria-label="Перетащить виджет">
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical">
+<circle cx="9" cy="12" r="1">
+</circle>
+<circle cx="9" cy="5" r="1">
+</circle>
+<circle cx="9" cy="19" r="1">
+</circle>
+<circle cx="15" cy="12" r="1">
+</circle>
+<circle cx="15" cy="5" r="1">
+</circle>
+<circle cx="15" cy="19" r="1">
+</circle>
+</svg>
+</button>
+<button type="button" title="Поднять выше" aria-label="Поднять выше">
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up">
+<path d="m5 12 7-7 7 7">
+</path>
+<path d="M12 19V5">
+</path>
+</svg>
+</button>
+<button type="button" title="Опустить ниже" aria-label="Опустить ниже">
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down">
+<path d="M12 5v14">
+</path>
+<path d="m19 12-7 7-7-7">
+</path>
+</svg>
+</button>
+<button type="button" title="Настроить" aria-label="Настроить" data-modal-trigger aria-controls="lower-banner-modal" aria-haspopup="dialog">
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil">
+<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z">
+</path>
+<path d="m15 5 4 4">
+</path>
+</svg>
+</button>
+<button type="button" title="Удалить" aria-label="Удалить">
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2">
+<path d="M3 6h18">
+</path>
+<path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6">
+</path>
+<path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2">
+</path>
+<line x1="10" x2="10" y1="11" y2="17">
+</line>
+<line x1="14" x2="14" y1="11" y2="17">
+</line>
+</svg>
+</button>
+</div>
+<div>
+<small>Новая коллекция</small>
+<h3>Город. Дорога. Свобода.</h3>
+<p>Лаконичные формы для каждого дня.</p>
+<button>Смотреть коллекцию</button>
+</div>
+<span>
+<svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag">
+<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z">
+</path>
+<path d="M3 6h18">
+</path>
+<path d="M16 10a4 4 0 0 1-8 0">
+</path>
+</svg>
+</span>
+</section>
+<button type="button" class="shopra-add-widget" data-modal-trigger aria-controls="add-widget-modal" aria-haspopup="dialog">
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus">
+<path d="M5 12h14">
+</path>
+<path d="M12 5v14">
+</path>
+</svg> Добавить виджет</button>
+<footer class="shopra-store-footer">
+<button type="button" class="shopra-ae-edit" data-modal-trigger aria-controls="footer-settings-modal" aria-haspopup="dialog">
+<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil">
+<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z">
+</path>
+<path d="m15 5 4 4">
+</path>
+</svg>Настроить низ сайта</button>
+<div>
+<div class="shopra-store-logo">
+<small>ATELIER</small>
+<b>No. 7</b>
+</div>
+<section>
+<b>Страницы магазина</b>
+<a>Доставка и оплата</a>
+<a>Возврат и обмен</a>
+<a>Договор оферты</a>
+</section>
+<section>
+<b>Ещё</b>
+<a>О нас</a>
+<a>Контакты</a>
+<a>Конфиденциальность</a>
+</section>
+<section>
+<b>Мы в соцсетях</b>
+<span>
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-instagram">
+<rect width="20" height="20" x="2" y="2" rx="5" ry="5">
+</rect>
+<path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z">
+</path>
+<line x1="17.5" x2="17.51" y1="6.5" y2="6.5">
+</line>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-facebook">
+<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z">
+</path>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-youtube">
+<path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17">
+</path>
+<path d="m10 15 5-3-5-3z">
+</path>
+</svg>
+</span>
+</section>
+</div>
+<p>
+<span>© 2026 ATELIER No. 7</span>
+<span>Магазин работает на Shopra</span>
+</p>
+</footer>
+</div>
+</div>
+</div>
+</section>
+            </div>
+        </main>
+</div>
+
+<div id="style-elements-modal" class="modal-overlay" role="presentation" hidden>
+    <section class="modal-dialog flex !w-[min(760px,100%)] flex-col bg-white" role="dialog" aria-modal="true" aria-labelledby="style-elements-modal-title">
+        <header class="flex min-h-[82px] shrink-0 items-center justify-between border-b border-[color:var(--color-border)] bg-white px-[22px] py-[17px] max-sm:px-4">
+            <div><small class="mb-[3px] block text-[11px] font-[750] uppercase tracking-[.08em] text-[color:var(--color-accent)]">Внешний вид магазина</small><h2 id="style-elements-modal-title" class="m-0 text-[22px] font-[760] tracking-[-.035em]">Цвета и стиль элементов</h2></div>
+            <button type="button" class="grid h-9 w-9 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#faf9f7] p-0 text-[#716861]" aria-label="Закрыть настройки стиля" data-modal-close><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+        </header>
+        <div class="flex min-h-0 flex-1 flex-col gap-[13px] overflow-y-auto px-[23px] py-[21px] max-sm:px-4 max-sm:py-4">
+            <section class="rounded-[13px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[17px]" data-selection-group>
+                <h3 class="m-0 text-[13px] font-bold">Цветовая гамма</h3><p class="mb-[13px] mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Применяется к кнопкам, ссылкам и акцентам магазина.</p>
+                <div class="grid grid-cols-2 gap-2 max-sm:grid-cols-1">
+                    <button type="button" class="grid min-h-[58px] grid-cols-[auto_1fr_auto] items-center gap-[10px] rounded-[10px] border border-[#d39a78] bg-[#fff3eb] px-[11px] py-2 text-left text-[color:var(--color-accent)]" data-selection-option="copper" aria-pressed="true"><span class="flex"><i class="h-[23px] w-[23px] rounded-full border-2 border-white bg-[#22201e] shadow-[0_0_0_1px_#ddd7d1]"></i><i class="-ml-2 h-[23px] w-[23px] rounded-full border-2 border-white bg-[#b85a2b] shadow-[0_0_0_1px_#ddd7d1]"></i><i class="-ml-2 h-[23px] w-[23px] rounded-full border-2 border-white bg-[#f1e7dc] shadow-[0_0_0_1px_#ddd7d1]"></i></span><b class="text-[12px]">Тёплая кожа</b><svg data-selection-check width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="grid min-h-[58px] grid-cols-[auto_1fr_auto] items-center gap-[10px] rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] py-2 text-left" data-selection-option="forest" aria-pressed="false"><span class="flex"><i class="h-[23px] w-[23px] rounded-full border-2 border-white bg-[#1d2921] shadow-[0_0_0_1px_#ddd7d1]"></i><i class="-ml-2 h-[23px] w-[23px] rounded-full border-2 border-white bg-[#58705d] shadow-[0_0_0_1px_#ddd7d1]"></i><i class="-ml-2 h-[23px] w-[23px] rounded-full border-2 border-white bg-[#e7ece7] shadow-[0_0_0_1px_#ddd7d1]"></i></span><b class="text-[12px]">Лес</b><svg data-selection-check class="hidden" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="grid min-h-[58px] grid-cols-[auto_1fr_auto] items-center gap-[10px] rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] py-2 text-left" data-selection-option="navy" aria-pressed="false"><span class="flex"><i class="h-[23px] w-[23px] rounded-full border-2 border-white bg-[#172333] shadow-[0_0_0_1px_#ddd7d1]"></i><i class="-ml-2 h-[23px] w-[23px] rounded-full border-2 border-white bg-[#45627d] shadow-[0_0_0_1px_#ddd7d1]"></i><i class="-ml-2 h-[23px] w-[23px] rounded-full border-2 border-white bg-[#e5ebef] shadow-[0_0_0_1px_#ddd7d1]"></i></span><b class="text-[12px]">Чернильный</b><svg data-selection-check class="hidden" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="grid min-h-[58px] grid-cols-[auto_1fr_auto] items-center gap-[10px] rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] py-2 text-left" data-selection-option="mono" aria-pressed="false"><span class="flex"><i class="h-[23px] w-[23px] rounded-full border-2 border-white bg-[#171717] shadow-[0_0_0_1px_#ddd7d1]"></i><i class="-ml-2 h-[23px] w-[23px] rounded-full border-2 border-white bg-[#686868] shadow-[0_0_0_1px_#ddd7d1]"></i><i class="-ml-2 h-[23px] w-[23px] rounded-full border-2 border-white bg-[#eee] shadow-[0_0_0_1px_#ddd7d1]"></i></span><b class="text-[12px]">Графит</b><svg data-selection-check class="hidden" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="grid min-h-[58px] grid-cols-[auto_1fr_auto] items-center gap-[10px] rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] py-2 text-left" data-selection-option="wine" aria-pressed="false"><span class="flex"><i class="h-[23px] w-[23px] rounded-full border-2 border-white bg-[#2f2024] shadow-[0_0_0_1px_#ddd7d1]"></i><i class="-ml-2 h-[23px] w-[23px] rounded-full border-2 border-white bg-[#91465b] shadow-[0_0_0_1px_#ddd7d1]"></i><i class="-ml-2 h-[23px] w-[23px] rounded-full border-2 border-white bg-[#f1e5e8] shadow-[0_0_0_1px_#ddd7d1]"></i></span><b class="text-[12px]">Бордо</b><svg data-selection-check class="hidden" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="grid min-h-[58px] grid-cols-[auto_1fr_auto] items-center gap-[10px] rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] py-2 text-left" data-selection-option="sand" aria-pressed="false"><span class="flex"><i class="h-[23px] w-[23px] rounded-full border-2 border-white bg-[#2b2823] shadow-[0_0_0_1px_#ddd7d1]"></i><i class="-ml-2 h-[23px] w-[23px] rounded-full border-2 border-white bg-[#a47a45] shadow-[0_0_0_1px_#ddd7d1]"></i><i class="-ml-2 h-[23px] w-[23px] rounded-full border-2 border-white bg-[#f3eadc] shadow-[0_0_0_1px_#ddd7d1]"></i></span><b class="text-[12px]">Светлый песок</b><svg data-selection-check class="hidden" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="grid min-h-[58px] grid-cols-[auto_1fr_auto] items-center gap-[10px] rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] py-2 text-left" data-selection-option="sea" aria-pressed="false"><span class="flex"><i class="h-[23px] w-[23px] rounded-full border-2 border-white bg-[#183032] shadow-[0_0_0_1px_#ddd7d1]"></i><i class="-ml-2 h-[23px] w-[23px] rounded-full border-2 border-white bg-[#2f7775] shadow-[0_0_0_1px_#ddd7d1]"></i><i class="-ml-2 h-[23px] w-[23px] rounded-full border-2 border-white bg-[#e2efee] shadow-[0_0_0_1px_#ddd7d1]"></i></span><b class="text-[12px]">Морская</b><svg data-selection-check class="hidden" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="grid min-h-[58px] grid-cols-[auto_1fr_auto] items-center gap-[10px] rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] py-2 text-left" data-selection-option="plum" aria-pressed="false"><span class="flex"><i class="h-[23px] w-[23px] rounded-full border-2 border-white bg-[#2d2531] shadow-[0_0_0_1px_#ddd7d1]"></i><i class="-ml-2 h-[23px] w-[23px] rounded-full border-2 border-white bg-[#745d7c] shadow-[0_0_0_1px_#ddd7d1]"></i><i class="-ml-2 h-[23px] w-[23px] rounded-full border-2 border-white bg-[#ece6ef] shadow-[0_0_0_1px_#ddd7d1]"></i></span><b class="text-[12px]">Сливовая</b><svg data-selection-check class="hidden" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                </div>
+            </section>
+            <section class="rounded-[13px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[17px]" data-selection-group>
+                <h3 class="m-0 text-[13px] font-bold">Форма элементов</h3><p class="mb-[13px] mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Единая форма для карточек, полей, баннеров и кнопок.</p>
+                <div class="grid grid-cols-2 gap-[9px] max-sm:grid-cols-1">
+                    <button type="button" class="relative grid min-h-[91px] grid-cols-[65px_1fr] grid-rows-2 items-end gap-x-[10px] rounded-[11px] border border-[#d39a78] bg-[#fff3eb] p-[11px] text-left text-[color:var(--color-accent)]" data-selection-option="round" aria-pressed="true"><i class="row-span-2 h-[65px] w-[65px] rounded-xl border border-[#ddd4cc] bg-[linear-gradient(#b85a2b_0_13px,transparent_13px_23px,#fff_23px)] shadow-[inset_0_0_0_11px_#f7f3ef]"></i><b class="text-[12px]">Скруглённые</b><small class="self-start text-[11px] text-[color:var(--color-secondary)]">Мягкий современный вид</small><svg data-selection-check class="absolute right-2 top-2" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="relative grid min-h-[91px] grid-cols-[65px_1fr] grid-rows-2 items-end gap-x-[10px] rounded-[11px] border border-[color:var(--color-border)] bg-white p-[11px] text-left" data-selection-option="straight" aria-pressed="false"><i class="row-span-2 h-[65px] w-[65px] border border-[#ddd4cc] bg-[linear-gradient(#b85a2b_0_13px,transparent_13px_23px,#fff_23px)] shadow-[inset_0_0_0_11px_#f7f3ef]"></i><b class="text-[12px]">Прямые</b><small class="self-start text-[11px] text-[color:var(--color-secondary)]">Строгий редакционный вид</small><svg data-selection-check class="hidden absolute right-2 top-2" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                </div>
+            </section>
+            <section class="rounded-[13px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[17px]" data-selection-group>
+                <h3 class="m-0 text-[13px] font-bold">Стиль шрифтов</h3><p class="mb-[13px] mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Каждый пресет сочетает выразительный шрифт заголовков с хорошо читаемым основным текстом.</p>
+                <div class="grid grid-cols-2 gap-2 max-sm:grid-cols-1">
+                    <button type="button" class="grid min-h-[68px] grid-cols-[48px_1fr_auto] items-center gap-[10px] rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] py-[9px] text-left" data-selection-option="modern" aria-pressed="false"><span class="grid h-[46px] w-[46px] place-items-center rounded-[9px] bg-[#f2eeea] text-[20px] font-bold text-[#453d37]" style="font-family:'Manrope',sans-serif">Aa</span><span class="flex flex-col"><b class="text-[12px]">Современный</b><small class="mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Manrope · Inter</small></span><svg data-selection-check class="hidden text-[color:var(--color-accent)]" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="grid min-h-[68px] grid-cols-[48px_1fr_auto] items-center gap-[10px] rounded-[10px] border border-[#d39a78] bg-[#fff3eb] px-[11px] py-[9px] text-left text-[color:var(--color-accent)]" data-selection-option="editorial" aria-pressed="true"><span class="grid h-[46px] w-[46px] place-items-center rounded-[9px] bg-[#f2eeea] text-[20px] text-[#453d37]" style="font-family:'Playfair Display',serif">Aa</span><span class="flex flex-col"><b class="text-[12px]">Редакционный</b><small class="mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Playfair Display · Inter</small></span><svg data-selection-check width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="grid min-h-[68px] grid-cols-[48px_1fr_auto] items-center gap-[10px] rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] py-[9px] text-left" data-selection-option="minimal" aria-pressed="false"><span class="grid h-[46px] w-[46px] place-items-center rounded-[9px] bg-[#f2eeea] text-[20px] font-medium text-[#453d37]" style="font-family:'Montserrat',sans-serif">Aa</span><span class="flex flex-col"><b class="text-[12px]">Минимализм</b><small class="mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Montserrat · Open Sans</small></span><svg data-selection-check class="hidden text-[color:var(--color-accent)]" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="grid min-h-[68px] grid-cols-[48px_1fr_auto] items-center gap-[10px] rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] py-[9px] text-left" data-selection-option="classic" aria-pressed="false"><span class="grid h-[46px] w-[46px] place-items-center rounded-[9px] bg-[#f2eeea] text-[20px] text-[#453d37]" style="font-family:'Cormorant',serif">Aa</span><span class="flex flex-col"><b class="text-[12px]">Классический</b><small class="mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Cormorant · Lato</small></span><svg data-selection-check class="hidden text-[color:var(--color-accent)]" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="grid min-h-[68px] grid-cols-[48px_1fr_auto] items-center gap-[10px] rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] py-[9px] text-left" data-selection-option="soft" aria-pressed="false"><span class="grid h-[46px] w-[46px] place-items-center rounded-[9px] bg-[#f2eeea] text-[20px] font-bold text-[#453d37]" style="font-family:'Nunito',sans-serif">Aa</span><span class="flex flex-col"><b class="text-[12px]">Мягкий</b><small class="mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Nunito · Inter</small></span><svg data-selection-check class="hidden text-[color:var(--color-accent)]" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="grid min-h-[68px] grid-cols-[48px_1fr_auto] items-center gap-[10px] rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] py-[9px] text-left" data-selection-option="geometric" aria-pressed="false"><span class="grid h-[46px] w-[46px] place-items-center rounded-[9px] bg-[#f2eeea] text-[20px] font-semibold text-[#453d37]" style="font-family:'Poppins',sans-serif">Aa</span><span class="flex flex-col"><b class="text-[12px]">Геометричный</b><small class="mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Poppins · Source Sans</small></span><svg data-selection-check class="hidden text-[color:var(--color-accent)]" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="grid min-h-[68px] grid-cols-[48px_1fr_auto] items-center gap-[10px] rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] py-[9px] text-left" data-selection-option="elegant" aria-pressed="false"><span class="grid h-[46px] w-[46px] place-items-center rounded-[9px] bg-[#f2eeea] text-[20px] text-[#453d37]" style="font-family:Baskerville,'Libre Baskerville',serif">Aa</span><span class="flex flex-col"><b class="text-[12px]">Элегантный</b><small class="mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Baskerville · Lato</small></span><svg data-selection-check class="hidden text-[color:var(--color-accent)]" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="grid min-h-[68px] grid-cols-[48px_1fr_auto] items-center gap-[10px] rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] py-[9px] text-left" data-selection-option="business" aria-pressed="false"><span class="grid h-[46px] w-[46px] place-items-center rounded-[9px] bg-[#f2eeea] text-[20px] font-bold text-[#453d37]" style="font-family:'Merriweather',serif">Aa</span><span class="flex flex-col"><b class="text-[12px]">Деловой</b><small class="mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Merriweather · Roboto</small></span><svg data-selection-check class="hidden text-[color:var(--color-accent)]" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                </div>
+            </section>
+        </div>
+        <footer class="flex min-h-[66px] shrink-0 items-center justify-end gap-2 border-t border-[color:var(--color-border)] bg-[#fcfbfa] px-[22px] py-[11px] max-sm:px-4"><button type="button" class="min-h-[38px] rounded-[9px] border border-[#d8d0ca] bg-white px-[15px] text-[12px] font-bold" data-modal-close>Отмена</button><button type="button" class="inline-flex min-h-[38px] items-center gap-[5px] rounded-[9px] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)] px-[15px] text-[12px] font-bold text-white" data-modal-close><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg>Готово</button></footer>
+    </section>
+</div>
+
+<div id="footer-settings-modal" class="modal-overlay" role="presentation" hidden>
+    <section class="modal-dialog flex !w-[min(760px,100%)] flex-col bg-white" role="dialog" aria-modal="true" aria-labelledby="footer-settings-modal-title">
+        <header class="flex min-h-[82px] shrink-0 items-center justify-between border-b border-[color:var(--color-border)] bg-white px-[22px] py-[17px] max-sm:px-4">
+            <div>
+                <small class="mb-[3px] block text-[11px] font-[750] uppercase tracking-[.08em] text-[color:var(--color-accent)]">Внешний вид магазина</small>
+                <h2 id="footer-settings-modal-title" class="m-0 text-[22px] font-[760] tracking-[-.035em]">Нижняя часть сайта</h2>
+            </div>
+            <button type="button" class="grid h-9 w-9 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#faf9f7] p-0 text-[#716861]" aria-label="Закрыть настройки нижней части сайта" data-modal-close>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+            </button>
+        </header>
+
+        <div class="flex min-h-0 flex-1 flex-col gap-[13px] overflow-y-auto px-[23px] py-[21px] max-sm:px-4 max-sm:py-4">
+            <section class="rounded-[13px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[17px]">
+                <h3 class="m-0 text-[13px] font-bold">Социальные сети</h3>
+                <p class="mb-[13px] mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Добавьте только те сети, которыми пользуется магазин.</p>
+                <div class="grid grid-cols-[140px_1fr_36px] items-center gap-[7px] max-sm:grid-cols-[1fr_36px]">
+                    <select class="form-control h-[38px] rounded-[9px] px-3 text-[12px] max-sm:col-span-2" aria-label="Социальная сеть">
+                        <option selected>Instagram</option>
+                        <option>Facebook</option>
+                        <option>YouTube</option>
+                        <option>TikTok</option>
+                        <option>Telegram</option>
+                        <option>Pinterest</option>
+                    </select>
+                    <input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" type="text" value="instagram.com/atelier7" placeholder="Ссылка на профиль" aria-label="Ссылка на профиль">
+                    <button type="button" class="grid h-9 w-9 place-items-center rounded-lg border border-[color:var(--color-border)] bg-white p-0 text-[#81786f] hover:border-[#c9b2a3] hover:text-[color:var(--color-accent)]" aria-label="Удалить социальную сеть">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>
+                    </button>
+                </div>
+                <button type="button" class="mt-[11px] inline-flex min-h-[34px] items-center gap-1 rounded-lg border border-dashed border-[#cbbdb2] bg-white px-[11px] text-[11px] font-bold text-[color:var(--color-accent)] hover:border-[#bda99a]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                    Добавить социальную сеть
+                </button>
+            </section>
+
+            <section class="rounded-[13px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[17px]">
+                <h3 class="m-0 text-[13px] font-bold">Страницы внизу сайта</h3>
+                <p class="mb-[13px] mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Создавайте обычные информационные страницы. Они появятся только в футере и не будут перегружать шапку.</p>
+                <div class="flex flex-col gap-[5px]">
+                    <div class="flex min-h-[41px] items-center gap-2 rounded-lg border border-[color:var(--color-border)] bg-white px-[9px] hover:border-[#c9b2a3] hover:bg-[#fffaf7]"><label class="grid shrink-0 cursor-pointer place-items-center" aria-label="Показывать страницу Доставка и оплата"><input class="checkbox-control" type="checkbox" checked></label><button type="button" class="flex min-w-0 flex-1 flex-col border-0 bg-transparent p-0 text-left" data-modal-trigger aria-controls="footer-page-modal" data-page-title="Доставка и оплата"><b class="truncate text-[11px]">Доставка и оплата</b><small class="mt-px text-[11px] text-[color:var(--color-secondary)]">Добавьте текст страницы</small></button><button type="button" class="grid h-[30px] w-[30px] place-items-center rounded-md border-0 bg-transparent p-0 text-[#857b73] hover:bg-[#f4eeea] hover:text-[color:var(--color-accent)]" aria-label="Редактировать страницу Доставка и оплата" data-modal-trigger aria-controls="footer-page-modal" data-page-title="Доставка и оплата"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg></button><span class="grid h-[30px] w-[24px] cursor-grab place-items-center text-[#857b73]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></span></div>
+                    <div class="flex min-h-[41px] items-center gap-2 rounded-lg border border-[color:var(--color-border)] bg-white px-[9px] hover:border-[#c9b2a3] hover:bg-[#fffaf7]"><label class="grid shrink-0 cursor-pointer place-items-center" aria-label="Показывать страницу Возврат и обмен"><input class="checkbox-control" type="checkbox" checked></label><button type="button" class="flex min-w-0 flex-1 flex-col border-0 bg-transparent p-0 text-left" data-modal-trigger aria-controls="footer-page-modal" data-page-title="Возврат и обмен"><b class="truncate text-[11px]">Возврат и обмен</b><small class="mt-px text-[11px] text-[color:var(--color-secondary)]">Добавьте текст страницы</small></button><button type="button" class="grid h-[30px] w-[30px] place-items-center rounded-md border-0 bg-transparent p-0 text-[#857b73] hover:bg-[#f4eeea] hover:text-[color:var(--color-accent)]" aria-label="Редактировать страницу Возврат и обмен" data-modal-trigger aria-controls="footer-page-modal" data-page-title="Возврат и обмен"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg></button><span class="grid h-[30px] w-[24px] cursor-grab place-items-center text-[#857b73]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></span></div>
+                    <div class="flex min-h-[41px] items-center gap-2 rounded-lg border border-[color:var(--color-border)] bg-white px-[9px] hover:border-[#c9b2a3] hover:bg-[#fffaf7]"><label class="grid shrink-0 cursor-pointer place-items-center" aria-label="Показывать страницу Договор оферты"><input class="checkbox-control" type="checkbox" checked></label><button type="button" class="flex min-w-0 flex-1 flex-col border-0 bg-transparent p-0 text-left" data-modal-trigger aria-controls="footer-page-modal" data-page-title="Договор оферты"><b class="truncate text-[11px]">Договор оферты</b><small class="mt-px text-[11px] text-[color:var(--color-secondary)]">Добавьте текст страницы</small></button><button type="button" class="grid h-[30px] w-[30px] place-items-center rounded-md border-0 bg-transparent p-0 text-[#857b73] hover:bg-[#f4eeea] hover:text-[color:var(--color-accent)]" aria-label="Редактировать страницу Договор оферты" data-modal-trigger aria-controls="footer-page-modal" data-page-title="Договор оферты"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg></button><span class="grid h-[30px] w-[24px] cursor-grab place-items-center text-[#857b73]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></span></div>
+                    <div class="flex min-h-[41px] items-center gap-2 rounded-lg border border-[color:var(--color-border)] bg-white px-[9px] hover:border-[#c9b2a3] hover:bg-[#fffaf7]"><label class="grid shrink-0 cursor-pointer place-items-center" aria-label="Показывать страницу О нас"><input class="checkbox-control" type="checkbox" checked></label><button type="button" class="flex min-w-0 flex-1 flex-col border-0 bg-transparent p-0 text-left" data-modal-trigger aria-controls="footer-page-modal" data-page-title="О нас"><b class="truncate text-[11px]">О нас</b><small class="mt-px text-[11px] text-[color:var(--color-secondary)]">Добавьте текст страницы</small></button><button type="button" class="grid h-[30px] w-[30px] place-items-center rounded-md border-0 bg-transparent p-0 text-[#857b73] hover:bg-[#f4eeea] hover:text-[color:var(--color-accent)]" aria-label="Редактировать страницу О нас" data-modal-trigger aria-controls="footer-page-modal" data-page-title="О нас"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg></button><span class="grid h-[30px] w-[24px] cursor-grab place-items-center text-[#857b73]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></span></div>
+                    <div class="flex min-h-[41px] items-center gap-2 rounded-lg border border-[color:var(--color-border)] bg-white px-[9px] hover:border-[#c9b2a3] hover:bg-[#fffaf7]"><label class="grid shrink-0 cursor-pointer place-items-center" aria-label="Показывать страницу Контакты"><input class="checkbox-control" type="checkbox" checked></label><button type="button" class="flex min-w-0 flex-1 flex-col border-0 bg-transparent p-0 text-left" data-modal-trigger aria-controls="footer-page-modal" data-page-title="Контакты"><b class="truncate text-[11px]">Контакты</b><small class="mt-px text-[11px] text-[color:var(--color-secondary)]">Добавьте текст страницы</small></button><button type="button" class="grid h-[30px] w-[30px] place-items-center rounded-md border-0 bg-transparent p-0 text-[#857b73] hover:bg-[#f4eeea] hover:text-[color:var(--color-accent)]" aria-label="Редактировать страницу Контакты" data-modal-trigger aria-controls="footer-page-modal" data-page-title="Контакты"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg></button><span class="grid h-[30px] w-[24px] cursor-grab place-items-center text-[#857b73]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></span></div>
+                    <div class="flex min-h-[41px] items-center gap-2 rounded-lg border border-[color:var(--color-border)] bg-white px-[9px] hover:border-[#c9b2a3] hover:bg-[#fffaf7]"><label class="grid shrink-0 cursor-pointer place-items-center" aria-label="Показывать страницу Конфиденциальность"><input class="checkbox-control" type="checkbox" checked></label><button type="button" class="flex min-w-0 flex-1 flex-col border-0 bg-transparent p-0 text-left" data-modal-trigger aria-controls="footer-page-modal" data-page-title="Конфиденциальность"><b class="truncate text-[11px]">Конфиденциальность</b><small class="mt-px text-[11px] text-[color:var(--color-secondary)]">Добавьте текст страницы</small></button><button type="button" class="grid h-[30px] w-[30px] place-items-center rounded-md border-0 bg-transparent p-0 text-[#857b73] hover:bg-[#f4eeea] hover:text-[color:var(--color-accent)]" aria-label="Редактировать страницу Конфиденциальность" data-modal-trigger aria-controls="footer-page-modal" data-page-title="Конфиденциальность"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg></button><span class="grid h-[30px] w-[24px] cursor-grab place-items-center text-[#857b73]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></span></div>
+                </div>
+                <button type="button" class="mt-[11px] inline-flex min-h-[34px] items-center gap-1 rounded-lg border border-dashed border-[#cbbdb2] bg-white px-[11px] text-[11px] font-bold text-[color:var(--color-accent)] hover:border-[#bda99a]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                    Создать страницу
+                </button>
+            </section>
+        </div>
+
+        <footer class="flex min-h-[66px] shrink-0 items-center justify-end gap-2 border-t border-[color:var(--color-border)] bg-[#fcfbfa] px-[22px] py-[11px] max-sm:px-4">
+            <button type="button" class="min-h-[38px] rounded-[9px] border border-[#d8d0ca] bg-white px-[15px] text-[12px] font-bold" data-modal-close>Отмена</button>
+            <button type="button" class="inline-flex min-h-[38px] items-center gap-[5px] rounded-[9px] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)] px-[15px] text-[12px] font-bold text-white" data-modal-close><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg>Готово</button>
+        </footer>
+    </section>
+</div>
+
+<div id="footer-page-modal" class="modal-overlay !z-[600]" role="presentation" hidden>
+    <section class="modal-dialog flex !w-[min(960px,100%)] flex-col bg-white" role="dialog" aria-modal="true" aria-labelledby="footer-page-modal-title">
+        <header class="flex min-h-[76px] shrink-0 items-center justify-between border-b border-[color:var(--color-border)] bg-white px-[22px] py-[15px] max-sm:px-4">
+            <div><small class="mb-[3px] block text-[11px] font-[750] uppercase tracking-[.08em] text-[color:var(--color-accent)]">Страница магазина</small><h2 id="footer-page-modal-title" class="m-0 text-[19px] font-[760] tracking-[-.025em]" data-page-modal-heading>Редактировать страницу</h2></div>
+            <button type="button" class="grid h-9 w-9 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#faf9f7] p-0 text-[#716861]" aria-label="Закрыть редактор страницы" data-modal-close><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+        </header>
+
+        <div class="flex flex-col gap-[13px] overflow-y-auto px-[23px] py-[21px] max-sm:px-4 max-sm:py-4">
+            <label class="form-field"><span class="form-label">Название страницы</span><input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" type="text" value="Доставка и оплата" data-page-title-input></label>
+            <div class="form-field min-w-0">
+                <span class="form-label">Текст страницы</span>
+                <textarea name="footer_page_content" data-page-editor></textarea>
+            </div>
+            <small class="text-[11px] text-[color:var(--color-secondary)]">Используйте панель редактора для оформления текста, добавления ссылок и изображений.</small>
+        </div>
+
+        <footer class="flex min-h-[66px] shrink-0 items-center justify-end gap-2 border-t border-[color:var(--color-border)] bg-[#fcfbfa] px-[22px] py-[11px] max-sm:px-4">
+            <button type="button" class="mr-auto inline-flex min-h-[38px] items-center gap-[5px] rounded-[9px] border border-[#dfc4b8] bg-white px-[15px] text-[12px] font-bold text-[#a53f1b]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>Удалить страницу</button>
+            <button type="button" class="min-h-[38px] rounded-[9px] border border-[#d8d0ca] bg-white px-[15px] text-[12px] font-bold" data-modal-close>Отмена</button>
+            <button type="button" class="inline-flex min-h-[38px] items-center gap-[5px] rounded-[9px] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)] px-[15px] text-[12px] font-bold text-white" data-page-editor-save data-modal-close><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>Сохранить изменения</button>
+        </footer>
+    </section>
+</div>
+
+<div id="add-widget-modal" class="modal-overlay" role="presentation" hidden>
+    <section class="modal-dialog flex !w-[min(760px,100%)] flex-col bg-white" role="dialog" aria-modal="true" aria-labelledby="add-widget-modal-title">
+        <header class="flex min-h-[82px] shrink-0 items-center justify-between border-b border-[color:var(--color-border)] bg-white px-[22px] py-[17px] max-sm:px-4">
+            <div>
+                <small class="mb-[3px] block text-[11px] font-[750] uppercase tracking-[.08em] text-[color:var(--color-accent)]">Внешний вид магазина</small>
+                <h2 id="add-widget-modal-title" class="m-0 text-[22px] font-[760] tracking-[-.035em]">Добавить виджет</h2>
+            </div>
+            <button type="button" class="grid h-9 w-9 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#faf9f7] p-0 text-[#716861]" aria-label="Закрыть выбор виджета" data-modal-close>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+            </button>
+        </header>
+
+        <div class="grid grid-cols-3 gap-[9px] overflow-y-auto px-[23px] pb-[25px] pt-[21px] max-sm:grid-cols-1 max-sm:px-4 max-sm:py-4">
+            <button type="button" class="grid min-h-[140px] grid-cols-[36px_1fr_auto] items-start gap-[9px] rounded-xl border border-[color:var(--color-border)] bg-[#fcfbfa] p-[14px] text-left text-[color:var(--color-accent)] transition-colors hover:border-[#c9b2a3] hover:bg-white max-sm:min-h-20" data-modal-close>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg>
+                <span class="flex flex-col text-[color:var(--color-primary)]"><b class="text-[12px]">Витрина</b><small class="mt-1 text-[11px] leading-[1.4] text-[color:var(--color-secondary)]">Товары или категории в сетке</small></span>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+            </button>
+
+            <button type="button" class="grid min-h-[140px] grid-cols-[36px_1fr_auto] items-start gap-[9px] rounded-xl border border-[color:var(--color-border)] bg-[#fcfbfa] p-[14px] text-left text-[color:var(--color-accent)] transition-colors hover:border-[#c9b2a3] hover:bg-white max-sm:min-h-20" data-modal-close>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" x2="15" y1="20" y2="20"></line><line x1="12" x2="12" y1="4" y2="20"></line></svg>
+                <span class="flex flex-col text-[color:var(--color-primary)]"><b class="text-[12px]">Заголовок и текст</b><small class="mt-1 text-[11px] leading-[1.4] text-[color:var(--color-secondary)]">Текстовый блок с кнопкой</small></span>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+            </button>
+
+            <button type="button" class="grid min-h-[140px] grid-cols-[36px_1fr_auto] items-start gap-[9px] rounded-xl border border-[color:var(--color-border)] bg-[#fcfbfa] p-[14px] text-left text-[color:var(--color-accent)] transition-colors hover:border-[#c9b2a3] hover:bg-white max-sm:min-h-20" data-modal-close>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>
+                <span class="flex flex-col text-[color:var(--color-primary)]"><b class="text-[12px]">Баннер</b><small class="mt-1 text-[11px] leading-[1.4] text-[color:var(--color-secondary)]">Изображение или видео и кнопки</small></span>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+            </button>
+        </div>
+    </section>
+</div>
+
+<div id="lower-banner-modal" class="modal-overlay" role="presentation" hidden>
+    <section class="modal-dialog flex !w-[min(760px,100%)] flex-col bg-white" role="dialog" aria-modal="true" aria-labelledby="lower-banner-modal-title">
+        <header class="flex min-h-[82px] shrink-0 items-center justify-between border-b border-[color:var(--color-border)] bg-white px-[22px] py-[17px] max-sm:px-4">
+            <div><small class="mb-[3px] block text-[11px] font-[750] uppercase tracking-[.08em] text-[color:var(--color-accent)]">Внешний вид магазина</small><h2 id="lower-banner-modal-title" class="m-0 text-[22px] font-[760] tracking-[-.035em]">Баннер</h2></div>
+            <button type="button" class="grid h-9 w-9 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#faf9f7] p-0 text-[#716861]" aria-label="Закрыть настройки нижнего баннера" data-modal-close><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+        </header>
+
+        <div class="flex min-h-0 flex-1 flex-col gap-[13px] overflow-y-auto px-[23px] py-[21px] max-sm:px-4 max-sm:py-4">
+            <section class="rounded-[13px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[17px]" data-selection-group data-selection-style="tabs">
+                <h3 class="m-0 text-[13px] font-bold">Изображение или видео</h3>
+                <div class="my-[11px] grid grid-cols-2 gap-1 rounded-[9px] bg-[#efebe7] p-1" role="tablist">
+                    <button type="button" data-selection-option="lower-banner-image" aria-pressed="true" class="flex min-h-[33px] items-center justify-center gap-1.5 rounded-[7px] border-0 bg-white text-[11px] font-[650] text-[color:var(--color-accent)] shadow-[0_2px_7px_rgba(59,40,28,.08)]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>Изображение</button>
+                    <button type="button" data-selection-option="lower-banner-video" aria-pressed="false" class="flex min-h-[33px] items-center justify-center gap-1.5 rounded-[7px] border-0 bg-transparent text-[11px] font-[650] text-[#746c66]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 13 5.223 3.482A.5.5 0 0 0 22 16.066V7.87a.5.5 0 0 0-.752-.432L16 10.5"></path><rect x="2" y="6" width="14" height="12" rx="2"></rect></svg>Видео</button>
+                </div>
+                <div data-selection-panel="lower-banner-image"><label class="flex min-h-[62px] w-full cursor-pointer items-center gap-[10px] rounded-[9px] border border-dashed border-[#cfc4bb] bg-white px-[13px] py-[10px] text-[color:var(--color-accent)]"><input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg><span class="flex flex-col"><b class="text-[11px] text-[#514942]">Загрузить изображение</b><small class="mt-0.5 text-[11px] text-[#968e87]">JPG, PNG или WEBP, до 10 МБ</small></span><svg class="ml-auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg></label></div>
+                <div data-selection-panel="lower-banner-video" class="!hidden" hidden><label class="flex min-h-[62px] w-full cursor-pointer items-center gap-[10px] rounded-[9px] border border-dashed border-[#cfc4bb] bg-white px-[13px] py-[10px] text-[color:var(--color-accent)]"><input type="file" accept="video/mp4,video/webm" class="sr-only"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 13 5.223 3.482A.5.5 0 0 0 22 16.066V7.87a.5.5 0 0 0-.752-.432L16 10.5"></path><rect x="2" y="6" width="14" height="12" rx="2"></rect></svg><span class="flex flex-col"><b class="text-[11px] text-[#514942]">Загрузить видео</b><small class="mt-0.5 text-[11px] text-[#968e87]">MP4 или WebM, до 50 МБ</small></span><svg class="ml-auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg></label></div>
+                <div class="mt-3 flex items-center gap-1.5 text-[11px] text-[#7c736c]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>Перетяните слайды, чтобы изменить порядок</div>
+                <div class="mt-[11px] flex flex-col gap-1.5">
+                    <div class="flex min-h-[41px] items-center gap-[9px] rounded-[8px] border border-[color:var(--color-border)] bg-white px-[9px] py-[5px]"><button type="button" class="grid h-[30px] w-7 shrink-0 cursor-grab place-items-center rounded-md border-0 bg-transparent p-0 text-[#81776f]" aria-label="Перетащить слайд"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button><i class="h-[29px] w-10 shrink-0 rounded-[5px] bg-gradient-to-br from-[#443027] to-[#b37550]"></i><span class="flex min-w-0 flex-1 flex-col text-[12px] text-[#4d4640]">Летняя коллекция<small class="mt-0.5 text-[11px] text-[color:var(--color-secondary)]">Изображение</small></span><button type="button" class="grid h-[30px] w-[30px] place-items-center rounded-md border-0 bg-transparent p-0 text-[#7d746d]" aria-label="Удалить слайд"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg></button></div>
+                    <div class="flex min-h-[41px] items-center gap-[9px] rounded-[8px] border border-[color:var(--color-border)] bg-white px-[9px] py-[5px]"><button type="button" class="grid h-[30px] w-7 shrink-0 cursor-grab place-items-center rounded-md border-0 bg-transparent p-0 text-[#81776f]" aria-label="Перетащить слайд"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button><i class="h-[29px] w-10 shrink-0 rounded-[5px] bg-gradient-to-br from-[#6e725f] to-[#d0b38c]"></i><span class="flex min-w-0 flex-1 flex-col text-[12px] text-[#4d4640]">Сумки для города<small class="mt-0.5 text-[11px] text-[color:var(--color-secondary)]">Изображение</small></span><button type="button" class="grid h-[30px] w-[30px] place-items-center rounded-md border-0 bg-transparent p-0 text-[#7d746d]" aria-label="Удалить слайд"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg></button></div>
+                    <div class="flex min-h-[41px] items-center gap-[9px] rounded-[8px] border border-[color:var(--color-border)] bg-white px-[9px] py-[5px]"><button type="button" class="grid h-[30px] w-7 shrink-0 cursor-grab place-items-center rounded-md border-0 bg-transparent p-0 text-[#81776f]" aria-label="Перетащить слайд"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button><i class="h-[29px] w-10 shrink-0 rounded-[5px] bg-gradient-to-br from-[#32404b] to-[#9c7563]"></i><span class="flex min-w-0 flex-1 flex-col text-[12px] text-[#4d4640]">Ручная работа<small class="mt-0.5 text-[11px] text-[color:var(--color-secondary)]">Изображение</small></span><button type="button" class="grid h-[30px] w-[30px] place-items-center rounded-md border-0 bg-transparent p-0 text-[#7d746d]" aria-label="Удалить слайд"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg></button></div>
+                </div>
+                <button type="button" class="mt-[10px] inline-flex items-center gap-1 border-0 bg-transparent p-0 text-[11px] font-bold text-[color:var(--color-accent)]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Добавить слайд</button>
+            </section>
+
+            <section class="rounded-[13px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[17px]" data-selection-group>
+                <h3 class="m-0 text-[13px] font-bold">Цвет текста на баннере</h3>
+                <p class="mb-[13px] mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Подберите контрастный цвет заголовка и описания под загруженное изображение.</p>
+                <div class="grid grid-cols-2 gap-2 max-sm:grid-cols-1">
+                    <button type="button" class="flex min-h-[42px] items-center gap-2 rounded-[9px] border border-[#d39a78] bg-[#fff3eb] px-[10px] text-left text-[color:var(--color-accent)]" data-selection-option="white" aria-pressed="true"><i class="h-6 w-6 rounded-full border border-[#d8d0ca] bg-white"></i><span class="flex-1 text-[12px] font-bold">Белый</span><svg data-selection-check width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="flex min-h-[42px] items-center gap-2 rounded-[9px] border border-[color:var(--color-border)] bg-white px-[10px] text-left" data-selection-option="milk" aria-pressed="false"><i class="h-6 w-6 rounded-full border border-[#d8d0ca] bg-[#f4e7da]"></i><span class="flex-1 text-[12px] font-bold">Молочный</span><svg data-selection-check class="hidden" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="flex min-h-[42px] items-center gap-2 rounded-[9px] border border-[color:var(--color-border)] bg-white px-[10px] text-left" data-selection-option="dark" aria-pressed="false"><i class="h-6 w-6 rounded-full bg-[#241d19]"></i><span class="flex-1 text-[12px] font-bold">Тёмный</span><svg data-selection-check class="hidden" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="flex min-h-[42px] items-center gap-2 rounded-[9px] border border-[color:var(--color-border)] bg-white px-[10px] text-left" data-selection-option="accent" aria-pressed="false"><i class="h-6 w-6 rounded-full bg-[#b85a2b]"></i><span class="flex-1 text-[12px] font-bold">Акцентный</span><svg data-selection-check class="hidden" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                </div>
+                <label class="mt-2 flex min-h-[48px] cursor-pointer items-center gap-[10px] rounded-[9px] border border-[color:var(--color-border)] bg-white px-[10px]" data-selection-option="custom" aria-pressed="false"><input type="color" value="#ffffff" class="h-8 w-10 cursor-pointer rounded border-0 bg-transparent p-0"><span class="flex flex-1 flex-col"><b class="text-[12px]">Свой цвет</b><small class="mt-0.5 text-[11px] text-[color:var(--color-secondary)]">#FFFFFF</small></span><svg data-selection-check class="hidden text-[color:var(--color-accent)]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></label>
+            </section>
+
+            <label class="form-field"><span class="form-label">Заголовок</span><input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" type="text" value="Город. Дорога. Свобода."></label>
+            <label class="form-field"><span class="form-label">Текст</span><textarea class="form-control min-h-[82px] resize-y rounded-[9px] px-3 py-2 text-[12px]" rows="3">Сумки и аксессуары ручной работы для города и путешествий.</textarea></label>
+            <div class="grid grid-cols-2 gap-[11px] max-sm:grid-cols-1"><label class="form-field"><span class="form-label">Текст кнопки</span><input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" type="text" value="Смотреть коллекцию"></label><label class="form-field"><span class="form-label">Ссылка</span><input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" type="text" value="/catalog"></label></div>
+            <button type="button" class="inline-flex items-center gap-1 self-start border-0 bg-transparent p-0 text-[11px] font-bold text-[color:var(--color-accent)]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Добавить ещё кнопку</button>
+        </div>
+
+        <footer class="flex min-h-[66px] shrink-0 items-center justify-end gap-2 border-t border-[color:var(--color-border)] bg-[#fcfbfa] px-[22px] py-[11px] max-sm:px-4"><button type="button" class="min-h-[38px] rounded-[9px] border border-[#d8d0ca] bg-white px-[15px] text-[12px] font-bold" data-modal-close>Отмена</button><button type="button" class="inline-flex min-h-[38px] items-center gap-[5px] rounded-[9px] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)] px-[15px] text-[12px] font-bold text-white" data-modal-close><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg>Готово</button></footer>
+    </section>
+</div>
+
+<div id="handmade-modal" class="modal-overlay" role="presentation" hidden>
+    <section class="modal-dialog flex !w-[min(760px,100%)] flex-col bg-white" role="dialog" aria-modal="true" aria-labelledby="handmade-modal-title">
+        <header class="flex min-h-[82px] shrink-0 items-center justify-between border-b border-[color:var(--color-border)] bg-white px-[22px] py-[17px] max-sm:px-4">
+            <div>
+                <small class="mb-[3px] block text-[11px] font-[750] uppercase tracking-[.08em] text-[color:var(--color-accent)]">Внешний вид магазина</small>
+                <h2 id="handmade-modal-title" class="m-0 text-[22px] font-[760] tracking-[-.035em]">Заголовок и текст</h2>
+            </div>
+            <button type="button" class="grid h-9 w-9 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#faf9f7] p-0 text-[#716861]" aria-label="Закрыть настройки текстового блока" data-modal-close>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+            </button>
+        </header>
+
+        <div class="flex flex-col gap-[13px] overflow-y-auto px-[23px] pb-[25px] pt-[21px] max-sm:px-4 max-sm:py-4">
+            <label class="form-field">
+                <span class="form-label">Надзаголовок</span>
+                <input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" type="text" value="Ручная работа">
+            </label>
+            <label class="form-field">
+                <span class="form-label">Заголовок</span>
+                <input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" type="text" value="Вещи, которые становятся только лучше со временем">
+            </label>
+            <label class="form-field">
+                <span class="form-label">Текст</span>
+                <textarea class="form-control min-h-[116px] resize-y rounded-[9px] px-3 py-2 text-[12px]" rows="5">Мы работаем с натуральной кожей и собираем каждое изделие вручную — спокойно, точно и с вниманием к деталям.</textarea>
+            </label>
+            <div class="grid grid-cols-2 gap-[11px] max-sm:grid-cols-1">
+                <label class="form-field">
+                    <span class="form-label">Текст кнопки</span>
+                    <input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" type="text" value="О мастерской">
+                </label>
+                <label class="form-field">
+                    <span class="form-label">Ссылка</span>
+                    <input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" type="text" value="/about">
+                </label>
+            </div>
+        </div>
+
+        <footer class="flex min-h-[66px] shrink-0 items-center justify-end gap-2 border-t border-[color:var(--color-border)] bg-[#fcfbfa] px-[22px] py-[11px] max-sm:px-4">
+            <button type="button" class="min-h-[38px] rounded-[9px] border border-[#d8d0ca] bg-white px-[15px] text-[12px] font-bold" data-modal-close>Отмена</button>
+            <button type="button" class="inline-flex min-h-[38px] items-center gap-[5px] rounded-[9px] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)] px-[15px] text-[12px] font-bold text-white" data-modal-close>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg>
+                Готово
+            </button>
+        </footer>
+    </section>
+</div>
+
+<div id="showcase-modal" class="modal-overlay" role="presentation" hidden>
+    <section class="modal-dialog flex !w-[min(760px,100%)] flex-col bg-white" role="dialog" aria-modal="true" aria-labelledby="showcase-modal-title">
+        <header class="flex min-h-[82px] shrink-0 items-center justify-between border-b border-[color:var(--color-border)] bg-white px-[22px] py-[17px] max-sm:px-4">
+            <div><small class="mb-[3px] block text-[11px] font-[750] uppercase tracking-[.08em] text-[color:var(--color-accent)]">Внешний вид магазина</small><h2 id="showcase-modal-title" class="m-0 text-[22px] font-[760] tracking-[-.035em]">Витрина</h2></div>
+            <button type="button" class="grid h-9 w-9 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#faf9f7] p-0 text-[#716861]" aria-label="Закрыть настройки витрины" data-modal-close><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+        </header>
+
+        <div class="flex min-h-0 flex-1 flex-col gap-[13px] overflow-y-auto px-[23px] py-[21px] max-sm:px-4 max-sm:py-4">
+            <section class="rounded-[13px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[17px]">
+                <h3 class="m-0 text-[13px] font-bold">Заголовок витрины</h3>
+                <p class="mb-[13px] mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Тексты сразу обновляются в предпросмотре магазина.</p>
+                <div class="grid grid-cols-2 gap-[11px] max-sm:grid-cols-1">
+                    <label class="form-field"><span class="form-label">Надзаголовок</span><input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" type="text" value="Выбор покупателей"></label>
+                    <label class="form-field"><span class="form-label">Текст ссылки</span><input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" type="text" value="Смотреть все"></label>
+                </div>
+                <label class="form-field mt-[11px]"><span class="form-label">Основной заголовок</span><input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" type="text" value="Популярные товары"></label>
+            </section>
+
+            <section class="rounded-[13px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[17px]" data-selection-group>
+                <h3 class="m-0 text-[13px] font-bold">Что показать</h3>
+                <div class="mt-[11px] grid grid-cols-2 gap-2 max-sm:grid-cols-1">
+                    <button type="button" class="flex min-h-[62px] items-center gap-[9px] rounded-[10px] border border-[#d39a78] bg-[#fff3eb] px-[11px] py-[9px] text-left text-[color:var(--color-accent)]" data-selection-option aria-pressed="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg><span class="flex flex-1 flex-col"><b class="text-[12px]">Товары</b><small class="mt-0.5 text-[11px] text-[color:var(--color-secondary)]">Выбрать отдельные товары</small></span><svg data-selection-check width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                    <button type="button" class="flex min-h-[62px] items-center gap-[9px] rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] py-[9px] text-left" data-selection-option aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg><span class="flex flex-1 flex-col"><b class="text-[12px]">Категории</b><small class="mt-0.5 text-[11px] text-[color:var(--color-secondary)]">Показать разделы каталога</small></span><svg data-selection-check class="hidden" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></button>
+                </div>
+            </section>
+
+            <section class="rounded-[13px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[17px]">
+                <h3 class="m-0 text-[13px] font-bold">Выбранные товары</h3>
+                <p class="mb-[13px] mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Перетяните строки мышкой, чтобы изменить их порядок в витрине.</p>
+                <label class="form-control-group flex h-[37px] items-center gap-[7px] rounded-[8px] bg-white px-[10px]"><svg class="shrink-0 text-[color:var(--color-secondary)]" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input class="form-control h-full text-[11px]" type="search" placeholder="Найти товар…"></label>
+                <div class="mt-[11px] flex flex-col gap-1.5 [&>div]:flex [&>div]:min-h-[41px] [&>div]:items-center [&>div]:gap-[9px] [&>div]:rounded-[8px] [&>div]:border [&>div]:border-[color:var(--color-border)] [&>div]:bg-white [&>div]:px-[9px] [&>div]:py-[5px] [&>div]:text-[#716961] [&>div>span]:flex [&>div>span]:min-w-0 [&>div>span]:flex-1 [&>div>span]:flex-col [&_b]:text-[12px] [&_b]:text-[#4d4640] [&_small]:mt-0.5 [&_small]:text-[11px]" data-sortable-list>
+                    <div><button type="button" class="grid h-[30px] w-7 shrink-0 cursor-grab place-items-center rounded-md border-0 bg-transparent p-0 text-[#81776f]" aria-label="Перетащить Сумка Moss"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button><i class="h-[29px] w-10 shrink-0 rounded-[5px] bg-gradient-to-br from-[#87947b] to-[#c5c7b3]"></i><span><b>Сумка Moss</b><small>3 290 ₴</small></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></div>
+                    <div><button type="button" class="grid h-[30px] w-7 shrink-0 cursor-grab place-items-center rounded-md border-0 bg-transparent p-0 text-[#81776f]" aria-label="Перетащить Рюкзак Bruno"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button><i class="h-[29px] w-10 shrink-0 rounded-[5px] bg-gradient-to-br from-[#8b502d] to-[#d5a575]"></i><span><b>Рюкзак Bruno</b><small>4 890 ₴</small></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></div>
+                    <div><button type="button" class="grid h-[30px] w-7 shrink-0 cursor-grab place-items-center rounded-md border-0 bg-transparent p-0 text-[#81776f]" aria-label="Перетащить Кошелёк Mini"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button><i class="h-[29px] w-10 shrink-0 rounded-[5px] bg-gradient-to-br from-[#653b3b] to-[#b78884]"></i><span><b>Кошелёк Mini</b><small>1 290 ₴</small></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></div>
+                    <div><button type="button" class="grid h-[30px] w-7 shrink-0 cursor-grab place-items-center rounded-md border-0 bg-transparent p-0 text-[#81776f]" aria-label="Перетащить Сумка Terra"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button><i class="h-[29px] w-10 shrink-0 rounded-[5px] bg-gradient-to-br from-[#a98b65] to-[#e3d1b7]"></i><span><b>Сумка Terra</b><small>3 790 ₴</small></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></div>
+                    <div><button type="button" class="grid h-[30px] w-7 shrink-0 cursor-grab place-items-center rounded-md border-0 bg-transparent p-0 text-[#81776f]" aria-label="Перетащить Портмоне Slate"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button><i class="h-[29px] w-10 shrink-0 rounded-[5px] bg-gradient-to-br from-[#443027] to-[#b37550]"></i><span><b>Портмоне Slate</b><small>1 690 ₴</small></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></div>
+                    <div><button type="button" class="grid h-[30px] w-7 shrink-0 cursor-grab place-items-center rounded-md border-0 bg-transparent p-0 text-[#81776f]" aria-label="Перетащить Клатч Ember"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button><i class="h-[29px] w-10 shrink-0 rounded-[5px] bg-gradient-to-br from-[#443027] to-[#b37550]"></i><span><b>Клатч Ember</b><small>2 490 ₴</small></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></div>
+                    <div><button type="button" class="grid h-[30px] w-7 shrink-0 cursor-grab place-items-center rounded-md border-0 bg-transparent p-0 text-[#81776f]" aria-label="Перетащить Ремень Atlas"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button><i class="h-[29px] w-10 shrink-0 rounded-[5px] bg-gradient-to-br from-[#443027] to-[#b37550]"></i><span><b>Ремень Atlas</b><small>1 490 ₴</small></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></div>
+                    <div><button type="button" class="grid h-[30px] w-7 shrink-0 cursor-grab place-items-center rounded-md border-0 bg-transparent p-0 text-[#81776f]" aria-label="Перетащить Шопер Loft"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button><i class="h-[29px] w-10 shrink-0 rounded-[5px] bg-gradient-to-br from-[#443027] to-[#b37550]"></i><span><b>Шопер Loft</b><small>3 590 ₴</small></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg></div>
+                </div>
+            </section>
+
+            <section class="rounded-[13px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[17px]" data-selection-group>
+                <h3 class="m-0 text-[13px] font-bold">Расположение</h3>
+                <p class="mb-[13px] mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Выбранный вариант сразу применяется к витрине.</p>
+                <div class="grid grid-cols-3 gap-2 overflow-x-auto max-sm:grid-cols-[repeat(3,minmax(125px,1fr))]">
+                    <button type="button" class="flex min-h-[82px] flex-col items-center justify-center gap-[7px] rounded-[9px] border border-[#d39a78] bg-[#fff3eb] text-[11px] font-bold text-[color:var(--color-accent)]" data-selection-option aria-pressed="true"><i class="h-[39px] w-[75px] border-[5px] border-[#f8f5f2] bg-[repeating-linear-gradient(90deg,#b8ada4_0_14px,transparent_14px_18px)] shadow-[0_0_0_1px_#e0d9d3]"></i>Сетка 4</button>
+                    <button type="button" class="flex min-h-[82px] flex-col items-center justify-center gap-[7px] rounded-[9px] border border-[color:var(--color-border)] bg-white text-[11px] font-bold" data-selection-option aria-pressed="false"><i class="grid h-[39px] w-[75px] grid-cols-6 grid-rows-2 gap-1 border-[5px] border-[#f8f5f2] shadow-[0_0_0_1px_#e0d9d3]"><span class="col-span-3 bg-[#b8ada4]"></span><span class="col-span-3 bg-[#b8ada4]"></span><span class="col-span-2 bg-[#b8ada4]"></span><span class="col-span-2 bg-[#b8ada4]"></span><span class="col-span-2 bg-[#b8ada4]"></span></i>Смешанная</button>
+                    <button type="button" class="flex min-h-[82px] flex-col items-center justify-center gap-[7px] rounded-[9px] border border-[color:var(--color-border)] bg-white text-[11px] font-bold" data-selection-option aria-pressed="false"><i class="h-[39px] w-[75px] border-[5px] border-[#f8f5f2] bg-[repeating-linear-gradient(90deg,#b8ada4_0_11px,transparent_11px_15px)] shadow-[0_0_0_1px_#e0d9d3]"></i>Карусель</button>
+                </div>
+            </section>
+        </div>
+
+        <footer class="flex min-h-[66px] shrink-0 items-center justify-end gap-2 border-t border-[color:var(--color-border)] bg-[#fcfbfa] px-[22px] py-[11px] max-sm:px-4"><button type="button" class="min-h-[38px] rounded-[9px] border border-[#d8d0ca] bg-white px-[15px] text-[12px] font-bold" data-modal-close>Отмена</button><button type="button" class="inline-flex min-h-[38px] items-center gap-[5px] rounded-[9px] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)] px-[15px] text-[12px] font-bold text-white" data-modal-close><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"></path></svg>Готово</button></footer>
+    </section>
+</div>
+
+<div id="hero-banner-modal" class="modal-overlay" role="presentation" hidden>
+    <section class="modal-dialog flex !w-[min(760px,100%)] flex-col bg-white" role="dialog" aria-modal="true" aria-labelledby="hero-banner-modal-title">
+        <header class="flex min-h-[82px] shrink-0 items-center justify-between border-b border-[color:var(--color-border)] bg-white px-[22px] py-[17px] max-sm:px-4">
+            <div><small class="mb-[3px] block text-[11px] font-[750] uppercase tracking-[.08em] text-[color:var(--color-accent)]">Внешний вид магазина</small><h2 id="hero-banner-modal-title" class="m-0 text-[22px] font-[760] tracking-[-.035em]">Главный баннер</h2></div>
+            <button type="button" class="grid h-9 w-9 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#faf9f7] p-0 text-[#716861]" aria-label="Закрыть настройки баннера" data-modal-close><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+        </header>
+
+        <div class="flex min-h-0 flex-1 flex-col gap-[13px] overflow-y-auto px-[23px] py-[21px] max-sm:px-4 max-sm:py-4">
+            <section class="rounded-[13px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[17px]" data-selection-group data-selection-style="tabs">
+                <h3 class="m-0 text-[13px] font-bold">Изображение или видео</h3>
+                <div class="my-[11px] grid grid-cols-2 gap-1 rounded-[9px] bg-[#efebe7] p-1" role="tablist">
+                    <button type="button" data-selection-option="image" aria-pressed="true" class="flex min-h-[33px] items-center justify-center gap-1.5 rounded-[7px] border-0 bg-white text-[11px] font-[650] text-[color:var(--color-accent)] shadow-[0_2px_7px_rgba(59,40,28,.08)]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>Изображение</button>
+                    <button type="button" data-selection-option="video" aria-pressed="false" class="flex min-h-[33px] items-center justify-center gap-1.5 rounded-[7px] border-0 bg-transparent text-[11px] font-[650] text-[#746c66]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 13 5.223 3.482A.5.5 0 0 0 22 16.066V7.87a.5.5 0 0 0-.752-.432L16 10.5"></path><rect x="2" y="6" width="14" height="12" rx="2"></rect></svg>Видео</button>
+                </div>
+
+                <div data-selection-panel="image">
+                    <label class="flex min-h-[62px] w-full cursor-pointer items-center gap-[10px] rounded-[9px] border border-dashed border-[#cfc4bb] bg-white px-[13px] py-[10px] text-[color:var(--color-accent)]"><input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg><span class="flex flex-col"><b class="text-[11px] text-[#514942]">Загрузить изображение</b><small class="mt-0.5 text-[11px] text-[#968e87]">JPG, PNG или WEBP, до 10 МБ</small></span><svg class="ml-auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg></label>
+                </div>
+                <div data-selection-panel="video" class="!hidden" hidden>
+                    <label class="flex min-h-[62px] w-full cursor-pointer items-center gap-[10px] rounded-[9px] border border-dashed border-[#cfc4bb] bg-white px-[13px] py-[10px] text-[color:var(--color-accent)]"><input type="file" accept="video/mp4,video/webm" class="sr-only"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 13 5.223 3.482A.5.5 0 0 0 22 16.066V7.87a.5.5 0 0 0-.752-.432L16 10.5"></path><rect x="2" y="6" width="14" height="12" rx="2"></rect></svg><span class="flex flex-col"><b class="text-[11px] text-[#514942]">Загрузить видео</b><small class="mt-0.5 text-[11px] text-[#968e87]">MP4 или WebM, до 50 МБ</small></span><svg class="ml-auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg></label>
+                </div>
+
+                <div class="mt-3 flex items-center gap-1.5 text-[11px] text-[#7c736c]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>Перетяните слайды, чтобы изменить порядок</div>
+                <div class="shopra-ae-list shopra-ae-sortable-list">
+                    <div><button type="button" class="shopra-ae-drag-handle" aria-label="Перетащить слайд"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button><i class="shopra-slide"></i><span>Летняя коллекция<small>Изображение</small></span><button type="button" aria-label="Удалить слайд"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg></button></div>
+                    <div><button type="button" class="shopra-ae-drag-handle" aria-label="Перетащить слайд"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button><i class="shopra-slide shopra-s1"></i><span>Сумки для города<small>Изображение</small></span><button type="button" aria-label="Удалить слайд"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg></button></div>
+                    <div><button type="button" class="shopra-ae-drag-handle" aria-label="Перетащить слайд"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button><i class="shopra-slide shopra-s2"></i><span>Ручная работа<small>Изображение</small></span><button type="button" aria-label="Удалить слайд"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg></button></div>
+                </div>
+                <button type="button" class="shopra-ae-addline"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Добавить слайд</button>
+            </section>
+
+            <label class="form-field"><span class="form-label">Заголовок</span><input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" value="Кожа, которая живёт вместе с вами"></label>
+            <label class="form-field"><span class="form-label">Текст</span><textarea class="form-control min-h-[82px] resize-y rounded-[9px] px-3 py-2 text-[12px]" rows="3">Сумки и аксессуары ручной работы для города и путешествий.</textarea></label>
+            <div class="grid grid-cols-2 gap-[11px] max-sm:grid-cols-1"><label class="form-field"><span class="form-label">Текст кнопки</span><input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" value="Смотреть коллекцию"></label><label class="form-field"><span class="form-label">Ссылка</span><input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" value="/catalog"></label></div>
+            <button type="button" class="shopra-ae-addline"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Добавить ещё кнопку</button>
+        </div>
+
+        <footer class="flex min-h-[66px] shrink-0 items-center justify-end gap-2 border-t border-[color:var(--color-border)] bg-[#fcfbfa] px-[22px] py-[11px] max-sm:px-4"><button type="button" class="min-h-[38px] rounded-[9px] border border-[#d8d0ca] bg-white px-[15px] text-[12px] font-bold" data-modal-close>Отмена</button><button type="button" class="inline-flex min-h-[38px] items-center gap-[5px] rounded-[9px] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)] px-[15px] text-[12px] font-bold text-white" data-modal-close><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m20 6-11 11-5-5"></path></svg>Готово</button></footer>
+    </section>
+</div>
+
+<div id="store-header-modal" class="modal-overlay" role="presentation" hidden>
+    <section class="modal-dialog flex !w-[min(760px,100%)] flex-col bg-white" role="dialog" aria-modal="true" aria-labelledby="store-header-modal-title">
+        <header class="flex min-h-[82px] shrink-0 items-center justify-between border-b border-[color:var(--color-border)] bg-white px-[22px] py-[17px] max-sm:px-4">
+            <div><small class="mb-[3px] block text-[11px] font-[750] uppercase tracking-[.08em] text-[color:var(--color-accent)]">Внешний вид магазина</small><h2 id="store-header-modal-title" class="m-0 text-[22px] font-[760] tracking-[-.035em]">Шапка магазина</h2></div>
+            <button type="button" class="grid h-9 w-9 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#faf9f7] p-0 text-[#716861]" aria-label="Закрыть настройки шапки" data-modal-close><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+        </header>
+
+        <div class="flex min-h-0 flex-1 flex-col gap-[13px] overflow-y-auto px-[23px] py-[21px] max-sm:px-4 max-sm:py-4">
+            <section class="rounded-[13px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[17px]" data-selection-group>
+                <h3 class="m-0 text-[13px] font-bold">Расположение элементов</h3><p class="mb-[13px] mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Выберите готовую структуру шапки — изменения сразу видны в магазине.</p>
+                <div class="grid grid-cols-2 gap-2 max-sm:grid-cols-1">
+                    <button type="button" data-selection-option="left" aria-pressed="true" class="relative flex min-h-[92px] flex-col justify-center gap-2 rounded-[10px] border border-[#d39a78] bg-[#fff3eb] p-[9px] text-[color:var(--color-accent)]">
+                        <i class="relative flex h-10 items-center gap-[5px] rounded-md border border-[#e2dcd6] bg-[#faf8f6] p-[7px]"><span class="h-2 w-[28%] rounded-sm bg-[color:var(--color-accent)]"></span><span class="h-2 w-[42%] rounded-sm bg-[#c8bdb5]"></span><span class="ml-auto h-2 w-[18%] rounded-sm bg-[#7f756e]"></span></i><b class="text-center text-[11px]">Логотип слева</b><span data-selection-check class="absolute right-2 top-2 grid h-[18px] w-[18px] place-items-center rounded-full bg-[color:var(--color-accent)] text-white"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m20 6-11 11-5-5"></path></svg></span>
+                    </button>
+                    <button type="button" data-selection-option="center" aria-pressed="false" class="relative flex min-h-[92px] flex-col justify-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-white p-[9px] text-[#554d47]">
+                        <i class="relative flex h-10 items-center gap-[5px] rounded-md border border-[#e2dcd6] bg-[#faf8f6] p-[7px]"><span class="h-2 w-[25%] rounded-sm bg-[#c8bdb5]"></span><span class="absolute left-1/2 h-2 w-[27%] -translate-x-1/2 rounded-sm bg-[color:var(--color-accent)]"></span><span class="ml-auto h-2 w-[18%] rounded-sm bg-[#7f756e]"></span></i><b class="text-center text-[11px]">Логотип по центру</b><span data-selection-check class="hidden absolute right-2 top-2 grid h-[18px] w-[18px] place-items-center rounded-full bg-[color:var(--color-accent)] text-white"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m20 6-11 11-5-5"></path></svg></span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="rounded-[13px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[17px]" data-selection-group data-selection-style="tabs">
+                <h3 class="m-0 text-[13px] font-bold">Логотип</h3>
+                <div class="mt-[11px] grid grid-cols-2 gap-1 rounded-[9px] bg-[#efebe7] p-1" role="tablist">
+                    <button type="button" data-selection-option="text" aria-pressed="true" class="min-h-[33px] rounded-[7px] border-0 bg-white text-[11px] font-[650] text-[color:var(--color-accent)] shadow-[0_2px_7px_rgba(59,40,28,.08)]">Надпись</button>
+                    <button type="button" data-selection-option="image" aria-pressed="false" class="min-h-[33px] rounded-[7px] border-0 bg-transparent text-[11px] font-[650] text-[#746c66]">Изображение</button>
+                </div>
+                <div data-selection-panel="text" class="mt-[11px]"><label class="form-field"><span class="form-label">Название магазина</span><input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" value="ATELIER No. 7"></label></div>
+                <div data-selection-panel="image" class="!hidden mt-[11px]" hidden><label class="flex min-h-[62px] w-full cursor-pointer items-center gap-[10px] rounded-[9px] border border-dashed border-[#cfc4bb] bg-white px-[13px] py-[10px] text-left text-[color:var(--color-accent)]"><input type="file" accept="image/*" class="sr-only"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m-4-4 4 4 4-4"></path><path d="M5 21h14"></path></svg><span class="flex flex-col"><b class="text-[11px] text-[#514942]">Загрузить логотип</b><small class="mt-0.5 text-[11px] text-[#968e87]">PNG или SVG, до 5 МБ</small></span></label></div>
+            </section>
+
+            <section class="rounded-[13px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[17px]" data-selection-group data-selection-style="tabs">
+                <h3 class="m-0 text-[13px] font-bold">Ширина поиска</h3><p class="mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Поиск не обязан занимать всю свободную ширину шапки.</p>
+                <div class="mt-[11px] grid grid-cols-4 gap-1 rounded-[9px] bg-[#efebe7] p-1 max-sm:grid-cols-2">
+                    <button type="button" data-selection-option="icon" aria-pressed="false" class="min-h-[34px] rounded-[7px] border-0 bg-transparent text-[11px] font-bold text-[#756c65]">Иконка</button><button type="button" data-selection-option="compact" aria-pressed="true" class="min-h-[34px] rounded-[7px] border-0 bg-white text-[11px] font-bold text-[color:var(--color-accent)] shadow-[0_2px_7px_rgba(59,40,28,.08)]">Компактный</button><button type="button" data-selection-option="medium" aria-pressed="false" class="min-h-[34px] rounded-[7px] border-0 bg-transparent text-[11px] font-bold text-[#756c65]">Средний</button><button type="button" data-selection-option="wide" aria-pressed="false" class="min-h-[34px] rounded-[7px] border-0 bg-transparent text-[11px] font-bold text-[#756c65]">Широкий</button>
+                </div>
+            </section>
+
+            <div class="flex min-h-[65px] items-center justify-between rounded-[11px] border border-[color:var(--color-border)] bg-[#fcfbfa] px-[15px] py-3"><div class="flex flex-col"><b class="text-[12px]">Показывать телефон</b><small class="mt-0.5 text-[11px] text-[color:var(--color-secondary)]">Справа от логотипа</small></div><label class="switch" aria-label="Показывать телефон"><input class="switch__input" type="checkbox" checked><span class="switch__track"></span></label></div>
+            <label class="form-field"><span class="form-label">Номер телефона</span><input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" value="+380 67 123 45 67"></label>
+
+            <section class="rounded-[13px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[17px]">
+                <h3 class="m-0 text-[13px] font-bold">Мобильная шапка</h3><p class="mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Перетаскивайте иконки, меняйте порядок или удаляйте ненужные.</p>
+                <div class="shopra-ae-mobile-icons shopra-ae-sortable-list">
+                    <div><svg class="shopra-ae-mobile-grip" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><b>Поиск</b><span class="shopra-ae-mobile-icon-actions"><button disabled aria-label="Поднять Поиск"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button><button aria-label="Опустить Поиск"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></button><button aria-label="Удалить Поиск"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg></button></span></div>
+                    <div><svg class="shopra-ae-mobile-grip" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg><b>Кабинет</b><span class="shopra-ae-mobile-icon-actions"><button aria-label="Поднять Кабинет"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button><button aria-label="Опустить Кабинет"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></button><button aria-label="Удалить Кабинет"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg></button></span></div>
+                    <div><svg class="shopra-ae-mobile-grip" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg><b>Корзина</b><span class="shopra-ae-mobile-icon-actions"><button aria-label="Поднять Корзина"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button><button aria-label="Опустить Корзина"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></button><button aria-label="Удалить Корзина"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg></button></span></div>
+                    <div><svg class="shopra-ae-mobile-grip" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg><b>Меню</b><span class="shopra-ae-mobile-icon-actions"><button aria-label="Поднять Меню"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button><button disabled aria-label="Опустить Меню"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></button><button aria-label="Удалить Меню"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg></button></span></div>
+                </div>
+            </section>
+
+            <section class="rounded-[13px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[17px]">
+                <h3 class="m-0 text-[13px] font-bold">Навигация по каталогу</h3><p class="mt-[3px] text-[11px] text-[color:var(--color-secondary)]">Перетаскивайте разделы — порядок сразу изменится в шапке магазина.</p>
+                <div class="shopra-ae-list shopra-ae-sortable-list shopra-ae-header-menu">
+                    <div><svg class="shopra-ae-drag-handle" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg><span>Каталог</span><span class="shopra-ae-header-menu-actions"><button disabled><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button><button><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></button><button class="text-[#625a54]">•••</button></span></div>
+                    <div><svg class="shopra-ae-drag-handle" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg><span>Новинки</span><span class="shopra-ae-header-menu-actions"><button><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button><button><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></button><button class="text-[#625a54]">•••</button></span></div>
+                    <div><svg class="shopra-ae-drag-handle" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg><span>Сумки</span><span class="shopra-ae-header-menu-actions"><button><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button><button><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></button><button class="text-[#625a54]">•••</button></span></div>
+                    <div><svg class="shopra-ae-drag-handle" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg><span>Рюкзаки</span><span class="shopra-ae-header-menu-actions"><button><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button><button><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></button><button class="text-[#625a54]">•••</button></span></div>
+                    <div><svg class="shopra-ae-drag-handle" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg><span>Аксессуары</span><span class="shopra-ae-header-menu-actions"><button><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button><button disabled><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></button><button class="text-[#625a54]">•••</button></span></div>
+                </div><button type="button" class="shopra-ae-addline"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5v14"/></svg> Добавить раздел каталога</button>
+            </section>
+        </div>
+
+        <footer class="flex min-h-[66px] shrink-0 items-center justify-end gap-2 border-t border-[color:var(--color-border)] bg-[#fcfbfa] px-[22px] py-[11px] max-sm:px-4"><button type="button" class="min-h-[38px] rounded-[9px] border border-[#d8d0ca] bg-white px-[15px] text-[12px] font-bold" data-modal-close>Отмена</button><button type="button" class="inline-flex min-h-[38px] items-center gap-[5px] rounded-[9px] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)] px-[15px] text-[12px] font-bold text-white" data-modal-close><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"/></svg>Готово</button></footer>
+    </section>
+</div>
+
+<div id="top-banner-modal" class="modal-overlay" role="presentation" hidden>
+    <section class="modal-dialog flex !w-[min(760px,100%)] flex-col bg-white" role="dialog" aria-modal="true" aria-labelledby="top-banner-modal-title">
+        <header class="flex min-h-[82px] items-center justify-between border-b border-[color:var(--color-border)] bg-white px-[22px] py-[17px] max-sm:px-4">
+            <div>
+                <small class="mb-[3px] block text-[11px] font-[750] uppercase tracking-[.08em] text-[color:var(--color-accent)]">Внешний вид магазина</small>
+                <h2 id="top-banner-modal-title" class="m-0 text-[22px] font-[760] tracking-[-.035em]">Верхний баннер</h2>
+            </div>
+            <button type="button" class="grid h-9 w-9 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#faf9f7] p-0 text-[#716861]" aria-label="Закрыть настройки верхнего баннера" data-modal-close>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+            </button>
+        </header>
+
+        <div class="flex flex-col gap-[13px] overflow-y-auto px-[23px] pb-[25px] pt-[21px] max-sm:px-4 max-sm:py-4">
+            <div class="flex min-h-[65px] items-center justify-between gap-4 rounded-[11px] border border-[color:var(--color-border)] bg-[#fcfbfa] px-[15px] py-3">
+                <div class="flex min-w-0 flex-col">
+                    <b class="text-[12px]">Показывать верхний баннер</b>
+                    <small class="mt-0.5 text-[11px] text-[color:var(--color-secondary)]">Тонкая строка над шапкой</small>
+                </div>
+                <label class="switch" aria-label="Показывать верхний баннер">
+                    <input class="switch__input" type="checkbox" checked>
+                    <span class="switch__track"></span>
+                </label>
+            </div>
+
+            <label class="form-field">
+                <span class="form-label">Текст баннера</span>
+                <input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" type="text" value="Бесплатная доставка от 2 500 ₴">
+            </label>
+
+            <label class="form-field">
+                <span class="form-label">Ссылка</span>
+                <input class="form-control h-[38px] rounded-[9px] px-3 text-[12px]" type="text" value="/delivery">
+            </label>
+
+            <fieldset class="m-0 border-0 p-0">
+                <legend class="mb-[7px] text-[11px] font-[700] text-[#4f4842]">Цвет фона баннера</legend>
+                <div class="flex items-center gap-2">
+                    <label class="relative h-[33px] w-[33px] cursor-pointer rounded-full border-[3px] border-white bg-[#22201e] shadow-[0_0_0_1px_#d7d0ca]">
+                        <input type="radio" name="top-banner-color" value="#22201e" checked class="sr-only">
+                        <span class="sr-only">Тёмный</span>
+                    </label>
+                    <label class="relative h-[33px] w-[33px] cursor-pointer rounded-full border-[3px] border-white bg-[#b85a2b] shadow-[0_0_0_1px_#d7d0ca]">
+                        <input type="radio" name="top-banner-color" value="#b85a2b" class="sr-only">
+                        <span class="sr-only">Медный</span>
+                    </label>
+                    <label class="relative h-[33px] w-[33px] cursor-pointer rounded-full border-[3px] border-white bg-[#f1e7dc] shadow-[0_0_0_1px_#d7d0ca]">
+                        <input type="radio" name="top-banner-color" value="#f1e7dc" class="sr-only">
+                        <span class="sr-only">Светлый</span>
+                    </label>
+                    <label class="grid h-[33px] w-[33px] cursor-pointer place-items-center rounded-full border-[3px] border-white bg-white text-[#716861] shadow-[0_0_0_1px_#d7d0ca]" aria-label="Выбрать свой цвет">
+                        <input type="color" value="#78331b" class="sr-only">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"></path></svg>
+                    </label>
+                </div>
+            </fieldset>
+        </div>
+
+        <footer class="flex min-h-[66px] items-center justify-end gap-2 border-t border-[color:var(--color-border)] bg-[#fcfbfa] px-[22px] py-[11px] max-sm:px-4">
+            <button type="button" class="min-h-[38px] rounded-[9px] border border-[#d8d0ca] bg-white px-[15px] text-[12px] font-[700]" data-modal-close>Отмена</button>
+            <button type="button" class="inline-flex min-h-[38px] items-center gap-[5px] rounded-[9px] border border-[color:var(--color-accent)] bg-[color:var(--color-accent)] px-[15px] text-[12px] font-[700] text-white" data-modal-close>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m20 6-11 11-5-5"></path></svg>
+                Готово
+            </button>
+        </footer>
+    </section>
+</div>
+
+<script src="./assets/js/popover.js" defer></script>
+<script src="./assets/js/notifications.js" defer></script>
+<script src="./assets/js/mobile-menu.js" defer></script>
+<script src="./assets/js/appearance-preview.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/tinymce@7.9.1/tinymce.min.js" defer></script>
+<script src="./assets/js/modal.js" defer></script>
+<script src="./assets/js/selection-panels.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopra — Доставка</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./assets/js/tailwind-config.js"></script>
+    <link rel="stylesheet" href="./assets/styles/tokens.css">
+    <link rel="stylesheet" href="./assets/styles/sidebar.css">
+    <link rel="stylesheet" href="./assets/styles/forms.css">
+    <link rel="stylesheet" href="./assets/styles/buttons.css">
+    <link rel="stylesheet" href="./assets/styles/badges.css">
+    <link rel="stylesheet" href="./assets/styles/header-tokens.css">
+    <link rel="stylesheet" href="./assets/styles/popover.css">
+    <link rel="stylesheet" href="./assets/styles/switch.css">
+</head>
+<body class="min-h-screen overflow-x-hidden bg-[var(--color-page-bg)] text-[var(--color-primary)]">
+<div class="min-h-screen pl-[var(--sidebar-width)] max-lg:pl-0">
+        <div class="fixed inset-0 z-[90] bg-[rgba(35,27,21,0.34)] backdrop-blur-[5px] !hidden lg:!hidden"
+            data-mobile-overlay hidden></div>
+
+        <aside class="sidebar-shell flex h-screen flex-col overflow-hidden max-lg:!z-[100] max-lg:!-translate-x-full max-lg:!w-[min(310px,88vw)] max-lg:!min-w-0 max-lg:!border-r-0 max-lg:!bg-white max-lg:!p-[18px] max-lg:!pt-[22px] max-lg:!backdrop-blur-none max-lg:transition-transform max-lg:duration-200 max-lg:ease-out max-lg:will-change-transform"
+            data-mobile-drawer>
+            <div class="mb-[22px] hidden items-center justify-between px-2 max-lg:flex">
+                <a href="./index.html" class="flex items-center gap-[11px]">
+                    <span class="relative flex h-[34px] w-[30px] items-center justify-center text-[color:var(--sidebar-active-text)]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-[19px] w-[19px]"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                        <span class="absolute top-[13px] text-[10px] font-[800] leading-none">S</span>
+                    </span>
+                    <span class="text-[21px] font-[750] tracking-[-0.045em] text-[color:var(--sidebar-text-strong)]">Shopra</span>
+                </a>
+                <button type="button" class="grid h-[39px] w-[39px] place-items-center rounded-[10px] border border-transparent bg-transparent p-0 hover:border-[color:var(--color-border)] hover:bg-white" aria-label="Закрыть меню" data-mobile-menu-close>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="px-[18px] pb-[26px] pt-[28px] max-lg:hidden">
+                <a href="./index.html" class="flex items-center gap-[11px]">
+                    <span
+                        class="relative flex h-[34px] w-[30px] items-center justify-center text-[color:var(--sidebar-active-text)]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                            class="sidebar-icon h-[19px] w-[19px]">
+                            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                            <path d="M3 6h18"></path>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                        <span class="absolute top-[13px] text-[10px] font-[800] leading-none">S</span>
+                    </span>
+                    <span
+                        class="text-[21px] font-[650] tracking-[-0.045em] text-[color:var(--sidebar-text-strong)]">Shopra</span>
+                </a>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto px-[10px] pb-[14px] max-lg:px-0" data-mobile-menu-nav>
+                <div class="space-y-[4px]">
+                    <a class="sidebar-nav-link" href="./index.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></span>
+                        <span class="leading-none">Главная</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./appearance.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg></span>
+                        <span class="leading-none">Внешний вид</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./products.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg></span>
+                        <span class="leading-none">Товары</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./orders.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg></span>
+                        <span class="leading-none">Заказы</span><span class="sidebar-nav-badge">8</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./users.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
+                        <span class="leading-none">Пользователи</span>
+                    </a>
+                    <a class="sidebar-nav-link active" href="./delivery.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path>
+                                <path d="M15 18H9"></path>
+                                <path
+                                    d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14">
+                                </path>
+                                <circle cx="17" cy="18" r="2"></circle>
+                                <circle cx="7" cy="18" r="2"></circle>
+                            </svg></span>
+                        <span class="leading-none">Доставка</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./payment.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                                <line x1="2" x2="22" y1="10" y2="10"></line>
+                            </svg></span>
+                        <span class="leading-none">Оплата</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./discounts.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z">
+                                </path>
+                                <path d="m15 9-6 6"></path>
+                                <path d="M9 9h.01"></path>
+                                <path d="M15 15h.01"></path>
+                            </svg></span>
+                        <span class="leading-none">Скидки</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./statistics.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 16v5"></path>
+                                <path d="M16 14v7"></path>
+                                <path d="M20 10v11"></path>
+                                <path d="m22 3-8.646 8.646a.5.5 0 0 1-.708 0L9.354 8.354a.5.5 0 0 0-.707 0L2 15"></path>
+                                <path d="M4 18v3"></path>
+                                <path d="M8 14v7"></path>
+                            </svg></span>
+                        <span class="leading-none">Статистика</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./domain.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"></path>
+                                <path
+                                    d="M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17">
+                                </path>
+                                <path d="M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"></path>
+                                <circle cx="12" cy="12" r="10"></circle>
+                            </svg></span>
+                        <span class="leading-none">Домен</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./settings.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z">
+                                </path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg></span>
+                        <span class="leading-none">Настройки</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="relative border-t border-[color:var(--sidebar-border)] px-[18px] pb-[18px] pt-[14px] max-lg:px-0 max-lg:pb-0">
+                <div class="popover max-lg:hidden" data-popover data-popover-placement="top-end">
+                    <button type="button"
+                        class="popover__trigger flex w-full items-center gap-[10px] rounded-[13px] border border-[color:var(--sidebar-border)] bg-[color:var(--sidebar-surface)] p-[10px] text-left shadow-[0_5px_18px_rgba(63,44,29,0.035)]"
+                        data-popover-trigger aria-expanded="false" aria-haspopup="menu">
+                        <span
+                            class="flex h-[34px] w-[34px] flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#c18461] to-[#82441f] text-[13px] font-[750] text-white">AJ</span>
+                        <span class="min-w-0 flex-1">
+                            <span
+                                class="block truncate text-[12px] font-semibold text-[color:var(--sidebar-text-strong)]">Alex
+                                Johnson</span>
+                            <span class="mt-[1px] block text-[12px] text-[color:var(--sidebar-text-muted)]">Owner</span>
+                        </span>
+                    </button>
+
+                    <div class="popover__content w-full" data-popover-content hidden>
+                        <a href="#" class="popover__item" data-popover-close>
+                            <span
+                                class="flex h-5 w-5 items-center justify-center text-[color:var(--sidebar-active-text)]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                    <polyline points="16 17 21 12 16 7"></polyline>
+                                    <line x1="21" x2="9" y1="12" y2="12"></line>
+                                </svg>
+                            </span>
+                            <span>Выйти</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-[10px] rounded-[12px] bg-[#faf7f4] px-[11px] py-[10px] text-[12px] text-[#685e56]">
+                    <div class="flex items-center justify-between">
+                        <span class="inline-flex items-center gap-[6px]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-sparkles" aria-hidden="true">
+                                <path
+                                    d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z">
+                                </path>
+                                <path d="M20 3v4"></path>
+                                <path d="M22 5h-4"></path>
+                                <path d="M4 17v2"></path>
+                                <path d="M5 18H3"></path>
+                            </svg>
+                            Магазин готов
+                        </span>
+                        <strong class="text-[12px] text-[#8c3510]">50%</strong>
+                    </div>
+                    <div class="mt-2 h-[5px] overflow-hidden rounded-full bg-[#eadfd7]" role="progressbar"
+                        aria-label="Готовность магазина" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+                        <span class="block h-full w-1/2 rounded-[inherit] bg-gradient-to-r from-[#bb4e18] to-[#e28950]"></span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <header
+            class="sticky top-0 z-40 h-[var(--header-height)] bg-[var(--color-page-bg)] max-lg:hidden">
+            <div
+                class="page-container flex h-full items-center justify-between border-b border-[color:var(--color-header-border)]">
+                <div class="flex items-center gap-4">
+                    <label
+                        class="hidden items-center gap-2 rounded-2xl border border-[color:var(--color-border)] bg-[color:var(--color-surface-muted)] px-3 py-2 text-sm text-[color:var(--color-secondary)] sm:flex">
+                        <svg class="h-4 w-4 text-[color:var(--color-secondary)]" width="16.4" height="16.4"
+                            viewBox="0 0 20 20" aria-hidden="true">
+                            <circle fill="none" stroke="#000" stroke-width="1.1" cx="9" cy="9" r="7"></circle>
+                            <path fill="none" stroke="#000" stroke-width="1.1" d="M14,14 L18,18 L14,14 Z"></path>
+                        </svg>
+                        <input
+                            class="w-44 border-0 bg-transparent outline-none text-sm text-[color:var(--color-secondary)]"
+                            placeholder="Поиск по панели" />
+                    </label>
+                </div>
+                <div class="flex items-center gap-[9px]">
+                    <div class="relative" data-notifications>
+                        <button type="button"
+                            class="relative grid h-[39px] w-[39px] cursor-pointer place-items-center rounded-[10px] border border-transparent bg-white p-0 transition-colors duration-150 hover:border-[color:var(--color-border)]"
+                            aria-label="Уведомления" aria-expanded="false" aria-controls="dashboard-notifications"
+                            data-notifications-trigger data-notifications-placement="desktop">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="lucide lucide-bell">
+                                <path d="M10.268 21a2 2 0 0 0 3.464 0"></path>
+                                <path
+                                    d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326">
+                                </path>
+                            </svg>
+                            <i class="absolute right-2 top-2 h-[6px] w-[6px] rounded-full border-[1.5px] border-[color:var(--color-page-bg)] bg-[color:var(--color-accent)]"></i>
+                        </button>
+
+                        <div id="dashboard-notifications"
+                            class="absolute right-[-42px] top-12 z-50 w-80 overflow-hidden rounded-[15px] border border-[color:var(--color-border)] bg-white shadow-[0_18px_55px_rgba(58,38,24,0.14)] max-lg:fixed max-lg:right-3 max-lg:top-[68px] max-lg:z-[110] max-lg:w-[calc(100vw-24px)] !hidden"
+                            data-notifications-dropdown hidden>
+                            <div class="flex items-center justify-between border-b border-[color:var(--color-border)] px-4 pb-[11px] pt-[15px]">
+                                <strong class="text-[13px]">Уведомления</strong>
+                                <span class="text-[12px] font-bold text-[color:var(--color-accent)]">2 новых</span>
+                            </div>
+                            <button type="button" class="flex w-full cursor-pointer items-center gap-[10px] border-0 border-b border-[#f1ede9] bg-white px-4 py-3 text-left hover:bg-[#fcfaf8]">
+                                <span class="grid h-[34px] w-[34px] flex-none place-items-center rounded-[9px] bg-[#f9eee7] text-[color:var(--color-accent)]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                                </span>
+                                <span class="flex flex-col">
+                                    <strong class="text-[12px]">Новый заказ #1024</strong>
+                                    <small class="text-[12px] text-[#77716b]">Анна Смирнова · 3 520 ₴</small>
+                                </span>
+                            </button>
+                            <button type="button" class="flex w-full cursor-pointer items-center gap-[10px] border-0 border-b border-[#f1ede9] bg-white px-4 py-3 text-left hover:bg-[#fcfaf8]">
+                                <span class="grid h-[34px] w-[34px] flex-none place-items-center rounded-[9px] bg-[#eef8ee] text-[#2e8b45]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-box"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
+                                </span>
+                                <span class="flex flex-col">
+                                    <strong class="text-[12px]">Заканчивается товар</strong>
+                                    <small class="text-[12px] text-[#77716b]">Кожаная сумка Forest · 2 шт.</small>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button"
+                        class="grid h-[39px] w-[39px] cursor-pointer place-items-center rounded-[10px] border border-transparent bg-white p-0 transition-colors duration-150 hover:border-[color:var(--color-border)]"
+                        aria-label="Помощь">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-circle-help">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <path d="M12 17h.01"></path>
+                        </svg>
+                    </button>
+                </div>
+
+
+            </div>
+        </header>
+
+        <header class="sticky top-0 z-40 hidden h-[62px] items-center justify-between border-b border-[color:var(--color-border)] bg-white px-[18px] max-lg:flex">
+            <button type="button" class="grid h-[39px] w-[39px] place-items-center rounded-[10px] border border-transparent bg-white p-0 hover:border-[color:var(--color-border)]" aria-label="Открыть меню" aria-expanded="false" data-mobile-menu-trigger>
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>
+            </button>
+            <a href="./index.html" class="flex items-center gap-[11px]" aria-label="Shopra">
+                <span class="relative flex h-[34px] w-[30px] items-center justify-center text-[color:var(--sidebar-active-text)]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-[19px] w-[19px]"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                    <span class="absolute top-[13px] text-[10px] font-[800] leading-none">S</span>
+                </span>
+                <span class="text-[21px] font-[750] tracking-[-0.045em] text-[color:var(--sidebar-text-strong)]">Shopra</span>
+            </a>
+            <button type="button" class="relative grid h-[39px] w-[39px] place-items-center rounded-[10px] border border-transparent bg-white p-0 hover:border-[color:var(--color-border)]" aria-label="Уведомления" aria-expanded="false" aria-controls="dashboard-notifications" data-notifications-trigger data-notifications-placement="mobile">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg>
+                <i class="absolute right-2 top-2 h-[6px] w-[6px] rounded-full border-[1.5px] border-[color:var(--color-page-bg)] bg-[color:var(--color-accent)]"></i>
+            </button>
+        </header>
+
+    <main class="min-w-0 flex-1">
+        <div class="page-container pt-[30px] max-sm:!mx-[13px] max-sm:pt-[18px] sm:max-lg:!mx-5 lg:pt-6">
+            <section class="mb-5 flex items-center justify-between gap-4">
+                <div class="flex min-w-0 items-center gap-3">
+        
+                    <div class="min-w-0">
+                        <p class="text-[11px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-accent)] max-lg:hidden">Настройки магазина</p>
+                        <h1 class="m-0 truncate text-[32px] font-[760] tracking-[-0.05em] max-lg:text-[19px]">Доставка</h1>
+                        <p class="mt-[5px] text-[13px] text-[color:var(--color-secondary)]">Включите готовую службу без ключей — покупатель укажет город, отделение или адрес, а вы увидите всё в заказе.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="flex min-w-[225px] items-center gap-[10px] rounded-[12px] border border-[#d9eadb] bg-[#f4fbf5] p-3 max-sm:min-w-0">
+                        <span class="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-[10px] bg-white text-[#438254]"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 16 2 2 4-4"></path><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"></path><path d="m7.5 4.27 9 5.15M3.29 7 12 12l8.71-5M12 22V12"></path></svg></span>
+                        <p class="m-0 flex flex-col max-sm:hidden"><small class="text-[11px] text-[#869087]">Готово принимать адреса</small><strong class="mt-0.5 text-[12px] text-[#425046]">2 способа включены</strong></p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mt-[11px] rounded-[16px] border border-[color:var(--color-border)] bg-white p-[17px] shadow-[var(--shadow)]">
+                <header class="mb-[13px] flex items-center justify-between gap-[18px] max-md:flex-col max-md:items-stretch"><div><p class="m-0 text-[11px] font-[760] uppercase tracking-[.08em] text-[color:var(--color-accent)]">Готовые подключения</p><h2 class="mb-0.5 mt-[3px] text-[17px] font-bold">Службы доставки</h2><p class="m-0 text-[12px] text-[#918880]">Все необходимые способы уже собраны — остаётся включить нужные.</p></div><button type="button" class="inline-flex min-h-[38px] items-center justify-center gap-[6px] rounded-[9px] border border-[#d8d0ca] bg-white px-[11px] text-[12px] font-bold text-[#655d57]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5v14"></path></svg>Добавить свою доставку</button></header>
+                <div class="grid grid-cols-[minmax(0,1.1fr)_minmax(310px,.9fr)] gap-[11px] max-[980px]:grid-cols-1">
+                    <div class="flex flex-col gap-2">
+                        <article class="overflow-hidden rounded-[13px] border border-[#d9a98d] bg-white shadow-[0_0_0_2px_rgba(184,79,24,.045)]"><button type="button" class="grid min-h-[86px] w-full grid-cols-[46px_minmax(0,1fr)_20px] items-center gap-[11px] border-0 bg-transparent p-3 text-left"><span class="grid h-[46px] w-[46px] place-items-center rounded-[12px] bg-[#e53935] text-[12px] font-extrabold text-white">НП</span><p class="m-0 flex min-w-0 flex-col"><strong class="text-[13px]">Нова пошта</strong><small class="mt-1 text-[12px] leading-[1.45] text-[#8f8780]">Отделения, почтоматы и курьерская доставка по Украине и за границу.</small></p><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"></path></svg></button><div class="flex min-h-[42px] items-center gap-[6px] border-t border-[#f0ece8] bg-[#fcfaf8] px-[11px] py-[7px]"><span class="rounded-[7px] bg-white px-[7px] py-[5px] text-[11px]">По Украине</span><span class="rounded-[7px] bg-white px-[7px] py-[5px] text-[11px]">За границу</span><em class="ml-auto text-[11px] not-italic font-bold text-[#438254]">✓ Ручной режим</em><label class="switch"><input class="switch__input" type="checkbox" checked aria-label="Выключить Нова пошта"><span class="switch__track"></span></label></div></article>
+                        <article class="overflow-hidden rounded-[13px] border border-[color:var(--color-border)] bg-white"><button type="button" class="grid min-h-[86px] w-full grid-cols-[46px_minmax(0,1fr)_20px] items-center gap-[11px] border-0 bg-transparent p-3 text-left"><span class="grid h-[46px] w-[46px] place-items-center rounded-[12px] bg-[#f3c72c] text-[12px] font-extrabold text-[#225090]">УП</span><p class="m-0 flex min-w-0 flex-col"><strong class="text-[13px]">Укрпошта</strong><small class="mt-1 text-[12px] leading-[1.45] text-[#8f8780]">Доставка по Украине и международные отправления из одного подключения.</small></p><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"></path></svg></button><div class="flex min-h-[42px] items-center gap-[6px] border-t border-[#f0ece8] bg-[#fcfaf8] px-[11px] py-[7px]"><span class="rounded-[7px] bg-white px-[7px] py-[5px] text-[11px]">По Украине</span><span class="rounded-[7px] bg-white px-[7px] py-[5px] text-[11px]">За границу</span><em class="ml-auto text-[11px] not-italic font-bold text-[#948b84]">Ручной режим</em><label class="switch"><input class="switch__input" type="checkbox" checked aria-label="Выключить Укрпошта"><span class="switch__track"></span></label></div></article>
+                        <article class="grid min-h-[67px] grid-cols-[37px_minmax(0,1fr)_auto] items-center gap-[9px] rounded-[12px] border border-dashed border-[#dcd4ce] bg-[#fcfbfa] p-[10px_12px]"><span class="grid h-[37px] w-[37px] place-items-center rounded-[9px] bg-[#f2eeeb] text-[#7a7068]"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 7h20M5 7V5h14v2M4 7v13h16V7M8 12h.01M12 12h.01M16 12h.01"></path></svg></span><p class="m-0 flex flex-col"><strong class="text-[12px]">Самовывоз</strong><small class="mt-0.5 text-[11px] text-[#948b84]">Покупатель забирает заказ по вашему адресу</small></p><label class="switch"><input class="switch__input" type="checkbox"><span class="switch__track"></span></label></article>
+                    </div>
+
+                    <aside class="overflow-hidden rounded-[13px] border border-[color:var(--color-border)] bg-[#faf8f6]">
+                        <header class="grid min-h-[70px] grid-cols-[42px_minmax(0,1fr)_auto] items-center gap-[10px] border-b border-[#eae5e1] bg-white p-[11px_12px]"><span class="grid h-[42px] w-[42px] place-items-center rounded-[12px] bg-[#e53935] text-[12px] font-extrabold text-white">НП</span><div><p class="m-0 text-[10px] font-bold uppercase tracking-[.06em] text-[color:var(--color-accent)]">Способ работы</p><h3 class="mb-0 mt-0.5 text-[14px] font-bold">Нова пошта</h3></div><em class="rounded-full bg-[#eaf6ec] px-[7px] py-[5px] text-[11px] not-italic font-bold text-[#438254]">Активна</em></header>
+                        <div class="grid grid-cols-2 gap-[7px] border-b border-[#e8e2dd] bg-white p-[11px_12px] max-sm:grid-cols-1"><button type="button" class="relative grid min-h-[74px] grid-cols-[31px_minmax(0,1fr)] items-center gap-2 rounded-[10px] border border-[#d59068] bg-[#fff8f3] p-[9px] text-left"><span class="grid h-[31px] w-[31px] place-items-center rounded-[8px] bg-[#f9eee7] text-[color:var(--color-accent)]"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span><p class="m-0"><strong class="block text-[12px]">Просто, без API</strong><small class="mt-[3px] block text-[11px] leading-[1.35] text-[#918880]">Покупатель вводит адрес — вы оформляете отправку вручную</small></p><em class="absolute right-[7px] top-[6px] rounded-full bg-[#eaf6ec] px-[5px] py-[3px] text-[9px] not-italic font-extrabold uppercase text-[#438254]">Рекомендуем</em></button><button type="button" class="grid min-h-[74px] grid-cols-[31px_minmax(0,1fr)] items-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-white p-[9px] text-left"><span class="grid h-[31px] w-[31px] place-items-center rounded-[8px] bg-[#f2eeeb] text-[#837970]"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"></path><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle></svg></span><p class="m-0"><strong class="block text-[12px]">Автоматически</strong><small class="mt-[3px] block text-[11px] leading-[1.35] text-[#918880]">Тарифы, накладные и статусы через кабинет службы</small></p></button></div>
+                        <div class="border-b border-[#e8e2dd] bg-white p-3">
+                            <div class="flex items-center gap-2 rounded-[9px] border border-[#d9eadb] bg-[#f4fbf5] p-[9px]"><span class="grid h-[30px] w-[30px] place-items-center rounded-[8px] bg-white text-[#438254]"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"></path></svg></span><p class="m-0"><strong class="block text-[12px] text-[#425046]">Ключи и договор не нужны</strong><small class="text-[11px] text-[#778279]">Этого режима достаточно, чтобы понимать, куда отправлять заказ.</small></p></div>
+                            <div class="mt-[9px] grid grid-cols-[1fr_1.05fr] gap-2 max-sm:grid-cols-1">
+                                <div class="rounded-[9px] border border-[color:var(--color-border)] bg-[#fcfaf8] p-[10px]"><p class="m-0 mb-2 text-[10px] font-[760] uppercase tracking-[.07em] text-[color:var(--color-accent)]">Что заполнит покупатель</p><strong class="block text-[11px] text-[#524a44]">По Украине</strong><ul class="mt-[5px] grid gap-1 pl-[14px] text-[11px] leading-[1.35] text-[#857b73]"><li>Получатель и телефон</li><li>Город и отделение или почтомат</li><li>Адрес — если выбрана доставка курьером</li></ul><strong class="mt-[7px] block text-[11px] text-[#524a44]">За границу</strong><ul class="mt-[5px] grid gap-1 pl-[14px] text-[11px] leading-[1.35] text-[#857b73]"><li>Получатель латиницей и телефон</li><li>Страна, индекс, город</li><li>Улица, дом и квартира</li></ul></div>
+                                <div class="rounded-[9px] border border-[color:var(--color-border)] bg-[#fcfaf8] p-[10px]"><p class="m-0 mb-2 text-[10px] font-[760] uppercase tracking-[.07em] text-[color:var(--color-accent)]">Так это выглядит в заказе</p><header class="flex items-center gap-[7px] border-b border-[#eee9e5] pb-2"><span class="grid h-[30px] w-[30px] place-items-center rounded-[8px] bg-[#e53935] text-[10px] font-extrabold text-white">НП</span><p class="m-0 flex flex-col"><strong class="text-[11px]">Нова пошта · Отделение</strong><small class="mt-0.5 text-[11px] text-[#928981]">Доставка оплачивается получателем</small></p></header><dl class="mt-[5px]"><div class="grid grid-cols-[55px_minmax(0,1fr)] gap-[6px] border-b border-[#f0ece8] py-[5px] text-[11px]"><dt class="text-[#9a918a]">Куда</dt><dd class="m-0 text-right font-[690] text-[#514943]">Одесса, отделение № 24</dd></div><div class="grid grid-cols-[55px_minmax(0,1fr)] gap-[6px] border-b border-[#f0ece8] py-[5px] text-[11px]"><dt class="text-[#9a918a]">Получатель</dt><dd class="m-0 text-right font-[690] text-[#514943]">Анна Смирнова</dd></div><div class="grid grid-cols-[55px_minmax(0,1fr)] gap-[6px] py-[5px] text-[11px]"><dt class="text-[#9a918a]">Телефон</dt><dd class="m-0 text-right font-[690] text-[#514943]">+380 67 123 45 67</dd></div></dl></div>
+                            </div>
+                            <p class="mb-0 mt-[9px] flex items-start gap-[6px] rounded-[8px] bg-[#fff5ee] p-2 text-[11px] leading-[1.45] text-[#776c64]"><svg class="shrink-0 text-[color:var(--color-accent)]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg><span>Shopra сохраняет и показывает данные доставки в заказе. Накладную вы создаёте в кабинете Нова пошта, а готовый трек‑номер добавляете в заказ вручную.</span></p>
+                        </div>
+                        <div class="grid grid-cols-[38px_minmax(0,1fr)_auto] items-center gap-[9px] border-b border-[#eae5e1] p-[13px_12px]"><span class="grid h-[38px] w-[38px] place-items-center rounded-[10px] bg-[#fff0e7] text-[color:var(--color-accent)]"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 5-5.54 10.19-7.4 11.8a1 1 0 0 1-1.2 0C9.54 20.19 4 15 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg></span><p class="m-0"><strong class="block text-[12px]">Доставка по Украине</strong><small class="mt-[3px] block text-[11px] text-[#928981]">Покупатель укажет город и отделение вручную</small></p><label class="switch"><input class="switch__input" type="checkbox" checked><span class="switch__track"></span></label><div class="col-start-2 col-end-4 flex flex-wrap gap-[5px]"><span class="rounded-[7px] bg-white px-[7px] py-[5px] text-[11px]">✓ Отделение</span><span class="rounded-[7px] bg-white px-[7px] py-[5px] text-[11px]">✓ Почтомат</span><span class="rounded-[7px] bg-white px-[7px] py-[5px] text-[11px]">✓ Курьер</span></div></div>
+                        <div class="grid grid-cols-[38px_minmax(0,1fr)_auto] items-center gap-[9px] border-b border-[#eae5e1] p-[13px_12px]"><span class="grid h-[38px] w-[38px] place-items-center rounded-[10px] bg-[#edf3fa] text-[#4873a2]"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20"></path></svg></span><p class="m-0"><strong class="block text-[12px]">Международная доставка</strong><small class="mt-[3px] block text-[11px] text-[#928981]">Покупатель заполнит полный почтовый адрес</small></p><label class="switch"><input class="switch__input" type="checkbox"><span class="switch__track"></span></label><div class="col-start-2 col-end-4 flex gap-[5px]"><span class="rounded-[7px] bg-white px-[7px] py-[5px] text-[11px]">Отделение</span><span class="rounded-[7px] bg-white px-[7px] py-[5px] text-[11px]">Курьер</span></div></div>
+                    </aside>
+                </div>
+            </section>
+
+            <section class="mt-[11px] grid grid-cols-2 gap-[11px] max-lg:grid-cols-1">
+                <article class="rounded-[14px] border border-[color:var(--color-border)] bg-white p-[14px]">
+                    <header class="mb-3 grid grid-cols-[38px_minmax(0,1fr)_auto] items-center gap-[9px]"><span class="grid h-[38px] w-[38px] place-items-center rounded-[10px] bg-[#f9eee7] text-[color:var(--color-accent)]"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"></path><path d="M6 18h12M6 14h12"></path><rect width="12" height="12" x="6" y="10"></rect></svg></span><div><p class="m-0 text-[11px] font-bold uppercase tracking-[.06em] text-[color:var(--color-accent)]">Отправитель · необязательно</p><h2 class="mb-0 mt-0.5 text-[16px] font-bold">Откуда отправляем</h2></div><button type="button" class="border-0 bg-transparent p-0 text-[11px] font-bold text-[color:var(--color-accent)]">Сохранить</button></header>
+                    <div class="grid grid-cols-2 gap-2 max-sm:grid-cols-1"><label class="flex flex-col gap-1 text-[11px] font-bold text-[#70665f]"><span class="inline-flex items-center gap-1 whitespace-nowrap">Тип отправителя <b class="text-red-500">*</b></span><select class="h-[37px] rounded-[8px] border border-[#d8d0ca] bg-white px-[9px] font-normal"><option>Физическое лицо</option><option>ФОП</option><option>Компания</option></select></label><label class="flex flex-col gap-1 text-[11px] font-bold text-[#70665f]"><span class="inline-flex items-center gap-1 whitespace-nowrap">Имя отправителя <b class="text-red-500">*</b></span><input value="Вадим Панасенко" class="h-[37px] rounded-[8px] border border-[#d8d0ca] px-[9px] font-normal"></label><label class="flex flex-col gap-1 text-[11px] font-bold text-[#70665f]"><span class="inline-flex items-center gap-1 whitespace-nowrap">Телефон <b class="text-red-500">*</b></span><input value="+380" class="h-[37px] rounded-[8px] border border-[#d8d0ca] px-[9px] font-normal"></label><label class="flex flex-col gap-1 text-[11px] font-bold text-[#70665f]"><span class="inline-flex items-center gap-1 whitespace-nowrap">Город отправки <b class="text-red-500">*</b></span><input value="Одесса" class="h-[37px] rounded-[8px] border border-[#d8d0ca] px-[9px] font-normal"></label><label class="col-span-full flex flex-col gap-1 text-[11px] font-bold text-[#70665f] max-sm:col-span-1"><span class="inline-flex items-center gap-1 whitespace-nowrap">Отделение или адрес забора <b class="text-red-500">*</b></span><input class="h-[37px] rounded-[8px] border border-[#d8d0ca] px-[9px] font-normal" placeholder="Например, отделение № 24"></label></div>
+                    <p class="mb-0 mt-[9px] flex items-start gap-[6px] rounded-[8px] bg-[#fff5ee] p-2 text-[11px] leading-[1.4] text-[color:var(--color-accent)]"><svg class="shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg><span>В простом режиме можно не заполнять. Эти данные нужны для автоматического создания накладной.</span></p>
+                </article>
+                <article class="rounded-[14px] border border-[color:var(--color-border)] bg-white p-[14px]"><header class="mb-3 flex items-center gap-[9px]"><span class="grid h-[38px] w-[38px] place-items-center rounded-[10px] bg-[#f9eee7] text-[color:var(--color-accent)]"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8M12 18V6"></path></svg></span><div><p class="m-0 text-[11px] font-bold uppercase tracking-[.06em] text-[color:var(--color-accent)]">Стоимость</p><h2 class="mb-0 mt-0.5 text-[16px] font-bold">Что увидит покупатель</h2></div></header><label class="flex flex-col gap-1 text-[11px] font-bold text-[#70665f]">Расчёт доставки<select class="h-[39px] rounded-[9px] border border-[#d8d0ca] bg-white px-[10px] text-[12px] font-normal"><option>Фиксированная стоимость</option><option>Всегда бесплатно</option><option disabled>По тарифам службы — нужен API</option></select></label><div class="mt-3 grid grid-cols-2 gap-2"><label class="flex flex-col gap-1 text-[11px] font-bold">По Украине<div class="flex h-[37px] rounded-[8px] border border-[#d8d0ca]"><input value="100" class="min-w-0 flex-1 border-0 bg-transparent px-2 outline-none"><b class="grid w-9 place-items-center border-l border-[#e7e1dc] text-[#948b84]">₴</b></div></label><label class="flex flex-col gap-1 text-[11px] font-bold">За границу<div class="flex h-[37px] rounded-[8px] border border-[#d8d0ca]"><input value="500" class="min-w-0 flex-1 border-0 bg-transparent px-2 outline-none"><b class="grid w-9 place-items-center border-l border-[#e7e1dc] text-[#948b84]">₴</b></div></label></div><div class="mt-3 grid grid-cols-[38px_minmax(0,1fr)_140px] items-center gap-2 rounded-[10px] border border-[#e7d2c4] bg-[#fff8f3] p-[10px] max-sm:grid-cols-[38px_1fr]"><label class="switch"><input class="switch__input" type="checkbox" checked aria-label="Бесплатная доставка от суммы"><span class="switch__track"></span></label><p class="m-0"><strong class="block text-[12px]">Бесплатно от суммы заказа</strong><small class="text-[11px] text-[#8f867f]">Для доставки по Украине</small></p><label class="flex h-[37px] rounded-[8px] border border-[#d8d0ca] bg-white max-sm:col-start-2"><input value="2500" aria-label="Сумма бесплатной доставки" class="min-w-0 flex-1 border-0 bg-transparent px-2 outline-none"><b class="grid w-9 place-items-center border-l border-[#e7e1dc]">₴</b></label></div></article>
+                <article class="col-span-full rounded-[14px] border border-[color:var(--color-border)] bg-white p-[14px]">
+                    <div class="grid grid-cols-[minmax(210px,.82fr)_minmax(0,1fr)_minmax(0,1fr)] items-stretch gap-2 max-md:grid-cols-1">
+                        <header class="flex items-center gap-3 pr-3">
+                            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-[9px] bg-[#fff3eb] text-[color:var(--color-accent)]">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
+                            </span>
+                            <div><p class="m-0 text-[11px] font-bold uppercase tracking-[.06em] text-[color:var(--color-accent)]">Автоматизация</p><h2 class="mb-0 mt-0.5 text-[16px] font-bold">После получения заказа</h2></div>
+                        </header>
+                        <div class="grid grid-cols-[38px_minmax(0,1fr)_18px] items-center gap-3 rounded-[10px] border border-[#e5dfda] bg-[#faf8f6] p-3">
+                            <label class="switch"><input class="switch__input" type="checkbox" disabled><span class="switch__track"></span></label>
+                            <p class="m-0"><strong class="block text-[12px]">Создавать накладную</strong><small class="text-[11px] text-[#928981]">Доступно после подключения API</small></p>
+                            <svg class="text-[#8b827b]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"></path><rect x="6" y="14" width="12" height="8" rx="1"></rect></svg>
+                        </div>
+                        <div class="grid grid-cols-[38px_minmax(0,1fr)_18px] items-center gap-3 rounded-[10px] border border-[#e5dfda] bg-[#faf8f6] p-3">
+                            <label class="switch"><input class="switch__input" type="checkbox" checked><span class="switch__track"></span></label>
+                            <p class="m-0"><strong class="block text-[12px]">Отправлять добавленный трек‑номер</strong><small class="text-[11px] text-[#928981]">Покупатель получит его после отправки</small></p>
+                            <svg class="text-[#8b827b]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg>
+                        </div>
+                    </div>
+                </article>
+                <footer class="col-span-full flex items-start gap-[10px] rounded-[12px] border border-[#e7d2c4] bg-[#fff8f3] p-[12px_14px]">
+                    <svg class="mt-px shrink-0 text-[color:var(--color-accent)]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path><path d="M15 18H9"></path><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path><circle cx="17" cy="18" r="2"></circle><circle cx="7" cy="18" r="2"></circle></svg>
+                    <p class="m-0 text-[11px] leading-[1.45] text-[#776c64]"><strong class="block text-[#5c534c]">В заказе видны все данные для отправки</strong>Откройте заказ, перенесите адрес в кабинет службы и добавьте полученный трек‑номер.</p>
+                </footer>
+            </section>
+        </div>
+    </main>
+</div>
+<script src="./assets/js/popover.js" defer></script>
+<script src="./assets/js/notifications.js" defer></script>
+<script src="./assets/js/mobile-menu.js" defer></script>
+</body>
+</html>

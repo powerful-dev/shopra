@@ -1,0 +1,35 @@
+[data-page-editor] {
+  width: 100%;
+  min-height: 420px;
+}
+
+#footer-page-modal .tox-tinymce {
+  width: 100%;
+  border-color: var(--color-border);
+  border-radius: 9px;
+  font-family: inherit;
+}
+
+#footer-page-modal .tox-tinymce:focus-within {
+  border-color: #c78661;
+  box-shadow: 0 0 0 3px rgba(184, 79, 24, 0.08);
+}
+
+#footer-page-modal .tox .tox-editor-header {
+  box-shadow: none;
+}
+
+#footer-page-modal .tox .tox-toolbar-overlord,
+#footer-page-modal .tox .tox-toolbar__primary {
+  background-color: #faf9f7;
+}
+
+.tox-tinymce-aux {
+  z-index: 700 !important;
+}
+
+@media (max-width: 640px) {
+  #footer-page-modal .tox-tinymce {
+    max-width: 100%;
+  }
+}

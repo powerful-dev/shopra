@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shopra UI Kit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./assets/js/tailwind-config.js"></script>
+    <link rel="stylesheet" href="./assets/styles/tokens.css" />
+    <link rel="stylesheet" href="./assets/styles/sidebar.css">
+    <link rel="stylesheet" href="./assets/styles/forms.css">
+    <link rel="stylesheet" href="./assets/styles/buttons.css">
+    <link rel="stylesheet" href="./assets/styles/badges.css">
+    <link rel="stylesheet" href="./assets/styles/header-tokens.css" />
+    <link rel="stylesheet" href="./assets/styles/popover.css" />
+    <link rel="stylesheet" href="./assets/styles/data-list.css" />
+    <link rel="stylesheet" href="./assets/styles/chart.css" />
+    <link rel="stylesheet" href="./assets/styles/setup-card.css" />
+</head>
+
+<body class="min-h-screen overflow-x-hidden bg-[var(--color-page-bg)] text-[var(--color-primary)]">
+    <div class="min-h-screen pl-[var(--sidebar-width)] max-lg:pl-0">
+        <div class="fixed inset-0 z-[90] bg-[rgba(35,27,21,0.34)] backdrop-blur-[5px] !hidden lg:!hidden"
+            data-mobile-overlay hidden></div>
+
+        <aside class="sidebar-shell flex h-screen flex-col overflow-hidden max-lg:!z-[100] max-lg:!-translate-x-full max-lg:!w-[min(310px,88vw)] max-lg:!min-w-0 max-lg:!border-r-0 max-lg:!bg-white max-lg:!p-[18px] max-lg:!pt-[22px] max-lg:!backdrop-blur-none max-lg:transition-transform max-lg:duration-200 max-lg:ease-out max-lg:will-change-transform"
+            data-mobile-drawer>
+            <div class="mb-[22px] hidden items-center justify-between px-2 max-lg:flex">
+                <a href="./index.html" class="flex items-center gap-[11px]">
+                    <span class="relative flex h-[34px] w-[30px] items-center justify-center text-[color:var(--sidebar-active-text)]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-[19px] w-[19px]"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                        <span class="absolute top-[13px] text-[10px] font-[800] leading-none">S</span>
+                    </span>
+                    <span class="text-[21px] font-[750] tracking-[-0.045em] text-[color:var(--sidebar-text-strong)]">Shopra</span>
+                </a>
+                <button type="button" class="grid h-[39px] w-[39px] place-items-center rounded-[10px] border border-transparent bg-transparent p-0 hover:border-[color:var(--color-border)] hover:bg-white" aria-label="Закрыть меню" data-mobile-menu-close>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="px-[18px] pb-[26px] pt-[28px] max-lg:hidden">
+                <a href="./index.html" class="flex items-center gap-[11px]">
+                    <span
+                        class="relative flex h-[34px] w-[30px] items-center justify-center text-[color:var(--sidebar-active-text)]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                            class="sidebar-icon h-[19px] w-[19px]">
+                            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                            <path d="M3 6h18"></path>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                        <span class="absolute top-[13px] text-[10px] font-[800] leading-none">S</span>
+                    </span>
+                    <span
+                        class="text-[21px] font-[650] tracking-[-0.045em] text-[color:var(--sidebar-text-strong)]">Shopra</span>
+                </a>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto px-[10px] pb-[14px] max-lg:px-0" data-mobile-menu-nav>
+                <div class="space-y-[4px]">
+                    <a class="sidebar-nav-link active" href="./index.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></span>
+                        <span class="leading-none">Главная</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./appearance.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg></span>
+                        <span class="leading-none">Внешний вид</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./products.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg></span>
+                        <span class="leading-none">Товары</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./orders.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg></span>
+                        <span class="leading-none">Заказы</span><span class="sidebar-nav-badge">8</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./users.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
+                        <span class="leading-none">Пользователи</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./delivery.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path>
+                                <path d="M15 18H9"></path>
+                                <path
+                                    d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14">
+                                </path>
+                                <circle cx="17" cy="18" r="2"></circle>
+                                <circle cx="7" cy="18" r="2"></circle>
+                            </svg></span>
+                        <span class="leading-none">Доставка</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./payment.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                                <line x1="2" x2="22" y1="10" y2="10"></line>
+                            </svg></span>
+                        <span class="leading-none">Оплата</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./discounts.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z">
+                                </path>
+                                <path d="m15 9-6 6"></path>
+                                <path d="M9 9h.01"></path>
+                                <path d="M15 15h.01"></path>
+                            </svg></span>
+                        <span class="leading-none">Скидки</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./statistics.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 16v5"></path>
+                                <path d="M16 14v7"></path>
+                                <path d="M20 10v11"></path>
+                                <path d="m22 3-8.646 8.646a.5.5 0 0 1-.708 0L9.354 8.354a.5.5 0 0 0-.707 0L2 15"></path>
+                                <path d="M4 18v3"></path>
+                                <path d="M8 14v7"></path>
+                            </svg></span>
+                        <span class="leading-none">Статистика</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./domain.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"></path>
+                                <path
+                                    d="M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17">
+                                </path>
+                                <path d="M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"></path>
+                                <circle cx="12" cy="12" r="10"></circle>
+                            </svg></span>
+                        <span class="leading-none">Домен</span>
+                    </a>
+                    <a class="sidebar-nav-link" href="./settings.html">
+                        <span class="sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z">
+                                </path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg></span>
+                        <span class="leading-none">Настройки</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="relative border-t border-[color:var(--sidebar-border)] px-[18px] pb-[18px] pt-[14px] max-lg:px-0 max-lg:pb-0">
+                <div class="popover max-lg:hidden" data-popover data-popover-placement="top-end">
+                    <button type="button"
+                        class="popover__trigger flex w-full items-center gap-[10px] rounded-[13px] border border-[color:var(--sidebar-border)] bg-[color:var(--sidebar-surface)] p-[10px] text-left shadow-[0_5px_18px_rgba(63,44,29,0.035)]"
+                        data-popover-trigger aria-expanded="false" aria-haspopup="menu">
+                        <span
+                            class="flex h-[34px] w-[34px] flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#c18461] to-[#82441f] text-[13px] font-[750] text-white">AJ</span>
+                        <span class="min-w-0 flex-1">
+                            <span
+                                class="block truncate text-[12px] font-semibold text-[color:var(--sidebar-text-strong)]">Alex
+                                Johnson</span>
+                            <span class="mt-[1px] block text-[12px] text-[color:var(--sidebar-text-muted)]">Owner</span>
+                        </span>
+                    </button>
+
+                    <div class="popover__content w-full" data-popover-content hidden>
+                        <a href="#" class="popover__item" data-popover-close>
+                            <span
+                                class="flex h-5 w-5 items-center justify-center text-[color:var(--sidebar-active-text)]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                    <polyline points="16 17 21 12 16 7"></polyline>
+                                    <line x1="21" x2="9" y1="12" y2="12"></line>
+                                </svg>
+                            </span>
+                            <span>Выйти</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-[10px] rounded-[12px] bg-[#faf7f4] px-[11px] py-[10px] text-[12px] text-[#685e56]">
+                    <div class="flex items-center justify-between">
+                        <span class="inline-flex items-center gap-[6px]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-sparkles" aria-hidden="true">
+                                <path
+                                    d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z">
+                                </path>
+                                <path d="M20 3v4"></path>
+                                <path d="M22 5h-4"></path>
+                                <path d="M4 17v2"></path>
+                                <path d="M5 18H3"></path>
+                            </svg>
+                            Магазин готов
+                        </span>
+                        <strong class="text-[12px] text-[#8c3510]">50%</strong>
+                    </div>
+                    <div class="mt-2 h-[5px] overflow-hidden rounded-full bg-[#eadfd7]" role="progressbar"
+                        aria-label="Готовность магазина" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+                        <span class="block h-full w-1/2 rounded-[inherit] bg-gradient-to-r from-[#bb4e18] to-[#e28950]"></span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <header
+            class="sticky top-0 z-40 h-[var(--header-height)] bg-[var(--color-page-bg)] max-lg:hidden">
+            <div
+                class="page-container flex h-full items-center justify-between border-b border-[color:var(--color-header-border)]">
+                <div class="flex items-center gap-4">
+                    <label
+                        class="hidden items-center gap-2 rounded-2xl border border-[color:var(--color-border)] bg-[color:var(--color-surface-muted)] px-3 py-2 text-sm text-[color:var(--color-secondary)] sm:flex">
+                        <svg class="h-4 w-4 text-[color:var(--color-secondary)]" width="16.4" height="16.4"
+                            viewBox="0 0 20 20" aria-hidden="true">
+                            <circle fill="none" stroke="#000" stroke-width="1.1" cx="9" cy="9" r="7"></circle>
+                            <path fill="none" stroke="#000" stroke-width="1.1" d="M14,14 L18,18 L14,14 Z"></path>
+                        </svg>
+                        <input
+                            class="w-44 border-0 bg-transparent outline-none text-sm text-[color:var(--color-secondary)]"
+                            placeholder="Поиск по панели" />
+                    </label>
+                </div>
+                <div class="flex items-center gap-[9px]">
+                    <div class="relative" data-notifications>
+                        <button type="button"
+                            class="relative grid h-[39px] w-[39px] cursor-pointer place-items-center rounded-[10px] border border-transparent bg-white p-0 transition-colors duration-150 hover:border-[color:var(--color-border)]"
+                            aria-label="Уведомления" aria-expanded="false" aria-controls="dashboard-notifications"
+                            data-notifications-trigger data-notifications-placement="desktop">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="lucide lucide-bell">
+                                <path d="M10.268 21a2 2 0 0 0 3.464 0"></path>
+                                <path
+                                    d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326">
+                                </path>
+                            </svg>
+                            <i class="absolute right-2 top-2 h-[6px] w-[6px] rounded-full border-[1.5px] border-[color:var(--color-page-bg)] bg-[color:var(--color-accent)]"></i>
+                        </button>
+
+                        <div id="dashboard-notifications"
+                            class="absolute right-[-42px] top-12 z-50 w-80 overflow-hidden rounded-[15px] border border-[color:var(--color-border)] bg-white shadow-[0_18px_55px_rgba(58,38,24,0.14)] max-lg:fixed max-lg:right-3 max-lg:top-[68px] max-lg:z-[110] max-lg:w-[calc(100vw-24px)] !hidden"
+                            data-notifications-dropdown hidden>
+                            <div class="flex items-center justify-between border-b border-[color:var(--color-border)] px-4 pb-[11px] pt-[15px]">
+                                <strong class="text-[13px]">Уведомления</strong>
+                                <span class="text-[12px] font-bold text-[color:var(--color-accent)]">2 новых</span>
+                            </div>
+                            <button type="button" class="flex w-full cursor-pointer items-center gap-[10px] border-0 border-b border-[#f1ede9] bg-white px-4 py-3 text-left hover:bg-[#fcfaf8]">
+                                <span class="grid h-[34px] w-[34px] flex-none place-items-center rounded-[9px] bg-[#f9eee7] text-[color:var(--color-accent)]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                                </span>
+                                <span class="flex flex-col">
+                                    <strong class="text-[12px]">Новый заказ #1024</strong>
+                                    <small class="text-[12px] text-[#77716b]">Анна Смирнова · 3 520 ₴</small>
+                                </span>
+                            </button>
+                            <button type="button" class="flex w-full cursor-pointer items-center gap-[10px] border-0 border-b border-[#f1ede9] bg-white px-4 py-3 text-left hover:bg-[#fcfaf8]">
+                                <span class="grid h-[34px] w-[34px] flex-none place-items-center rounded-[9px] bg-[#eef8ee] text-[#2e8b45]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-box"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
+                                </span>
+                                <span class="flex flex-col">
+                                    <strong class="text-[12px]">Заканчивается товар</strong>
+                                    <small class="text-[12px] text-[#77716b]">Кожаная сумка Forest · 2 шт.</small>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button"
+                        class="grid h-[39px] w-[39px] cursor-pointer place-items-center rounded-[10px] border border-transparent bg-white p-0 transition-colors duration-150 hover:border-[color:var(--color-border)]"
+                        aria-label="Помощь">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-circle-help">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <path d="M12 17h.01"></path>
+                        </svg>
+                    </button>
+                </div>
+
+
+            </div>
+        </header>
+
+        <header class="sticky top-0 z-40 hidden h-[62px] items-center justify-between border-b border-[color:var(--color-border)] bg-white px-[18px] max-lg:flex">
+            <button type="button" class="grid h-[39px] w-[39px] place-items-center rounded-[10px] border border-transparent bg-white p-0 hover:border-[color:var(--color-border)]" aria-label="Открыть меню" aria-expanded="false" data-mobile-menu-trigger>
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>
+            </button>
+            <a href="./index.html" class="flex items-center gap-[11px]" aria-label="Shopra">
+                <span class="relative flex h-[34px] w-[30px] items-center justify-center text-[color:var(--sidebar-active-text)]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-[19px] w-[19px]"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                    <span class="absolute top-[13px] text-[10px] font-[800] leading-none">S</span>
+                </span>
+                <span class="text-[21px] font-[750] tracking-[-0.045em] text-[color:var(--sidebar-text-strong)]">Shopra</span>
+            </a>
+            <button type="button" class="relative grid h-[39px] w-[39px] place-items-center rounded-[10px] border border-transparent bg-white p-0 hover:border-[color:var(--color-border)]" aria-label="Уведомления" aria-expanded="false" aria-controls="dashboard-notifications" data-notifications-trigger data-notifications-placement="mobile">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg>
+                <i class="absolute right-2 top-2 h-[6px] w-[6px] rounded-full border-[1.5px] border-[color:var(--color-page-bg)] bg-[color:var(--color-accent)]"></i>
+            </button>
+        </header>
+
+        <main class="flex-1">
+            <div class="page-container pb-8 max-sm:!mx-[13px] sm:max-lg:!mx-5">
+                <section
+                    class="mb-[27px] block px-[2px] pt-[25px] sm:flex sm:flex-wrap sm:items-start sm:gap-[18px] xl:mb-6 xl:flex-nowrap xl:items-end xl:justify-between xl:gap-[24px] xl:pt-[34px]">
+                    <div class="min-w-0">
+                        <p
+                            class="mb-2 text-[12px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-accent)]">
+                            Суббота, 1 августа</p>
+                        <h1
+                            class="text-[27px] font-[720] tracking-[-0.045em] text-[color:var(--color-primary)] sm:text-[clamp(26px,2.3vw,36px)]">
+                            Доброе утро, Иван! <span class="inline-block">👋</span></h1>
+                        <p class="mt-[7px] text-[13px] leading-[1.5] text-[color:var(--color-secondary)]">Вот что
+                            происходит в вашем магазине сегодня.</p>
+                    </div>
+                    <div class="mt-[18px] grid grid-cols-2 gap-[9px] sm:flex sm:w-full sm:items-center xl:mt-0 xl:w-auto">
+                        <button type="button" class="button button--secondary button--icon min-w-0 whitespace-nowrap max-sm:px-[9px]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-eye">
+                                <path
+                                    d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0">
+                                </path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            Посмотреть магазин
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="h-[14px] w-[14px] max-sm:hidden">
+                                <path d="M15 3h6v6"></path>
+                                <path d="m10 14 11-11"></path>
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            </svg>
+                        </button>
+                        <span
+                            class="inline-flex min-h-[40px] min-w-0 items-center gap-2 whitespace-nowrap rounded-[10px] border border-[color:var(--color-border)] bg-[rgba(255,255,255,0.55)] px-4 py-2.5 text-[12px] font-[650] text-[color:var(--color-secondary)] max-sm:px-[9px]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="h-[17px] w-[17px]">
+                                <path d="M8 2v4"></path>
+                                <path d="M16 2v4"></path>
+                                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                <path d="M3 10h18"></path>
+                                <path d="M8 14h.01"></path>
+                                <path d="M12 14h.01"></path>
+                                <path d="M16 14h.01"></path>
+                                <path d="M8 18h.01"></path>
+                                <path d="M12 18h.01"></path>
+                                <path d="M16 18h.01"></path>
+                            </svg>
+                            Сегодня, 1 августа 2026 г.
+                        </span>
+                    </div>
+                </section>
+
+                <section class="grid grid-cols-2 gap-2 sm:gap-[12px] xl:grid-cols-4">
+                    <article
+                        class="h-full rounded-[15px] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-[15px] shadow-[0_12px_40px_rgba(70,47,31,0.055)] transition duration-150 ease-in-out hover:-translate-y-[1px] hover:shadow-[0_15px_42px_rgba(70,47,31,0.08)] max-sm:min-h-[105px] max-sm:px-3 max-sm:py-[14px]">
+                        <div class="flex items-center gap-4 max-sm:items-start max-sm:gap-3">
+                            <span
+                                class="flex h-[43px] w-[43px] flex-none items-center justify-center rounded-[12px] bg-[color:var(--color-sand-soft)] text-[color:var(--color-accent)] max-sm:h-[35px] max-sm:w-[35px]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-shopping-bag">
+                                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                                    <path d="M3 6h18"></path>
+                                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                                </svg>
+                            </span>
+                            <div class="flex min-w-0 flex-col">
+                                <p
+                                    class="text-[12px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-accent)] max-xl:text-[11px]">
+                                    Новые заказы</p>
+                                <strong
+                                    class="text-[clamp(20px,1.75vw,27px)] font-[730] tracking-[-0.04em] text-[color:var(--color-primary)] max-sm:text-[19px]">12</strong>
+                                <p class=" text-[11px] font-[650] text-[color:var(--color-secondary)]">+3 за сегодня
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+                    <article
+                        class="h-full rounded-[15px] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-[15px] shadow-[0_12px_40px_rgba(70,47,31,0.055)] transition duration-150 ease-in-out hover:-translate-y-[1px] hover:shadow-[0_15px_42px_rgba(70,47,31,0.08)] max-sm:min-h-[105px] max-sm:px-3 max-sm:py-[14px]">
+                        <div class="flex items-center gap-4 max-sm:items-start max-sm:gap-3">
+                            <span
+                                class="flex h-[43px] w-[43px] flex-none items-center justify-center rounded-[12px] bg-[color:var(--color-success-soft)] text-[color:var(--color-success)] max-sm:h-[35px] max-sm:w-[35px]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-chart-no-axes-combined">
+                                    <path d="M12 16v5"></path>
+                                    <path d="M16 14v7"></path>
+                                    <path d="M20 10v11"></path>
+                                    <path d="m22 3-8.646 8.646a.5.5 0 0 1-.708 0L9.354 8.354a.5.5 0 0 0-.707 0L2 15">
+                                    </path>
+                                    <path d="M4 18v3"></path>
+                                    <path d="M8 14v7"></path>
+                                </svg>
+                            </span>
+                            <div class="flex min-w-0 flex-col">
+                                <p
+                                    class="text-[12px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-secondary)] max-xl:text-[11px]">
+                                    Продажи за сегодня</p>
+                                <strong
+                                    class="text-[clamp(20px,1.75vw,27px)] font-[730] tracking-[-0.04em] text-[color:var(--color-primary)] max-sm:text-[19px]">24
+                                    560 ₴</strong>
+                                <p class="text-[11px] font-[650] text-[color:var(--color-success)]">+18% к вчера
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+                    <article
+                        class="flex h-full flex-col rounded-[15px] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-[15px] shadow-[0_12px_40px_rgba(70,47,31,0.055)] transition duration-150 ease-in-out hover:-translate-y-[1px] hover:shadow-[0_15px_42px_rgba(70,47,31,0.08)] max-sm:min-h-[105px] max-sm:px-3 max-sm:py-[14px]">
+                        <div class="flex items-center gap-4 max-sm:items-start max-sm:gap-3">
+                            <span
+                                class="flex h-[43px] w-[43px] flex-none items-center justify-center rounded-[12px] bg-[color:var(--color-blue-soft)] text-[color:var(--color-info)] max-sm:h-[35px] max-sm:w-[35px]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-package">
+                                    <path
+                                        d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z">
+                                    </path>
+                                    <path d="M12 22V12"></path>
+                                    <path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"></path>
+                                    <path d="m7.5 4.27 9 5.15"></path>
+                                </svg>
+                            </span>
+                            <div class="flex min-w-0 flex-col">
+                                <p
+                                    class="text-[12px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-secondary)] max-xl:text-[11px]">
+                                    Заказы в обработке</p>
+                                <strong
+                                    class="text-[clamp(20px,1.75vw,27px)] font-[730] tracking-[-0.04em] text-[color:var(--color-primary)] max-sm:text-[19px]">28</strong>
+                                <p class="text-[11px] font-[650] text-[color:var(--color-secondary)]">Смотреть</p>
+                            </div>
+                        </div>
+                    </article>
+                    <article
+                        class="flex h-full flex-col rounded-[15px] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-[15px] shadow-[0_12px_40px_rgba(70,47,31,0.055)] transition duration-150 ease-in-out hover:-translate-y-[1px] hover:shadow-[0_15px_42px_rgba(70,47,31,0.08)] max-sm:min-h-[105px] max-sm:px-3 max-sm:py-[14px]">
+                        <div class="flex items-center gap-4 max-sm:items-start max-sm:gap-3">
+                            <span
+                                class="flex h-[43px] w-[43px] flex-none items-center justify-center rounded-[12px] bg-[color:var(--color-sand-soft)] text-[color:var(--color-sand)] max-sm:h-[35px] max-sm:w-[35px]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-box">
+                                    <path
+                                        d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z">
+                                    </path>
+                                    <path d="m3.3 7 8.7 5 8.7-5"></path>
+                                    <path d="M12 22V12"></path>
+                                </svg>
+                            </span>
+                            <div class="flex min-w-0 flex-col">
+                                <p
+                                    class="text-[12px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-secondary)] max-xl:text-[11px]">
+                                    Товары</p>
+                                <strong
+                                    class="text-[clamp(20px,1.75vw,27px)] font-[730] tracking-[-0.04em] text-[color:var(--color-primary)] max-sm:text-[19px]">156</strong>
+                                <p class="text-[11px] font-[650] text-[color:var(--color-secondary)]">Смотреть</p>
+                            </div>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="mt-6 grid min-w-0 gap-[12px] xl:grid-cols-[1.2fr_1.6fr]">
+                    <article
+                        class="h-full rounded-[15px] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] shadow-[0_12px_40px_rgba(70,47,31,0.055)]">
+                        <div class="flex flex-col">
+                            <div class="panel-head">
+                                <div>
+                                    <p class="panel-kicker">В реальном времени</p>
+                                    <h2>Последние заказы</h2>
+                                </div>
+                                <button type="button" class="text-link">Все заказы</button>
+                            </div>
+
+                                    <div class="mt-4">
+                                        <div class="data-list" role="list">
+                                    <div class="data-list__item max-sm:gap-y-0" role="listitem" tabindex="0">
+                                        <div class="data-list__id">#1021</div>
+                                        <div class="data-list__meta">
+                                            <strong>Мария Иванова</strong>
+                                            <small>2 товара — Самовывоз</small>
+                                        </div>
+                                        <div class="data-list__amount max-sm:justify-self-end max-sm:text-right">1 250 ₴</div>
+                                        <div class="status-badge status-badge--new max-sm:justify-self-end">Новый</div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="data-list__chevron lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg>
+                                    </div>
+
+                                    <div class="data-list__item max-sm:gap-y-0" role="listitem" tabindex="0">
+                                        <div class="data-list__id">#1020</div>
+                                        <div class="data-list__meta">
+                                            <strong>ООО «Магазин»</strong>
+                                            <small>5 товаров — Курьер</small>
+                                        </div>
+                                        <div class="data-list__amount max-sm:justify-self-end max-sm:text-right">4 980 ₴</div>
+                                        <div class="status-badge status-badge--paid max-sm:justify-self-end">Оплачен</div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="data-list__chevron lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg>
+                                    </div>
+
+                                    <div class="data-list__item max-sm:gap-y-0" role="listitem" tabindex="0">
+                                        <div class="data-list__id">#1019</div>
+                                        <div class="data-list__meta">
+                                            <strong>Алексей П.</strong>
+                                            <small>1 товар — Курьер</small>
+                                        </div>
+                                        <div class="data-list__amount max-sm:justify-self-end max-sm:text-right">390 ₴</div>
+                                        <div class="status-badge status-badge--pending max-sm:justify-self-end">В обработке</div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="data-list__chevron lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg>
+                                    </div>
+
+                                    <div class="data-list__item max-sm:gap-y-0" role="listitem" tabindex="0">
+                                        <div class="data-list__id">#1018</div>
+                                        <div class="data-list__meta">
+                                            <strong>Елена С.</strong>
+                                            <small>3 товара — Самовывоз</small>
+                                        </div>
+                                        <div class="data-list__amount max-sm:justify-self-end max-sm:text-right">2 120 ₴</div>
+                                        <div class="status-badge status-badge--new max-sm:justify-self-end">Новый</div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="data-list__chevron lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article
+                        class="h-full rounded-[15px] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p shadow-[0_12px_40px_rgba(70,47,31,0.055)]">
+                        <div class="flex h-full flex-col justify-between gap-6">
+                            <div>
+                                <div class="panel-head">
+                                    <div>
+                                        <p class="panel-kicker">Сегодня, 1 августа</p>
+                                        <h2>Продажи за сегодня</h2>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="chart-wrap">
+                                <div class="chart-y">
+                                    <span>30K ₴</span>
+                                    <span>20K ₴</span>
+                                    <span>10K ₴</span>
+                                    <span>0 ₴</span>
+                                </div>
+                                <svg class="sales-chart" viewBox="0 0 500 220" role="img" aria-label="График продаж за сегодня">
+                                    <defs>
+                                        <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="#c55a1d" stop-opacity=".2" />
+                                            <stop offset="100%" stop-color="#c55a1d" stop-opacity="0" />
+                                        </linearGradient>
+                                    </defs>
+                                    <line x1="18" y1="40" x2="480" y2="40" class="chart-grid" />
+                                    <line x1="18" y1="90" x2="480" y2="90" class="chart-grid" />
+                                    <line x1="18" y1="140" x2="480" y2="140" class="chart-grid" />
+                                    <line x1="18" y1="190" x2="480" y2="190" class="chart-grid" />
+                                    <polygon points="18,190 18,166.923077 75.75,143.846154 133.5,155.384615 191.25,109.230769 249,132.307692 306.75,86.153846 364.5,97.692308 422.25,62.961538 480,40 480,190" fill="url(#chartFill)" />
+                                    <polyline points="18,166.923077 75.75,143.846154 133.5,155.384615 191.25,109.230769 249,132.307692 306.75,86.153846 364.5,97.692308 422.25,62.961538 480,40" class="chart-line" />
+                                    <circle cx="18" cy="166.923077" r="4" class="chart-dot"><title>2 000 ₴</title></circle>
+                                    <circle cx="75.75" cy="143.846154" r="4" class="chart-dot"><title>4 000 ₴</title></circle>
+                                    <circle cx="133.5" cy="155.384615" r="4" class="chart-dot"><title>3 000 ₴</title></circle>
+                                    <circle cx="191.25" cy="109.230769" r="4" class="chart-dot"><title>7 000 ₴</title></circle>
+                                    <circle cx="249" cy="132.307692" r="4" class="chart-dot"><title>5 000 ₴</title></circle>
+                                    <circle cx="306.75" cy="86.153846" r="4" class="chart-dot"><title>9 000 ₴</title></circle>
+                                    <circle cx="364.5" cy="97.692308" r="4" class="chart-dot"><title>8 000 ₴</title></circle>
+                                    <circle cx="422.25" cy="62.961538" r="4" class="chart-dot"><title>11 000 ₴</title></circle>
+                                    <circle cx="480" cy="40" r="4" class="chart-dot"><title>13 000 ₴</title></circle>
+                                </svg>
+                                <div class="chart-labels">
+                                    <span>09:00</span>
+                                    <span>10:00</span>
+                                    <span>11:00</span>
+                                    <span>12:00</span>
+                                    <span>13:00</span>
+                                    <span>14:00</span>
+                                    <span>15:00</span>
+                                    <span>16:00</span>
+                                    <span>Сейчас</span>
+                                </div>
+                                <div class="chart-callout">
+                                    <span>Сейчас</span>
+                                    <strong>13 780 ₴</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="mt-[12px] grid gap-[12px] xl:grid-cols-[minmax(0,1.65fr)_minmax(260px,0.75fr)]">
+                    <article class="h-full rounded-[15px] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] shadow-[0_12px_40px_rgba(70,47,31,0.055)]">
+                        <div>
+                            <div class="panel-head compact">
+                                <div>
+                                    <p class="panel-kicker">Без лишних шагов</p>
+                                    <h2>Быстрые действия</h2>
+                                </div>
+                            </div>
+                            <div class="quick-actions !grid-cols-2 sm:!grid-cols-3 xl:!grid-cols-5">
+                                <button type="button" class="button quick-button">
+                                    <span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                                    </span>
+                                    Добавить товар
+                                </button>
+                                <button type="button" class="button quick-button">
+                                    <span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-badge-percent"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m15 9-6 6"></path><path d="M9 9h.01"></path><path d="M15 15h.01"></path></svg>
+                                    </span>
+                                    Создать акцию
+                                </button>
+                                <button type="button" class="button quick-button">
+                                    <span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-truck"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path><path d="M15 18H9"></path><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path><circle cx="17" cy="18" r="2"></circle><circle cx="7" cy="18" r="2"></circle></svg>
+                                    </span>
+                                    Добавить доставку
+                                </button>
+                                <button type="button" class="button quick-button">
+                                    <span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
+                                    </span>
+                                    Настроить оплату
+                                </button>
+                                <button type="button" class="button quick-button">
+                                    <span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-earth"><path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"></path><path d="M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17"></path><path d="M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"></path><circle cx="12" cy="12" r="10"></circle></svg>
+                                    </span>
+                                    Подключить домен
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="shopra-setup-card rounded-[15px] border border-[#ead8ca] p-[17px]">
+                        <div class="flex items-center gap-2 text-[color:var(--color-accent)]">
+                            <span class="grid h-[30px] w-[30px] place-items-center rounded-[9px] bg-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-store"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"></path><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"></path><path d="M2 7h20"></path><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"></path></svg>
+                            </span>
+                            <p class="m-0 flex-1 text-[11px] font-bold uppercase text-[#77716b]">СТАРТ МАГАЗИНА</p>
+                            <strong class="text-[12px]">50%</strong>
+                        </div>
+                        <h2 class="mt-[13px]">Осталось совсем немного</h2>
+                        <div class="my-3 h-[6px] overflow-hidden rounded-[99px] bg-[#ead8cb]" role="progressbar" aria-label="Прогресс запуска магазина" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><i class="block h-full rounded-[inherit] bg-[linear-gradient(90deg,#bb4e18,#e28950)]" style="width:50%"></i></div>
+                        <div class="overflow-hidden border-t border-[rgba(196,158,131,0.28)]">
+                            <button type="button" class="flex min-h-12 w-full cursor-default items-center gap-[7px] border-0 border-b border-[rgba(196,158,131,0.2)] bg-transparent py-2 text-left text-[#82786f] !hidden" data-setup-expanded-only disabled hidden>
+                                <span class="grid h-[22px] w-[22px] place-items-center rounded-full border border-[#b8d3bd] bg-[#eef7ef] text-[color:var(--color-success)]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"></path></svg>
+                                </span>
+                                <span class="flex min-w-0 flex-1 flex-col gap-px">
+                                    <strong class="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-[680]">Добавить первый товар</strong>
+                                    <small class="overflow-hidden text-ellipsis whitespace-nowrap text-[11px] not-italic text-[#8c8178]">Товар опубликован</small>
+                                </span>
+                            </button>
+                            <button type="button" class="flex min-h-12 w-full cursor-default items-center gap-[7px] border-0 border-b border-[rgba(196,158,131,0.2)] bg-transparent py-2 text-left text-[#82786f] !hidden" data-setup-expanded-only disabled hidden>
+                                <span class="grid h-[22px] w-[22px] place-items-center rounded-full border border-[#b8d3bd] bg-[#eef7ef] text-[color:var(--color-success)]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"></path></svg>
+                                </span>
+                                <span class="flex min-w-0 flex-1 flex-col gap-px">
+                                    <strong class="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-[680]">Настроить доставку</strong>
+                                    <small class="overflow-hidden text-ellipsis whitespace-nowrap text-[11px] not-italic text-[#8c8178]">Способ доставки добавлен</small>
+                                </span>
+                            </button>
+                            <button type="button" class="flex min-h-12 w-full cursor-pointer items-center gap-[7px] border-0 border-b border-[rgba(196,158,131,0.2)] bg-transparent py-2 text-left text-[#594c43] enabled:hover:text-[#8c3510]">
+                                <span class="grid h-[22px] w-[22px] place-items-center rounded-full border border-[#d8bda9] text-[color:var(--color-accent)]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
+                                </span>
+                                <span class="flex min-w-0 flex-1 flex-col gap-px">
+                                    <strong class="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-[680]">Добавить способ оплаты</strong>
+                                    <small class="overflow-hidden text-ellipsis whitespace-nowrap text-[11px] not-italic text-[#8c8178]">Прими оплату от покупателя</small>
+                                </span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down ml-auto -rotate-90"><path d="m6 9 6 6 6-6"></path></svg>
+                            </button>
+                            <button type="button" class="flex min-h-12 w-full cursor-pointer items-center gap-[7px] border-0 border-b border-[rgba(196,158,131,0.2)] bg-transparent py-2 text-left text-[#594c43] enabled:hover:text-[#8c3510] !hidden" data-setup-expanded-only hidden>
+                                <span class="grid h-[22px] w-[22px] place-items-center rounded-full border border-[#d8bda9] text-[color:var(--color-accent)]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-palette"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg>
+                                </span>
+                                <span class="flex min-w-0 flex-1 flex-col gap-px">
+                                    <strong class="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-[680]">Настроить внешний вид</strong>
+                                    <small class="overflow-hidden text-ellipsis whitespace-nowrap text-[11px] not-italic text-[#8c8178]">Логотип, цвета и баннер магазина</small>
+                                </span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down ml-auto -rotate-90"><path d="m6 9 6 6 6-6"></path></svg>
+                            </button>
+                            <button type="button" class="flex min-h-12 w-full cursor-pointer items-center gap-[7px] border-0 border-b border-[rgba(196,158,131,0.2)] bg-transparent py-2 text-left text-[#594c43] enabled:hover:text-[#8c3510] !hidden" data-setup-expanded-only hidden>
+                                <span class="grid h-[22px] w-[22px] place-items-center rounded-full border border-[#d8bda9] text-[color:var(--color-accent)]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-earth"><path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"></path><path d="M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17"></path><path d="M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"></path><circle cx="12" cy="12" r="10"></circle></svg>
+                                </span>
+                                <span class="flex min-w-0 flex-1 flex-col gap-px">
+                                    <strong class="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-[680]">Подключить домен</strong>
+                                    <small class="overflow-hidden text-ellipsis whitespace-nowrap text-[11px] not-italic text-[#8c8178]">Собственный адрес магазина<em class="ml-[5px] inline-block rounded bg-[rgba(255,255,255,0.78)] px-1 py-px text-[11px] font-bold not-italic text-[#8a5b40]">Необязательно</em></small>
+                                </span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down ml-auto -rotate-90"><path d="m6 9 6 6 6-6"></path></svg>
+                            </button>
+                        </div>
+                        <button type="button" class="group flex w-full cursor-pointer items-center justify-center gap-[5px] border-0 bg-transparent pt-[9px] text-[11px] font-bold text-[color:var(--color-accent)]" aria-expanded="false" data-state="closed" data-label-expanded="Свернуть список" data-label-collapsed="Все шаги (5)" data-setup-toggle>
+                            <span data-setup-toggle-label>Все шаги (5)</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-[15px] w-[15px] transition-transform duration-[160ms] group-data-[state=open]:rotate-180"><path d="m6 9 6 6 6-6"></path></svg>
+                        </button>
+                    </article>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="./assets/js/popover.js" defer></script>
+    <script src="./assets/js/setup-card.js" defer></script>
+    <script src="./assets/js/notifications.js" defer></script>
+    <script src="./assets/js/mobile-menu.js" defer></script>
+</body>
+
+</html>

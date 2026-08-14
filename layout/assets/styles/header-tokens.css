@@ -1,0 +1,7 @@
+:root {
+  /* Centralized header / layout tokens */
+  --sidebar-width: 252px;
+  --header-height: 72px;
+  --color-header-bg: rgba(255,255,255,0.96);
+  --color-header-border: var(--color-border);
+}

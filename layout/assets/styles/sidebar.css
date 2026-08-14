@@ -1,0 +1,85 @@
+.sidebar-shell {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 30;
+  width: 252px;
+  min-width: 252px;
+  height: 100vh;
+  background: var(--sidebar-background);
+  border-right: 1px solid var(--sidebar-border);
+  backdrop-filter: blur(20px);
+}
+
+.sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 13px;
+  border-radius: 11px;
+  color: var(--sidebar-text);
+  font-size: 13px;
+  font-weight: 570;
+  letter-spacing: -0.01em;
+  text-align: left;
+  transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
+  gap: 0.75rem;
+}
+
+.sidebar-nav-link:hover {
+  background: var(--sidebar-item-hover);
+  color: var(--sidebar-active-text);
+  transform: translateX(2px);
+}
+
+.sidebar-nav-link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(184, 79, 24, 0.16);
+}
+
+.sidebar-nav-link.active {
+  background: var(--sidebar-item-active);
+  color: var(--sidebar-active-text);
+  font-weight: 690;
+}
+
+.sidebar-nav-link.active .sidebar-icon {
+  color: var(--sidebar-active-text);
+}
+
+.sidebar-shell a:focus,
+.sidebar-shell a:focus-visible,
+.sidebar-shell a:active,
+a[aria-label="Shopra"]:focus,
+a[aria-label="Shopra"]:focus-visible,
+a[aria-label="Shopra"]:active {
+  outline: none;
+  box-shadow: none;
+}
+
+.sidebar-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: inherit;
+}
+
+.sidebar-nav-badge {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--sidebar-badge-bg);
+  color: var(--sidebar-badge-text);
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 1px 5px rgba(91, 48, 18, 0.08);
+}
