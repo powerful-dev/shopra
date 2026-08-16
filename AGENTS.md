@@ -1,592 +1,298 @@
 # Shopra AI Agent Instructions
 
-## Project Overview
+## Project
 
 Shopra is a SaaS platform for renting ready-made websites.
 
-The goal of the project is to allow administrators to quickly create, configure and publish websites for customers.
-
-This is a long-term project. Every architectural decision should prioritize maintainability, readability, and scalability over short-term speed.
+Prioritize maintainability, readability, consistency, and scalability. Prefer existing project conventions over personal preferences.
 
 ---
 
-# Technology Stack
+## Technology Stack
 
-## Backend
-
+### Backend
 - Laravel 13
 - PHP 8.4
 - PostgreSQL
 - Docker
 - Vite
 
-## Frontend
-
 ### Admin Panel
-
 - React 19
 - React Router
 - Tailwind CSS
+- Reusable project CSS/SCSS components
 
 ### Public Website
-
 - Blade templates
 
-Do not introduce Bootstrap, UIkit, Material UI, jQuery, or any other UI framework without explicit approval.
+Do not introduce Bootstrap, UIkit, Material UI, jQuery, or other UI frameworks without explicit approval.
+
+UIkit is legacy and must not be used in the production admin panel.
 
 ---
 
-# Architecture
+## Architecture
 
-## Public Website
+### Admin
+Use a React SPA communicating with the Laravel REST API.
 
+### Public Website
 Use Blade templates.
 
-## Admin Panel
-
-Use a React SPA.
-
-## Backend
-
-Expose functionality through a Laravel REST API.
-
-Business logic belongs in Services.
-
-Validation belongs in Form Requests.
-
-Use API Resources where appropriate.
-
-Database access should remain inside Eloquent models unless there is a strong architectural reason otherwise.
-
-Avoid introducing the Repository pattern unless it provides clear value.
+### Backend
+- Keep controllers thin.
+- Business logic belongs in Services.
+- Validation belongs in Form Requests.
+- Use API Resources where appropriate.
+- Use Eloquent and relationships for database access.
+- Use Policies/Gates for authorization where appropriate.
+- Prefer dependency injection.
+- Do not introduce the Repository pattern unless it provides clear value.
 
 ---
 
-# Frontend Guidelines
+# Admin UI Migration
 
-Build every admin interface using Tailwind CSS whenever possible.
+The `layout/` directory is the source of truth for the new admin UI.
 
-Tailwind utility classes are the primary styling approach for the admin panel.
+It contains the completed static frontend implementation, including:
 
-When implementing frontend styles, use the following priority:
+- HTML
+- CSS
+- JavaScript interactions
+- responsive behavior
+- SVG/icons
+- images and other assets
 
-1. Reuse existing React components and existing project styles.
-2. Use Tailwind CSS utility classes.
-3. Reuse existing shared custom SCSS where appropriate.
-4. Create new custom SCSS only when necessary.
+The current task is to progressively transfer this implementation into the React admin panel.
 
-Avoid creating custom CSS/SCSS classes when the same result can be cleanly achieved with Tailwind.
+This is not a redesign or approximate recreation.
 
-Custom styles are appropriate when:
+Before modifying an admin page, inspect the corresponding `layout/` HTML and all relevant CSS, JS, and assets.
 
-- Tailwind would make the markup unnecessarily complex.
-- The required design cannot be reasonably implemented with Tailwind utilities.
-- A reusable project-specific component requires dedicated styling.
-- Complex states, interactions, or responsive behavior are significantly clearer in SCSS.
+Preserve the existing implementation as accurately as reasonably possible, including:
 
-Keep the interface:
+- structure relevant to styling
+- dimensions and spacing
+- typography
+- colors
+- borders, radius, and shadows
+- icons and assets
+- states
+- responsive behavior
 
-- clean
-- modern
-- responsive
-- minimalistic
-- consistent
+Use exact existing values when they are already defined in `layout/`.
 
-Avoid unnecessary animations and visual effects.
-
-Prefer consistency over decoration.
-
-Use:
-
-- Functional Components
-- React Hooks
-- React Router
-
-Use the native Fetch API for all HTTP communication.
-
-Wrap Fetch API in a reusable service module instead of calling `fetch()` directly from React components.
-
-Keep components focused on a single responsibility.
-
-Extract reusable logic into custom hooks.
-
-Separate API communication from UI components by using dedicated service modules.
-
-Avoid duplicated state.
-
-Avoid unnecessary re-renders.
-
-Reuse existing components whenever possible before creating new ones.
+Do not modify files inside `layout/` unless explicitly requested.
 
 ---
 
-# Coding Style
+## Reusable UI and Styling
 
-Always follow PSR-12 for PHP code.
+Existing reusable components from `layout/` should normally be preserved and reused.
 
-Write readable, maintainable code.
+Examples include:
 
-Prefer expressive method and variable names.
+- `.button`
+- `.badge`
+- `.data-list`
+- `.popover`
+- forms
+- switches
+- shared cards and containers
 
-Keep controllers thin.
+Do not recreate an existing reusable component with a different implementation merely because another approach is possible.
 
-Keep React components small and focused.
+### Styling priority
 
-Extract duplicated business logic into Services.
+1. Existing reusable component from `layout/`
+2. Existing reusable production React/CSS component
+3. Tailwind for structural and local utility styling
+4. New custom CSS/SCSS only when necessary
 
-Prefer dependency injection.
+Tailwind is appropriate for layout, grid, flexbox, spacing, sizing, positioning, visibility, responsive structure, and local adjustments.
 
-Avoid static helper classes unless they provide clear value.
+Do not replace an existing reusable component with long repeated Tailwind class lists.
 
-Do not introduce unnecessary abstractions.
-
-Prefer simple solutions that follow the existing project architecture.
-
----
-
-# Database
-
-Database engine:
-
-PostgreSQL
-
-Requirements:
-
-- Use foreign keys wherever appropriate.
-- Use cascading deletes only when appropriate.
-- Add indexes to searchable columns.
-- Prefer Eloquent over raw SQL whenever possible.
-- Every migration must be reversible.
-- Avoid N+1 queries.
-- Use eager loading where appropriate.
+Arbitrary Tailwind values are allowed when required to reproduce exact layout values.
 
 ---
 
-# Laravel
+## CSS / SCSS
 
-Prefer:
+`admin.scss` is the main SCSS entry point for the admin application.
 
-- Form Requests
-- API Resources
-- Policies
-- Service classes
-- Eloquent relationships
+Shared components belong in the shared styling layer.
 
-Avoid placing business logic inside controllers.
+Page-specific files should contain only styles unique to that page and should not be created when unnecessary.
 
-Protect all admin endpoints using authentication and authorization middleware.
+Reuse existing tokens, mixins, responsive helpers, and shared styles where appropriate.
 
-Reuse existing Services and application architecture before introducing new abstractions.
+Avoid:
+
+- duplicated styles
+- conflicting implementations
+- excessive selector nesting
+- unnecessary override layers
+- unused legacy styles
+- `!important` unless necessary
+
+When migrating a page, remove obsolete styles only after verifying they are no longer used elsewhere.
+
+Do not perform broad legacy cleanup unrelated to the current task.
 
 ---
 
-# Docker
+## React
 
-The project is developed entirely inside Docker.
+Use functional components, Hooks, and React Router.
 
-Never assume a local PHP, Composer, Node.js, or NPM installation.
+Reuse existing components where possible.
 
-Run all project commands through Docker.
+Create reusable components when they represent a clear reusable UI concept, meaningful behavior, or are used in multiple places.
 
-Examples:
+Do not split static markup into excessive numbers of tiny components or introduce abstractions for hypothetical future reuse.
 
-```bash
-docker compose exec php php artisan migrate
-docker compose exec php composer install
-docker compose exec php npm install
-docker compose exec php npm run dev
-```
+When transferring `layout/` HTML to React:
 
-Before running commands, inspect the existing Docker configuration when necessary.
+- preserve relevant DOM structure and class names;
+- convert markup correctly to JSX;
+- reuse original assets;
+- implement required interactions using React state and event handlers.
+
+Do not blindly copy static JavaScript into React.
+
+Static demo behavior does not need to become production functionality unless required by the task.
+
+---
+
+## API
+
+Use the native Fetch API through reusable service modules.
+
+Do not scatter direct `fetch()` calls throughout React components.
+
+Keep API communication, UI rendering, and application state appropriately separated.
+
+Reuse existing API services before creating new ones.
+
+Do not change existing API contracts unless explicitly requested.
+
+---
+
+## Fonts and Assets
+
+The primary admin font is `Manrope`.
+
+Use local font files from:
+
+`resources/fonts/`
+
+Do not load the primary font from external CDNs.
+
+Before adding icons, SVGs, images, or illustrations, check `layout/` and reuse the original assets when they exist.
+
+Do not introduce a new icon library without approval.
+
+---
+
+## Responsive Design
+
+Follow the responsive behavior already implemented in `layout/`.
+
+Inspect its CSS, media queries, markup, and relevant interactions before implementing responsive changes.
+
+Do not invent new breakpoints when the required behavior already exists.
+
+Preserve reusable component responsive styles instead of creating duplicate implementations.
+
+---
+
+## Database
+
+Use PostgreSQL and Eloquent.
+
+Use appropriate foreign keys and indexes.
+
+Migrations must be reversible.
+
+Avoid N+1 queries and use eager loading where appropriate.
+
+Use raw SQL only when there is a clear reason.
+
+---
+
+## Docker
+
+The project runs inside Docker.
+
+Do not assume local PHP, Composer, or Node installations.
+
+Run project commands through Docker when applicable.
 
 Do not modify Docker configuration unless required by the current task.
 
 ---
 
-# Git
+## Security
 
-Write meaningful commit messages.
+Preserve existing authentication and authorization behavior.
 
-Keep commits focused.
+Validate client input and use Laravel authorization mechanisms where appropriate.
 
-Avoid mixing unrelated changes.
-
-Do not commit generated, temporary, or environment-specific files unless they are intentionally part of the project.
-
----
-
-# Performance
-
-Prefer server-side pagination for large datasets.
-
-Avoid N+1 queries.
-
-Use eager loading where appropriate.
-
-Cache expensive operations when appropriate.
-
-Avoid unnecessary frontend re-renders.
-
-Do not introduce optimization complexity without a clear reason.
-
-Optimize based on actual requirements rather than assumptions.
-
----
-
-# Security
-
-Never trust client input.
-
-Validate everything.
-
-Escape output where appropriate.
-
-Protect all admin routes.
-
-Never expose secrets.
-
-Use Laravel authorization through Policies, Gates, and Middleware where appropriate.
-
-Never expose sensitive backend information through API responses.
-
-Do not weaken existing authentication or authorization mechanisms.
-
----
-
-# Documentation
-
-Whenever a significant architectural decision is made, update the documentation inside:
-
-```text
-docs/
-```
-
-Important documents:
-
-- `PROJECT_CONTEXT.md`
-- `ROADMAP.md`
-- `DATABASE.md`
-- `ARCHITECTURE.md`
-- `DECISIONS.md`
-
-Do not update documentation for trivial visual changes unless the change affects project conventions or architecture.
-
----
-
-# Design Reference
-
-The project contains a `layout/` directory.
-
-The `layout/` directory is the authoritative design reference for the Shopra admin panel.
-
-Before implementing or modifying any admin panel UI, always inspect the relevant files inside `layout/`.
-
-Review:
-
-- the corresponding HTML page
-- relevant CSS/SCSS files
-- relevant JavaScript files
-- reused components
-- icons and other assets
-- responsive behavior
-
-The `layout/` directory defines the expected:
-
-- layout
-- page structure
-- navigation
-- visual hierarchy
-- spacing
-- typography
-- colors
-- components
-- responsive behavior
-- interactions
-- user experience
-
-When implementing a page, first find the corresponding page or closest existing example inside `layout/`.
-
-Reproduce the design and behavior as closely as reasonably possible.
-
-Do not redesign existing interfaces unless explicitly requested.
-
-Do not copy the `layout/` implementation blindly.
-
-The `layout/` directory defines the visual appearance and expected behavior, not the production application architecture.
-
-The production admin panel must recreate the layout using:
-
-- React components
-- React Router
-- Tailwind CSS
-- existing shared components
-- existing services
-- existing hooks
-- custom SCSS only when necessary
-
-Prefer Tailwind CSS when recreating styles from `layout/`.
-
-If the layout contains custom CSS that can be cleanly replaced by Tailwind utilities without changing the appearance or behavior, use Tailwind.
-
-If a specific layout implementation requires custom styles to reproduce correctly and cleanly, custom SCSS may be used.
-
-Do not modify files inside `layout/` unless explicitly requested.
-
-Treat `layout/` as a reference source.
-
----
-
-# Icons and Assets
-
-Before introducing a new icon or visual asset, check whether an appropriate asset already exists inside the project or `layout/`.
-
-Prefer reusing the same icons and assets used by the reference layout.
-
-Do not replace existing reference icons with visually different alternatives unless explicitly requested.
-
-Do not introduce a new icon library without explicit approval.
-
----
-
-# Tailwind CSS Guidelines
-
-Tailwind CSS is the primary styling system for the admin panel.
-
-Prefer utility classes directly in React markup when they provide a clear and readable implementation.
-
-Use Tailwind for:
-
-- spacing
-- sizing
-- typography
-- colors
-- borders
-- border radius
-- shadows
-- flexbox
-- grid
-- positioning
-- responsive behavior
-- visibility
-- common interactive states
-
-Before creating custom CSS or SCSS, check whether the required result can be implemented cleanly with existing Tailwind utilities.
-
-Avoid creating wrapper classes that simply duplicate a small set of Tailwind utilities.
-
-Avoid excessive use of arbitrary Tailwind values when an existing project value or Tailwind utility already matches the design.
-
-When an exact value from `layout/` is required to preserve the design and no appropriate standard utility exists, an arbitrary Tailwind value may be used.
-
-Do not change the visual design merely to fit standard Tailwind values.
-
-Visual consistency with `layout/` has priority over forcing everything into default Tailwind spacing or sizing.
-
----
-
-# SCSS Organization
-
-Tailwind CSS is the primary styling system.
-
-Custom SCSS is secondary and should only be used when it provides a clearer or more maintainable solution.
-
-Before adding custom SCSS:
-
-1. Check whether the required style already exists.
-2. Check whether an existing React component already solves the problem.
-3. Check whether it can be implemented cleanly with Tailwind.
-4. Check whether an existing shared SCSS class can be reused.
-5. Only then introduce new custom styles.
-
-Every new admin page that requires page-specific custom styles should have its own dedicated SCSS file.
-
-Examples:
-
-```text
-_dashboard.scss
-_administrators.scss
-_orders.scss
-```
-
-Do not create a page-specific SCSS file if the page can be implemented entirely with Tailwind and existing shared styles.
-
-Each page-specific SCSS file must be imported into the main SCSS entry file when needed.
-
-Shared components, common layouts, and reusable custom styles belong in `_core.scss`.
-
-Page-specific SCSS files should contain only styles unique to that page.
-
----
-
-## Existing SCSS Architecture
-
-The project already includes:
-
-- `_tokens.scss` – design tokens such as colors, spacing, typography, border radius, and shadows.
-- `_mixins.scss` – reusable mixins and helper functions.
-- `_responsive.scss` – responsive breakpoints and responsive helper mixins.
-- `_core.scss` – shared UI components and common application styles.
-
-When custom SCSS is necessary:
-
-- Reuse variables from `_tokens.scss` instead of hardcoding values when appropriate.
-- Reuse existing mixins from `_mixins.scss`.
-- Use responsive utilities from `_responsive.scss` instead of creating arbitrary media queries.
-- Check `_core.scss` before creating a new reusable class.
-- Avoid duplicating functionality already provided cleanly by Tailwind.
-
-Before creating new variables, mixins, helper classes, or reusable styles, check whether an appropriate solution already exists.
-
----
-
-# SCSS Style Guidelines
-
-Follow the existing nested SCSS style used throughout `_core.scss`.
-
-Keep selectors properly nested.
-
-Avoid unnecessarily long or deeply nested selectors.
-
-Avoid duplicating or overriding styles from `_core.scss` unless necessary.
-
-If a custom style becomes reusable across multiple pages, move it into `_core.scss`.
-
-Maintain consistent naming conventions across all SCSS files.
-
-Do not use `!important` unless there is no reasonable alternative.
-
-Do not create custom classes solely to hide Tailwind utilities behind another class name.
-
-The styling priority is:
-
-**existing reusable components → Tailwind CSS → existing shared SCSS → new custom SCSS**
-
-The goal is to keep the styling system modular, reusable, predictable, and easy to maintain.
-
----
-
-# Responsive Design
-
-Responsive behavior should follow the reference implementation inside `layout/`.
-
-Before implementing responsive styles, inspect how the corresponding page behaves in `layout/`.
-
-Prefer Tailwind responsive utilities whenever possible.
-
-Use existing responsive SCSS helpers only when custom SCSS is necessary.
-
-Do not introduce arbitrary breakpoints when an existing project breakpoint can be used.
-
-Do not simplify or remove responsive behavior from the reference layout unless explicitly requested.
-
----
-
-# Component Reuse
-
-Before creating a new React component:
-
-1. Search for an existing component that already provides the required functionality.
-2. Check whether an existing component can be extended without introducing unnecessary complexity.
-3. Check similar pages for reusable patterns.
-4. Create a new component only when reuse is not appropriate.
-
-Shared UI patterns should become reusable components when doing so clearly reduces duplication.
-
-Do not extract tiny components solely for abstraction.
-
-Prefer meaningful component boundaries based on responsibility.
-
----
-
-# AI Behavior
-
-When suggesting or modifying code:
-
-- Follow the existing project structure.
-- Inspect the current implementation before making changes.
-- Inspect relevant files inside `layout/` for UI tasks.
-- Reuse existing Services before creating new ones.
-- Reuse existing React components before creating new ones.
-- Reuse existing hooks and utilities.
-- Prefer Tailwind CSS for styling.
-- Use custom SCSS only when appropriate.
-- Do not introduce new libraries without a strong reason and explicit approval.
-- Keep solutions simple and maintainable.
-- Explain architectural trade-offs when multiple reasonable solutions exist.
-- Prefer consistency with the existing codebase over personal preference.
-- If project conventions conflict with general best practices, follow the project conventions unless doing so would introduce a serious problem.
-- Do not redesign interfaces that already have a reference implementation.
-- Do not implement functionality outside the requested scope.
-
-If information required to make a safe architectural decision is missing, ask before making assumptions.
-
-For small implementation details that can be determined from the existing codebase or `layout/`, inspect the project instead of asking unnecessary questions.
+Never expose secrets or weaken existing security mechanisms.
 
 ---
 
 # Working Rules
 
-Unless explicitly requested otherwise:
+Work only on the requested scope.
 
-- Do not change existing business logic.
-- Do not modify authentication or authorization flows.
-- Do not change API contracts.
-- Do not change routing.
-- Do not rename existing components, services, models, or files.
-- Do not introduce breaking changes.
-- Do not refactor unrelated code while implementing a task.
-- Focus only on the requested functionality.
+Before changing code:
 
-If a required change may affect existing behavior, explain why and ask for confirmation before proceeding.
+1. Inspect the current implementation.
+2. For admin UI work, inspect the corresponding `layout/` implementation and its dependencies.
+3. Identify existing reusable React and CSS components.
+4. Make the smallest clean change that satisfies the task.
+5. Remove code only when it has actually become obsolete.
+6. Verify the result.
 
-Before modifying existing code:
+Unless explicitly requested:
 
-1. Understand the current implementation.
-2. Inspect related components and files.
-3. Inspect the corresponding reference inside `layout/` for UI changes.
-4. Reuse existing architecture whenever possible.
-5. Prefer extending existing code over replacing it.
-6. Implement only the required changes.
+- do not change business logic;
+- do not change authentication or authorization flows;
+- do not change API contracts or routing;
+- do not rename files, components, models, or services unnecessarily;
+- do not refactor unrelated code;
+- do not install new libraries;
+- do not modify unrelated pages;
+- do not introduce breaking changes.
 
-Do not perform broad refactoring unless explicitly requested.
+If required information can be determined by inspecting the project, inspect it instead of asking unnecessary questions.
 
----
-
-# Scope of Changes
-
-Implement only what is required for the current task.
-
-Avoid implementing future functionality unless explicitly requested.
-
-Use placeholders or mock data where appropriate instead of introducing unfinished business logic.
-
-Do not modify unrelated files.
-
-Do not introduce abstractions solely for possible future requirements.
-
-Do not create backend functionality when the task only requires frontend implementation.
-
-Do not create frontend functionality when the task only requires backend implementation.
-
-Keep each implementation focused on the requested result.
+If a change may significantly affect existing functionality and the correct behavior cannot be determined from the project, ask before proceeding.
 
 ---
 
-# Implementation Priority
+## Admin Migration Checklist
 
-When working on an existing feature, use the following order:
+When migrating a page from `layout/`:
 
-1. Understand the requested task.
-2. Inspect the current implementation.
-3. Inspect the relevant reference inside `layout/` for UI tasks.
-4. Identify existing reusable components, services, hooks, styles, and assets.
-5. Implement the smallest maintainable change.
-6. Use Tailwind CSS as the primary styling approach.
-7. Add custom SCSS only when necessary.
-8. Preserve existing behavior outside the requested scope.
-9. Verify responsive behavior when UI is affected.
-10. Update documentation only when an architectural or significant project-level decision was made.
+1. Inspect its HTML and related CSS, JS, and assets.
+2. Reuse already migrated components and styles where possible.
+3. Transfer the markup and styling faithfully to React.
+4. Preserve existing application functionality unless a static migration is explicitly requested.
+5. Migrate missing shared components only once into the shared layer.
+6. Remove only code made obsolete by this migration.
+7. Compare the result with `layout/`, including responsive behavior.
 
-The primary goal is not to rewrite existing code.
+Do not consider a migration complete if the result only approximately matches the source.
 
-The primary goal is to extend Shopra consistently, safely, and maintainably.
+---
+
+## Git and Documentation
+
+Keep commits focused and avoid unrelated changes.
+
+Update project documentation only when architecture, conventions, or significant implementation decisions change. Do not update architectural documentation for routine UI adjustments.
