@@ -97,55 +97,55 @@ export default function AdminEditPage() {
                 <div className="shopra-card-body">
 
                     <div class="shopra-alert-inner">
-                        {message && <div className="uk-alert uk-alert-primary uk-margin-small-bottom">{message}</div>}
+                        {message && <div className="mb-3 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-800">{message}</div>}
                     </div>
 
                     <form noValidate>
-                        <div className="uk-grid-small" uk-grid="true">
-                            <div className="uk-width-1-2@s">
-                                <div className="uk-margin">
-                                    <label className="uk-form-label" htmlFor="first_name">Имя</label>
-                                    <input id="first_name" name="first_name" className={`uk-input ${formErrors.first_name ? 'uk-form-danger' : ''}`} value={form.first_name} onChange={updateField} required />
-                                    {formErrors.first_name && <div className="uk-text-danger uk-text-small uk-margin-small-top">{formErrors.first_name[0]}</div>}
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div>
+                                <div>
+                                    <label className="mb-1.5 block text-sm font-semibold" htmlFor="first_name">Имя</label>
+                                    <input id="first_name" name="first_name" className={`w-full rounded-lg border bg-white px-3 py-2 outline-none ${formErrors.first_name ? 'border-red-500' : 'border-[color:var(--color-border)]'}`} value={form.first_name} onChange={updateField} required />
+                                    {formErrors.first_name && <div className="mt-1 text-xs text-red-600">{formErrors.first_name[0]}</div>}
                                 </div>
                             </div>
 
-                            <div className="uk-width-1-2@s">
-                                <div className="uk-margin">
-                                    <label className="uk-form-label" htmlFor="last_name">Фамилия</label>
-                                    <input id="last_name" name="last_name" className={`uk-input ${formErrors.last_name ? 'uk-form-danger' : ''}`} value={form.last_name} onChange={updateField} required />
-                                    {formErrors.last_name && <div className="uk-text-danger uk-text-small uk-margin-small-top">{formErrors.last_name[0]}</div>}
+                            <div>
+                                <div>
+                                    <label className="mb-1.5 block text-sm font-semibold" htmlFor="last_name">Фамилия</label>
+                                    <input id="last_name" name="last_name" className={`w-full rounded-lg border bg-white px-3 py-2 outline-none ${formErrors.last_name ? 'border-red-500' : 'border-[color:var(--color-border)]'}`} value={form.last_name} onChange={updateField} required />
+                                    {formErrors.last_name && <div className="mt-1 text-xs text-red-600">{formErrors.last_name[0]}</div>}
                                 </div>
                             </div>
 
-                            <div className="uk-width-1-2@s">
-                                <div className="uk-margin">
-                                    <label className="uk-form-label" htmlFor="email">Email</label>
-                                    <input id="email" name="email" type="email" className={`uk-input ${formErrors.email ? 'uk-form-danger' : ''}`} value={form.email} onChange={updateField} required />
-                                    {formErrors.email && <div className="uk-text-danger uk-text-small uk-margin-small-top">{formErrors.email[0]}</div>}
+                            <div>
+                                <div>
+                                    <label className="mb-1.5 block text-sm font-semibold" htmlFor="email">Email</label>
+                                    <input id="email" name="email" type="email" className={`w-full rounded-lg border bg-white px-3 py-2 outline-none ${formErrors.email ? 'border-red-500' : 'border-[color:var(--color-border)]'}`} value={form.email} onChange={updateField} required />
+                                    {formErrors.email && <div className="mt-1 text-xs text-red-600">{formErrors.email[0]}</div>}
                                 </div>
                             </div>
 
-                            <div className="uk-width-1-2@s">
-                                <div className="uk-margin">
-                                    <label className="uk-form-label" htmlFor="password">Пароль</label>
-                                    <input id="password" name="password" type="password" className={`uk-input ${formErrors.password ? 'uk-form-danger' : ''}`} value={form.password} onChange={updateField} placeholder={isNew ? '' : 'Оставьте пустым, чтобы не менять'} />
-                                    {formErrors.password && <div className="uk-text-danger uk-text-small uk-margin-small-top">{formErrors.password[0]}</div>}
+                            <div>
+                                <div>
+                                    <label className="mb-1.5 block text-sm font-semibold" htmlFor="password">Пароль</label>
+                                    <input id="password" name="password" type="password" className={`w-full rounded-lg border bg-white px-3 py-2 outline-none ${formErrors.password ? 'border-red-500' : 'border-[color:var(--color-border)]'}`} value={form.password} onChange={updateField} placeholder={isNew ? '' : 'Оставьте пустым, чтобы не менять'} />
+                                    {formErrors.password && <div className="mt-1 text-xs text-red-600">{formErrors.password[0]}</div>}
                                 </div>
                             </div>
 
-                            <div className="uk-width-1-1">
-                                <div className="uk-margin">
+                            <div className="sm:col-span-2">
+                                <div>
                                     <label>
-                                        <input name="is_active" className="uk-checkbox" type="checkbox" checked={form.is_active} onChange={updateField} />
-                                        <span className="uk-margin-small-left">Активен</span>
+                                        <input name="is_active" className="h-4 w-4 rounded border-gray-300 accent-[var(--color-accent)]" type="checkbox" checked={form.is_active} onChange={updateField} />
+                                        <span className="ml-2">Активен</span>
                                     </label>
                                 </div>
                             </div>
 
-                            <div className="uk-width-1-1 uk-flex">
+                            <div className="flex sm:col-span-2">
                                 <button className="button button-primary" type="button" onClick={() => saveData(false)} disabled={isSubmitting}>{isSubmitting ? 'Сохранение…' : isNew ? 'Создать' : 'Сохранить'}</button>
-                                <button className="button button-default uk-margin-small-left" type="button" onClick={() => saveData(true)} disabled={isSubmitting}>{isSubmitting ? 'Сохранение…' : 'Применить'}</button>
+                                <button className="button button-default ml-2" type="button" onClick={() => saveData(true)} disabled={isSubmitting}>{isSubmitting ? 'Сохранение…' : 'Применить'}</button>
                             </div>
                         </div>
                     </form>

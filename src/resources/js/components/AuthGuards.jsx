@@ -2,7 +2,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 function LoadingScreen() {
-    return <div className="uk-flex uk-flex-center uk-flex-middle uk-height-viewport uk-text-muted">Loading…</div>;
+    return <div className="flex min-h-screen items-center justify-center text-sm text-[color:var(--color-secondary)]">Loading…</div>;
 }
 
 export function RequireAuth({ children }) {

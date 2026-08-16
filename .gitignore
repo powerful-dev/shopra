@@ -6,3 +6,4 @@ src/storage/framework/sessions/*
 src/storage/framework/views/*
 src/bootstrap/cache/*
 src/.env
+*.Identifier

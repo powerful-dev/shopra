@@ -1,9 +1,10 @@
 // Shopra admin stylesheet entry point.
-// Import order intentionally preserves the cascade of the original admin.css.
+// Tailwind is loaded before this file from resources/css/tailwind.css.
 
-@use "admin/tokens";
-@use "admin/mixins";
-@use "admin/core";
-@use "admin/responsive";
-@use "admin/dashboard-polish";
-@use "admin/dashboard-polish-responsive";
+@use 'admin/core';
+@use 'admin/buttons';
+@use 'admin/badges';
+@use 'admin/data-list';
+@use 'admin/pagination';
+@use 'admin/chart';
+@use 'admin/setup-card';

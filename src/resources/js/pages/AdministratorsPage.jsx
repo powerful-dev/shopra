@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import PageContainer from '../components/admin/PageContainer';
 import { csrf, request } from '../services/api';
-import UIkit from 'uikit';
 
 const DEFAULT_PAGE = 1;
 
@@ -50,7 +49,6 @@ export default function AdministratorsPage() {
     const [statusChangingId, setStatusChangingId] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [adminToDelete, setAdminToDelete] = useState(null);
-    const deleteModalRef = useRef(null);
 
     const currentPage = Number(searchParams.get('page') ?? DEFAULT_PAGE);
     const navigate = useNavigate();
@@ -93,15 +91,9 @@ export default function AdministratorsPage() {
     const openDeleteModal = (admin) => {
         setAdminToDelete(admin);
         setMessage('');
-        if (deleteModalRef.current) {
-            UIkit.modal(deleteModalRef.current).show();
-        }
     };
 
     const closeDeleteModal = () => {
-        if (deleteModalRef.current) {
-            UIkit.modal(deleteModalRef.current).hide();
-        }
         setAdminToDelete(null);
     };
 
@@ -185,11 +177,11 @@ export default function AdministratorsPage() {
             </header>
 
 
-            <section className="shopra-dashboard-card uk-card uk-card-default">
+            <section className="shopra-dashboard-card">
 
                 {isLoading ? (
-                    <div className="uk-flex uk-flex-center uk-padding">
-                        <div uk-spinner="ratio: 1.2" />
+                    <div className="flex justify-center p-8">
+                        <div className="h-7 w-7 animate-spin rounded-full border-2 border-[color:var(--color-border)] border-t-[color:var(--color-accent)]" role="status" aria-label="Загрузка" />
                     </div>
                 ) : admins.length > 0 ? (
                     <div className="shopra-admin-list">
@@ -229,10 +221,10 @@ export default function AdministratorsPage() {
 
                                     </div>
                                     <div className="shopra-admin-list-actions">
-                                        <button className="uk-button uk-button-small uk-button-default" type="button" onClick={() => navigate(`/admin/administrators/${admin.id}`)}>
+                                        <button className="rounded-lg border border-[color:var(--color-border)] bg-white px-3 py-2 text-xs font-semibold" type="button" onClick={() => navigate(`/admin/administrators/${admin.id}`)}>
                                             Редактировать
                                         </button>
-                                        <button className="uk-button uk-button-small uk-button-danger" type="button" onClick={() => openDeleteModal(admin)} disabled={isCurrentUser}>
+                                        <button className="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40" type="button" onClick={() => openDeleteModal(admin)} disabled={isCurrentUser}>
                                             Удалить
                                         </button>
                                     </div>
@@ -242,27 +234,27 @@ export default function AdministratorsPage() {
                     </div>
                 ) : (
                     <div className="shopra-admin-empty">
-                        <p className="uk-margin-remove-bottom">Пока нет доступных администраторов.</p>
+                        <p className="mb-0">Пока нет доступных администраторов.</p>
                     </div>
                 )}
 
                 {!isLoading && meta && totalPages > 1 && (
-                    <ul className="uk-pagination uk-flex-center uk-margin-medium-top">
-                        <li className={currentPage <= 1 ? 'uk-disabled' : ''}>
+                    <ul className="mt-6 flex list-none justify-center gap-1 p-0">
+                        <li>
                             <button type="button" onClick={() => setSearchParams({ page: Math.max(1, currentPage - 1).toString() }, { replace: true })} disabled={currentPage <= 1}>
                                 ←
                             </button>
                         </li>
                         {paginationItems.map((page, index) => (
-                            <li key={`${page}-${index}`} className={page === currentPage ? 'uk-active' : ''}>
+                            <li key={`${page}-${index}`}>
                                 {page === '…' ? <span>{page}</span> : (
-                                    <button type="button" onClick={() => setSearchParams({ page: page.toString() }, { replace: true })}>
+                                    <button type="button" className={page === currentPage ? 'bg-[var(--color-accent)] text-white' : ''} onClick={() => setSearchParams({ page: page.toString() }, { replace: true })}>
                                         {page}
                                     </button>
                                 )}
                             </li>
                         ))}
-                        <li className={currentPage >= totalPages ? 'uk-disabled' : ''}>
+                        <li>
                             <button type="button" onClick={() => setSearchParams({ page: Math.min(totalPages, currentPage + 1).toString() }, { replace: true })} disabled={currentPage >= totalPages}>
                                 →
                             </button>
@@ -273,16 +265,16 @@ export default function AdministratorsPage() {
 
             {/* Edit form moved to a dedicated page: /admin/administrators/new or /admin/administrators/:id */}
 
-            <div ref={deleteModalRef} id="delete-admin-modal" uk-modal="true">
-                <div className="uk-modal-dialog uk-modal-body">
-                    <h2 className="uk-modal-title">Подтвердите удаление</h2>
-                    <p>{adminToDelete ? `Удалить администратора ${adminToDelete.first_name} ${adminToDelete.last_name}?` : 'Удалить администратора?'}</p>
-                    <div className="uk-flex uk-flex-right">
-                        <button className="uk-button uk-button-default uk-modal-close" type="button" onClick={closeDeleteModal}>Отмена</button>
-                        <button className="uk-button uk-button-danger uk-margin-small-left" type="button" onClick={removeAdministrator} disabled={isDeleting}>{isDeleting ? 'Удаление…' : 'Удалить'}</button>
+            {adminToDelete && <div className="fixed inset-0 z-[200] grid place-items-center bg-black/40 p-4 backdrop-blur-sm" role="presentation" onMouseDown={closeDeleteModal}>
+                <div className="w-full max-w-md rounded-2xl border border-[color:var(--color-border)] bg-white p-6 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="delete-admin-title" onMouseDown={(event) => event.stopPropagation()}>
+                    <h2 id="delete-admin-title" className="m-0 text-xl font-bold">Подтвердите удаление</h2>
+                    <p className="my-4 text-sm text-[color:var(--color-secondary)]">{`Удалить администратора ${adminToDelete.first_name} ${adminToDelete.last_name}?`}</p>
+                    <div className="flex justify-end gap-2">
+                        <button className="rounded-lg border border-[color:var(--color-border)] bg-white px-4 py-2 text-sm font-semibold" type="button" onClick={closeDeleteModal}>Отмена</button>
+                        <button className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50" type="button" onClick={removeAdministrator} disabled={isDeleting}>{isDeleting ? 'Удаление…' : 'Удалить'}</button>
                     </div>
                 </div>
-            </div>
+            </div>}
         </PageContainer>
     );
 }

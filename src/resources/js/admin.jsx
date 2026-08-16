@@ -1,10 +1,5 @@
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import UIkit from 'uikit';
-import Icons from 'uikit/dist/js/uikit-icons';
-
-import '@fontsource-variable/inter/wght.css';
-import 'uikit/dist/css/uikit.min.css';
 
 import { AuthProvider } from './hooks/useAuth';
 import AdminLayout from './components/admin/AdminLayout';
@@ -12,18 +7,16 @@ import { GuestOnly, RequireAuth } from './components/AuthGuards';
 import CreateShopPage from './pages/CreateShopPage';
 import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
+import ProductsPage from './pages/ProductsPage';
+import OrdersPage from './pages/OrdersPage';
 import PlaceholderPage from './pages/PlaceholderPage';
 import AdministratorsPage from './pages/AdministratorsPage';
 import AdminEditPage from './pages/AdminEditPage';
 import { placeholders } from './data/adminNavigation';
 
 
+import '../css/tailwind.css';
 import '../scss/admin.scss';
-
-if (!window.__SHOPRA_UIKIT_ICONS__) {
-    UIkit.use(Icons);
-    window.__SHOPRA_UIKIT_ICONS__ = true;
-}
 
 function AdminApp() {
     return (
@@ -32,6 +25,8 @@ function AdminApp() {
             <Route element={<RequireAuth><AdminLayout /></RequireAuth>}>
                 <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="/admin/dashboard" element={<DashboardPage />} />
+                <Route path="/admin/products" element={<ProductsPage />} />
+                <Route path="/admin/orders" element={<OrdersPage />} />
                 <Route path="/admin/administrators" element={<AdministratorsPage />} />
                 <Route path="/admin/administrators/new" element={<AdminEditPage />} />
                 <Route path="/admin/administrators/:id" element={<AdminEditPage />} />

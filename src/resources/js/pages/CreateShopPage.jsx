@@ -55,29 +55,29 @@ export default function CreateShopPage() {
     return (
         <PageContainer>
             <div className="shopra-create-shop">
-                <section className="shopra-dashboard-card uk-card uk-card-default">
-                    <h1 className="uk-card-title">Create shop</h1>
-                    {message && <div className="uk-alert-primary" uk-alert="true"><p>{message}</p></div>}
+                <section className="shopra-dashboard-card">
+                    <h1 className="text-2xl font-bold">Create shop</h1>
+                    {message && <div className="mt-4 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-800"><p>{message}</p></div>}
                     <form onSubmit={submit} noValidate>
-                        <div className="uk-margin">
-                            <label className="uk-form-label" htmlFor="name">Name</label>
-                            <input id="name" name="name" className={`uk-input ${errors.name ? 'uk-form-danger' : ''}`} value={form.name} onChange={updateField} required />
-                            {errors.name && <div className="uk-text-danger uk-text-small uk-margin-small-top">{errors.name[0]}</div>}
+                        <div className="mt-4">
+                            <label className="mb-1.5 block text-sm font-semibold" htmlFor="name">Name</label>
+                            <input id="name" name="name" className={`w-full rounded-lg border bg-white px-3 py-2 outline-none ${errors.name ? 'border-red-500' : 'border-[color:var(--color-border)]'}`} value={form.name} onChange={updateField} required />
+                            {errors.name && <div className="mt-1 text-xs text-red-600">{errors.name[0]}</div>}
                         </div>
-                        <div className="uk-margin">
-                            <label className="uk-form-label" htmlFor="theme">Theme</label>
-                            <select id="theme" name="theme" className={`uk-select ${errors.theme ? 'uk-form-danger' : ''}`} value={form.theme} onChange={updateField} required>
+                        <div className="mt-4">
+                            <label className="mb-1.5 block text-sm font-semibold" htmlFor="theme">Theme</label>
+                            <select id="theme" name="theme" className={`w-full rounded-lg border bg-white px-3 py-2 outline-none ${errors.theme ? 'border-red-500' : 'border-[color:var(--color-border)]'}`} value={form.theme} onChange={updateField} required>
                                 <option value="">Select a theme</option>
                                 {themes.map((theme) => <option key={theme.value} value={theme.value}>{theme.label}</option>)}
                             </select>
-                            {errors.theme && <div className="uk-text-danger uk-text-small uk-margin-small-top">{errors.theme[0]}</div>}
+                            {errors.theme && <div className="mt-1 text-xs text-red-600">{errors.theme[0]}</div>}
                         </div>
-                        <div className="uk-margin">
-                            <label className="uk-form-label" htmlFor="logo">Logo</label>
-                            <div uk-form-custom="target: true"><input id="logo" name="logo" type="file" accept="image/png,image/jpeg,image/webp" onChange={updateLogo} /><input className="uk-input uk-form-width-medium" type="text" placeholder="Select file" disabled /></div>
-                            {errors.logo && <div className="uk-text-danger uk-text-small uk-margin-small-top">{errors.logo[0]}</div>}
+                        <div className="mt-4">
+                            <label className="mb-1.5 block text-sm font-semibold" htmlFor="logo">Logo</label>
+                            <input id="logo" name="logo" className="block w-full rounded-lg border border-[color:var(--color-border)] bg-white px-3 py-2 text-sm" type="file" accept="image/png,image/jpeg,image/webp" onChange={updateLogo} />
+                            {errors.logo && <div className="mt-1 text-xs text-red-600">{errors.logo[0]}</div>}
                         </div>
-                        <button className="uk-button uk-button-primary" type="submit" disabled={isSubmitting}>{isSubmitting ? 'Creating…' : 'Create shop'}</button>
+                        <button className="mt-4 rounded-lg bg-[var(--color-accent)] px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50" type="submit" disabled={isSubmitting}>{isSubmitting ? 'Creating…' : 'Create shop'}</button>
                     </form>
                 </section>
             </div>
