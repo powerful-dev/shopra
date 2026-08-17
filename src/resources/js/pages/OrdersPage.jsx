@@ -18,7 +18,7 @@ const orders = [
 const rowClass = 'data-list__item !min-h-[150px] !grid-cols-[1fr_auto] !gap-2 !rounded-none !border-x-0 !border-b !border-t-0 !px-[11px] !py-2 max-md:!rounded-[10px] max-md:!border max-md:!p-[10px] md:!min-h-[150px] md:!grid-cols-[1fr_auto] md:!gap-[7px] md:!rounded-[10px] md:!border md:!p-[10px] 2xl:!min-h-[68px] 2xl:!grid-cols-[95px_minmax(135px,1.1fr)_85px_95px_minmax(125px,max-content)_76px] 2xl:!rounded-none 2xl:!border-x-0 2xl:!border-t-0 2xl:!px-[11px] 2xl:!py-2';
 
 export default function OrdersPage() {
-    return <div className="page-container pb-8 pt-[30px] max-sm:!mx-[13px] max-sm:pt-[18px] sm:max-lg:!mx-5 lg:pt-6">
+    return <>
         <section className="mb-[18px] flex flex-wrap items-end justify-between gap-6 max-sm:items-start">
             <div className="max-w-[720px]"><p className="mb-[3px] text-[11px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-accent)]">Продажи</p><h1 className="m-0 text-[32px] font-[760] tracking-[-0.05em] text-[color:var(--color-primary)] max-sm:text-[27px]">Заказы</h1><p className="mt-[5px] text-[13px] leading-[1.5] text-[color:var(--color-secondary)]">Находите заказы по номеру, покупателю, телефону или трек‑номеру и ведите их от оплаты до доставки.</p></div>
             <button type="button" className="button button--secondary min-h-[41px] whitespace-nowrap max-sm:w-full"><Icon type="file" />Экспорт заказов</button>
@@ -33,7 +33,7 @@ export default function OrdersPage() {
             </div>
             <OrderDetails />
         </section>
-    </div>;
+    </>;
 }
 
 function OrderRow({ order: [id,date,initial,customer,phone,payment,paymentTone,delivery,deliveryDetail,status,statusTone,amount,selected] }) {

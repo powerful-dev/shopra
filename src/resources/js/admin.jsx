@@ -13,7 +13,12 @@ import PlaceholderPage from './pages/PlaceholderPage';
 import AdministratorsPage from './pages/AdministratorsPage';
 import AdminEditPage from './pages/AdminEditPage';
 import { placeholders } from './data/adminNavigation';
-
+import DeliveriesPage from './pages/DeliveriesPage';
+import AppearancePage from './pages/AppearancePage';
+import PaymentPage from './pages/PaymentPage';
+import DiscountsPage from './pages/DiscountsPage';
+import AnalyticsPage from './pages/AnalyticsPage';
+import SettingsPage from './pages/SettingsPage';
 
 import '../css/tailwind.css';
 import '../scss/admin.scss';
@@ -31,6 +36,12 @@ function AdminApp() {
                 <Route path="/admin/administrators/new" element={<AdminEditPage />} />
                 <Route path="/admin/administrators/:id" element={<AdminEditPage />} />
                 <Route path="/admin/shops/create" element={<CreateShopPage />} />
+                <Route path="/admin/deliveries" element={<DeliveriesPage />} />
+                <Route path="/admin/appearance" element={<AppearancePage />} />
+                <Route path="/admin/payments" element={<PaymentPage />} />
+                <Route path="/admin/discounts" element={<DiscountsPage />} />
+                <Route path="/admin/analytics" element={<AnalyticsPage />} />
+                <Route path="/admin/settings" element={<SettingsPage />} />
                 {Object.entries(placeholders).map(([slug, [title, description]]) => <Route key={slug} path={`/admin/${slug}`} element={<PlaceholderPage title={title} description={description} />} />)}
             </Route>
             <Route path="*" element={<Navigate to="/admin" replace />} />

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import PageContainer from '../components/admin/PageContainer';
-import DashboardCard from '../components/admin/DashboardCard';
+import DashboardCard from '../components/admin/Dashboard/DashboardCard';
 import { csrf, request } from '../services/api';
 
 export default function AdminEditPage() {

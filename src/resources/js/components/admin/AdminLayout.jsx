@@ -35,7 +35,9 @@ export default function AdminLayout() {
             <Sidebar isOpen={isMobileMenuOpen} user={user} onClose={() => setIsMobileMenuOpen(false)} onLogout={signOut} />
             <div className="min-w-0">
                 <Header onMenuClick={() => setIsMobileMenuOpen(true)} />
-                <main className="min-w-0 flex-1"><Outlet /></main>
+                <main className="min-w-0 flex-1">
+                    <div className="page-container pb-8 pt-[30px] max-sm:!mx-[13px] sm:max-lg:!mx-5"><Outlet /></div>
+                </main>
             </div>
         </div>
     );

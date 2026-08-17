@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import Brand from './Brand/Brand';
+import Brand from './Brand';
 
 export default function Header({ onMenuClick }) {
     const [notificationsOpen, setNotificationsOpen] = useState(false);

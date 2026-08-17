@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { ApiError } from '../services/api';
-import Brand from '../components/admin/Brand/Brand';
+import Brand from '../components/admin/Brand';
 
 export default function LoginPage() {
     const { login, user } = useAuth();

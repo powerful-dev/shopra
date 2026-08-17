@@ -1,6 +1,5 @@
-import { NavLink } from 'react-router-dom';
-import './Sidebar.css';
-import Brand from './Brand/Brand';
+import { NavLink } from 'react-router-dom'
+import Brand from './Brand';
 import UserMenu from './UserMenu';
 import HomeIcon from '../icons/HomeIcon';
 import AppearanceIcon from '../icons/AppearanceIcon';
@@ -18,12 +17,11 @@ const navigation = [
     { label: 'Внешний вид', path: '/admin/appearance', icon: AppearanceIcon },
     { label: 'Товары', path: '/admin/products', icon: ProductsIcon },
     { label: 'Заказы', path: '/admin/orders', icon: OrdersIcon, badge: '8' },
-    { label: 'Доставка', path: '/admin/shipping', icon: ShippingIcon },
+    { label: 'Доставка', path: '/admin/deliveries', icon: ShippingIcon },
     { label: 'Оплата', path: '/admin/payments', icon: PaymentsIcon },
     { label: 'Скидки', path: '/admin/discounts', icon: DiscountsIcon },
     { label: 'Статистика', path: '/admin/analytics', icon: AnalyticsIcon },
     { label: 'Домен', path: '/admin/domain', icon: DomainIcon },
-    { label: 'Администраторы', path: '/admin/administrators', icon: SettingsIcon },
     { label: 'Настройки', path: '/admin/settings', icon: SettingsIcon },
 ];
 

@@ -1,7 +1,7 @@
-import CalendarIcon from '../icons/CalendarIcon';
-import EyeIcon from '../icons/EyeIcon';
-import OpenLinkIcon from '../icons/OpenLinkIcon';
-import { useLocalDateTime } from '../../hooks/useLocalDateTime';
+import CalendarIcon from '../../icons/CalendarIcon';
+import EyeIcon from '../../icons/EyeIcon';
+import OpenLinkIcon from '../../icons/OpenLinkIcon';
+import { useLocalDateTime } from '../../../hooks/useLocalDateTime';
 
 export default function DashboardWelcome({userName}) {
 
@@ -9,7 +9,7 @@ export default function DashboardWelcome({userName}) {
     const homeUrl = document.getElementById('admin-app')?.dataset.storeUrl;
 
     return (
-        <section className="mb-[27px] block px-0.5 pt-[25px] sm:flex sm:flex-wrap sm:items-start sm:gap-[18px] xl:mb-6 xl:flex-nowrap xl:items-end xl:justify-between xl:gap-6 xl:pt-[34px]">
+        <section className="mb-[27px] block px-0.5 sm:flex sm:flex-wrap sm:items-start sm:gap-[18px] xl:mb-6 xl:flex-nowrap xl:items-end xl:justify-between xl:gap-6">
             <div className="min-w-0">
   
                 <h1 className="text-[27px] font-[720] tracking-[-0.045em] text-[color:var(--color-primary)] sm:text-[clamp(26px,2.3vw,36px)]">{greeting}, { userName }! <span className="inline-block">👋</span></h1>

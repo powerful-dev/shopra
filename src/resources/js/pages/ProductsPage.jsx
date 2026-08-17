@@ -18,7 +18,7 @@ const productRowGrid = '!grid-cols-[25px_minmax(245px,1.6fr)_minmax(100px,.75fr)
 
 export default function ProductsPage() {
     return (
-        <div className="mx-4 pb-8 pt-[30px] max-sm:!mx-[13px] max-sm:pt-[18px] sm:max-lg:!mx-5 lg:mx-8 lg:pt-6">
+        <>
             <header className="mb-5 flex flex-wrap items-end justify-between gap-6 max-md:items-start">
                 <div>
                     <p className="mb-[3px] text-[11px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-accent)]">Каталог магазина</p>
@@ -57,7 +57,7 @@ export default function ProductsPage() {
                     </nav>
                 </footer>
             </section>
-        </div>
+        </>
     );
 }
 
