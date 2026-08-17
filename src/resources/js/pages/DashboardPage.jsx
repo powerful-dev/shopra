@@ -5,11 +5,15 @@ import RecentOrders from '../components/admin/RecentOrders';
 import SalesChart from '../components/admin/SalesChart';
 import SetupProgress from '../components/admin/SetupProgress';
 import StatCard from '../components/admin/StatCard';
+import { useAuth } from '../hooks/useAuth';
 
 export default function DashboardPage() {
+
+    const { user } = useAuth();
+
     return (
         <div className="mx-4 pb-8 max-sm:!mx-[13px] sm:max-lg:!mx-5 lg:mx-8">
-            <DashboardWelcome />
+            <DashboardWelcome userName={user.name.split(' ')[0]} />
             <section className="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
                 <StatCard type="orders" label="Новые заказы" value="12" detail="+3 за сегодня" />
                 <StatCard type="sales" label="Продажи за сегодня" value="24 560 ₴" detail="+18% к вчера" />
