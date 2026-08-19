@@ -39,6 +39,16 @@ services:
     depends_on:
       - php
 
+  adminer:
+    image: adminer
+    container_name: shopra_adminer
+
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      - postgres
+
   postgres:
     image: postgres:17
 
