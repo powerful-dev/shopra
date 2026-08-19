@@ -1,4 +1,7 @@
-@import 'tailwindcss';
+@import "tailwindcss";
+
+@source "../js/**/*.js";
+@source "../js/**/*.jsx";
 
 @theme {
     --breakpoint-sm: 36rem;
