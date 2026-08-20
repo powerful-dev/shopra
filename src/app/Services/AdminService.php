@@ -10,13 +10,23 @@ use App\Enums\Role;
 
 class AdminService
 {
-    public function paginate(): LengthAwarePaginator
+    public function paginate(?string $search = null): LengthAwarePaginator
     {
+        $search = trim((string) $search);
+
         return User::query()
             ->with([
                 'roles',
                 'modules:id,name',
             ])
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query
+                        ->whereLike('first_name', "%{$search}%", caseSensitive: false)
+                        ->orWhereLike('last_name', "%{$search}%", caseSensitive: false)
+                        ->orWhereLike('email', "%{$search}%", caseSensitive: false);
+                });
+            })
             ->orderByDesc('created_at')
             ->paginate(10);
     }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { csrf, request } from '../../services/api';
 import PageLoader from '../../components/admin/PageLoader';
@@ -27,8 +27,10 @@ export default function AdministratorsPage() {
     const [admins, setAdmins] = useState([]);
     const [meta, setMeta] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isSearching, setIsSearching] = useState(false);
     const [message, setMessage] = useState('');
-    const [query, setQuery] = useState('');
+    const currentSearch = searchParams.get('search') ?? '';
+    const [query, setQuery] = useState(currentSearch);
     const [statusChangingId, setStatusChangingId] = useState(null);
     const [adminToDelete, setAdminToDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -38,29 +40,66 @@ export default function AdministratorsPage() {
     const currentPage = Number(searchParams.get('page') ?? DEFAULT_PAGE);
     const currentAdminId = Number(window.__SHOPRA_ADMIN_ID__);
     const [availableModulesCount, setAvailableModulesCount] = useState(0);
+    const isInitialLoad = useRef(true);
 
-    const loadAdmins = async (page = currentPage) => {
-        setIsLoading(true);
+    const loadAdmins = async (page = currentPage, search = currentSearch, initial = false) => {
+        if (initial) {
+            setIsLoading(true);
+        } else {
+            setIsSearching(true);
+        }
         setMessage('');
         try {
-            const payload = await request(`/api/admins?page=${page}`);
+            const params = new URLSearchParams({ page: String(page) });
+            if (search) params.set('search', search);
+            const payload = await request(`/api/admins?${params.toString()}`);
             setAdmins(payload.data ?? []);
             setMeta(payload.meta ?? null);
             setAvailableModulesCount(payload.available_modules_count ?? 0);
         } catch (error) {
             setMessage(error.message ?? 'Не удалось загрузить администраторов.');
         } finally {
-            setIsLoading(false);
+            if (initial) {
+                isInitialLoad.current = false;
+                setIsLoading(false);
+            } else {
+                setIsSearching(false);
+            }
         }
     };
 
     useEffect(() => {
         if (!Number.isInteger(currentPage) || currentPage < 1) {
-            setSearchParams({ page: String(DEFAULT_PAGE) }, { replace: true });
+            const params = new URLSearchParams(searchParams);
+            params.set('page', String(DEFAULT_PAGE));
+            setSearchParams(params, { replace: true });
             return;
         }
-        loadAdmins(currentPage);
-    }, [currentPage]);
+        const initial = isInitialLoad.current;
+        loadAdmins(currentPage, currentSearch, initial);
+    }, [currentPage, currentSearch]);
+
+    useEffect(() => {
+        setQuery(currentSearch);
+    }, [currentSearch]);
+
+    useEffect(() => {
+        if (query === currentSearch) return undefined;
+
+        const timeoutId = window.setTimeout(() => {
+            const params = new URLSearchParams(searchParams);
+            const search = query.trim();
+            if (search) {
+                params.set('search', search);
+            } else {
+                params.delete('search');
+            }
+            params.set('page', String(DEFAULT_PAGE));
+            setSearchParams(params, { replace: true });
+        }, 700);
+
+        return () => window.clearTimeout(timeoutId);
+    }, [query, currentSearch, searchParams, setSearchParams]);
 
     useEffect(() => {
         if (!location.state?.message) return;
@@ -106,8 +145,10 @@ export default function AdministratorsPage() {
             await request(`/api/admins/${adminToDelete.id}`, { method: 'DELETE' });
             setAdminToDelete(null);
             const targetPage = admins.length === 1 && currentPage > 1 ? currentPage - 1 : currentPage;
-            setSearchParams({ page: String(targetPage) }, { replace: true });
-            await loadAdmins(targetPage);
+            const params = new URLSearchParams(searchParams);
+            params.set('page', String(targetPage));
+            setSearchParams(params, { replace: true });
+            await loadAdmins(targetPage, currentSearch);
             setMessage('Администратор удалён.');
         } catch (error) {
             setMessage(error.message ?? 'Не удалось удалить администратора.');
@@ -118,12 +159,12 @@ export default function AdministratorsPage() {
 
     const totalPages = meta?.last_page ?? 1;
     const pages = useMemo(() => paginationItems(currentPage, totalPages), [currentPage, totalPages]);
-    const filteredAdmins = useMemo(() => {
-        const needle = query.trim().toLocaleLowerCase('ru');
-        if (!needle) return admins;
-        return admins.filter((admin) => [admin.full_name, admin.first_name, admin.last_name, admin.email]
-            .filter(Boolean).some((value) => value.toLocaleLowerCase('ru').includes(needle)));
-    }, [admins, query]);
+
+    const setPage = (page) => {
+        const params = new URLSearchParams(searchParams);
+        params.set('page', String(page));
+        setSearchParams(params, { replace: true });
+    };
 
     if (isLoading) {
         return <PageLoader />;
@@ -158,9 +199,9 @@ export default function AdministratorsPage() {
                     <span>Имя</span><span>Доступ</span><span>E-mail</span><span>Активность</span><span className="sr-only">Действия</span>
                 </div>
 
-                {isLoading ? <Loading /> : filteredAdmins.length > 0 ? (
+                {isSearching ? <Loading /> : admins.length > 0 ? (
                     <div className="data-list data-list--uniform-typography grid !min-h-0 gap-2 bg-[#faf8f6] !p-2 md:grid-cols-2 2xl:block 2xl:gap-0 2xl:bg-transparent 2xl:!p-0" role="list">
-                        {filteredAdmins.map((admin) => {
+                        {admins.map((admin) => {
                             const isCurrentUser = admin.id === currentAdminId;
                             const displayName = admin.full_name || [admin.first_name, admin.last_name].filter(Boolean).join(' ') || admin.email;
                             const isSuperAdmin = Boolean(admin.is_superadmin);
@@ -262,10 +303,10 @@ export default function AdministratorsPage() {
                 ) : <div className="min-h-40 bg-[#faf8f6] px-4 py-12 text-center text-[12px] text-[color:var(--color-secondary)]">{query ? 'По вашему запросу ничего не найдено.' : 'Пока нет доступных администраторов.'}</div>}
             </section>
 
-            {!isLoading && meta && totalPages > 1 && !query && <nav className="mt-5 flex justify-center" aria-label="Пагинация администраторов"><div className="pagination">
-                <button className="pagination__item" type="button" onClick={() => setSearchParams({ page: String(Math.max(1, currentPage - 1)) }, { replace: true })} disabled={currentPage <= 1} aria-label="Предыдущая страница">←</button>
-                {pages.map((page, index) => page === '…' ? <span className="grid h-[29px] min-w-[29px] place-items-center text-[12px] text-[color:var(--color-secondary)]" key={`ellipsis-${index}`}>…</span> : <button className={`pagination__item ${page === currentPage ? 'pagination__item--active' : ''}`} type="button" onClick={() => setSearchParams({ page: String(page) }, { replace: true })} key={page}>{page}</button>)}
-                <button className="pagination__item" type="button" onClick={() => setSearchParams({ page: String(Math.min(totalPages, currentPage + 1)) }, { replace: true })} disabled={currentPage >= totalPages} aria-label="Следующая страница">→</button>
+            {!isLoading && meta && totalPages > 1 && <nav className="mt-5 flex justify-center" aria-label="Пагинация администраторов"><div className="pagination">
+                <button className="pagination__item" type="button" onClick={() => setPage(Math.max(1, currentPage - 1))} disabled={currentPage <= 1} aria-label="Предыдущая страница">←</button>
+                {pages.map((page, index) => page === '…' ? <span className="grid h-[29px] min-w-[29px] place-items-center text-[12px] text-[color:var(--color-secondary)]" key={`ellipsis-${index}`}>…</span> : <button className={`pagination__item ${page === currentPage ? 'pagination__item--active' : ''}`} type="button" onClick={() => setPage(page)} key={page}>{page}</button>)}
+                <button className="pagination__item" type="button" onClick={() => setPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage >= totalPages} aria-label="Следующая страница">→</button>
             </div></nav>}
 
             {adminToDelete && <DeleteModal admin={adminToDelete} isDeleting={isDeleting} onClose={() => setAdminToDelete(null)} onDelete={removeAdministrator} />}

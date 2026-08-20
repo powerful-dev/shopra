@@ -20,7 +20,7 @@ class AdminController extends Controller
     {
     }
 
-    public function index(): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
         $site = Site::query()
             ->with('siteType')
@@ -32,7 +32,7 @@ class AdminController extends Controller
             ->count();
 
         return AdminResource::collection(
-            $this->adminService->paginate()
+            $this->adminService->paginate($request->string('search')->toString())
         )->additional([
             'available_modules_count' => $availableModulesCount,
         ]);
