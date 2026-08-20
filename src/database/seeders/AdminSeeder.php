@@ -34,29 +34,33 @@ class AdminSeeder extends Seeder
 
         $user->syncRoles([$superAdminRole]);
 
-        $existingEmails = User::query()->pluck('email')->all();
+        if (app()->environment('local')) {
+            $existingEmails = User::query()->pluck('email')->all();
 
-        for ($i = 0; $i < 30; $i++) {
-            $email = fake()->unique()->safeEmail();
-
-            while (in_array($email, $existingEmails, true)) {
+            for ($i = 0; $i < 30; $i++) {
                 $email = fake()->unique()->safeEmail();
+
+                while (in_array($email, $existingEmails, true)) {
+                    $email = fake()->unique()->safeEmail();
+                }
+
+                $firstName = fake()->firstName();
+                $lastName = fake()->lastName();
+
+                User::query()->create([
+                    'name' => trim($firstName.' '.$lastName),
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'email' => $email,
+                    'password' => Hash::make('password'),
+                    'is_active' => fake()->boolean(),
+                ]);
+
+                $existingEmails[] = $email;
             }
-
-            $firstName = fake()->firstName();
-            $lastName = fake()->lastName();
-
-            User::query()->create([
-                'name' => trim($firstName.' '.$lastName),
-                'first_name' => $firstName,
-                'last_name' => $lastName,
-                'email' => $email,
-                'password' => Hash::make('password'),
-                'is_active' => fake()->boolean(),
-            ]);
-
-            $existingEmails[] = $email;
         }
+
+
     }
 
     /**
