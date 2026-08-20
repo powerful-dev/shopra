@@ -1,0 +1,5 @@
+.popover { position:relative; display:block; width:100%; }
+.popover__trigger { cursor:pointer; }
+.popover__content { position:absolute; top:calc(100% + 10px); right:0; z-index:60; min-width:176px; padding:.5rem; border:1px solid var(--color-border); border-radius:1rem; background:var(--color-surface); box-shadow:var(--shadow-md); }
+.popover__item { display:flex; align-items:center; width:100%; gap:.7rem; padding:.3rem .35rem; border-radius:.7rem; color:inherit; font-size:.85rem; font-weight:600; transition:background-color 140ms ease,color 140ms ease; }
+.popover__item:hover,.popover__item:focus-visible { background:var(--sidebar-item-hover); color:var(--sidebar-active-text); outline:none; }

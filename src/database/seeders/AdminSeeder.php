@@ -13,22 +13,26 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        $role = RoleModel::findOrCreate(Role::SuperAdmin->value, 'web');
+        $superAdminRole = RoleModel::findOrCreate(
+            Role::SuperAdmin->value,
+            'web'
+        );
 
         $admin = $this->administratorAttributes();
+        [$firstName, $lastName] = $this->splitName($admin['name']);
 
         $user = User::query()->updateOrCreate(
             ['email' => $admin['email']],
             [
                 'name' => $admin['name'],
-                'first_name' => $this->splitName($admin['name'])[0],
-                'last_name' => $this->splitName($admin['name'])[1],
+                'first_name' => $firstName,
+                'last_name' => $lastName,
                 'password' => Hash::make($admin['password']),
                 'is_active' => true,
             ],
         );
 
-        $user->assignRole($role);
+        $user->syncRoles([$superAdminRole]);
 
         $existingEmails = User::query()->pluck('email')->all();
 
@@ -42,7 +46,7 @@ class AdminSeeder extends Seeder
             $firstName = fake()->firstName();
             $lastName = fake()->lastName();
 
-            $adminUser = User::query()->create([
+            User::query()->create([
                 'name' => trim($firstName.' '.$lastName),
                 'first_name' => $firstName,
                 'last_name' => $lastName,
@@ -51,7 +55,6 @@ class AdminSeeder extends Seeder
                 'is_active' => fake()->boolean(),
             ]);
 
-            $adminUser->assignRole($role);
             $existingEmails[] = $email;
         }
     }
@@ -73,7 +76,9 @@ class AdminSeeder extends Seeder
         $value = getenv($key);
 
         if (! is_string($value) || trim($value) === '') {
-            throw new RuntimeException("Required environment variable [{$key}] is missing.");
+            throw new RuntimeException(
+                "Required environment variable [{$key}] is missing."
+            );
         }
 
         return $value;
@@ -85,12 +90,19 @@ class AdminSeeder extends Seeder
     private function splitName(string $name): array
     {
         $parts = preg_split('/\s+/', trim($name)) ?: [''];
-        $parts = array_values(array_filter($parts, static fn (string $part): bool => $part !== ''));
-        $lastName = count($parts) > 1 ? implode(' ', array_slice($parts, 1)) : '';
+
+        $parts = array_values(
+            array_filter(
+                $parts,
+                static fn (string $part): bool => $part !== ''
+            )
+        );
 
         return [
             $parts[0] ?? '',
-            $lastName,
+            count($parts) > 1
+                ? implode(' ', array_slice($parts, 1))
+                : '',
         ];
     }
 }

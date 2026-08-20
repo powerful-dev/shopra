@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Enums\Role;
 
 /** @mixin \App\Models\User */
 class AdminResource extends JsonResource
@@ -22,6 +23,11 @@ class AdminResource extends JsonResource
             'is_active' => (bool) $this->is_active,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
+            'is_superadmin' => $this->hasRole(Role::SuperAdmin->value),
+            'modules' => $this->modules->map(fn ($module) => [
+                'id' => $module->id,
+                'name' => $module->name,
+            ]),
         ];
     }
 }

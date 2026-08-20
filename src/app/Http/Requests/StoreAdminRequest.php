@@ -21,6 +21,8 @@ class StoreAdminRequest extends FormRequest
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
             'is_active' => ['required', 'boolean'],
+            'module_ids' => ['sometimes', 'array'],
+            'module_ids.*' => ['integer', 'exists:modules,id'],
         ];
     }
 }

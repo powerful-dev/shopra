@@ -12,6 +12,7 @@ use App\Services\AdminService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Models\Site;
 
 class AdminController extends Controller
 {
@@ -21,7 +22,20 @@ class AdminController extends Controller
 
     public function index(): AnonymousResourceCollection
     {
-        return AdminResource::collection($this->adminService->paginate());
+        $site = Site::query()
+            ->with('siteType')
+            ->firstOrFail();
+
+        $availableModulesCount = $site->siteType
+            ->modules()
+            ->where('is_required', false)
+            ->count();
+
+        return AdminResource::collection(
+            $this->adminService->paginate()
+        )->additional([
+            'available_modules_count' => $availableModulesCount,
+        ]);
     }
 
     public function store(StoreAdminRequest $request): JsonResponse

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import PageContainer from '../components/admin/PageContainer';
-import { csrf, request } from '../services/api';
+import PageContainer from '../../components/admin/PageContainer';
+import { csrf, request } from '../../services/api';
 
 const DEFAULT_PAGE = 1;
 
@@ -20,6 +20,7 @@ const SearchIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="n
 const MoreIcon = () => <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg>;
 const PencilIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /><path d="m15 5 4 4" /></svg>;
 const TrashIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>;
+const CheckIcon = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>;
 
 export default function AdministratorsPage() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -36,6 +37,7 @@ export default function AdministratorsPage() {
     const location = useLocation();
     const currentPage = Number(searchParams.get('page') ?? DEFAULT_PAGE);
     const currentAdminId = Number(window.__SHOPRA_ADMIN_ID__);
+    const [availableModulesCount, setAvailableModulesCount] = useState(0);
 
     const loadAdmins = async (page = currentPage) => {
         setIsLoading(true);
@@ -44,6 +46,7 @@ export default function AdministratorsPage() {
             const payload = await request(`/api/admins?page=${page}`);
             setAdmins(payload.data ?? []);
             setMeta(payload.meta ?? null);
+            setAvailableModulesCount(payload.available_modules_count ?? 0);
         } catch (error) {
             setMessage(error.message ?? 'Не удалось загрузить администраторов.');
         } finally {
@@ -133,7 +136,12 @@ export default function AdministratorsPage() {
                 <button type="button" className="button button--primary min-h-[46px] whitespace-nowrap px-[18px] max-md:w-full" onClick={() => navigate('/admin/administrators/new')}><PlusIcon />Добавить администратора</button>
             </section>
 
-            {message && <div className="mb-4 rounded-[10px] border border-[#d9e5f2] bg-[#f2f7fc] px-4 py-3 text-[12px] text-[#506b86]" role="status">{message}</div>}
+            {message && (
+                <div className={`alert alert--success h-[40px] mb-5 py-0 max-lg:col-span-2 max-lg:row-start-2 max-lg:justify-self-end`} role="status" aria-live="polite">
+                    <span className="alert__icon"><CheckIcon /></span>
+                    <span>{message}</span>
+                </div>
+            )}
 
             <section className="overflow-visible rounded-[16px] border border-[color:var(--color-border)] bg-[rgba(255,255,255,.95)] shadow-[var(--shadow-sm)]">
                 <div className="flex items-center gap-[7px] border-b border-[#eee9e5] p-[11px] max-sm:grid max-sm:grid-cols-1">
@@ -151,12 +159,52 @@ export default function AdministratorsPage() {
                         {filteredAdmins.map((admin) => {
                             const isCurrentUser = admin.id === currentAdminId;
                             const displayName = admin.full_name || [admin.first_name, admin.last_name].filter(Boolean).join(' ') || admin.email;
+                            const isSuperAdmin = Boolean(admin.is_superadmin);
+                            const adminModules = admin.modules ?? [];
+                            const hasFullAccess =
+                                !isSuperAdmin &&
+                                availableModulesCount > 0 &&
+                                adminModules.length === availableModulesCount;
+
+                            const modulesNames = adminModules
+                                .map((module) => module.name)
+                                .join(', ');
                             return (
                                 <div className="data-list__item relative !min-h-[152px] !grid-cols-[minmax(0,1fr)_auto] !gap-[9px] !rounded-[10px] !border !p-[12px] max-2xl:!rounded-[10px] 2xl:!min-h-[73px] 2xl:!grid-cols-[minmax(230px,1.2fr)_minmax(220px,1fr)_minmax(210px,1fr)_100px_50px] 2xl:!gap-[10px] 2xl:!rounded-none 2xl:!border-x-0 2xl:!border-b 2xl:!border-t-0 2xl:!px-[15px] 2xl:!py-[7px]" role="listitem" key={admin.id}>
                                     <span className="flex min-w-0 flex-col"><strong className="truncate text-[13px] text-[#312d29]">{displayName}</strong><small className="mt-[3px] text-[11px] text-[#958c85]">{isCurrentUser ? 'Владелец магазина · текущий аккаунт' : 'Администратор'}</small></span>
-                                    {isCurrentUser
-                                        ? <span className="status-badge status-badge--paid col-span-2 row-start-2 max-sm:!col-start-1 max-sm:!row-start-2 max-sm:!justify-self-start 2xl:col-span-1 2xl:row-auto">Полный доступ</span>
-                                        : <span className="col-span-2 row-start-2 flex min-w-0 flex-col max-sm:!col-start-1 max-sm:!row-start-2 2xl:col-span-1 2xl:row-auto"><strong className="text-[12px]">Ограниченный доступ</strong><small className="mt-[3px] truncate text-[11px] text-[#958c85]">Управление магазином</small></span>}
+                                    <span className="col-span-2 row-start-2 flex min-w-0 flex-col gap-[4px] max-sm:!col-start-1 max-sm:!row-start-2 2xl:col-span-1 2xl:row-auto">
+                                        <span className="flex flex-wrap items-center gap-[4px]">
+                                            {isCurrentUser && (
+                                                <span className="status-badge status-badge--paid">
+                                                    Это вы
+                                                </span>
+                                            )}
+
+                                            {isSuperAdmin && (
+                                                <span className="status-badge status-badge--paid">
+                                                    Владелец, Полный доступ
+                                                </span>
+                                            )}
+
+                                            {!isSuperAdmin && hasFullAccess && (
+                                                <span className="status-badge status-badge--paid">
+                                                    Полный доступ
+                                                </span>
+                                            )}
+                                        </span>
+
+                                        {!isSuperAdmin && !hasFullAccess && (
+                                            <>
+                                                <strong className="text-[12px]">
+                                                    Ограниченный доступ
+                                                </strong>
+
+                                                <small className="truncate text-[11px] text-[#958c85]">
+                                                    {modulesNames || 'Нет дополнительных доступов'}
+                                                </small>
+                                            </>
+                                        )}
+                                    </span>
                                     <span className="min-w-0 truncate text-[12px] text-[#5d554f] max-sm:col-start-1 max-sm:row-start-3">{admin.email}</span>
                                     <label className="switch justify-self-end max-sm:col-start-2 max-sm:row-start-3 max-sm:ml-3 max-sm:self-center 2xl:justify-self-start" aria-label={`Активность ${displayName}`}>
                                         <input className="switch__input" type="checkbox" checked={Boolean(admin.is_active)} onChange={() => toggleStatus(admin)} disabled={statusChangingId === admin.id || isCurrentUser} /><span className="switch__track" />

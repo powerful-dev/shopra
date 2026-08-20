@@ -19,6 +19,7 @@ class AuthenticationService
             [
                 'email' => $credentials['email'],
                 'password' => $credentials['password'],
+                'is_active' => true,
             ],
             $credentials['remember'] ?? false,
         );

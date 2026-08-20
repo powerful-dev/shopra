@@ -23,6 +23,8 @@ class UpdateAdminRequest extends FormRequest
             'email' => ['sometimes', 'required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($id)],
             'password' => ['nullable', 'string', 'min:8'],
             'is_active' => ['sometimes', 'required', 'boolean'],
+            'module_ids' => ['sometimes', 'array'],
+            'module_ids.*' => ['integer', 'exists:modules,id'],
         ];
     }
 }

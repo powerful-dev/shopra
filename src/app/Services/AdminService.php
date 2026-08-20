@@ -6,36 +6,51 @@ use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
+use App\Enums\Role;
 
 class AdminService
 {
     public function paginate(): LengthAwarePaginator
     {
         return User::query()
+            ->with([
+                'roles',
+                'modules:id,name',
+            ])
             ->orderByDesc('created_at')
             ->paginate(10);
     }
 
     public function create(array $data, ?User $actor = null): User
     {
+        $moduleIds = $data['module_ids'] ?? [];
+        unset($data['module_ids']);
+
         $admin = new User();
         $admin->fill($this->preparePayload($data));
         $admin->password = Hash::make($data['password']);
         $admin->save();
+
+        $admin->modules()->sync($moduleIds);
 
         return $admin;
     }
 
     public function update(User $admin, array $data, ?User $actor = null): User
     {
+        $moduleIds = $data['module_ids'] ?? [];
+        unset($data['module_ids']);
+
         if (isset($data['password']) && $data['password'] !== '') {
-            $data['password'] = Hash::make($data['password']);
-        } else {
-            unset($data['password']);
+            $admin->password = Hash::make($data['password']);
         }
 
         $admin->fill($this->preparePayload($data, $admin));
         $admin->save();
+
+        if (! $admin->hasRole(Role::SuperAdmin->value)) {
+            $admin->modules()->sync($moduleIds);
+        }
 
         return $admin;
     }

@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 import { NavLink } from 'react-router-dom'
 import Brand from './Brand';
 import UserMenu from './UserMenu';
@@ -11,21 +13,48 @@ import DiscountsIcon from '../icons/DiscountsIcon';
 import AnalyticsIcon from '../icons/AnalyticsIcon';
 import DomainIcon from '../icons/DomainIcon';
 import SettingsIcon from '../icons/SettingsIcon';
+import { useModules } from '../../hooks/useModules';
 
-const navigation = [
-    { label: 'Главная', path: '/admin/dashboard', icon: HomeIcon },
-    { label: 'Внешний вид', path: '/admin/appearance', icon: AppearanceIcon },
-    { label: 'Товары', path: '/admin/products', icon: ProductsIcon },
-    { label: 'Заказы', path: '/admin/orders', icon: OrdersIcon, badge: '8' },
-    { label: 'Доставка', path: '/admin/deliveries', icon: ShippingIcon },
-    { label: 'Оплата', path: '/admin/payments', icon: PaymentsIcon },
-    { label: 'Скидки', path: '/admin/discounts', icon: DiscountsIcon },
-    { label: 'Статистика', path: '/admin/analytics', icon: AnalyticsIcon },
-    { label: 'Домен', path: '/admin/domain', icon: DomainIcon },
-    { label: 'Настройки', path: '/admin/settings', icon: SettingsIcon },
-];
+const icons = {
+    home: HomeIcon,
+    appearance: AppearanceIcon,
+    products: ProductsIcon,
+    orders: OrdersIcon,
+    shipping: ShippingIcon,
+    payments: PaymentsIcon,
+    discounts: DiscountsIcon,
+    analytics: AnalyticsIcon,
+    domain: DomainIcon,
+    settings: SettingsIcon,
+};
 
 export default function Sidebar({ isOpen, user, onClose, onLogout }) {
+
+    const [navigation, setNavigation] = useState([]);
+    const { modules } = useModules();
+
+    useEffect(() => {
+        fetch('/api/sites/1/modules', {
+            credentials: 'include',
+            headers: {
+                Accept: 'application/json',
+            },
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Не удалось загрузить модули');
+                }
+
+                return response.json();
+            })
+            .then(({ data }) => {
+                setNavigation(data);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }, []);
+
     return (
         <aside
             className={`sidebar-shell flex flex-col overflow-hidden max-lg:!z-[100] max-lg:!w-[min(310px,88vw)] max-lg:!min-w-0 max-lg:!border-r-0 max-lg:!bg-white max-lg:!p-[18px] max-lg:!pt-[22px] max-lg:!backdrop-blur-none max-lg:transition-transform max-lg:duration-200 max-lg:ease-out max-lg:will-change-transform ${isOpen ? 'max-lg:translate-x-0' : 'max-lg:-translate-x-full'}`}
@@ -44,18 +73,61 @@ export default function Sidebar({ isOpen, user, onClose, onLogout }) {
 
             <nav className="flex-1 overflow-y-auto px-[10px] pb-[14px] max-lg:px-0">
                 <div className="space-y-1">
-                    {navigation.map(({ label, path, icon: Icon, badge }) => (
-                        <NavLink
-                            key={path}
-                            to={path}
-                            onClick={onClose}
-                            className={({ isActive }) => `sidebar-nav-link${isActive ? ' active' : ''}`}
-                        >
-                            <span className="sidebar-icon"><Icon /></span>
-                            <span className="leading-none">{label}</span>
-                            {badge && <span className="sidebar-nav-badge">{badge}</span>}
-                        </NavLink>
-                    ))}
+
+                    {modules
+                        .filter((module) => module.show_in_menu)
+                        .map((module) => {
+                            
+                            const Icon = icons[module.icon];
+
+                            return (
+                                <NavLink
+                                    key={module.id}
+                                    to={module.path}
+                                    onClick={onClose}
+                                    className={({ isActive }) =>
+                                        `sidebar-nav-link${isActive ? ' active' : ''}`
+                                    }
+                                >
+                                    {Icon && (
+                                        <span className="sidebar-icon">
+                                            <Icon />
+                                        </span>
+                                    )}
+
+                                    <span className="leading-none">
+                                        {module.name}
+                                    </span>
+                                </NavLink>
+                            );
+                    })}
+
+                    {/* {navigation.map(({ id, name, path, icon }) => {
+                        const Icon = icons[icon];
+
+                        return (
+                            <NavLink
+                                key={id}
+                                to={path}
+                                onClick={onClose}
+                                className={({ isActive }) =>
+                                    `sidebar-nav-link${isActive ? ' active' : ''}`
+                                }
+                            >
+                                {Icon && (
+                                    <span className="sidebar-icon">
+                                        <Icon />
+                                    </span>
+                                )}
+
+                                <span className="leading-none">
+                                    {name}
+                                </span>
+                            </NavLink>
+                        );
+                    })} */}
+
+
                 </div>
             </nav>
 

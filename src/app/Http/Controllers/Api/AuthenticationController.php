@@ -22,6 +22,8 @@ class AuthenticationController extends Controller
             ], 422);
         }
 
+
+
         return (new UserResource($user))->response();
     }
 
