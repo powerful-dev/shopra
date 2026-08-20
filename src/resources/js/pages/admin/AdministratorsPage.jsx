@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import PageContainer from '../../components/admin/PageContainer';
 import { csrf, request } from '../../services/api';
+import PageLoader from '../../components/admin/PageLoader';
 
 const DEFAULT_PAGE = 1;
 
@@ -125,6 +125,10 @@ export default function AdministratorsPage() {
             .filter(Boolean).some((value) => value.toLocaleLowerCase('ru').includes(needle)));
     }, [admins, query]);
 
+    if (isLoading) {
+        return <PageLoader />;
+    }
+
     return (
         <>
             <section className="mb-5 flex flex-wrap items-end justify-between gap-6 max-md:items-start">
@@ -219,7 +223,7 @@ export default function AdministratorsPage() {
                                             } />
                                         <span className="switch__track" />
                                     </label>
-                                    
+
                                     {(!isSuperAdmin || isCurrentUser) && (
                                         <div className="relative col-start-2 row-start-1 !w-8 justify-self-end 2xl:col-auto 2xl:row-auto">
                                             <button
