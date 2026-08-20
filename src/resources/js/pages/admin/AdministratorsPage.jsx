@@ -69,7 +69,7 @@ export default function AdministratorsPage() {
     }, [location, navigate]);
 
     const toggleStatus = async (admin) => {
-        if (admin.id === currentAdminId) {
+        if (admin.id === currentAdminId || admin.is_super_admin) {
             setMessage('Нельзя отключить собственную учётную запись.');
             return;
         }
@@ -207,12 +207,50 @@ export default function AdministratorsPage() {
                                     </span>
                                     <span className="min-w-0 truncate text-[12px] text-[#5d554f] max-sm:col-start-1 max-sm:row-start-3">{admin.email}</span>
                                     <label className="switch justify-self-end max-sm:col-start-2 max-sm:row-start-3 max-sm:ml-3 max-sm:self-center 2xl:justify-self-start" aria-label={`Активность ${displayName}`}>
-                                        <input className="switch__input" type="checkbox" checked={Boolean(admin.is_active)} onChange={() => toggleStatus(admin)} disabled={statusChangingId === admin.id || isCurrentUser} /><span className="switch__track" />
+                                        <input 
+                                            className="switch__input" 
+                                            type="checkbox" 
+                                            checked={Boolean(admin.is_active)} 
+                                            onChange={() => toggleStatus(admin)} 
+                                            disabled={
+                                                statusChangingId === admin.id ||
+                                                isCurrentUser ||
+                                                isSuperAdmin
+                                            } />
+                                        <span className="switch__track" />
                                     </label>
-                                    <div className="relative col-start-2 row-start-1 !w-8 justify-self-end 2xl:col-auto 2xl:row-auto">
-                                        <button className="grid h-8 w-8 place-items-center rounded-lg border-0 bg-transparent text-[#756d67] hover:bg-[#f2ede9]" type="button" aria-label={`Действия ${displayName}`} aria-expanded={openActionsId === admin.id} onClick={() => setOpenActionsId((id) => id === admin.id ? null : admin.id)}><MoreIcon /></button>
-                                        {openActionsId === admin.id && <ActionsMenu admin={admin} isCurrentUser={isCurrentUser} navigate={navigate} onDelete={() => { setOpenActionsId(null); setAdminToDelete(admin); setMessage(''); }} />}
-                                    </div>
+                                    
+                                    {(!isSuperAdmin || isCurrentUser) && (
+                                        <div className="relative col-start-2 row-start-1 !w-8 justify-self-end 2xl:col-auto 2xl:row-auto">
+                                            <button
+                                                className="grid h-8 w-8 place-items-center rounded-lg border-0 bg-transparent text-[#756d67] hover:bg-[#f2ede9]"
+                                                type="button"
+                                                aria-label={`Действия ${displayName}`}
+                                                aria-expanded={openActionsId === admin.id}
+                                                onClick={() =>
+                                                    setOpenActionsId((id) =>
+                                                        id === admin.id ? null : admin.id
+                                                    )
+                                                }
+                                            >
+                                                <MoreIcon />
+                                            </button>
+
+                                            {openActionsId === admin.id && (
+                                                <ActionsMenu
+                                                    admin={admin}
+                                                    isCurrentUser={isCurrentUser}
+                                                    navigate={navigate}
+                                                    onDelete={() => {
+                                                        setOpenActionsId(null);
+                                                        setAdminToDelete(admin);
+                                                        setMessage('');
+                                                    }}
+                                                />
+                                            )}
+                                        </div>
+                                    )}
+
                                 </div>
                             );
                         })}

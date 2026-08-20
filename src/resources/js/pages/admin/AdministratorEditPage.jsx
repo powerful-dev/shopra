@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { csrf, request } from '../../services/api';
+import { useAuth } from '../../hooks/useAuth';
 
 const BackIcon = () => <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>;
 const SaveIcon = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7" /><path d="M7 3v4a1 1 0 0 0 1 1h7" /></svg>;
@@ -19,6 +20,8 @@ export default function AdministratorEditPage() {
     const [messageType, setMessageType] = useState('success');
     const [actionsOpen, setActionsOpen] = useState(false);
     const [modules, setModules] = useState([]);
+    const { user } = useAuth();
+    const isCurrentUser = !isNew && Number(id) === Number(user?.id);
 
     useEffect(() => {
         if (isNew || !id) return;
@@ -117,34 +120,6 @@ export default function AdministratorEditPage() {
         })();
     }, [id, isNew]);
 
-    // useEffect(() => {
-    //     if (isNew || !id) return;
-
-    //     (async () => {
-    //         try {
-    //             const [{ data: admin }, { data: modules }] = await Promise.all([
-    //                 request(`/api/admins/${id}`),
-    //                 request(`/api/admins/${id}/modules`),
-    //             ]);
-
-    //             setForm({
-    //                 name: [admin.first_name, admin.last_name].filter(Boolean).join(' '),
-    //                 email: admin.email ?? '',
-    //                 password: '',
-    //                 password_confirmation: '',
-    //                 is_active: Boolean(admin.is_active),
-    //             });
-
-    //             setModules(modules);
-
-
-    //         } catch (error) {
-    //             setMessageType('error');
-    //             setMessage(error.message ?? 'Не удалось загрузить администратора.');
-    //         }
-    //     })();
-    // }, [id, isNew]);
-
     const toggleModule = (moduleId) => {
         setModules((current) =>
             current.map((module) => {
@@ -213,7 +188,20 @@ export default function AdministratorEditPage() {
                     <Field className="md:col-span-2" label="Email" error={formErrors.email}><input className={`form-input ${formErrors.email ? '!border-red-500' : ''}`} type="email" name="email" autoComplete="email" value={form.email} onChange={updateField} required /></Field>
                     <Field label={isNew ? 'Пароль' : 'Новый пароль'} error={formErrors.password}><input className={`form-input ${formErrors.password ? '!border-red-500' : ''}`} type="password" name="password" autoComplete="new-password" value={form.password} onChange={updateField} placeholder={isNew ? '' : 'Оставьте пустым, чтобы не менять'} required={isNew} /></Field>
                     <Field label={isNew ? 'Повтор пароля' : 'Повтор нового пароля'} error={formErrors.password_confirmation}><input className={`form-input ${formErrors.password_confirmation ? '!border-red-500' : ''}`} type="password" name="password_confirmation" autoComplete="new-password" value={form.password_confirmation} onChange={updateField} placeholder={isNew ? 'Повторите пароль' : 'Повторите новый пароль'} required={isNew || Boolean(form.password)} /></Field>
-                    <div className="form-field md:col-span-2"><span className="form-label">Активность</span><label className="switch self-start" aria-label="Активность администратора"><input className="switch__input" type="checkbox" name="is_active" checked={form.is_active} onChange={updateField} /><span className="switch__track" /></label></div>
+      
+                    <div className="form-field md:col-span-2">
+                        <span className="form-label">Активность</span>
+                        <label className="switch self-start" aria-label="Активность администратора">
+                            <input 
+                                className="switch__input" 
+                                type="checkbox" 
+                                name="is_active" 
+                                checked={form.is_active} 
+                                disabled={isCurrentUser}
+                                onChange={updateField} />
+                            <span className="switch__track" />
+                        </label>
+                    </div>
                 </div></form>
             </section>
             <AccessPanel modules={modules} onToggle={toggleModule} />

@@ -38,6 +38,8 @@ class AdminService
 
     public function update(User $admin, array $data, ?User $actor = null): User
     {
+        $this->ensureCanEdit($admin, $actor);
+
         $moduleIds = $data['module_ids'] ?? [];
         unset($data['module_ids']);
 
@@ -59,6 +61,11 @@ class AdminService
     {
         $this->ensureNotSelf($admin, $actor, 'You cannot disable your own account.');
 
+        $this->ensureNotSuperAdmin(
+            $admin,
+            'You cannot disable the super administrator.'
+        );
+
         $admin->is_active = $isActive;
         $admin->save();
 
@@ -68,6 +75,11 @@ class AdminService
     public function delete(User $admin, ?User $actor = null): void
     {
         $this->ensureNotSelf($admin, $actor, 'You cannot delete your own account.');
+
+        $this->ensureNotSuperAdmin(
+            $admin,
+            'You cannot delete the super administrator.'
+        );
 
         $admin->delete();
     }
@@ -96,6 +108,25 @@ class AdminService
     private function ensureNotSelf(User $admin, ?User $actor, string $message): void
     {
         if ($actor !== null && $actor->getKey() === $admin->getKey()) {
+            throw new AuthorizationException($message);
+        }
+    }
+
+    private function ensureCanEdit(User $admin, ?User $actor): void
+    {
+        if (
+            $admin->hasRole(Role::SuperAdmin->value) &&
+            ($actor === null || $actor->getKey() !== $admin->getKey())
+        ) {
+            throw new AuthorizationException(
+                'You cannot edit the super administrator.'
+            );
+        }
+    }
+
+    private function ensureNotSuperAdmin(User $admin, string $message): void
+    {
+        if ($admin->hasRole(Role::SuperAdmin->value)) {
             throw new AuthorizationException($message);
         }
     }
