@@ -1,0 +1,1 @@
+export default function Loading() {return <div className="flex min-h-40 items-center justify-center bg-[#faf8f6] p-8"><div className="h-7 w-7 animate-spin rounded-full border-2 border-[color:var(--color-border)] border-t-[color:var(--color-accent)]" role="status" aria-label="Загрузка" /></div>;}

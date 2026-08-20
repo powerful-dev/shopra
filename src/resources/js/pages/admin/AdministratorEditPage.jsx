@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { csrf, request } from '../../services/api';
 import { useAuth } from '../../hooks/useAuth';
+import Field from '../../components/form/Field';
+import SaveIcon from '../../components/icons/SaveIcon';
+import BackIcon from '../../components/icons/BackIcon';
+import CheckIcon from '../../components/icons/CheckIcon';
+import PlusIcon from '../../components/icons/PlusIcon';
 
-const BackIcon = () => <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>;
-const SaveIcon = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7" /><path d="M7 3v4a1 1 0 0 0 1 1h7" /></svg>;
-const MoreIcon = () => <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg>;
-const CheckIcon = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>;
-const PlusIcon = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>;
 
 export default function AdministratorEditPage() {
     const { id } = useParams();
@@ -60,8 +60,6 @@ export default function AdministratorEditPage() {
                 is_active: form.is_active,
                 module_ids: moduleIds,
             };
-
-            console.log('PAYLOAD', payload);
 
             const response = await request(isNew ? '/api/admins' : `/api/admins/${id}`, { method: isNew ? 'POST' : 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             setMessageType('success');
@@ -209,15 +207,9 @@ export default function AdministratorEditPage() {
     </>;
 }
 
-function Field({ label, error, className = '', children }) { return <label className={`form-field ${className}`}><span className="form-label">{label}</span>{children}{error && <span className="text-[11px] text-red-600">{error[0]}</span>}</label>; }
-
 function AccessPanel({ modules, onToggle }) {
     const enabledModules = modules.filter((module) => module.enabled);
     const disabledModules = modules.filter((module) => !module.enabled);
-
-    const MinusIcon = () => (
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"></path></svg>
-    );
 
     return (
         <aside className="access-panel" aria-label="Доступы администратора">
@@ -238,9 +230,9 @@ function AccessPanel({ modules, onToggle }) {
                         >
                             <span className="access-list__icon">
                                 {module.locked ? (
-                                    <PlusIcon />
+                                    <PlusIcon width={12} height={12} />
                                 ) : (
-                                    <MinusIcon />
+                                    <CheckIcon />
                                 )}
                             </span>
 
@@ -264,7 +256,7 @@ function AccessPanel({ modules, onToggle }) {
                             onClick={() => onToggle(module.id)}
                         >
                             <span className="access-list__icon">
-                                <PlusIcon />
+                                <PlusIcon width={12} height={12} />
                             </span>
 
                             <span>{module.name}</span>

@@ -1,26 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { csrf, request } from '../../services/api';
+import ActionsMenu from '../../components/admin/ActionsMenu';
 import PageLoader from '../../components/admin/PageLoader';
+import ConfirmModal from '../../components/admin/ConfirmModal';
+import Pagination from '../../components/admin/Pagination';
+import Loading from '../../components/admin/Loading';
+import PlusIcon from '../../components/icons/PlusIcon';
+import SearchIcon from '../../components/icons/SearchIcon';
+import MoreIcon from '../../components/icons/MoreIcon';
+import CheckIcon from '../../components/icons/CheckIcon';
+import PencilIcon from '../../components/icons/PencilIcon';
+import TrashIcon from '../../components/icons/TrashIcon';
 
 const DEFAULT_PAGE = 1;
-
-function paginationItems(current, last) {
-    if (last <= 7) return Array.from({ length: last }, (_, index) => index + 1);
-    const pages = [1];
-    if (current > 3) pages.push('…');
-    for (let page = Math.max(2, current - 1); page <= Math.min(last - 1, current + 1); page += 1) pages.push(page);
-    if (current < last - 2) pages.push('…');
-    pages.push(last);
-    return pages;
-}
-
-const PlusIcon = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M5 12h14" /><path d="M12 5v14" /></svg>;
-const SearchIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>;
-const MoreIcon = () => <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg>;
-const PencilIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /><path d="m15 5 4 4" /></svg>;
-const TrashIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>;
-const CheckIcon = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>;
 
 export default function AdministratorsPage() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -158,7 +151,6 @@ export default function AdministratorsPage() {
     };
 
     const totalPages = meta?.last_page ?? 1;
-    const pages = useMemo(() => paginationItems(currentPage, totalPages), [currentPage, totalPages]);
 
     const setPage = (page) => {
         const params = new URLSearchParams(searchParams);
@@ -283,14 +275,24 @@ export default function AdministratorsPage() {
 
                                             {openActionsId === admin.id && (
                                                 <ActionsMenu
-                                                    admin={admin}
-                                                    isCurrentUser={isCurrentUser}
-                                                    navigate={navigate}
-                                                    onDelete={() => {
-                                                        setOpenActionsId(null);
-                                                        setAdminToDelete(admin);
-                                                        setMessage('');
-                                                    }}
+                                                    actions={[
+                                                        {
+                                                            label: 'Изменить',
+                                                            icon: <PencilIcon />,
+                                                            onClick: () => navigate(`/admin/administrators/${admin.id}`),
+                                                        },
+                                                        {
+                                                            label: 'Удалить',
+                                                            icon: <TrashIcon />,
+                                                            variant: 'danger',
+                                                            disabled: isCurrentUser,
+                                                            onClick: () => {
+                                                                setAdminToDelete(admin);
+                                                                setMessage('');
+                                                            },
+                                                        },
+                                                    ]}
+                                                    onClose={() => setOpenActionsId(null)}
                                                 />
                                             )}
                                         </div>
@@ -303,34 +305,23 @@ export default function AdministratorsPage() {
                 ) : <div className="min-h-40 bg-[#faf8f6] px-4 py-12 text-center text-[12px] text-[color:var(--color-secondary)]">{query ? 'По вашему запросу ничего не найдено.' : 'Пока нет доступных администраторов.'}</div>}
             </section>
 
-            {!isLoading && meta && totalPages > 1 && <nav className="mt-5 flex justify-center" aria-label="Пагинация администраторов"><div className="pagination">
-                <button className="pagination__item" type="button" onClick={() => setPage(Math.max(1, currentPage - 1))} disabled={currentPage <= 1} aria-label="Предыдущая страница">←</button>
-                {pages.map((page, index) => page === '…' ? <span className="grid h-[29px] min-w-[29px] place-items-center text-[12px] text-[color:var(--color-secondary)]" key={`ellipsis-${index}`}>…</span> : <button className={`pagination__item ${page === currentPage ? 'pagination__item--active' : ''}`} type="button" onClick={() => setPage(page)} key={page}>{page}</button>)}
-                <button className="pagination__item" type="button" onClick={() => setPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage >= totalPages} aria-label="Следующая страница">→</button>
-            </div></nav>}
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setPage}
+            />
 
-            {adminToDelete && <DeleteModal admin={adminToDelete} isDeleting={isDeleting} onClose={() => setAdminToDelete(null)} onDelete={removeAdministrator} />}
+            <ConfirmModal
+                isOpen={Boolean(adminToDelete)}
+                title="Подтвердите удаление"
+                message={`Удалить администратора ${adminToDelete?.full_name || adminToDelete?.email}?`}
+                confirmText="Удалить"
+                cancelText="Отмена"
+                isLoading={isDeleting}
+                variant="danger"
+                onConfirm={removeAdministrator}
+                onClose={() => setAdminToDelete(null)}
+            />
         </>
     );
-}
-
-function Loading() {
-    return <div className="flex min-h-40 items-center justify-center bg-[#faf8f6] p-8"><div className="h-7 w-7 animate-spin rounded-full border-2 border-[color:var(--color-border)] border-t-[color:var(--color-accent)]" role="status" aria-label="Загрузка" /></div>;
-}
-
-function ActionsMenu({ admin, isCurrentUser, navigate, onDelete }) {
-    return <div className="absolute right-0 bottom-[calc(100%+8px)] z-30 min-w-[150px] rounded-2xl border border-[color:var(--color-border)] bg-white p-1.5 shadow-[var(--shadow-md)]">
-        <button className="flex w-full items-center gap-2 rounded-[10px] border-0 bg-transparent px-3 py-2 text-left text-[12px] text-[color:var(--color-primary)] hover:bg-[#f7f3f0]" type="button" onClick={() => navigate(`/admin/administrators/${admin.id}`)}><PencilIcon /> Изменить</button>
-        <button className="flex w-full items-center gap-2 rounded-[10px] border-0 bg-transparent px-3 py-2 text-left text-[12px] text-[#b7483f] hover:bg-[#f7f3f0] disabled:cursor-not-allowed disabled:opacity-40" type="button" disabled={isCurrentUser} onClick={onDelete}><TrashIcon /> Удалить</button>
-    </div>;
-}
-
-function DeleteModal({ admin, isDeleting, onClose, onDelete }) {
-    return <div className="fixed inset-0 z-[200] grid place-items-center bg-black/40 p-4 backdrop-blur-sm" role="presentation" onMouseDown={onClose}>
-        <div className="w-full max-w-md rounded-2xl border border-[color:var(--color-border)] bg-white p-6 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="delete-admin-title" onMouseDown={(event) => event.stopPropagation()}>
-            <h2 id="delete-admin-title" className="m-0 text-xl font-bold">Подтвердите удаление</h2>
-            <p className="my-4 text-sm text-[color:var(--color-secondary)]">Удалить администратора {admin.full_name || admin.email}?</p>
-            <div className="flex justify-end gap-2"><button className="button button--secondary" type="button" onClick={onClose}>Отмена</button><button className="button border-[#b7483f] bg-[#b7483f] text-white hover:bg-[#9f3e36] disabled:opacity-50" type="button" onClick={onDelete} disabled={isDeleting}>{isDeleting ? 'Удаление…' : 'Удалить'}</button></div>
-        </div>
-    </div>;
 }

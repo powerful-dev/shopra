@@ -1,0 +1,1 @@
+export default function Field({ label, error, className = '', children }) { return <label className={`form-field ${className}`}><span className="form-label">{label}</span>{children}{error && <span className="text-[11px] text-red-600">{error[0]}</span>}</label>; }
