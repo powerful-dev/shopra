@@ -7,13 +7,14 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-#[Fillable(['name', 'first_name', 'last_name', 'email', 'password', 'is_active'])]
+#[Fillable(['name', 'first_name', 'last_name', 'email', 'password', 'is_active', 'admin_language_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -37,5 +38,10 @@ class User extends Authenticatable
     public function modules(): BelongsToMany
     {
         return $this->belongsToMany(Module::class);
+    }
+
+    public function adminLanguage(): BelongsTo
+    {
+        return $this->belongsTo(Language::class, 'admin_language_id');
     }
 }

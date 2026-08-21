@@ -1,12 +1,12 @@
 <?php
 
 use App\Http\Controllers\Api\AdminController;
-use App\Http\Controllers\Api\AuthenticationController;
-use App\Http\Controllers\Api\ShopController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\SiteModuleController;
 use App\Http\Controllers\Api\AdminModuleController;
-
+use App\Http\Controllers\Api\AuthenticationController;
+use App\Http\Controllers\Api\CommonSettingsController;
+use App\Http\Controllers\Api\ShopController;
+use App\Http\Controllers\Api\SiteModuleController;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware('web')->post('/login', [AuthenticationController::class, 'login']);
 
@@ -31,6 +31,10 @@ Route::middleware([
     Route::get('/admins/{admin}/modules', [AdminModuleController::class, 'index']);
     Route::get('/me/modules', [SiteModuleController::class, 'currentUser']);
 
+    Route::middleware('module:settings')->group(function (): void {
+        Route::get('/settings/common', [CommonSettingsController::class, 'show']);
+        Route::put('/settings/common', [CommonSettingsController::class, 'update']);
+    });
 
     Route::middleware('module:products')->group(function (): void {
 

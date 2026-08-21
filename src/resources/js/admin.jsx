@@ -18,7 +18,8 @@ import AppearancePage from './pages/AppearancePage';
 import PaymentPage from './pages/PaymentPage';
 import DiscountsPage from './pages/DiscountsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
-import SettingsPage from './pages/SettingsPage';
+import SettingsPage from './pages/settings/SettingsPage';
+import CommonSettingsPage from './pages/settings/CommonSettingsPage';
 import RequireModule from './components/admin/RequireModule';
 
 import '../css/tailwind.css';
@@ -39,6 +40,7 @@ function AdminApp() {
         ['/admin/discounts', 'discounts', <DiscountsPage />],
         ['/admin/analytics', 'analytics', <AnalyticsPage />],
         ['/admin/settings', 'settings', <SettingsPage />],
+        ['/admin/settings/common', 'settings', <CommonSettingsPage />],
     ];
 
     return (
