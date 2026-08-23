@@ -30,7 +30,15 @@
     },
 
     "breadcrumbs": {
+        "products": "Products",
+        "appearance": "Appearance",
+        "orders": "Orders",
+        "deliveries": "Delivery",
+        "payments": "Payments",
+        "discounts": "Discounts",
         "settings": "Settings",
+        "analytics": "Analytics",
+        "domain": "Domain",
         "settings_common": "Common settings",
         "administrators": "Administrators",
         "administrator_new": "New administrator",

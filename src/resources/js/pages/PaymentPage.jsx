@@ -1,3 +1,5 @@
+import Breadcrumbs from '../components/admin/Breadcrumbs';
+
 export default function PaymentPage() {
     const paymentMethods = [
         {
@@ -40,9 +42,8 @@ export default function PaymentPage() {
             <section className="mb-5 flex items-center justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-3">
                     <div>
-                        <p className="text-[11px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-accent)] max-lg:hidden">
-                            Настройки магазина
-                        </p>
+                        
+                        <Breadcrumbs className="mb-[3px]" />
 
                         <h1 className="m-0 text-[32px] font-[760] tracking-[-.05em] max-lg:text-[19px]">
                             Оплата

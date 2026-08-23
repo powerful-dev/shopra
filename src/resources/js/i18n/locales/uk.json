@@ -30,6 +30,14 @@
     },
 
     "breadcrumbs": {
+        "products": "Товари",
+        "appearance": "Зовнішній вигляд",
+        "orders": "Замовлення",
+        "deliveries": "Доставка",
+        "payments": "Оплата",
+        "discounts": "Знижки",
+        "analytics": "Статистика",
+        "domain": "Домен",
         "settings": "Налаштування",
         "settings_common": "Основні налаштування",
         "administrators": "Доступи співробітників",

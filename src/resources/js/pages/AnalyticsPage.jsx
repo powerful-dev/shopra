@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { initStatisticsChart } from './statisticsChart';
+import Breadcrumbs from '../components/admin/Breadcrumbs';
 
 export default function AnalyticsPage() {
     const chartRef = useRef(null);
@@ -71,9 +72,8 @@ export default function AnalyticsPage() {
         <>
             <section className="mb-5 flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                    <p className="text-[11px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-accent)] max-lg:hidden">
-                        Шопра · Панель управления
-                    </p>
+                    
+                    <Breadcrumbs className="mb-[3px]" />
 
                     <h1 className="m-0 truncate text-[32px] font-[760] tracking-[-0.05em] max-lg:text-[19px]">
                         Статистика

@@ -1,12 +1,11 @@
 import BoxCheckedIcon from "../../icons/BoxCheckedIcon"
+import Breadcrumbs from "../Breadcrumbs"
 
 export default function DeliveriesHeader(){
     return (
         <section className="mb-5 flex items-center justify-between gap-4">
             <div className="min-w-0">
-                <p className="text-[11px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-accent)] max-lg:hidden">
-                    Настройки магазина
-                </p>
+                <Breadcrumbs className="max-lg:hidden" />
 
                 <h1 className="m-0 truncate text-[32px] font-[760] tracking-[-0.05em] max-lg:text-[19px]">
                     Доставка

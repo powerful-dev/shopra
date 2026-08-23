@@ -1,3 +1,5 @@
+import Breadcrumbs from '../components/admin/Breadcrumbs';
+
 export default function DiscountsPage() {
     const stats = [
         {
@@ -55,9 +57,8 @@ export default function DiscountsPage() {
     return (
         <>
             <header className="mb-[15px]">
-                <p className="m-0 mb-1 text-[11px] font-bold uppercase tracking-[.09em] text-[color:var(--color-accent)]">
-                    Shopra · Продвижение
-                </p>
+                
+                <Breadcrumbs className="mb-[3px]" />
 
                 <h1 className="m-0 text-[31px] font-[760] tracking-[-.045em] max-sm:text-[25px]">
                     Скидки и распродажи

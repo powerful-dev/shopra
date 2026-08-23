@@ -1,3 +1,5 @@
+import Breadcrumbs from '../components/admin/Breadcrumbs';
+
 const summaries = [
     { label: 'Все товары', value: '156', detail: 'В каталоге', icon: 'boxes', tone: 'border-[#ddc4b5] bg-[#f9eee7] text-[color:var(--color-accent)]' },
     { label: 'Активные', value: '142', detail: 'Видны покупателям', icon: 'active', tone: 'border-[color:var(--color-border)] bg-[#eef8ee] text-[#2f7c4b]' },
@@ -21,7 +23,7 @@ export default function ProductsPage() {
         <>
             <header className="mb-5 flex flex-wrap items-end justify-between gap-6 max-md:items-start">
                 <div>
-                    <p className="mb-[3px] text-[11px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-accent)]">Каталог магазина</p>
+                    <Breadcrumbs className="mb-[3px]" />
                     <h1 className="m-0 text-[32px] font-[760] tracking-[-0.05em] text-[color:var(--color-primary)] max-md:text-[28px]">Товары</h1>
                     <p className="mt-[5px] text-[13px] text-[color:var(--color-secondary)]">Все товары, остатки и цены — в одном месте.</p>
                 </div>

@@ -1,5 +1,37 @@
 export const breadcrumbRoutes = [
     {
+        path: '/admin/products',
+        labelKey: 'breadcrumbs.products',
+    },
+    {
+        path: '/admin/appearance',
+        labelKey: 'breadcrumbs.appearance',
+    },
+    {
+        path: '/admin/orders',
+        labelKey: 'breadcrumbs.orders',
+    },
+    {
+        path: '/admin/deliveries',
+        labelKey: 'breadcrumbs.deliveries',
+    },
+    {
+        path: '/admin/payments',
+        labelKey: 'breadcrumbs.payments',
+    },
+    {
+        path: '/admin/discounts',
+        labelKey: 'breadcrumbs.discounts',
+    },
+    {
+        path: '/admin/analytics',
+        labelKey: 'breadcrumbs.analytics',
+    },
+    {
+        path: '/admin/domain',
+        labelKey: 'breadcrumbs.domain',
+    },
+    {
         path: '/admin/settings',
         labelKey: 'breadcrumbs.settings',
     },

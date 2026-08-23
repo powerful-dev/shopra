@@ -5,7 +5,6 @@ import './i18n';
 import { AuthProvider } from './hooks/useAuth';
 import AdminLayout from './components/admin/AdminLayout';
 import { GuestOnly, RequireAuth } from './components/AuthGuards';
-import CreateShopPage from './pages/CreateShopPage';
 import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
 import PlaceholderPage from './pages/PlaceholderPage';

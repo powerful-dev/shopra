@@ -1,3 +1,5 @@
+import Breadcrumbs from '../components/admin/Breadcrumbs';
+
 const summaries = [
     ['Новые', '1', 'bg-[#fff0e7] text-[color:var(--color-accent)]', 'bag'],
     ['Оплачены', '6', 'bg-[color:var(--color-success-soft)] text-[color:var(--color-success)]', 'paid'],
@@ -20,7 +22,7 @@ const rowClass = 'data-list__item !min-h-[150px] !grid-cols-[1fr_auto] !gap-2 !r
 export default function OrdersPage() {
     return <>
         <section className="mb-[18px] flex flex-wrap items-end justify-between gap-6 max-sm:items-start">
-            <div className="max-w-[720px]"><p className="mb-[3px] text-[11px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-accent)]">Продажи</p><h1 className="m-0 text-[32px] font-[760] tracking-[-0.05em] text-[color:var(--color-primary)] max-sm:text-[27px]">Заказы</h1><p className="mt-[5px] text-[13px] leading-[1.5] text-[color:var(--color-secondary)]">Находите заказы по номеру, покупателю, телефону или трек‑номеру и ведите их от оплаты до доставки.</p></div>
+            <div className="max-w-[720px]"><Breadcrumbs className="mb-[3px]" /><h1 className="m-0 text-[32px] font-[760] tracking-[-0.05em] text-[color:var(--color-primary)] max-sm:text-[27px]">Заказы</h1><p className="mt-[5px] text-[13px] leading-[1.5] text-[color:var(--color-secondary)]">Находите заказы по номеру, покупателю, телефону или трек‑номеру и ведите их от оплаты до доставки.</p></div>
             <button type="button" className="button button--secondary min-h-[41px] whitespace-nowrap max-sm:w-full"><Icon type="file" />Экспорт заказов</button>
         </section>
         <section className="mb-3 grid grid-cols-2 gap-2 sm:gap-[10px] xl:grid-cols-4">{summaries.map(([label,value,tone,icon]) => <article key={label} className="flex items-center gap-[10px] rounded-[13px] border border-[color:var(--color-border)] bg-white px-[13px] py-[12px] shadow-[0_8px_24px_rgba(70,47,31,.035)]"><span className={`grid h-9 w-9 flex-none place-items-center rounded-[10px] ${tone}`}><Icon type={icon} /></span><p className="m-0 flex flex-col"><small className="text-[11px] font-[700] text-[#756d67]">{label}</small><strong className="mt-[2px] text-[18px] leading-none tracking-[-0.04em]">{value}</strong></p></article>)}</section>

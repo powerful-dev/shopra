@@ -10,7 +10,7 @@ import ShowcaseModal from '../modals/Appearance/ShowcaseModal';
 import HeroBannerModal from '../modals/Appearance/HeroBannerModal';
 import StoreHeaderModal from '../modals/Appearance/StoreHeaderModal';
 import TopBannerModal from '../modals/Appearance/TopBannerModal';
-
+import Breadcrumbs from '../components/admin/Breadcrumbs';
 
 
 export default function AppearancePage() {
@@ -47,8 +47,8 @@ export default function AppearancePage() {
             <header className="mb-5 flex items-end justify-between gap-6 max-[1180px]:flex-col max-[1180px]:items-start">
                 <div>
 
-                    <p className="mb-[3px] text-[11px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-accent)]">Магазин · Внешний вид</p>
-
+                    <Breadcrumbs className="mb-[3px]" />
+                    
                     <h1 className="mb-[5px] mt-1 text-[32px] font-[760] tracking-[-0.05em]">
                         Внешний вид магазина
                     </h1>

@@ -30,6 +30,14 @@
     },
 
     "breadcrumbs": {
+        "products": "Товары",
+        "appearance": "Внешний вид",
+        "orders": "Заказы",
+        "deliveries": "Доставка",
+        "payments": "Оплата",
+        "discounts": "Скидки",
+        "analytics": "Статистика",
+        "domain": "Домен",
         "settings": "Настройки",
         "settings_common": "Основные настройки",
         "administrators": "Доступы сотрудников",
