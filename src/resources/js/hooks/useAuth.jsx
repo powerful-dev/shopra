@@ -1,8 +1,15 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import * as authentication from '../services/auth';
 import { ApiError } from '../services/api';
+import i18n from '../i18n';
 
 const AuthContext = createContext(null);
+
+async function applyUserLanguage(user) {
+    if (user?.admin_language) {
+        await i18n.changeLanguage(user.admin_language);
+    }
+}
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
@@ -10,7 +17,10 @@ export function AuthProvider({ children }) {
 
     useEffect(() => {
         authentication.getCurrentUser()
-            .then(setUser)
+            .then(async (authenticatedUser) => {
+                await applyUserLanguage(authenticatedUser);
+                setUser(authenticatedUser);
+            })
             .catch((error) => {
                 if (!(error instanceof ApiError) || error.status !== 401) {
                     console.error('Unable to restore the administrator session.', error);
@@ -24,6 +34,7 @@ export function AuthProvider({ children }) {
         isLoading,
         login: async (credentials) => {
             const authenticatedUser = await authentication.login(credentials);
+            await applyUserLanguage(authenticatedUser);
             setUser(authenticatedUser);
         },
         logout: async () => {

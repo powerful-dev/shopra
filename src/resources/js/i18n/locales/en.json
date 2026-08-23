@@ -1,0 +1,113 @@
+{
+    "common": {
+        "save": "Save"
+    },
+
+    "modules": {
+        "dashboard": "Home",
+        "appearance": "Appearance",
+        "products": "Products",
+        "orders": "Orders",
+        "deliveries": "Delivery",
+        "payments": "Payments",
+        "discounts": "Discounts",
+        "analytics": "Analytics",
+        "domain": "Domain",
+        "settings": "Settings",
+        "administrators": "Administrators"
+    },
+
+    "commonSettingsPage": {
+        "title": "General settings",
+        "siteName": "Site name",
+        "adminLanguage": "Admin language",
+        "siteLanguage": "Site language",
+        "loadError": "Failed to load general settings.",
+        "saved": "General settings saved.",
+        "saveError": "Failed to save general settings.",
+        "saving": "Saving…",
+        "selectLanguage": "Select a language"
+    },
+
+    "breadcrumbs": {
+        "settings": "Settings",
+        "settings_common": "Common settings",
+        "administrators": "Administrators",
+        "administrator_new": "New administrator",
+        "administrator": "Administrator"
+    },
+
+    "settingsPage": {
+        "title": "Settings",
+        "description": "Basic store information and additional tools.",
+        "commonSettingsTitle": "General settings",
+        "commonSettingsDescription": "Store name, contacts, and notifications",
+        "staffAccessTitle": "Staff access",
+        "staffAccessDescription": "Team roles and permissions"
+    },
+
+    "administratorsPage": {
+        "title": "Administrators",
+        "description": "Manage employee access to sections of the administration panel.",
+        "addAdministrator": "Add administrator",
+        "search": "Search by name or e-mail",
+        "name": "Name",
+        "access": "Access",
+        "email": "E-mail",
+        "activity": "Activity",
+        "actions": "Actions",
+        "currentUserRole": "Store owner · current account",
+        "administratorRole": "Administrator",
+        "you": "This is you",
+        "ownerFullAccess": "Owner, Full access",
+        "fullAccess": "Full access",
+        "limitedAccess": "Limited access",
+        "noAdditionalAccess": "No additional access",
+        "activityLabel": "Activity for {{name}}",
+        "actionsLabel": "Actions for {{name}}",
+        "edit": "Edit",
+        "delete": "Delete",
+        "noSearchResults": "No results found for your search.",
+        "empty": "No administrators are available yet.",
+        "confirmDeleteTitle": "Confirm deletion",
+        "confirmDeleteMessage": "Delete administrator {{name}}?",
+        "cancel": "Cancel",
+        "loadError": "Failed to load administrators.",
+        "cannotDisableSelf": "You cannot disable your own account.",
+        "statusUpdated": "Administrator “{{name}}” status updated.",
+        "statusUpdateError": "Failed to change the administrator status.",
+        "cannotDeleteSelf": "You cannot delete your own account.",
+        "deleted": "Administrator deleted.",
+        "deleteError": "Failed to delete the administrator."
+    },
+
+    "administratorEditPage": {
+        "loadAdministratorError": "Failed to load the administrator.",
+        "passwordMismatch": "Passwords do not match.",
+        "fullNameRequired": "Enter the first and last name.",
+        "created": "Administrator “{{name}}” created.",
+        "saved": "Administrator “{{name}}” saved.",
+        "saveError": "Failed to save the administrator.",
+        "createTitle": "Create administrator",
+        "editTitle": "Edit administrator",
+        "loadDataError": "Failed to load data.",
+        "newAdministrator": "New administrator",
+        "backToAdministrators": "Back to administrators",
+        "saving": "Saving…",
+        "save": "Save",
+        "fullName": "First and last name",
+        "email": "Email",
+        "password": "Password",
+        "newPassword": "New password",
+        "repeatPassword": "Repeat password",
+        "repeatNewPassword": "Repeat new password",
+        "leavePasswordBlank": "Leave blank to keep unchanged",
+        "repeatPasswordPlaceholder": "Repeat the password",
+        "repeatNewPasswordPlaceholder": "Repeat the new password",
+        "activity": "Activity",
+        "activityLabel": "Administrator activity",
+        "accessPanelLabel": "Administrator access",
+        "accessGranted": "Access granted",
+        "addAccess": "Add access"
+    }
+}

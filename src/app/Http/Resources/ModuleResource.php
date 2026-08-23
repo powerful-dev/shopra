@@ -12,7 +12,6 @@ class ModuleResource extends JsonResource
         return [
             'id' => $this->id,
             'code' => $this->code,
-            'name' => $this->name,
             'path' => $this->admin_path,
             'icon' => $this->icon,
             'show_in_menu' => (bool) $this->show_in_menu,

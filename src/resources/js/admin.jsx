@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import './i18n';
 
 import { AuthProvider } from './hooks/useAuth';
 import AdminLayout from './components/admin/AdminLayout';
@@ -7,42 +8,15 @@ import { GuestOnly, RequireAuth } from './components/AuthGuards';
 import CreateShopPage from './pages/CreateShopPage';
 import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
-import ProductsPage from './pages/ProductsPage';
-import OrdersPage from './pages/OrdersPage';
 import PlaceholderPage from './pages/PlaceholderPage';
-import AdministratorsPage from './pages/admin/AdministratorsPage';
-import AdministratorEditPage from './pages/admin/AdministratorEditPage';
 import { placeholders } from './data/adminNavigation';
-import DeliveriesPage from './pages/DeliveriesPage';
-import AppearancePage from './pages/AppearancePage';
-import PaymentPage from './pages/PaymentPage';
-import DiscountsPage from './pages/DiscountsPage';
-import AnalyticsPage from './pages/AnalyticsPage';
-import SettingsPage from './pages/settings/SettingsPage';
-import CommonSettingsPage from './pages/settings/CommonSettingsPage';
+import { adminRoutes } from './data/adminRoutes';
 import RequireModule from './components/admin/RequireModule';
 
 import '../css/tailwind.css';
 import '../scss/admin.scss';
 
 function AdminApp() {
-
-    const protectedRoutes = [
-
-        ['/admin/products', 'products', <ProductsPage />],
-        ['/admin/orders', 'orders', <OrdersPage />],
-        ['/admin/administrators', 'administrators', <AdministratorsPage />],
-        ['/admin/administrators/new', 'administrators', <AdministratorEditPage />],
-        ['/admin/administrators/:id', 'administrators', <AdministratorEditPage />],
-        ['/admin/deliveries', 'deliveries', <DeliveriesPage />],
-        ['/admin/appearance', 'appearance', <AppearancePage />],
-        ['/admin/payments', 'payments', <PaymentPage />],
-        ['/admin/discounts', 'discounts', <DiscountsPage />],
-        ['/admin/analytics', 'analytics', <AnalyticsPage />],
-        ['/admin/settings', 'settings', <SettingsPage />],
-        ['/admin/settings/common', 'settings', <CommonSettingsPage />],
-    ];
-
     return (
         <AuthProvider><BrowserRouter><Routes>
             <Route path="/admin/login" element={<GuestOnly><LoginPage /></GuestOnly>} />
@@ -50,11 +24,11 @@ function AdminApp() {
                 <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="/admin/dashboard" element={<DashboardPage />} />
 
-                {protectedRoutes.map(([path, code, element]) => (
+                {adminRoutes.map(({ path, module, component: Component }) => (
                     <Route
                         key={path}
                         path={path}
-                        element={<RequireModule code={code}>{element}</RequireModule>}
+                        element={<RequireModule code={module}><Component /></RequireModule>}
                     />
                 ))}
 

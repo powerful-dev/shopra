@@ -24,7 +24,7 @@ class EnsureModuleAccess
             ->where('code', $moduleCode)
             ->exists();
 
-        abort_unless($hasAccess, 403, 'Доступ запрещён.');
+        abort_unless($hasAccess, 403, 'Access denied.');
 
         return $next($request);
     }

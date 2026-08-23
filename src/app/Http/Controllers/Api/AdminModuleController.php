@@ -35,7 +35,6 @@ class AdminModuleController extends Controller
             return [
                 'id' => $module->id,
                 'code' => $module->code,
-                'name' => $module->name,
                 'icon' => $module->icon,
                 'enabled' => $isSuperAdmin || in_array($module->id, $assignedModuleIds, true),
                 'locked' => $isSuperAdmin,

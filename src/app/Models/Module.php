@@ -9,7 +9,6 @@ class Module extends Model
 {
     protected $fillable = [
         'code',
-        'name',
         'admin_path',
         'icon',
         'show_in_menu',

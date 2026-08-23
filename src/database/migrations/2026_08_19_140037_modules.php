@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('modules', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
-            $table->string('name');
             $table->unsignedInteger('sorting')->default(0);
             $table->string('admin_path')->nullable();
             $table->string('icon')->nullable();

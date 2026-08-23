@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { NavLink } from 'react-router-dom'
 import Brand from './Brand';
@@ -30,6 +31,7 @@ const icons = {
 
 export default function Sidebar({ isOpen, user, onClose, onLogout }) {
 
+    const { t } = useTranslation();
     const [navigation, setNavigation] = useState([]);
     const { modules } = useModules();
 
@@ -96,7 +98,7 @@ export default function Sidebar({ isOpen, user, onClose, onLogout }) {
                                     )}
 
                                     <span className="leading-none">
-                                        {module.name}
+                                        {t(`modules.${module.code}`)}
                                     </span>
                                 </NavLink>
                             );

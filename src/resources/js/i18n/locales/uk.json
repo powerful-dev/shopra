@@ -1,0 +1,113 @@
+{
+    "common": {
+        "save": "Зберегти"
+    },
+
+    "modules": {
+        "dashboard": "Головна",
+        "appearance": "Зовнішній вигляд",
+        "products": "Товари",
+        "orders": "Замовлення",
+        "deliveries": "Доставка",
+        "payments": "Оплата",
+        "discounts": "Знижки",
+        "analytics": "Статистика",
+        "domain": "Домен",
+        "settings": "Налаштування",
+        "administrators": "Адміністратори"
+    },
+
+    "commonSettingsPage": {
+        "title": "Основні налаштування",
+        "siteName": "Назва сайту",
+        "adminLanguage": "Мова адмінпанелі",
+        "siteLanguage": "Мова сайту",
+        "loadError": "Не вдалося завантажити основні налаштування.",
+        "saved": "Основні налаштування збережено.",
+        "saveError": "Не вдалося зберегти основні налаштування.",
+        "saving": "Збереження…",
+        "selectLanguage": "Виберіть мову"
+    },
+
+    "breadcrumbs": {
+        "settings": "Налаштування",
+        "settings_common": "Основні налаштування",
+        "administrators": "Доступи співробітників",
+        "administrator_new": "Новий адміністратор",
+        "administrator": "Адміністратор"
+    },
+
+    "settingsPage": {
+        "title": "Налаштування",
+        "description": "Основні дані магазину та додаткові інструменти.",
+        "commonSettingsTitle": "Основні налаштування",
+        "commonSettingsDescription": "Назва магазину, контакти та сповіщення",
+        "staffAccessTitle": "Доступи співробітників",
+        "staffAccessDescription": "Ролі та права команди"
+    },
+
+    "administratorsPage": {
+        "title": "Адміністратори",
+        "description": "Керуйте доступом співробітників до розділів панелі адміністратора.",
+        "addAdministrator": "Додати адміністратора",
+        "search": "Знайти за ім’ям або e-mail",
+        "name": "Ім’я",
+        "access": "Доступ",
+        "email": "E-mail",
+        "activity": "Активність",
+        "actions": "Дії",
+        "currentUserRole": "Власник магазину · поточний акаунт",
+        "administratorRole": "Адміністратор",
+        "you": "Це ви",
+        "ownerFullAccess": "Власник, Повний доступ",
+        "fullAccess": "Повний доступ",
+        "limitedAccess": "Обмежений доступ",
+        "noAdditionalAccess": "Немає додаткових доступів",
+        "activityLabel": "Активність {{name}}",
+        "actionsLabel": "Дії {{name}}",
+        "edit": "Змінити",
+        "delete": "Видалити",
+        "noSearchResults": "За вашим запитом нічого не знайдено.",
+        "empty": "Поки немає доступних адміністраторів.",
+        "confirmDeleteTitle": "Підтвердьте видалення",
+        "confirmDeleteMessage": "Видалити адміністратора {{name}}?",
+        "cancel": "Скасувати",
+        "loadError": "Не вдалося завантажити адміністраторів.",
+        "cannotDisableSelf": "Не можна вимкнути власний обліковий запис.",
+        "statusUpdated": "Статус адміністратора «{{name}}» оновлено.",
+        "statusUpdateError": "Не вдалося змінити статус адміністратора.",
+        "cannotDeleteSelf": "Не можна видалити власний обліковий запис.",
+        "deleted": "Адміністратора видалено.",
+        "deleteError": "Не вдалося видалити адміністратора."
+    },
+
+    "administratorEditPage": {
+        "loadAdministratorError": "Не вдалося завантажити адміністратора.",
+        "passwordMismatch": "Паролі не збігаються.",
+        "fullNameRequired": "Вкажіть ім’я та прізвище.",
+        "created": "Адміністратора «{{name}}» створено.",
+        "saved": "Адміністратора «{{name}}» збережено.",
+        "saveError": "Не вдалося зберегти адміністратора.",
+        "createTitle": "Створення адміністратора",
+        "editTitle": "Редагування адміністратора",
+        "loadDataError": "Не вдалося завантажити дані.",
+        "newAdministrator": "Новий адміністратор",
+        "backToAdministrators": "Повернутися до адміністраторів",
+        "saving": "Збереження…",
+        "save": "Зберегти",
+        "fullName": "Ім’я та прізвище",
+        "email": "Email",
+        "password": "Пароль",
+        "newPassword": "Новий пароль",
+        "repeatPassword": "Повтор пароля",
+        "repeatNewPassword": "Повтор нового пароля",
+        "leavePasswordBlank": "Залиште порожнім, щоб не змінювати",
+        "repeatPasswordPlaceholder": "Повторіть пароль",
+        "repeatNewPasswordPlaceholder": "Повторіть новий пароль",
+        "activity": "Активність",
+        "activityLabel": "Активність адміністратора",
+        "accessPanelLabel": "Доступи адміністратора",
+        "accessGranted": "Доступ дозволено",
+        "addAccess": "Додати доступ"
+    }
+}

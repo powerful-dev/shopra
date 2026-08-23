@@ -1,0 +1,114 @@
+{
+    "common": {
+        "save": "Сохранить"
+    },
+
+    "modules": {
+        "dashboard": "Главная",
+        "appearance": "Внешний вид",
+        "products": "Товары",
+        "orders": "Заказы",
+        "deliveries": "Доставка",
+        "payments": "Оплата",
+        "discounts": "Скидки",
+        "analytics": "Статистика",
+        "domain": "Домен",
+        "settings": "Настройки",
+        "administrators": "Администраторы"
+    },
+
+    "commonSettingsPage": {
+        "title": "Основные настройки",
+        "siteName": "Название сайта",
+        "adminLanguage": "Язык админки",
+        "siteLanguage": "Язык сайта",
+        "loadError": "Не удалось загрузить основные настройки.",
+        "saved": "Основные настройки сохранены.",
+        "saveError": "Не удалось сохранить основные настройки.",
+        "saving": "Сохранение…",
+        "selectLanguage": "Выберите язык"
+    },
+
+    "breadcrumbs": {
+        "settings": "Настройки",
+        "settings_common": "Основные настройки",
+        "administrators": "Доступы сотрудников",
+        "administrator_new": "Новый администратор",
+        "administrator": "Администратор"
+    },
+
+    "settingsPage": {
+        "title": "Настройки",
+        "description": "Основные данные магазина и дополнительные инструменты.",
+        "commonSettingsTitle": "Основные настройки",
+        "commonSettingsDescription": "Название магазина, контакты и уведомления",
+        "staffAccessTitle": "Доступы сотрудников",
+        "staffAccessDescription": "Роли и права команды"
+    },
+
+    "administratorsPage": {
+        "title": "Администраторы",
+        "description": "Управляйте доступом сотрудников к разделам панели администратора.",
+        "addAdministrator": "Добавить администратора",
+        "search": "Найти по имени или e-mail",
+        "name": "Имя",
+        "access": "Доступ",
+        "email": "E-mail",
+        "activity": "Активность",
+        "actions": "Действия",
+        "currentUserRole": "Владелец магазина · текущий аккаунт",
+        "administratorRole": "Администратор",
+        "you": "Это вы",
+        "ownerFullAccess": "Владелец, Полный доступ",
+        "fullAccess": "Полный доступ",
+        "limitedAccess": "Ограниченный доступ",
+        "noAdditionalAccess": "Нет дополнительных доступов",
+        "activityLabel": "Активность {{name}}",
+        "actionsLabel": "Действия {{name}}",
+        "edit": "Изменить",
+        "delete": "Удалить",
+        "noSearchResults": "По вашему запросу ничего не найдено.",
+        "empty": "Пока нет доступных администраторов.",
+        "confirmDeleteTitle": "Подтвердите удаление",
+        "confirmDeleteMessage": "Удалить администратора {{name}}?",
+        "cancel": "Отмена",
+        "loadError": "Не удалось загрузить администраторов.",
+        "cannotDisableSelf": "Нельзя отключить собственную учётную запись.",
+        "statusUpdated": "Статус администратора «{{name}}» обновлён.",
+        "statusUpdateError": "Не удалось изменить статус администратора.",
+        "cannotDeleteSelf": "Нельзя удалить собственную учётную запись.",
+        "deleted": "Администратор удалён.",
+        "deleteError": "Не удалось удалить администратора."
+    },
+
+    "administratorEditPage": {
+        "loadAdministratorError": "Не удалось загрузить администратора.",
+        "passwordMismatch": "Пароли не совпадают.",
+        "fullNameRequired": "Укажите имя и фамилию.",
+        "created": "Администратор «{{name}}» создан.",
+        "saved": "Администратор «{{name}}» сохранён.",
+        "saveError": "Не удалось сохранить администратора.",
+        "createTitle": "Создание администратора",
+        "editTitle": "Редактирование администратора",
+        "loadDataError": "Не удалось загрузить данные.",
+        "newAdministrator": "Новый администратор",
+        "backToAdministrators": "Вернуться к администраторам",
+        "saving": "Сохранение…",
+        "save": "Сохранить",
+        "fullName": "Имя и фамилия",
+        "email": "Email",
+        "password": "Пароль",
+        "newPassword": "Новый пароль",
+        "repeatPassword": "Повтор пароля",
+        "repeatNewPassword": "Повтор нового пароля",
+        "leavePasswordBlank": "Оставьте пустым, чтобы не менять",
+        "repeatPasswordPlaceholder": "Повторите пароль",
+        "repeatNewPasswordPlaceholder": "Повторите новый пароль",
+        "activity": "Активность",
+        "activityLabel": "Активность администратора",
+        "accessPanelLabel": "Доступы администратора",
+        "accessGranted": "Доступ разрешен",
+        "addAccess": "Добавить доступ"
+    }
+
+}

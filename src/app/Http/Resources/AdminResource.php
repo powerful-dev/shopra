@@ -26,7 +26,7 @@ class AdminResource extends JsonResource
             'is_superadmin' => $this->hasRole(Role::SuperAdmin->value),
             'modules' => $this->modules->map(fn ($module) => [
                 'id' => $module->id,
-                'name' => $module->name,
+                'code' => $module->code
             ]),
         ];
     }

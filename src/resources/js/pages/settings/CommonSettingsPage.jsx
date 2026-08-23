@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import Breadcrumbs from '../../components/admin/Breadcrumbs';
 import Field from '../../components/form/Field';
 import SaveIcon from '../../components/icons/SaveIcon';
 import BackIcon from '../../components/icons/BackIcon';
@@ -8,6 +10,7 @@ import { csrf, request } from '../../services/api';
 
 
 export default function CommonSettingsPage() {
+    const { t, i18n } = useTranslation();
     const [form, setForm] = useState({
         site_name: '',
         admin_language_id: '',
@@ -35,14 +38,22 @@ export default function CommonSettingsPage() {
                 });
                 setAdminLanguages(data.admin_languages ?? []);
                 setSiteLanguages(data.site_languages ?? []);
+
+                const adminLanguage = data.admin_languages?.find(
+                    (language) => Number(language.id) === Number(data.admin_language_id)
+                );
+
+                if (adminLanguage?.code) {
+                    await i18n.changeLanguage(adminLanguage.code);
+                }
             } catch (error) {
                 setMessageType('error');
-                setMessage(error.message ?? 'Не удалось загрузить основные настройки.');
+                setMessage(error.message ?? i18n.t('commonSettingsPage.loadError'));
             } finally {
                 setIsLoading(false);
             }
         })();
-    }, []);
+    }, [i18n]);
 
     const updateField = ({ target }) => {
         setForm((current) => ({ ...current, [target.name]: target.value }));
@@ -69,12 +80,21 @@ export default function CommonSettingsPage() {
             });
             setAdminLanguages(data.admin_languages ?? []);
             setSiteLanguages(data.site_languages ?? []);
+
+            const adminLanguage = data.admin_languages?.find(
+                (language) => Number(language.id) === Number(data.admin_language_id)
+            );
+
+            if (adminLanguage?.code) {
+                await i18n.changeLanguage(adminLanguage.code);
+            }
+
             setMessageType('success');
-            setMessage('Основные настройки сохранены.');
+            setMessage(t('commonSettingsPage.saved'));
         } catch (error) {
             setFormErrors(error.errors ?? {});
             setMessageType('error');
-            setMessage(error.message ?? 'Не удалось сохранить основные настройки.');
+            setMessage(error.message ?? t('commonSettingsPage.saveError'));
         } finally {
             setIsSubmitting(false);
         }
@@ -82,9 +102,7 @@ export default function CommonSettingsPage() {
 
     return (
         <>
-            <p className="mb-5 text-[11px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-accent)] max-lg:hidden">
-                Шопра · Панель управления
-            </p>
+            <Breadcrumbs className="mb-5 max-lg:hidden" />
 
             <section className="mb-5 flex w-full flex-wrap items-center gap-x-6 gap-y-3">
             
@@ -99,7 +117,7 @@ export default function CommonSettingsPage() {
                     </button>
     
                     <h1 className="m-0 min-w-0 text-[32px] font-[760] leading-none tracking-[-0.05em] text-[color:var(--color-primary)] max-lg:text-[19px]">
-                        Основные настройки
+                        {t('commonSettingsPage.title')}
                     </h1>
                 </div>
     
@@ -111,7 +129,7 @@ export default function CommonSettingsPage() {
                         disabled={isLoading || isSubmitting}
                     >
                         <SaveIcon />
-                        {isSubmitting ? 'Сохранение…' : 'Сохранить'}
+                        {isSubmitting ? t('commonSettingsPage.saving') : t('common.save')}
                     </button>
                 </div>
     
@@ -128,10 +146,10 @@ export default function CommonSettingsPage() {
                 <form id="common-settings-form" className="p-5 max-sm:p-4" noValidate onSubmit={(event) => { event.preventDefault(); saveData(); }}>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-[18px] max-md:grid-cols-1">
                         <h2 className="m-0 text-[16px] font-[760] text-[color:var(--color-primary)] md:col-span-2">
-                            Основные настройки
+                            {t('commonSettingsPage.title')}
                         </h2>
 
-                        <Field className="md:col-span-2" label="Название сайта" error={formErrors.site_name}>
+                        <Field className="md:col-span-2" label={t('commonSettingsPage.siteName')} error={formErrors.site_name}>
                             <input
                                 className={`form-input ${formErrors.site_name ? '!border-red-500' : ''}`}
                                 type="text"
@@ -143,7 +161,7 @@ export default function CommonSettingsPage() {
                             />
                         </Field>
 
-                        <Field label="Язык админки" error={formErrors.admin_language_id}>
+                        <Field label={t('commonSettingsPage.adminLanguage')} error={formErrors.admin_language_id}>
                             <select
                                 className={`form-select ${formErrors.admin_language_id ? '!border-red-500' : ''}`}
                                 name="admin_language_id"
@@ -152,14 +170,14 @@ export default function CommonSettingsPage() {
                                 disabled={isLoading}
                                 required
                             >
-                                <option value="">Выберите язык</option>
+                                <option value="">{t('commonSettingsPage.selectLanguage')}</option>
                                 {adminLanguages.map((language) => (
                                     <option key={language.id} value={language.id}>{language.name}</option>
                                 ))}
                             </select>
                         </Field>
 
-                        <Field label="Язык сайта" error={formErrors.site_language_id}>
+                        <Field label={t('commonSettingsPage.siteLanguage')} error={formErrors.site_language_id}>
                             <select
                                 className={`form-select ${formErrors.site_language_id ? '!border-red-500' : ''}`}
                                 name="site_language_id"
@@ -168,7 +186,7 @@ export default function CommonSettingsPage() {
                                 disabled={isLoading}
                                 required
                             >
-                                <option value="">Выберите язык</option>
+                                <option value="">{t('commonSettingsPage.selectLanguage')}</option>
                                 {siteLanguages.map((language) => (
                                     <option key={language.id} value={language.id}>{language.name}</option>
                                 ))}

@@ -17,7 +17,7 @@ class AdminService
         return User::query()
             ->with([
                 'roles',
-                'modules:id,name',
+                'modules:id',
             ])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {

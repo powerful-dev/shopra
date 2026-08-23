@@ -12,7 +12,6 @@ class ModuleSeeder extends Seeder
         $modules = [
             [
                 'code' => 'dashboard',
-                'name' => 'Главная',
                 'admin_path' => '/admin/dashboard',
                 'icon' => 'home',
                 'sorting' => 10,
@@ -21,7 +20,6 @@ class ModuleSeeder extends Seeder
             ],
             [
                 'code' => 'appearance',
-                'name' => 'Внешний вид',
                 'admin_path' => '/admin/appearance',
                 'icon' => 'appearance',
                 'sorting' => 20,
@@ -30,7 +28,6 @@ class ModuleSeeder extends Seeder
             ],
             [
                 'code' => 'products',
-                'name' => 'Товары',
                 'admin_path' => '/admin/products',
                 'icon' => 'products',
                 'sorting' => 30,
@@ -39,7 +36,6 @@ class ModuleSeeder extends Seeder
             ],
             [
                 'code' => 'orders',
-                'name' => 'Заказы',
                 'admin_path' => '/admin/orders',
                 'icon' => 'orders',
                 'sorting' => 40,
@@ -48,7 +44,6 @@ class ModuleSeeder extends Seeder
             ],
             [
                 'code' => 'deliveries',
-                'name' => 'Доставка',
                 'admin_path' => '/admin/deliveries',
                 'icon' => 'shipping',
                 'sorting' => 50,
@@ -57,7 +52,6 @@ class ModuleSeeder extends Seeder
             ],
             [
                 'code' => 'payments',
-                'name' => 'Оплата',
                 'admin_path' => '/admin/payments',
                 'icon' => 'payments',
                 'sorting' => 60,
@@ -66,7 +60,6 @@ class ModuleSeeder extends Seeder
             ],
             [
                 'code' => 'discounts',
-                'name' => 'Скидки',
                 'admin_path' => '/admin/discounts',
                 'icon' => 'discounts',
                 'sorting' => 70,
@@ -75,7 +68,6 @@ class ModuleSeeder extends Seeder
             ],
             [
                 'code' => 'analytics',
-                'name' => 'Статистика',
                 'admin_path' => '/admin/analytics',
                 'icon' => 'analytics',
                 'sorting' => 80,
@@ -84,7 +76,6 @@ class ModuleSeeder extends Seeder
             ], 
             [
                 'code' => 'domain',
-                'name' => 'Домен',
                 'admin_path' => '/admin/domain',
                 'icon' => 'domain',
                 'sorting' => 90,
@@ -93,7 +84,6 @@ class ModuleSeeder extends Seeder
             ],
             [
                 'code' => 'settings',
-                'name' => 'Настройки',
                 'admin_path' => '/admin/settings',
                 'icon' => 'settings',
                 'sorting' => 100,
@@ -102,7 +92,6 @@ class ModuleSeeder extends Seeder
             ],
             [
                 'code' => 'administrators',
-                'name' => 'Администраторы',
                 'admin_path' => '/admin/administrators',
                 'icon' => 'administrators',
                 'sorting' => 110,

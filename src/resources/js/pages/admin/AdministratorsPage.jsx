@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import Breadcrumbs from '../../components/admin/Breadcrumbs';
 import { csrf, request } from '../../services/api';
 import ActionsMenu from '../../components/admin/ActionsMenu';
 import PageLoader from '../../components/admin/PageLoader';
@@ -16,6 +18,7 @@ import TrashIcon from '../../components/icons/TrashIcon';
 const DEFAULT_PAGE = 1;
 
 export default function AdministratorsPage() {
+    const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
     const [admins, setAdmins] = useState([]);
     const [meta, setMeta] = useState(null);
@@ -50,7 +53,7 @@ export default function AdministratorsPage() {
             setMeta(payload.meta ?? null);
             setAvailableModulesCount(payload.available_modules_count ?? 0);
         } catch (error) {
-            setMessage(error.message ?? 'Не удалось загрузить администраторов.');
+            setMessage(error.message ?? t('administratorsPage.loadError'));
         } finally {
             if (initial) {
                 isInitialLoad.current = false;
@@ -102,7 +105,7 @@ export default function AdministratorsPage() {
 
     const toggleStatus = async (admin) => {
         if (admin.id === currentAdminId || admin.is_super_admin) {
-            setMessage('Нельзя отключить собственную учётную запись.');
+            setMessage(t('administratorsPage.cannotDisableSelf'));
             return;
         }
         setStatusChangingId(admin.id);
@@ -116,9 +119,9 @@ export default function AdministratorsPage() {
             });
             const updated = response.data;
             setAdmins((items) => items.map((item) => item.id === admin.id ? { ...item, ...updated, is_active: Boolean(updated.is_active) } : item));
-            setMessage(`Статус администратора «${updated.full_name || updated.email}» обновлён.`);
+            setMessage(t('administratorsPage.statusUpdated', { name: updated.full_name || updated.email }));
         } catch (error) {
-            setMessage(error.message ?? 'Не удалось изменить статус администратора.');
+            setMessage(error.message ?? t('administratorsPage.statusUpdateError'));
         } finally {
             setStatusChangingId(null);
         }
@@ -127,7 +130,7 @@ export default function AdministratorsPage() {
     const removeAdministrator = async () => {
         if (!adminToDelete) return;
         if (adminToDelete.id === currentAdminId) {
-            setMessage('Нельзя удалить собственную учётную запись.');
+            setMessage(t('administratorsPage.cannotDeleteSelf'));
             setAdminToDelete(null);
             return;
         }
@@ -142,9 +145,9 @@ export default function AdministratorsPage() {
             params.set('page', String(targetPage));
             setSearchParams(params, { replace: true });
             await loadAdmins(targetPage, currentSearch);
-            setMessage('Администратор удалён.');
+            setMessage(t('administratorsPage.deleted'));
         } catch (error) {
-            setMessage(error.message ?? 'Не удалось удалить администратора.');
+            setMessage(error.message ?? t('administratorsPage.deleteError'));
         } finally {
             setIsDeleting(false);
         }
@@ -166,11 +169,11 @@ export default function AdministratorsPage() {
         <>
             <section className="mb-5 flex flex-wrap items-end justify-between gap-6 max-md:items-start">
                 <div>
-                    <p className="mb-[3px] text-[11px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-accent)]">Команда магазина</p>
-                    <h1 className="m-0 text-[32px] font-[760] tracking-[-0.05em] text-[color:var(--color-primary)] max-md:text-[28px]">Администраторы</h1>
-                    <p className="mt-[5px] text-[13px] text-[color:var(--color-secondary)]">Управляйте доступом сотрудников к разделам панели администратора.</p>
+                    <Breadcrumbs className="mb-[3px]" />
+                    <h1 className="m-0 text-[32px] font-[760] tracking-[-0.05em] text-[color:var(--color-primary)] max-md:text-[28px]">{t('administratorsPage.title')}</h1>
+                    <p className="mt-[5px] text-[13px] text-[color:var(--color-secondary)]">{t('administratorsPage.description')}</p>
                 </div>
-                <button type="button" className="button button--primary min-h-[46px] whitespace-nowrap px-[18px] max-md:w-full" onClick={() => navigate('/admin/administrators/new')}><PlusIcon />Добавить администратора</button>
+                <button type="button" className="button button--primary min-h-[46px] whitespace-nowrap px-[18px] max-md:w-full" onClick={() => navigate('/admin/administrators/new')}><PlusIcon />{t('administratorsPage.addAdministrator')}</button>
             </section>
 
             {message && (
@@ -184,11 +187,11 @@ export default function AdministratorsPage() {
                 <div className="flex items-center gap-[7px] border-b border-[#eee9e5] p-[11px] max-sm:grid max-sm:grid-cols-1">
                     <label className="flex h-[39px] min-w-0 flex-1 items-center gap-2 rounded-[9px] border border-[color:var(--color-border)] bg-white px-2 text-[#958c85] focus-within:border-[#c78661] focus-within:shadow-[0_0_0_3px_rgba(184,79,24,.06)]">
                         <SearchIcon />
-                        <input type="search" className="min-w-0 flex-1 border-0 bg-transparent text-[11px] text-[#514943] outline-none" placeholder="Найти по имени или e-mail" aria-label="Найти по имени или e-mail" value={query} onChange={(event) => setQuery(event.target.value)} />
+                        <input type="search" className="min-w-0 flex-1 border-0 bg-transparent text-[11px] text-[#514943] outline-none" placeholder={t('administratorsPage.search')} aria-label={t('administratorsPage.search')} value={query} onChange={(event) => setQuery(event.target.value)} />
                     </label>
                 </div>
                 <div className="grid min-h-[43px] grid-cols-[minmax(230px,1.2fr)_minmax(220px,1fr)_minmax(210px,1fr)_100px_50px] items-center gap-[10px] rounded-t-[16px] bg-[#faf8f6] px-[15px] py-[7px] text-[12px] font-[720] uppercase tracking-[0.04em] text-[#8e8781] max-2xl:hidden">
-                    <span>Имя</span><span>Доступ</span><span>E-mail</span><span>Активность</span><span className="sr-only">Действия</span>
+                    <span>{t('administratorsPage.name')}</span><span>{t('administratorsPage.access')}</span><span>{t('administratorsPage.email')}</span><span>{t('administratorsPage.activity')}</span><span className="sr-only">{t('administratorsPage.actions')}</span>
                 </div>
 
                 {isSearching ? <Loading /> : admins.length > 0 ? (
@@ -204,28 +207,28 @@ export default function AdministratorsPage() {
                                 adminModules.length === availableModulesCount;
 
                             const modulesNames = adminModules
-                                .map((module) => module.name)
+                                .map((module) => t(`modules.${module.code}`))
                                 .join(', ');
                             return (
                                 <div className="data-list__item relative !min-h-[152px] !grid-cols-[minmax(0,1fr)_auto] !gap-[9px] !rounded-[10px] !border !p-[12px] max-2xl:!rounded-[10px] 2xl:!min-h-[73px] 2xl:!grid-cols-[minmax(230px,1.2fr)_minmax(220px,1fr)_minmax(210px,1fr)_100px_50px] 2xl:!gap-[10px] 2xl:!rounded-none 2xl:!border-x-0 2xl:!border-b 2xl:!border-t-0 2xl:!px-[15px] 2xl:!py-[7px]" role="listitem" key={admin.id}>
-                                    <span className="flex min-w-0 flex-col"><strong className="truncate text-[13px] text-[#312d29]">{displayName}</strong><small className="mt-[3px] text-[11px] text-[#958c85]">{isCurrentUser ? 'Владелец магазина · текущий аккаунт' : 'Администратор'}</small></span>
+                                    <span className="flex min-w-0 flex-col"><strong className="truncate text-[13px] text-[#312d29]">{displayName}</strong><small className="mt-[3px] text-[11px] text-[#958c85]">{isCurrentUser ? t('administratorsPage.currentUserRole') : t('administratorsPage.administratorRole')}</small></span>
                                     <span className="col-span-2 row-start-2 flex min-w-0 flex-col gap-[4px] max-sm:!col-start-1 max-sm:!row-start-2 2xl:col-span-1 2xl:row-auto">
                                         <span className="flex flex-wrap items-center gap-[4px]">
                                             {isCurrentUser && (
                                                 <span className="status-badge status-badge--paid">
-                                                    Это вы
+                                                    {t('administratorsPage.you')}
                                                 </span>
                                             )}
 
                                             {isSuperAdmin && (
                                                 <span className="status-badge status-badge--paid">
-                                                    Владелец, Полный доступ
+                                                    {t('administratorsPage.ownerFullAccess')}
                                                 </span>
                                             )}
 
                                             {!isSuperAdmin && hasFullAccess && (
                                                 <span className="status-badge status-badge--paid">
-                                                    Полный доступ
+                                                    {t('administratorsPage.fullAccess')}
                                                 </span>
                                             )}
                                         </span>
@@ -233,17 +236,17 @@ export default function AdministratorsPage() {
                                         {!isSuperAdmin && !hasFullAccess && (
                                             <>
                                                 <strong className="text-[12px]">
-                                                    Ограниченный доступ
+                                                    {t('administratorsPage.limitedAccess')}
                                                 </strong>
 
                                                 <small className="truncate text-[11px] text-[#958c85]">
-                                                    {modulesNames || 'Нет дополнительных доступов'}
+                                                    {modulesNames || t('administratorsPage.noAdditionalAccess')}
                                                 </small>
                                             </>
                                         )}
                                     </span>
                                     <span className="min-w-0 truncate text-[12px] text-[#5d554f] max-sm:col-start-1 max-sm:row-start-3">{admin.email}</span>
-                                    <label className="switch justify-self-end max-sm:col-start-2 max-sm:row-start-3 max-sm:ml-3 max-sm:self-center 2xl:justify-self-start" aria-label={`Активность ${displayName}`}>
+                                    <label className="switch justify-self-end max-sm:col-start-2 max-sm:row-start-3 max-sm:ml-3 max-sm:self-center 2xl:justify-self-start" aria-label={t('administratorsPage.activityLabel', { name: displayName })}>
                                         <input 
                                             className="switch__input" 
                                             type="checkbox" 
@@ -262,7 +265,7 @@ export default function AdministratorsPage() {
                                             <button
                                                 className="grid h-8 w-8 place-items-center rounded-lg border-0 bg-transparent text-[#756d67] hover:bg-[#f2ede9]"
                                                 type="button"
-                                                aria-label={`Действия ${displayName}`}
+                                                aria-label={t('administratorsPage.actionsLabel', { name: displayName })}
                                                 aria-expanded={openActionsId === admin.id}
                                                 onClick={() =>
                                                     setOpenActionsId((id) =>
@@ -277,12 +280,12 @@ export default function AdministratorsPage() {
                                                 <ActionsMenu
                                                     actions={[
                                                         {
-                                                            label: 'Изменить',
+                                                            label: t('administratorsPage.edit'),
                                                             icon: <PencilIcon />,
                                                             onClick: () => navigate(`/admin/administrators/${admin.id}`),
                                                         },
                                                         {
-                                                            label: 'Удалить',
+                                                            label: t('administratorsPage.delete'),
                                                             icon: <TrashIcon />,
                                                             variant: 'danger',
                                                             disabled: isCurrentUser,
@@ -302,7 +305,7 @@ export default function AdministratorsPage() {
                             );
                         })}
                     </div>
-                ) : <div className="min-h-40 bg-[#faf8f6] px-4 py-12 text-center text-[12px] text-[color:var(--color-secondary)]">{query ? 'По вашему запросу ничего не найдено.' : 'Пока нет доступных администраторов.'}</div>}
+                ) : <div className="min-h-40 bg-[#faf8f6] px-4 py-12 text-center text-[12px] text-[color:var(--color-secondary)]">{query ? t('administratorsPage.noSearchResults') : t('administratorsPage.empty')}</div>}
             </section>
 
             <Pagination
@@ -313,10 +316,10 @@ export default function AdministratorsPage() {
 
             <ConfirmModal
                 isOpen={Boolean(adminToDelete)}
-                title="Подтвердите удаление"
-                message={`Удалить администратора ${adminToDelete?.full_name || adminToDelete?.email}?`}
-                confirmText="Удалить"
-                cancelText="Отмена"
+                title={t('administratorsPage.confirmDeleteTitle')}
+                message={t('administratorsPage.confirmDeleteMessage', { name: adminToDelete?.full_name || adminToDelete?.email })}
+                confirmText={t('administratorsPage.delete')}
+                cancelText={t('administratorsPage.cancel')}
                 isLoading={isDeleting}
                 variant="danger"
                 onConfirm={removeAdministrator}

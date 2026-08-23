@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\Role;
+use App\Models\Language;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,9 +17,17 @@ class AuthenticationTest extends TestCase
 
     public function test_user_can_login_and_retrieve_their_profile(): void
     {
+        $language = Language::query()->create([
+            'code' => 'uk',
+            'name' => 'Українська',
+            'is_admin' => true,
+            'is_site' => true,
+            'is_active' => true,
+        ]);
         $user = User::factory()->create([
             'email' => 'admin@example.com',
             'password' => Hash::make('secret-password'),
+            'admin_language_id' => $language->getKey(),
         ]);
 
         $this->withHeader('Origin', 'http://localhost')->postJson('/api/login', [
@@ -27,10 +36,12 @@ class AuthenticationTest extends TestCase
             'remember' => true,
         ])->assertOk()
             ->assertJsonPath('data.email', $user->email)
+            ->assertJsonPath('data.admin_language', 'uk')
             ->assertJsonMissingPath('data.password');
 
         $this->getJson('/api/user')->assertOk()
-            ->assertJsonPath('data.id', $user->id);
+            ->assertJsonPath('data.id', $user->id)
+            ->assertJsonPath('data.admin_language', 'uk');
     }
 
     public function test_invalid_credentials_return_a_validation_error(): void

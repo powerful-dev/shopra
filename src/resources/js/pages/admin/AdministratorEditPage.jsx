@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
+import Breadcrumbs from '../../components/admin/Breadcrumbs';
 import { csrf, request } from '../../services/api';
 import { useAuth } from '../../hooks/useAuth';
 import Field from '../../components/form/Field';
@@ -10,6 +12,7 @@ import PlusIcon from '../../components/icons/PlusIcon';
 
 
 export default function AdministratorEditPage() {
+    const { t, i18n } = useTranslation();
     const { id } = useParams();
     const navigate = useNavigate();
     const isNew = id === 'new' || !id;
@@ -31,7 +34,7 @@ export default function AdministratorEditPage() {
                 setForm({ name: [admin.first_name, admin.last_name].filter(Boolean).join(' '), email: admin.email ?? '', password: '', password_confirmation: '', is_active: Boolean(admin.is_active) });
             } catch (error) {
                 setMessageType('error');
-                setMessage(error.message ?? 'Не удалось загрузить администратора.');
+                setMessage(error.message ?? i18n.t('administratorEditPage.loadAdministratorError'));
             }
         })();
     }, [id, isNew]);
@@ -45,9 +48,9 @@ export default function AdministratorEditPage() {
     const saveData = async () => {
         setFormErrors({});
         setMessage('');
-        if (form.password !== form.password_confirmation) return setFormErrors({ password_confirmation: ['Пароли не совпадают.'] });
+        if (form.password !== form.password_confirmation) return setFormErrors({ password_confirmation: [t('administratorEditPage.passwordMismatch')] });
         const nameParts = form.name.trim().split(/\s+/);
-        if (nameParts.length < 2) return setFormErrors({ name: ['Укажите имя и фамилию.'] });
+        if (nameParts.length < 2) return setFormErrors({ name: [t('administratorEditPage.fullNameRequired')] });
 
         setIsSubmitting(true);
         try {
@@ -63,17 +66,20 @@ export default function AdministratorEditPage() {
 
             const response = await request(isNew ? '/api/admins' : `/api/admins/${id}`, { method: isNew ? 'POST' : 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             setMessageType('success');
-            setMessage(`Администратор «${response.data.full_name || response.data.email}» ${isNew ? 'создан' : 'сохранён'}.`);
+            setMessage(t(
+                isNew ? 'administratorEditPage.created' : 'administratorEditPage.saved',
+                { name: response.data.full_name || response.data.email }
+            ));
             setForm((current) => ({ ...current, password: '', password_confirmation: '' }));
         } catch (error) {
             setFormErrors(error.errors ?? {});
             setMessageType('error');
-            setMessage(error.message ?? 'Не удалось сохранить администратора.');
+            setMessage(error.message ?? t('administratorEditPage.saveError'));
         } finally { setIsSubmitting(false); }
     };
 
     const nameError = formErrors.name || formErrors.first_name || formErrors.last_name;
-    const title = isNew ? 'Создание администратора' : 'Редактирование администратора';
+    const title = isNew ? t('administratorEditPage.createTitle') : t('administratorEditPage.editTitle');
 
     // загружаем модули 
     useEffect(() => {
@@ -113,7 +119,7 @@ export default function AdministratorEditPage() {
                 setModules(modules);
             } catch (error) {
                 setMessageType('error');
-                setMessage(error.message ?? 'Не удалось загрузить данные.');
+                setMessage(error.message ?? i18n.t('administratorEditPage.loadDataError'));
             }
         })();
     }, [id, isNew]);
@@ -139,7 +145,10 @@ export default function AdministratorEditPage() {
 
     return <>
 
-        <p class="mb-5 text-[11px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-accent)] max-lg:hidden">Шопра · Панель управления</p>
+        <Breadcrumbs
+            className="mb-5 max-lg:hidden"
+            currentLabel={isNew ? t('administratorEditPage.newAdministrator') : form.name}
+        />
         
         <section className="mb-5 flex w-full flex-wrap items-center gap-x-6 gap-y-3">
 
@@ -147,7 +156,7 @@ export default function AdministratorEditPage() {
                 <button
                     type="button"
                     className="grid h-[40px] w-[40px] shrink-0 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-white p-0 text-[#615950]"
-                    aria-label="Вернуться к администраторам"
+                    aria-label={t('administratorEditPage.backToAdministrators')}
                     onClick={() => navigate('/admin/administrators')}
                 >
                     <BackIcon />
@@ -166,7 +175,7 @@ export default function AdministratorEditPage() {
                     disabled={isSubmitting}
                 >
                     <SaveIcon />
-                    {isSubmitting ? 'Сохранение…' : 'Сохранить'}
+                    {isSubmitting ? t('administratorEditPage.saving') : t('administratorEditPage.save')}
                 </button>
             </div>
 
@@ -182,14 +191,14 @@ export default function AdministratorEditPage() {
         <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(240px,1fr)]">
             <section className="rounded-[16px] border border-[color:var(--color-border)] bg-[rgba(255,255,255,.95)] shadow-[var(--shadow-sm)]">
                 <form id="administrator-edit-form" className="p-5 max-sm:p-4" noValidate onSubmit={(event) => { event.preventDefault(); saveData(); }}><div className="grid grid-cols-2 gap-x-4 gap-y-[18px] max-md:grid-cols-1">
-                    <Field className="md:col-span-2" label="Имя и фамилия" error={nameError}><input className={`form-input ${nameError ? '!border-red-500' : ''}`} type="text" name="name" autoComplete="name" value={form.name} onChange={updateField} required /></Field>
-                    <Field className="md:col-span-2" label="Email" error={formErrors.email}><input className={`form-input ${formErrors.email ? '!border-red-500' : ''}`} type="email" name="email" autoComplete="email" value={form.email} onChange={updateField} required /></Field>
-                    <Field label={isNew ? 'Пароль' : 'Новый пароль'} error={formErrors.password}><input className={`form-input ${formErrors.password ? '!border-red-500' : ''}`} type="password" name="password" autoComplete="new-password" value={form.password} onChange={updateField} placeholder={isNew ? '' : 'Оставьте пустым, чтобы не менять'} required={isNew} /></Field>
-                    <Field label={isNew ? 'Повтор пароля' : 'Повтор нового пароля'} error={formErrors.password_confirmation}><input className={`form-input ${formErrors.password_confirmation ? '!border-red-500' : ''}`} type="password" name="password_confirmation" autoComplete="new-password" value={form.password_confirmation} onChange={updateField} placeholder={isNew ? 'Повторите пароль' : 'Повторите новый пароль'} required={isNew || Boolean(form.password)} /></Field>
+                    <Field className="md:col-span-2" label={t('administratorEditPage.fullName')} error={nameError}><input className={`form-input ${nameError ? '!border-red-500' : ''}`} type="text" name="name" autoComplete="name" value={form.name} onChange={updateField} required /></Field>
+                    <Field className="md:col-span-2" label={t('administratorEditPage.email')} error={formErrors.email}><input className={`form-input ${formErrors.email ? '!border-red-500' : ''}`} type="email" name="email" autoComplete="email" value={form.email} onChange={updateField} required /></Field>
+                    <Field label={isNew ? t('administratorEditPage.password') : t('administratorEditPage.newPassword')} error={formErrors.password}><input className={`form-input ${formErrors.password ? '!border-red-500' : ''}`} type="password" name="password" autoComplete="new-password" value={form.password} onChange={updateField} placeholder={isNew ? '' : t('administratorEditPage.leavePasswordBlank')} required={isNew} /></Field>
+                    <Field label={isNew ? t('administratorEditPage.repeatPassword') : t('administratorEditPage.repeatNewPassword')} error={formErrors.password_confirmation}><input className={`form-input ${formErrors.password_confirmation ? '!border-red-500' : ''}`} type="password" name="password_confirmation" autoComplete="new-password" value={form.password_confirmation} onChange={updateField} placeholder={isNew ? t('administratorEditPage.repeatPasswordPlaceholder') : t('administratorEditPage.repeatNewPasswordPlaceholder')} required={isNew || Boolean(form.password)} /></Field>
       
                     <div className="form-field md:col-span-2">
-                        <span className="form-label">Активность</span>
-                        <label className="switch self-start" aria-label="Активность администратора">
+                        <span className="form-label">{t('administratorEditPage.activity')}</span>
+                        <label className="switch self-start" aria-label={t('administratorEditPage.activityLabel')}>
                             <input 
                                 className="switch__input" 
                                 type="checkbox" 
@@ -208,15 +217,16 @@ export default function AdministratorEditPage() {
 }
 
 function AccessPanel({ modules, onToggle }) {
+    const { t } = useTranslation();
     const enabledModules = modules.filter((module) => module.enabled);
     const disabledModules = modules.filter((module) => !module.enabled);
 
     return (
-        <aside className="access-panel" aria-label="Доступы администратора">
+        <aside className="access-panel" aria-label={t('administratorEditPage.accessPanelLabel')}>
 
             <section className="access-panel__section">
                 <h2 className="access-panel__title">
-                    Доступ разрешен
+                    {t('administratorEditPage.accessGranted')}
                 </h2>
 
                 <div className="access-list">
@@ -236,7 +246,7 @@ function AccessPanel({ modules, onToggle }) {
                                 )}
                             </span>
 
-                            <span>{module.name}</span>
+                            <span>{t(`modules.${module.code}`)}</span>
                         </button>
                     ))}
                 </div>
@@ -244,7 +254,7 @@ function AccessPanel({ modules, onToggle }) {
 
             <section className="access-panel__section">
                 <h2 className="access-panel__title">
-                    Добавить доступ
+                    {t('administratorEditPage.addAccess')}
                 </h2>
 
                 <div className="access-list">
@@ -259,7 +269,7 @@ function AccessPanel({ modules, onToggle }) {
                                 <PlusIcon width={12} height={12} />
                             </span>
 
-                            <span>{module.name}</span>
+                            <span>{t(`modules.${module.code}`)}</span>
                         </button>
                     ))}
                 </div>
