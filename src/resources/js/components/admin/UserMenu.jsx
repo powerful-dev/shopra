@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function UserMenu({ user, onLogout }) {
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef(null);
-    const name = user?.name || user?.email || 'Administrator';
+    const name = user?.name || user?.email || t('userMenu.administrator');
+    const role = user?.roles?.includes('super-admin')
+        ? t('userMenu.owner')
+        : t('userMenu.administrator');
     const initials = name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase();
 
     useEffect(() => {
@@ -22,9 +27,11 @@ export default function UserMenu({ user, onLogout }) {
         <div ref={menuRef} className="relative max-lg:hidden">
             <button type="button" className="flex w-full items-center gap-[10px] rounded-[13px] border border-[color:var(--sidebar-border)] bg-[color:var(--sidebar-surface)] p-[10px] text-left shadow-[0_5px_18px_rgba(63,44,29,0.035)]" onClick={() => setIsOpen((value) => !value)} aria-expanded={isOpen} aria-haspopup="menu">
                 <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#c18461] to-[#82441f] text-[13px] font-[750] text-white">{initials}</span>
-                <span className="min-w-0 flex-1"><strong className="block truncate text-xs font-semibold text-[color:var(--sidebar-text-strong)]">{name}</strong><small className="mt-px block text-xs text-[color:var(--sidebar-text-muted)]">Owner</small></span>
+                <span className="min-w-0 flex-1">
+                    <strong className="block truncate text-xs font-semibold text-[color:var(--sidebar-text-strong)]">{name}</strong>
+                    <small className="mt-px block text-xs text-[color:var(--sidebar-text-muted)]">{role}</small></span>
             </button>
-            {isOpen && <div className="sidebar-user-popover" role="menu"><button type="button" className="sidebar-user-popover__item" onClick={onLogout} role="menuitem"><span className="flex h-5 w-5 items-center justify-center text-[color:var(--sidebar-active-text)]"><LogoutIcon /></span><span>Выйти</span></button></div>}
+            {isOpen && <div className="sidebar-user-popover" role="menu"><button type="button" className="sidebar-user-popover__item" onClick={onLogout} role="menuitem"><span className="flex h-5 w-5 items-center justify-center text-[color:var(--sidebar-active-text)]"><LogoutIcon /></span><span>{t('userMenu.logout')}</span></button></div>}
         </div>
     );
 }

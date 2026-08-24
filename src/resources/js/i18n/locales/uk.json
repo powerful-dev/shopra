@@ -3,6 +3,12 @@
         "save": "Зберегти"
     },
 
+    "userMenu": {
+        "owner": "Власник",
+        "administrator": "Адміністратор",
+        "logout": "Вийти"
+    },
+
     "modules": {
         "dashboard": "Головна",
         "appearance": "Зовнішній вигляд",

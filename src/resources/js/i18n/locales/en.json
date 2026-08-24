@@ -3,6 +3,12 @@
         "save": "Save"
     },
 
+    "userMenu": {
+        "owner": "Owner",
+        "administrator": "Administrator",
+        "logout": "Logout"
+    },
+
     "modules": {
         "dashboard": "Home",
         "appearance": "Appearance",

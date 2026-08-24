@@ -104,32 +104,6 @@ export default function Sidebar({ isOpen, user, onClose, onLogout }) {
                             );
                     })}
 
-                    {/* {navigation.map(({ id, name, path, icon }) => {
-                        const Icon = icons[icon];
-
-                        return (
-                            <NavLink
-                                key={id}
-                                to={path}
-                                onClick={onClose}
-                                className={({ isActive }) =>
-                                    `sidebar-nav-link${isActive ? ' active' : ''}`
-                                }
-                            >
-                                {Icon && (
-                                    <span className="sidebar-icon">
-                                        <Icon />
-                                    </span>
-                                )}
-
-                                <span className="leading-none">
-                                    {name}
-                                </span>
-                            </NavLink>
-                        );
-                    })} */}
-
-
                 </div>
             </nav>
 
