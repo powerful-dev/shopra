@@ -306,13 +306,15 @@ export default function AdministratorsPage() {
                         })}
                     </div>
                 ) : <div className="min-h-40 bg-[#faf8f6] px-4 py-12 text-center text-[12px] text-[color:var(--color-secondary)]">{query ? t('administratorsPage.noSearchResults') : t('administratorsPage.empty')}</div>}
-            </section>
 
-            <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setPage}
-            />
+                <footer className="flex min-h-[60px] items-center justify-end gap-3 px-[15px] py-2.5 text-xs text-[#8d8680]">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setPage}
+                    />
+                </footer>
+            </section>
 
             <ConfirmModal
                 isOpen={Boolean(adminToDelete)}

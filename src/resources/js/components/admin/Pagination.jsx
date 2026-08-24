@@ -20,12 +20,10 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
     const pages = paginationItems(currentPage, totalPages);
 
     return (
-        <nav className="mt-5 flex justify-center" aria-label="Пагинация администраторов">
-            <div className="pagination">
-                <button className="pagination__item" type="button" onClick={() => onPageChange(Math.max(1, currentPage - 1))} disabled={currentPage <= 1} aria-label="Предыдущая страница">←</button>
-                {pages.map((page, index) => page === '…' ? <span className="grid h-[29px] min-w-[29px] place-items-center text-[12px] text-[color:var(--color-secondary)]" key={`ellipsis-${index}`}>…</span> : <button className={`pagination__item ${page === currentPage ? 'pagination__item--active' : ''}`} type="button" onClick={() => onPageChange(page)} key={page}>{page}</button>)}
-                <button className="pagination__item" type="button" onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))} disabled={currentPage >= totalPages} aria-label="Следующая страница">→</button>
-            </div>
+        <nav className="pagination max-w-full overflow-x-auto" aria-label="Пагинация администраторов">
+            <button className="pagination__item" type="button" onClick={() => onPageChange(Math.max(1, currentPage - 1))} disabled={currentPage <= 1} aria-label="Предыдущая страница">←</button>
+            {pages.map((page, index) => page === '…' ? <span className="grid h-[29px] min-w-[29px] place-items-center text-[12px] text-[color:var(--color-secondary)]" key={`ellipsis-${index}`}>…</span> : <button className={`pagination__item ${page === currentPage ? 'pagination__item--active' : ''}`} type="button" onClick={() => onPageChange(page)} key={page}>{page}</button>)}
+            <button className="pagination__item" type="button" onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))} disabled={currentPage >= totalPages} aria-label="Следующая страница">→</button>
         </nav>
     );
 }
