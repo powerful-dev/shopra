@@ -1,12 +1,47 @@
 {
     "common": {
-        "save": "Save"
+        "save": "Save",
+        "product": "Product",
+        "categories": "Categories",
+        "stock": "Stock",
+        "price": "Price",
+        "status": "Status"
     },
 
     "userMenu": {
         "owner": "Owner",
         "administrator": "Administrator",
         "logout": "Logout"
+    },
+
+    "pagination": {
+        "shown": "Showing {{from}}–{{to}} of {{total}}"
+    },
+
+    "productsPage": {
+        "title": "Products",
+        "description": "All products, stock, and prices in one place.",
+        "addProduct": "Add product",
+        "searchPlaceholder": "Search products…",
+        "searchLabel": "Search products",
+        "copyExisting": "Create from an existing product",
+        "selectProduct": "Select {{name}}",
+        "productActions": "Actions for {{name}}",
+        "summary": {
+            "all": "All products",
+            "catalog": "In the catalog",
+            "active": "Active",
+            "visible": "Visible to customers",
+            "drafts": "Drafts",
+            "awaiting": "Awaiting publication",
+            "lowStock": "Low stock",
+            "check": "Needs attention"
+        },
+        "statuses": {
+            "active": "Active",
+            "draft": "Draft",
+            "archived": "Inactive"
+        }
     },
 
     "modules": {
@@ -32,7 +67,24 @@
         "saved": "General settings saved.",
         "saveError": "Failed to save general settings.",
         "saving": "Saving…",
-        "selectLanguage": "Select a language"
+        "selectLanguage": "Select a language",
+        "shopSettingsTitle": "Online store settings",
+        "lowStockThreshold": "Low product stock threshold",
+        "defaultShopUnit": "Default product unit",
+        "selectShopUnit": "Select a unit"
+    },
+
+    "shopUnits": {
+        "piece": { "name": "Piece", "shortName": "pcs." },
+        "kilogram": { "name": "Kilogram", "shortName": "kg" },
+        "gram": { "name": "Gram", "shortName": "g" },
+        "liter": { "name": "Liter", "shortName": "L" },
+        "milliliter": { "name": "Milliliter", "shortName": "ml" },
+        "meter": { "name": "Meter", "shortName": "m" },
+        "centimeter": { "name": "Centimeter", "shortName": "cm" },
+        "square_meter": { "name": "Square meter", "shortName": "m²" },
+        "package": { "name": "Package", "shortName": "pkg." },
+        "set": { "name": "Set", "shortName": "set" }
     },
 
     "breadcrumbs": {

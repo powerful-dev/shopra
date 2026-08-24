@@ -7,9 +7,9 @@ import ActionsMenu from '../../components/admin/ActionsMenu';
 import PageLoader from '../../components/admin/PageLoader';
 import ConfirmModal from '../../components/admin/ConfirmModal';
 import Pagination from '../../components/admin/Pagination';
+import SearchField from '../../components/admin/SearchField';
 import Loading from '../../components/admin/Loading';
 import PlusIcon from '../../components/icons/PlusIcon';
-import SearchIcon from '../../components/icons/SearchIcon';
 import MoreIcon from '../../components/icons/MoreIcon';
 import CheckIcon from '../../components/icons/CheckIcon';
 import PencilIcon from '../../components/icons/PencilIcon';
@@ -26,7 +26,6 @@ export default function AdministratorsPage() {
     const [isSearching, setIsSearching] = useState(false);
     const [message, setMessage] = useState('');
     const currentSearch = searchParams.get('search') ?? '';
-    const [query, setQuery] = useState(currentSearch);
     const [statusChangingId, setStatusChangingId] = useState(null);
     const [adminToDelete, setAdminToDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -75,27 +74,16 @@ export default function AdministratorsPage() {
         loadAdmins(currentPage, currentSearch, initial);
     }, [currentPage, currentSearch]);
 
-    useEffect(() => {
-        setQuery(currentSearch);
-    }, [currentSearch]);
-
-    useEffect(() => {
-        if (query === currentSearch) return undefined;
-
-        const timeoutId = window.setTimeout(() => {
-            const params = new URLSearchParams(searchParams);
-            const search = query.trim();
-            if (search) {
-                params.set('search', search);
-            } else {
-                params.delete('search');
-            }
-            params.set('page', String(DEFAULT_PAGE));
-            setSearchParams(params, { replace: true });
-        }, 700);
-
-        return () => window.clearTimeout(timeoutId);
-    }, [query, currentSearch, searchParams, setSearchParams]);
+    const setSearch = (search) => {
+        const params = new URLSearchParams(searchParams);
+        if (search) {
+            params.set('search', search);
+        } else {
+            params.delete('search');
+        }
+        params.set('page', String(DEFAULT_PAGE));
+        setSearchParams(params, { replace: true });
+    };
 
     useEffect(() => {
         if (!location.state?.message) return;
@@ -185,10 +173,13 @@ export default function AdministratorsPage() {
 
             <section className="overflow-visible rounded-[16px] border border-[color:var(--color-border)] bg-[rgba(255,255,255,.95)] shadow-[var(--shadow-sm)]">
                 <div className="flex items-center gap-[7px] border-b border-[#eee9e5] p-[11px] max-sm:grid max-sm:grid-cols-1">
-                    <label className="flex h-[39px] min-w-0 flex-1 items-center gap-2 rounded-[9px] border border-[color:var(--color-border)] bg-white px-2 text-[#958c85] focus-within:border-[#c78661] focus-within:shadow-[0_0_0_3px_rgba(184,79,24,.06)]">
-                        <SearchIcon />
-                        <input type="search" className="min-w-0 flex-1 border-0 bg-transparent text-[11px] text-[#514943] outline-none" placeholder={t('administratorsPage.search')} aria-label={t('administratorsPage.search')} value={query} onChange={(event) => setQuery(event.target.value)} />
-                    </label>
+                    <SearchField
+                        value={currentSearch}
+                        onSearch={setSearch}
+                        placeholder={t('administratorsPage.search')}
+                        className="flex h-[39px] min-w-0 flex-1 items-center gap-2 rounded-[9px] border border-[color:var(--color-border)] bg-white px-2 text-[#958c85] focus-within:border-[#c78661] focus-within:shadow-[0_0_0_3px_rgba(184,79,24,.06)]"
+                        inputClassName="min-w-0 flex-1 border-0 bg-transparent text-[11px] text-[#514943] outline-none"
+                    />
                 </div>
                 <div className="grid min-h-[43px] grid-cols-[minmax(230px,1.2fr)_minmax(220px,1fr)_minmax(210px,1fr)_100px_50px] items-center gap-[10px] rounded-t-[16px] bg-[#faf8f6] px-[15px] py-[7px] text-[12px] font-[720] uppercase tracking-[0.04em] text-[#8e8781] max-2xl:hidden">
                     <span>{t('administratorsPage.name')}</span><span>{t('administratorsPage.access')}</span><span>{t('administratorsPage.email')}</span><span>{t('administratorsPage.activity')}</span><span className="sr-only">{t('administratorsPage.actions')}</span>
@@ -307,10 +298,13 @@ export default function AdministratorsPage() {
                     </div>
                 ) : <div className="min-h-40 bg-[#faf8f6] px-4 py-12 text-center text-[12px] text-[color:var(--color-secondary)]">{query ? t('administratorsPage.noSearchResults') : t('administratorsPage.empty')}</div>}
 
-                <footer className="flex min-h-[60px] items-center justify-end gap-3 px-[15px] py-2.5 text-xs text-[#8d8680]">
+                <footer className="flex min-h-[60px] items-center justify-between gap-3 px-[15px] py-2.5 text-xs text-[#8d8680]">
                     <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
+                        from={meta?.from ?? 0}
+                        to={meta?.to ?? 0}
+                        total={meta?.total ?? 0}
                         onPageChange={setPage}
                     />
                 </footer>

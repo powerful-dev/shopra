@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AdminModuleController;
 use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\CommonSettingsController;
 use App\Http\Controllers\Api\ShopController;
+use App\Http\Controllers\Api\ShopItemController;
 use App\Http\Controllers\Api\SiteModuleController;
 use Illuminate\Support\Facades\Route;
 
@@ -37,12 +38,7 @@ Route::middleware([
     });
 
     Route::middleware('module:products')->group(function (): void {
-
-        // Сюда потом помещаем ProductController:
-        // Route::get('/products', ...);
-        // Route::post('/products', ...);
-        // Route::put('/products/{product}', ...);
-
+        Route::get('/products', [ShopItemController::class, 'index']);
     });
 
 });

@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Language;
 use App\Models\Module;
+use App\Models\Shop;
+use App\Models\ShopUnit;
 use App\Models\Site;
 use App\Models\SiteType;
 use App\Models\User;
@@ -18,6 +20,10 @@ class CommonSettingsApiTest extends TestCase
 
     private Site $site;
 
+    private Shop $shop;
+
+    private ShopUnit $pieceUnit;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -29,6 +35,16 @@ class CommonSettingsApiTest extends TestCase
         $this->site = Site::query()->create([
             'site_type_id' => $siteType->getKey(),
             'name' => 'Initial site',
+        ]);
+        $this->pieceUnit = ShopUnit::query()->create([
+            'code' => 'piece',
+            'is_system' => true,
+        ]);
+        $this->shop = Shop::query()->create([
+            'name' => 'Initial shop',
+            'theme' => 'other',
+            'low_stock_threshold' => 5,
+            'default_shop_unit_id' => $this->pieceUnit->getKey(),
         ]);
         $this->user = User::factory()->create(['is_active' => true]);
 
@@ -62,6 +78,10 @@ class CommonSettingsApiTest extends TestCase
             ->assertJsonPath('data.site_name', 'Initial site')
             ->assertJsonPath('data.admin_language_id', $russian->getKey())
             ->assertJsonPath('data.site_language_id', $english->getKey())
+            ->assertJsonPath('data.low_stock_threshold', 5)
+            ->assertJsonPath('data.default_shop_unit_id', $this->pieceUnit->getKey())
+            ->assertJsonPath('data.shop_units.0.code', 'piece')
+            ->assertJsonPath('data.shop_units.0.name', null)
             ->assertJsonPath('data.admin_languages.0.code', 'en')
             ->assertJsonPath('data.admin_languages.1.code', 'ru')
             ->assertJsonPath('data.admin_languages.2.code', 'uk')
@@ -78,12 +98,16 @@ class CommonSettingsApiTest extends TestCase
             'site_name' => 'Updated site',
             'admin_language_id' => $adminLanguage->getKey(),
             'site_language_id' => $siteLanguage->getKey(),
+            'low_stock_threshold' => 8,
+            'default_shop_unit_id' => $this->pieceUnit->getKey(),
         ]);
 
         $response->assertOk()
             ->assertJsonPath('data.site_name', 'Updated site')
             ->assertJsonPath('data.admin_language_id', $adminLanguage->getKey())
-            ->assertJsonPath('data.site_language_id', $siteLanguage->getKey());
+            ->assertJsonPath('data.site_language_id', $siteLanguage->getKey())
+            ->assertJsonPath('data.low_stock_threshold', 8)
+            ->assertJsonPath('data.default_shop_unit_id', $this->pieceUnit->getKey());
 
         $this->assertDatabaseHas('sites', [
             'id' => $this->site->getKey(),
@@ -93,6 +117,11 @@ class CommonSettingsApiTest extends TestCase
         $this->assertDatabaseHas('users', [
             'id' => $this->user->getKey(),
             'admin_language_id' => $adminLanguage->getKey(),
+        ]);
+        $this->assertDatabaseHas('shops', [
+            'id' => $this->shop->getKey(),
+            'low_stock_threshold' => 8,
+            'default_shop_unit_id' => $this->pieceUnit->getKey(),
         ]);
     }
 

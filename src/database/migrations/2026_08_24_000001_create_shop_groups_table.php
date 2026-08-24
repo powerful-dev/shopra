@@ -8,17 +8,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('shops', function (Blueprint $table): void {
+        Schema::create('shop_groups', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->nullable();
-            $table->string('logo')->nullable();
-            $table->string('theme', 50)->nullable()->index();
+            $table->string('name');
+            $table->string('url');
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('shops');
+        Schema::dropIfExists('shop_groups');
     }
 };

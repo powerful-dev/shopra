@@ -8,6 +8,13 @@ import BackIcon from '../../components/icons/BackIcon';
 import CheckIcon from '../../components/icons/CheckIcon';
 import { csrf, request } from '../../services/api';
 
+const formFromData = (data) => ({
+    site_name: data.site_name ?? '',
+    admin_language_id: data.admin_language_id ?? '',
+    site_language_id: data.site_language_id ?? '',
+    low_stock_threshold: data.low_stock_threshold ?? 5,
+    default_shop_unit_id: data.default_shop_unit_id ?? '',
+});
 
 export default function CommonSettingsPage() {
     const { t, i18n } = useTranslation();
@@ -15,9 +22,12 @@ export default function CommonSettingsPage() {
         site_name: '',
         admin_language_id: '',
         site_language_id: '',
+        low_stock_threshold: 5,
+        default_shop_unit_id: '',
     });
     const [adminLanguages, setAdminLanguages] = useState([]);
     const [siteLanguages, setSiteLanguages] = useState([]);
+    const [shopUnits, setShopUnits] = useState([]);
     const [formErrors, setFormErrors] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,13 +41,10 @@ export default function CommonSettingsPage() {
             try {
                 const { data } = await request('/api/settings/common');
 
-                setForm({
-                    site_name: data.site_name ?? '',
-                    admin_language_id: data.admin_language_id ?? '',
-                    site_language_id: data.site_language_id ?? '',
-                });
+                setForm(formFromData(data));
                 setAdminLanguages(data.admin_languages ?? []);
                 setSiteLanguages(data.site_languages ?? []);
+                setShopUnits(data.shop_units ?? []);
 
                 const adminLanguage = data.admin_languages?.find(
                     (language) => Number(language.id) === Number(data.admin_language_id)
@@ -73,13 +80,10 @@ export default function CommonSettingsPage() {
                 body: JSON.stringify(form),
             });
 
-            setForm({
-                site_name: data.site_name ?? '',
-                admin_language_id: data.admin_language_id ?? '',
-                site_language_id: data.site_language_id ?? '',
-            });
+            setForm(formFromData(data));
             setAdminLanguages(data.admin_languages ?? []);
             setSiteLanguages(data.site_languages ?? []);
+            setShopUnits(data.shop_units ?? []);
 
             const adminLanguage = data.admin_languages?.find(
                 (language) => Number(language.id) === Number(data.admin_language_id)
@@ -142,59 +146,102 @@ export default function CommonSettingsPage() {
                 </div>
             )}
 
-            <section className="rounded-[16px] border border-[color:var(--color-border)] bg-[rgba(255,255,255,.95)] shadow-[var(--shadow-sm)]">
-                <form id="common-settings-form" className="p-5 max-sm:p-4" noValidate onSubmit={(event) => { event.preventDefault(); saveData(); }}>
+            <form id="common-settings-form" noValidate onSubmit={(event) => { event.preventDefault(); saveData(); }}>
+                <section className="rounded-[16px] border border-[color:var(--color-border)] bg-[rgba(255,255,255,.95)] shadow-[var(--shadow-sm)]">
+                    <div className="p-5 max-sm:p-4">
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-[18px] max-md:grid-cols-1">
+                            <h2 className="m-0 text-[16px] font-[760] text-[color:var(--color-primary)] md:col-span-2">
+                                {t('commonSettingsPage.title')}
+                            </h2>
+
+                            <Field className="md:col-span-2" label={t('commonSettingsPage.siteName')} error={formErrors.site_name}>
+                                <input
+                                    className={`form-input ${formErrors.site_name ? '!border-red-500' : ''}`}
+                                    type="text"
+                                    name="site_name"
+                                    value={form.site_name}
+                                    onChange={updateField}
+                                    disabled={isLoading}
+                                    required
+                                />
+                            </Field>
+
+                            <Field label={t('commonSettingsPage.adminLanguage')} error={formErrors.admin_language_id}>
+                                <select
+                                    className={`form-select ${formErrors.admin_language_id ? '!border-red-500' : ''}`}
+                                    name="admin_language_id"
+                                    value={form.admin_language_id}
+                                    onChange={updateField}
+                                    disabled={isLoading}
+                                    required
+                                >
+                                    <option value="">{t('commonSettingsPage.selectLanguage')}</option>
+                                    {adminLanguages.map((language) => (
+                                        <option key={language.id} value={language.id}>{language.name}</option>
+                                    ))}
+                                </select>
+                            </Field>
+
+                            <Field label={t('commonSettingsPage.siteLanguage')} error={formErrors.site_language_id}>
+                                <select
+                                    className={`form-select ${formErrors.site_language_id ? '!border-red-500' : ''}`}
+                                    name="site_language_id"
+                                    value={form.site_language_id}
+                                    onChange={updateField}
+                                    disabled={isLoading}
+                                    required
+                                >
+                                    <option value="">{t('commonSettingsPage.selectLanguage')}</option>
+                                    {siteLanguages.map((language) => (
+                                        <option key={language.id} value={language.id}>{language.name}</option>
+                                    ))}
+                                </select>
+                            </Field>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="mt-5 rounded-[16px] border border-[color:var(--color-border)] bg-[rgba(255,255,255,.95)] shadow-[var(--shadow-sm)]">
+                    <div className="p-5 max-sm:p-4">
                     <div className="grid grid-cols-2 gap-x-4 gap-y-[18px] max-md:grid-cols-1">
                         <h2 className="m-0 text-[16px] font-[760] text-[color:var(--color-primary)] md:col-span-2">
-                            {t('commonSettingsPage.title')}
+                                {t('commonSettingsPage.shopSettingsTitle')}
                         </h2>
 
-                        <Field className="md:col-span-2" label={t('commonSettingsPage.siteName')} error={formErrors.site_name}>
+                            <Field label={t('commonSettingsPage.lowStockThreshold')} error={formErrors.low_stock_threshold}>
                             <input
-                                className={`form-input ${formErrors.site_name ? '!border-red-500' : ''}`}
-                                type="text"
-                                name="site_name"
-                                value={form.site_name}
+                                    className={`form-input ${formErrors.low_stock_threshold ? '!border-red-500' : ''}`}
+                                    type="number"
+                                    name="low_stock_threshold"
+                                    min="1"
+                                    step="1"
+                                    value={form.low_stock_threshold}
                                 onChange={updateField}
                                 disabled={isLoading}
                                 required
                             />
                         </Field>
 
-                        <Field label={t('commonSettingsPage.adminLanguage')} error={formErrors.admin_language_id}>
+                            <Field label={t('commonSettingsPage.defaultShopUnit')} error={formErrors.default_shop_unit_id}>
                             <select
-                                className={`form-select ${formErrors.admin_language_id ? '!border-red-500' : ''}`}
-                                name="admin_language_id"
-                                value={form.admin_language_id}
+                                    className={`form-select ${formErrors.default_shop_unit_id ? '!border-red-500' : ''}`}
+                                    name="default_shop_unit_id"
+                                    value={form.default_shop_unit_id}
                                 onChange={updateField}
                                 disabled={isLoading}
-                                required
                             >
-                                <option value="">{t('commonSettingsPage.selectLanguage')}</option>
-                                {adminLanguages.map((language) => (
-                                    <option key={language.id} value={language.id}>{language.name}</option>
-                                ))}
-                            </select>
-                        </Field>
-
-                        <Field label={t('commonSettingsPage.siteLanguage')} error={formErrors.site_language_id}>
-                            <select
-                                className={`form-select ${formErrors.site_language_id ? '!border-red-500' : ''}`}
-                                name="site_language_id"
-                                value={form.site_language_id}
-                                onChange={updateField}
-                                disabled={isLoading}
-                                required
-                            >
-                                <option value="">{t('commonSettingsPage.selectLanguage')}</option>
-                                {siteLanguages.map((language) => (
-                                    <option key={language.id} value={language.id}>{language.name}</option>
+                                    <option value="">{t('commonSettingsPage.selectShopUnit')}</option>
+                                    {shopUnits.map((unit) => (
+                                        <option key={unit.id} value={unit.id}>
+                                            {unit.is_system && unit.code ? t(`shopUnits.${unit.code}.name`) : unit.name || unit.short_name || unit.code}
+                                        </option>
                                 ))}
                             </select>
                         </Field>
                     </div>
-                </form>
-            </section>
+                    </div>
+                </section>
+            </form>
         </>
     );
 }

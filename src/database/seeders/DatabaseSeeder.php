@@ -20,7 +20,12 @@ class DatabaseSeeder extends Seeder
             ModuleSeeder::class,
             SiteTypeSeeder::class,
             SiteSeeder::class,
+            ShopSeeder::class,
+            ShopUnitSeeder::class,
         ]);
 
+        //if (app()->environment('local')) {
+            $this->call(ShopCatalogSeeder::class);
+        //}
     }
 }

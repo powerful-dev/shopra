@@ -32,6 +32,15 @@ class UpdateCommonSettingsRequest extends FormRequest
                     fn (Builder $query) => $query->where('is_site', true)
                 ),
             ],
+            'low_stock_threshold' => ['required', 'integer', 'min:1'],
+            'default_shop_unit_id' => [
+                'present',
+                'nullable',
+                'integer',
+                Rule::exists('shop_units', 'id')->where(
+                    fn (Builder $query) => $query->whereNull('deleted_at')
+                ),
+            ],
         ];
     }
 }

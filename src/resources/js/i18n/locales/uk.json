@@ -1,12 +1,47 @@
 {
     "common": {
-        "save": "Зберегти"
+        "save": "Зберегти",
+        "product": "Товар",
+        "categories": "Категорії",
+        "stock": "Залишок",
+        "price": "Ціна",
+        "status": "Статус"
     },
 
     "userMenu": {
         "owner": "Власник",
         "administrator": "Адміністратор",
         "logout": "Вийти"
+    },
+
+    "pagination": {
+        "shown": "Показано {{from}}–{{to}} з {{total}}"
+    },
+
+    "productsPage": {
+        "title": "Товари",
+        "description": "Усі товари, залишки та ціни — в одному місці.",
+        "addProduct": "Додати товар",
+        "searchPlaceholder": "Знайти товар…",
+        "searchLabel": "Знайти товар",
+        "copyExisting": "Створити на основі наявного товару",
+        "selectProduct": "Вибрати {{name}}",
+        "productActions": "Дії {{name}}",
+        "summary": {
+            "all": "Усі товари",
+            "catalog": "У каталозі",
+            "active": "Активні",
+            "visible": "Видимі покупцям",
+            "drafts": "Чернетки",
+            "awaiting": "Очікують публікації",
+            "lowStock": "Мало на складі",
+            "check": "Потрібно перевірити"
+        },
+        "statuses": {
+            "active": "Активний",
+            "draft": "Чернетка",
+            "archived": "Неактивний"
+        }
     },
 
     "modules": {
@@ -32,7 +67,24 @@
         "saved": "Основні налаштування збережено.",
         "saveError": "Не вдалося зберегти основні налаштування.",
         "saving": "Збереження…",
-        "selectLanguage": "Виберіть мову"
+        "selectLanguage": "Виберіть мову",
+        "shopSettingsTitle": "Налаштування інтернет-магазину",
+        "lowStockThreshold": "Поріг малого залишку товару",
+        "defaultShopUnit": "Одиниця вимірювання товару за замовчуванням",
+        "selectShopUnit": "Виберіть одиницю вимірювання"
+    },
+
+    "shopUnits": {
+        "piece": { "name": "Штука", "shortName": "шт." },
+        "kilogram": { "name": "Кілограм", "shortName": "кг" },
+        "gram": { "name": "Грам", "shortName": "г" },
+        "liter": { "name": "Літр", "shortName": "л" },
+        "milliliter": { "name": "Мілілітр", "shortName": "мл" },
+        "meter": { "name": "Метр", "shortName": "м" },
+        "centimeter": { "name": "Сантиметр", "shortName": "см" },
+        "square_meter": { "name": "Квадратний метр", "shortName": "м²" },
+        "package": { "name": "Упаковка", "shortName": "уп." },
+        "set": { "name": "Комплект", "shortName": "компл." }
     },
 
     "breadcrumbs": {

@@ -1,0 +1,40 @@
+.status-badge {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 8px;
+    border-radius: 9999px;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 720;
+
+    &::before {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: currentColor;
+        content: '';
+    }
+
+    &--active {
+        background: #eef8ee;
+        color: #2f7c4b;
+    }
+
+    &--draft {
+        background: #fff2e4;
+        color: #a95b12;
+    }
+
+    &--archived {
+        background: #f0edeb;
+        color: #6c655f;
+    }
+}
+
+@media (max-width: 47.999rem) {
+    .status-badge {
+        grid-column: 3;
+    }
+}
