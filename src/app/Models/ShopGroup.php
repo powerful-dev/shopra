@@ -17,6 +17,10 @@ class ShopGroup extends Model
         'name',
         'slug',
         'sorting',
+        'description',
+        'text',
+        'seo_title',
+        'seo_description',
     ];
 
     protected function casts(): array

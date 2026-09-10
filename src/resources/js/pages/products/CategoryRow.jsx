@@ -3,7 +3,7 @@ import PencilIcon from '../../components/icons/PencilIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
 import { useTranslation } from 'react-i18next';
 
-export default function CategoryRow({ category, depth = 0, isExpanded, isLoading, error, onToggle, isActionsOpen, onToggleActions, onCloseActions, dragEnabled, isDragging, dropZone, onDragStart, onDragEnd, onDragOver, onDrop }) {
+export default function CategoryRow({ category, depth = 0, isExpanded, isLoading, error, onToggle, isActionsOpen, onToggleActions, onCloseActions, onEdit, onDelete, dragEnabled, isDragging, dropZone, onDragStart, onDragEnd, onDragOver, onDrop }) {
     const { t } = useTranslation();
     function dropPosition(event) {
         const rect = event.currentTarget.getBoundingClientRect();
@@ -43,8 +43,8 @@ export default function CategoryRow({ category, depth = 0, isExpanded, isLoading
                 onToggle={onToggleActions}
                 onClose={onCloseActions}
                 actions={[
-                    { label: t('categoriesModal.row.rename'), icon: <PencilIcon /> },
-                    { label: t('categoriesModal.row.delete'), icon: <TrashIcon />, variant: 'danger' },
+                    { label: t('productsPage.edit'), icon: <PencilIcon />, onClick: onEdit },
+                    { label: t('categoriesModal.row.delete'), icon: <TrashIcon />, variant: 'danger', onClick: onDelete },
                 ]}
             />
         </div>

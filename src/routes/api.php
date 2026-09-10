@@ -44,7 +44,9 @@ Route::middleware([
         Route::get('/product-categories/search', [ShopGroupController::class, 'search']);
         Route::get('/product-categories/{group}/children', [ShopGroupController::class, 'children']);
         Route::patch('/product-categories/{group}/move', [ShopGroupController::class, 'move']);
+        Route::delete('/product-categories/{group}', [ShopGroupController::class, 'destroy']);
         Route::post('/product-categories', [ShopGroupController::class, 'store']);
+        Route::put('/product-categories/{group}', [ShopGroupController::class, 'update']);
         Route::get('/product-categories/slug', [ShopGroupController::class, 'slug']);
         Route::get('/products', [ShopItemController::class, 'index']);
         Route::post('/products', [ShopItemController::class, 'store']);

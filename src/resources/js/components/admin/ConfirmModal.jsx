@@ -1,3 +1,5 @@
+import usePageScrollLock from '../../hooks/usePageScrollLock';
+
 export default function ConfirmModal({
     isOpen,
     title,
@@ -9,6 +11,8 @@ export default function ConfirmModal({
     onClose,
     variant,
 }) {
+    usePageScrollLock(isOpen);
+
     if (!isOpen) return null;
 
     const confirmButtonClass = variant === 'danger'

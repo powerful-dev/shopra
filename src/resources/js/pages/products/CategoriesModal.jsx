@@ -1,13 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import ConfirmModal from '../../components/admin/ConfirmModal';
+import CategoryEditModal from './CategoryEditModal';
 import CategoryRow from './CategoryRow';
-import PencilIcon from '../../components/icons/PencilIcon';
-import { createShopGroup, getRootShopGroups, getShopGroupChildren, getShopGroups, getUniqueShopGroupSlug, moveShopGroup, searchShopGroups } from '../../services/shopGroups';
+import CategorySlugField from './CategorySlugField';
+import usePageScrollLock from '../../hooks/usePageScrollLock';
+import { createShopGroup, deleteShopGroup, getRootShopGroups, getShopGroupChildren, getShopGroups, getUniqueShopGroupSlug, moveShopGroup, searchShopGroups } from '../../services/shopGroups';
 
 export default function CategoriesModal({ isOpen, onClose }) {
     const { t } = useTranslation();
     const [openActionsId, setOpenActionsId] = useState(null);
     const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+    const [categoryToDelete, setCategoryToDelete] = useState(null);
+    const [categoryToEdit, setCategoryToEdit] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [groups, setGroups] = useState([]);
     const [reloadKey, setReloadKey] = useState(0);
     const parentOptions = buildParentOptions(groups);
@@ -22,6 +28,7 @@ export default function CategoriesModal({ isOpen, onClose }) {
     const query = search.trim();
     const isSearching = [...query].length >= 2;
     const searchGroups = searchResult?.query === query ? searchResult.groups : [];
+    usePageScrollLock(isOpen);
 
     useEffect(() => {
         if (!isOpen || !isSearching) return undefined;
@@ -53,6 +60,25 @@ export default function CategoriesModal({ isOpen, onClose }) {
     function endDrag() {
         setDraggedId(null);
         setDropZone(null);
+    }
+
+    async function removeCategory() {
+        if (!categoryToDelete || isDeleting) return;
+
+        setIsDeleting(true);
+        setMoveError('');
+
+        try {
+            await deleteShopGroup(categoryToDelete.id);
+            setCategoryToDelete(null);
+            setOpenActionsId(null);
+            setReloadKey((key) => key + 1);
+        } catch {
+            setCategoryToDelete(null);
+            setMoveError(t('categoriesModal.errors.delete'));
+        } finally {
+            setIsDeleting(false);
+        }
     }
 
     function getDropZone(target, position) {
@@ -179,6 +205,8 @@ export default function CategoriesModal({ isOpen, onClose }) {
     const [parentsError, setParentsError] = useState('');
     const closeModal = useCallback(() => {
         setOpenActionsId(null);
+        setCategoryToDelete(null);
+        setCategoryToEdit(null);
         setSearch('');
         setIsCreateFormOpen(false);
         onClose();
@@ -191,11 +219,9 @@ export default function CategoriesModal({ isOpen, onClose }) {
             if (event.key === 'Escape') closeModal();
         };
 
-        document.body.classList.add('modal-open');
         document.addEventListener('keydown', closeOnEscape);
 
         return () => {
-            document.body.classList.remove('modal-open');
             document.removeEventListener('keydown', closeOnEscape);
         };
     }, [closeModal, isOpen]);
@@ -337,6 +363,8 @@ export default function CategoriesModal({ isOpen, onClose }) {
                                     isActionsOpen={openActionsId === category.id}
                                     onToggleActions={() => setOpenActionsId((id) => id === category.id ? null : category.id)}
                                     onCloseActions={() => setOpenActionsId(null)}
+                                    onEdit={() => setCategoryToEdit(category)}
+                                    onDelete={() => setCategoryToDelete(category)}
                                 />
                             ))}
                             {draggedId !== null && (
@@ -358,6 +386,31 @@ export default function CategoriesModal({ isOpen, onClose }) {
                     <button type="button" className="button button--primary min-w-28 justify-center max-[620px]:w-full" onClick={closeModal}>{t('categoriesModal.done')}</button>
                 </footer>
             </section>
+            <ConfirmModal
+                isOpen={Boolean(categoryToDelete)}
+                title={t('categoriesModal.confirmDeleteTitle')}
+                message={t('categoriesModal.confirmDeleteMessage', { name: categoryToDelete?.name })}
+                confirmText={t('categoriesModal.row.delete')}
+                cancelText={t('categoriesModal.form.cancel')}
+                isLoading={isDeleting}
+                onConfirm={removeCategory}
+                onClose={(event) => {
+                    event?.stopPropagation();
+                    if (!isDeleting) setCategoryToDelete(null);
+                }}
+                variant="danger"
+            />
+            <CategoryEditModal
+                category={categoryToEdit}
+                parentOptions={parentOptions}
+                isLoadingParents={isLoadingParents}
+                parentsError={parentsError}
+                onClose={() => setCategoryToEdit(null)}
+                onUpdated={() => {
+                    setCategoryToEdit(null);
+                    setReloadKey((key) => key + 1);
+                }}
+            />
         </div>
     );
 }
@@ -457,46 +510,18 @@ function CategoryCreateForm({ parentOptions, isLoadingParents, parentsError, onC
                     placeholder={t('categoriesModal.form.namePlaceholder')}
                 />
                 {(name || slug || manualSlug !== null) && (
-                    <div className="flex min-w-0 flex-col gap-[5px] text-xs text-[#8d857e]">
-                        {isEditing ? (
-                            <div className="form-control-group flex items-center rounded-lg px-[9px]">
-                                <span className="shrink-0">/catalog/</span>
-                                <input
-                                    className="form-control h-[30px] min-w-0 flex-1 bg-transparent text-xs"
-                                    aria-label={t('categoriesModal.form.slugLabel')}
-                                    name="slug"
-                                    autoFocus
-                                    maxLength={255}
-                                    disabled={isSaving}
-                                    value={slug}
-                                    onChange={(event) => {
-                                        setSlug(event.target.value);
-                                        setManualSlug(event.target.value);
-                                    }}
-                                    onBlur={() => setIsEditing(false)}
-                                    onKeyDown={(event) => {
-                                        if (event.key === 'Enter') {
-                                            event.preventDefault();
-                                            setIsEditing(false);
-                                        }
-                                    }}
-                                />
-                            </div>
-                        ) : (
-                            <button
-                                type="button"
-                                className="inline-flex w-fit max-w-full cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 text-left text-xs text-[#8d857e] hover:text-[color:var(--color-accent)]"
-                                aria-label={t('categoriesModal.form.editUrl', { url: `/catalog/${slug}` })}
-                                disabled={isSaving}
-                                onClick={() => setIsEditing(true)}
-                            >
-                                <span className="min-w-0 break-all">/catalog/{slug}</span>
-                                <span className="inline-flex shrink-0"><PencilIcon /></span>
-                            </button>
-                        )}
-                        {!isEditing && isChecking && <span role="status">{t('categoriesModal.form.checkingUrl')}</span>}
-                        {!isEditing && error && <span role="alert">{error}</span>}
-                    </div>
+                    <CategorySlugField
+                        slug={slug}
+                        isEditing={isEditing}
+                        isChecking={isChecking}
+                        error={error}
+                        disabled={isSaving}
+                        onChange={(value) => {
+                            setSlug(value);
+                            setManualSlug(value);
+                        }}
+                        onEditingChange={setIsEditing}
+                    />
                 )}
             </div>
             <label className="flex min-w-0 flex-col gap-[5px]">

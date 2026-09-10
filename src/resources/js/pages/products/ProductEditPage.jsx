@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ActionsMenu from '../../components/admin/ActionsMenu';
 import Breadcrumbs from '../../components/admin/Breadcrumbs';
@@ -14,6 +14,7 @@ import RocketIcon from '../../components/icons/RocketIcon';
 import ChevronIcon from '../../components/icons/ChevronIcon';
 import SaveIcon from '../../components/icons/SaveIcon';
 import { csrf, request } from '../../services/api';
+import useSectionScroll from '../../hooks/useSectionScroll';
 
 
 const fieldClass = 'h-[43px] w-full rounded-[9px] border border-[#ddd5cf] bg-white px-[11px] text-[13px] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]';
@@ -38,6 +39,9 @@ export default function ProductEditPage() {
     const [isActionsOpen, setIsActionsOpen] = useState(false);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const sectionNavigationRef = useRef(null);
+    const sectionRefs = useRef({});
+    const scrollToSection = useSectionScroll({ stickyRef: sectionNavigationRef });
 
     useEffect(() => {
         if (isNew) return undefined;
@@ -120,11 +124,11 @@ export default function ProductEditPage() {
                 </div>
             </header>
 
-            <nav className="sticky top-[var(--header-height)] z-20 mb-[13px] flex items-center gap-0.5 overflow-x-auto border-b border-[color:var(--color-border)] bg-[rgba(247,246,243,.95)] py-1 backdrop-blur max-lg:top-[62px] max-sm:-mx-[13px] max-sm:px-[13px]" aria-label="Разделы товара">
+            <nav ref={sectionNavigationRef} className="sticky top-[var(--header-height)] z-20 mb-[13px] flex items-center gap-0.5 overflow-x-auto border-b border-[color:var(--color-border)] bg-[rgba(247,246,243,.95)] py-1 backdrop-blur max-lg:top-[62px] max-sm:-mx-[13px] max-sm:px-[13px]" aria-label="Разделы товара">
                 {sectionLinks.map(([id, label, icon], index) => (
-                    <a key={id} href={`#${id}`} className={`flex min-h-[45px] shrink-0 items-center gap-1.5 px-2.5 text-[12px] font-[680] ${index === 0 ? 'relative text-[color:var(--color-accent)] after:absolute after:inset-x-2.5 after:-bottom-1 after:h-0.5 after:rounded-full after:bg-[color:var(--color-accent)]' : 'text-[#756e67]'}`}>
+                    <button key={id} type="button" className={`flex min-h-[45px] shrink-0 cursor-pointer items-center gap-1.5 border-0 bg-transparent px-2.5 text-[12px] font-[680] ${index === 0 ? 'relative text-[color:var(--color-accent)] after:absolute after:inset-x-2.5 after:-bottom-1 after:h-0.5 after:rounded-full after:bg-[color:var(--color-accent)]' : 'text-[#756e67]'}`} onClick={() => scrollToSection(sectionRefs.current[id])}>
                         <span className={`grid h-[25px] w-[25px] place-items-center rounded-lg ${index === 0 ? 'bg-[#f9eee7]' : 'bg-[#f0ebe7]'}`}><SectionIcon type={icon} /></span>{label}
-                    </a>
+                    </button>
                 ))}
             </nav>
 
@@ -166,22 +170,22 @@ export default function ProductEditPage() {
 
             <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
                 <form className="space-y-3" aria-label="Данные товара" onSubmit={(event) => event.preventDefault()}>
-                    <MainSection form={form} onChange={updateField} />
-                    <MediaSection />
-                    <PriceSection form={form} onChange={updateField} />
-                    <AccordionSection id="variants" title="Модификации товара" icon="layers" open>
+                    <MainSection sectionRef={(element) => { sectionRefs.current.main = element; }} form={form} onChange={updateField} />
+                    <MediaSection sectionRef={(element) => { sectionRefs.current.photo = element; }} />
+                    <PriceSection sectionRef={(element) => { sectionRefs.current.price = element; }} form={form} onChange={updateField} />
+                    <AccordionSection sectionRef={(element) => { sectionRefs.current.variants = element; }} id="variants" title="Модификации товара" icon="layers" open>
                         <article className="grid min-h-[82px] grid-cols-[42px_minmax(0,1fr)_auto] items-center gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[12px_13px] max-md:grid-cols-[38px_minmax(0,1fr)]">
                             <span className="grid h-[42px] w-[42px] place-items-center rounded-[11px] bg-[#f1ece8] text-[#81766e]"><SectionIcon type="layers" size={18} /></span>
                             <div><strong className="block text-[13px]">Модификации отключены</strong><small className="mt-0.5 block text-[12px] leading-[1.4] text-[#8c837c]">Обычный товар с одной ценой и общим остатком. Цвета, размеры и другие опции добавляются только при необходимости.</small></div>
                             <button type="button" className="button button--primary min-h-9 max-md:col-span-full max-md:w-full"><PlusIcon />Добавить модификации</button>
                         </article>
                     </AccordionSection>
-                    <AccordionSection id="description" title="Описание" icon="file">
+                    <AccordionSection sectionRef={(element) => { sectionRefs.current.description = element; }} id="description" title="Описание" icon="file">
                         <label className="flex flex-col gap-[7px]"><span className="flex items-center justify-between text-[12px] font-bold text-[#554e48]">Описание товара<button type="button" className="inline-flex items-center gap-[5px] rounded-[7px] border-0 bg-[#f9eee7] px-[7px] py-[5px] text-[11px] font-[720] text-[color:var(--color-accent)]">◇ Помочь написать</button></span><textarea className="h-[116px] w-full resize-y rounded-[9px] border border-[#ddd5cf] bg-white p-[11px] text-[13px] leading-normal outline-none" placeholder="Расскажите о товаре" /></label>
                     </AccordionSection>
-                    <AccordionSection id="features" title="Характеристики" icon="sliders"><Field label="Характеристики товара"><input className={fieldClass} type="text" placeholder="Например: материал — натуральная кожа" /></Field></AccordionSection>
-                    <AccordionSection id="delivery" title="Доставка" icon="truck"><Field label="Группа доставки"><select className={fieldClass} defaultValue="standard"><option value="standard">Стандартная доставка</option><option>Крупногабаритный товар</option><option>Самовывоз</option></select></Field></AccordionSection>
-                    <AccordionSection id="seo" title="SEO" icon="link">
+                    <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title="Характеристики" icon="sliders"><Field label="Характеристики товара"><input className={fieldClass} type="text" placeholder="Например: материал — натуральная кожа" /></Field></AccordionSection>
+                    <AccordionSection sectionRef={(element) => { sectionRefs.current.delivery = element; }} id="delivery" title="Доставка" icon="truck"><Field label="Группа доставки"><select className={fieldClass} defaultValue="standard"><option value="standard">Стандартная доставка</option><option>Крупногабаритный товар</option><option>Самовывоз</option></select></Field></AccordionSection>
+                    <AccordionSection sectionRef={(element) => { sectionRefs.current.seo = element; }} id="seo" title="SEO" icon="link">
                         <Field label="Заголовок для поиска"><input className={fieldClass} type="text" defaultValue="Кожаный рюкзак CITY — купить в Shopra" /></Field>
                         <div className="mt-[13px] rounded-[10px] border border-[color:var(--color-border)] bg-[#faf9f7] p-3"><small className="text-[11px] text-[color:var(--color-success)]">shopra.store/products/kozhanyy-ryukzak-city</small><strong className="mt-[3px] block text-[12px] text-[#375b8b]">Кожаный рюкзак CITY — купить в Shopra</strong><p className="mt-[3px] text-[11px] text-[#7c746e]">Городской кожаный рюкзак CITY. Доставка по Украине, удобная оплата и гарантия качества.</p></div>
                     </AccordionSection>
@@ -219,9 +223,9 @@ function StatusActions({ status, isNew, isSubmitting, onSave }) {
         </>;
 }
 
-function MainSection({ form, onChange }) {
+function MainSection({ sectionRef, form, onChange }) {
     return (
-        <Card id="main" title="Основное" required>
+        <Card sectionRef={sectionRef} id="main" title="Основное" required>
             <Field label={<>Название товара <b className="text-[color:var(--color-accent)]">*</b></>}>
                 <input className={fieldClass} name="name" value={form.name} onChange={onChange} />
             </Field>
@@ -251,13 +255,13 @@ function MainSection({ form, onChange }) {
     );
 }
 
-function MediaSection() {
+function MediaSection({ sectionRef }) {
     const photos = ['bg-[linear-gradient(145deg,#d9ae84,#8d512b)]', 'bg-[linear-gradient(145deg,#c99a70,#714226)]', 'bg-[linear-gradient(145deg,#937565,#4c3328)]'];
-    return <Card id="photo" title="Фото и видео" required><div className="flex flex-wrap gap-2">{photos.map((background, index) => <div key={background} className={`relative h-[178px] w-[139px] overflow-hidden rounded-[10px] border border-[color:var(--color-border)] ${background} max-sm:h-[153px] max-sm:w-[119px]`}>{index === 0 && <span className="absolute bottom-[5px] right-[5px] rounded-[5px] bg-white/90 px-[5px] py-[3px] text-[11px] font-[750] text-[#9b3f14]">Главное</span>}<i className="absolute inset-[24%] rounded-[36%_36%_18%_18%] border border-white/40 bg-[#62391f]/50" /></div>)}<label className="flex h-[178px] w-[139px] cursor-pointer flex-col items-center justify-center rounded-[10px] border border-[color:var(--color-border)] bg-[#f8f5f2] text-[color:var(--color-accent)] max-sm:h-[153px] max-sm:w-[119px]"><input className="sr-only" type="file" accept="image/*" multiple /><UploadIcon /><strong className="mt-1.5 text-[11px] text-[#5d554f]">Добавить</strong><small className="text-[11px] text-[#98918a]">фото или видео</small></label></div><p className="mt-2 text-[12px] text-[#9c948e]">Перетащите фото, чтобы изменить порядок. Можно добавить ещё 17 фото и 2 видео.</p></Card>;
+    return <Card sectionRef={sectionRef} id="photo" title="Фото и видео" required><div className="flex flex-wrap gap-2">{photos.map((background, index) => <div key={background} className={`relative h-[178px] w-[139px] overflow-hidden rounded-[10px] border border-[color:var(--color-border)] ${background} max-sm:h-[153px] max-sm:w-[119px]`}>{index === 0 && <span className="absolute bottom-[5px] right-[5px] rounded-[5px] bg-white/90 px-[5px] py-[3px] text-[11px] font-[750] text-[#9b3f14]">Главное</span>}<i className="absolute inset-[24%] rounded-[36%_36%_18%_18%] border border-white/40 bg-[#62391f]/50" /></div>)}<label className="flex h-[178px] w-[139px] cursor-pointer flex-col items-center justify-center rounded-[10px] border border-[color:var(--color-border)] bg-[#f8f5f2] text-[color:var(--color-accent)] max-sm:h-[153px] max-sm:w-[119px]"><input className="sr-only" type="file" accept="image/*" multiple /><UploadIcon /><strong className="mt-1.5 text-[11px] text-[#5d554f]">Добавить</strong><small className="text-[11px] text-[#98918a]">фото или видео</small></label></div><p className="mt-2 text-[12px] text-[#9c948e]">Перетащите фото, чтобы изменить порядок. Можно добавить ещё 17 фото и 2 видео.</p></Card>;
 }
 
-function PriceSection({ form, onChange }) {
-    return <Card id="price" title="Цена и наличие" required bodyClassName="grid grid-cols-3 gap-3 p-[15px_17px_17px] max-md:grid-cols-1 max-sm:p-[13px]"><PriceField label="Цена" name="price" value={form.price} onChange={onChange} suffix="грн" required /><PriceField label="Старая цена" name="old_price" value={form.old_price} onChange={onChange} suffix="грн" /><PriceField label="Количество" name="quantity" value={form.quantity} onChange={onChange} suffix="шт" required /><label className="col-span-full flex items-center gap-[7px] text-[12px] text-[#6d655e]"><input className="h-[14px] w-[14px] accent-[color:var(--color-accent)]" type="checkbox" defaultChecked />Показывать остаток на витрине</label></Card>;
+function PriceSection({ sectionRef, form, onChange }) {
+    return <Card sectionRef={sectionRef} id="price" title="Цена и наличие" required bodyClassName="grid grid-cols-3 gap-3 p-[15px_17px_17px] max-md:grid-cols-1 max-sm:p-[13px]"><PriceField label="Цена" name="price" value={form.price} onChange={onChange} suffix="грн" required /><PriceField label="Старая цена" name="old_price" value={form.old_price} onChange={onChange} suffix="грн" /><PriceField label="Количество" name="quantity" value={form.quantity} onChange={onChange} suffix="шт" required /><label className="col-span-full flex items-center gap-[7px] text-[12px] text-[#6d655e]"><input className="h-[14px] w-[14px] accent-[color:var(--color-accent)]" type="checkbox" defaultChecked />Показывать остаток на витрине</label></Card>;
 }
 
 function ProductAside() {
@@ -301,12 +305,12 @@ function ProductAside() {
         </aside>);
 }
 
-function Card({ id, title, required, children, bodyClassName = 'p-[15px_17px_17px] max-sm:p-[13px]' }) {
-    return <section id={id} className="rounded-[14px] border border-[color:var(--color-border)] bg-white shadow-[0_7px_24px_rgba(70,47,31,.03)]"><header className="flex min-h-[48px] items-center gap-[9px] border-b border-[#f0ece8] px-[17px]"><h2 className="text-[15px] font-[740]">{title}</h2>{required && <em className="rounded-full bg-[color:var(--color-success-soft)] px-[7px] py-1 text-[11px] font-[720] not-italic text-[color:var(--color-success)]">Обязательно</em>}</header><div className={bodyClassName}>{children}</div></section>;
+function Card({ sectionRef, id, title, required, children, bodyClassName = 'p-[15px_17px_17px] max-sm:p-[13px]' }) {
+    return <section ref={sectionRef} id={id} className="rounded-[14px] border border-[color:var(--color-border)] bg-white shadow-[0_7px_24px_rgba(70,47,31,.03)]"><header className="flex min-h-[48px] items-center gap-[9px] border-b border-[#f0ece8] px-[17px]"><h2 className="text-[15px] font-[740]">{title}</h2>{required && <em className="rounded-full bg-[color:var(--color-success-soft)] px-[7px] py-1 text-[11px] font-[720] not-italic text-[color:var(--color-success)]">Обязательно</em>}</header><div className={bodyClassName}>{children}</div></section>;
 }
 
-function AccordionSection({ id, title, icon, children, open = false }) {
-    return <details id={id} className="accordion" open={open}><summary className="accordion__summary"><span className="accordion__icon"><SectionIcon type={icon} /></span><strong className="accordion__title">{title}</strong><em className="accordion__badge">Необязательно</em><ChevronIcon /></summary><div className="accordion__body">{children}</div></details>;
+function AccordionSection({ sectionRef, id, title, icon, children, open = false }) {
+    return <details ref={sectionRef} id={id} className="accordion" open={open}><summary className="accordion__summary"><span className="accordion__icon"><SectionIcon type={icon} /></span><strong className="accordion__title">{title}</strong><em className="accordion__badge">Необязательно</em><ChevronIcon /></summary><div className="accordion__body">{children}</div></details>;
 }
 
 function Field({ label, children }) { return <label className="flex flex-col gap-[7px]"><span className="text-[12px] font-bold text-[#554e48]">{label}</span>{children}</label>; }

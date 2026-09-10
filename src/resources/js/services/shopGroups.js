@@ -20,6 +20,22 @@ export async function createShopGroup(data) {
     return response.data;
 }
 
+export async function updateShopGroup(id, data) {
+    await csrf();
+    const response = await request(`/api/product-categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+
+    return response.data;
+}
+
+export async function deleteShopGroup(id) {
+    await csrf();
+    await request(`/api/product-categories/${id}`, { method: 'DELETE' });
+}
+
 export async function getShopGroups(options = {}) {
     const response = await request('/api/product-categories', options);
 

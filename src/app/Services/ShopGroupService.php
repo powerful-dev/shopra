@@ -11,6 +11,48 @@ use Illuminate\Validation\ValidationException;
 
 class ShopGroupService
 {
+    public function delete(ShopGroup $group): void
+    {
+        DB::transaction(function () use ($group): void {
+            $groups = ShopGroup::query()->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            $deleting = $groups->get($group->id);
+
+            if (! $deleting) {
+                return;
+            }
+
+            $branchIds = [];
+            $pendingIds = [$deleting->id];
+
+            while ($pendingIds !== []) {
+                $categoryId = array_shift($pendingIds);
+
+                if (isset($branchIds[$categoryId])) {
+                    continue;
+                }
+
+                $branchIds[$categoryId] = true;
+
+                foreach ($groups->where('parent_id', $categoryId) as $child) {
+                    $pendingIds[] = $child->id;
+                }
+            }
+
+            $ids = array_keys($branchIds);
+
+            DB::table('shop_group_shop_item')->whereIn('shop_group_id', $ids)->delete();
+            ShopGroup::query()->whereIn('id', $ids)->delete();
+
+            $groups->where('parent_id', $deleting->parent_id)
+                ->whereNotIn('id', $ids)
+                ->sortBy([['sorting', 'asc'], ['id', 'asc']])
+                ->values()
+                ->each(function (ShopGroup $sibling, int $sorting): void {
+                    $sibling->fill(['sorting' => $sorting])->save();
+                });
+        });
+    }
+
     public function move(ShopGroup $group, array $data): void
     {
         DB::transaction(function () use ($group, $data): void {
@@ -65,6 +107,54 @@ class ShopGroupService
             $group = ShopGroup::query()->create($data);
 
             return $this->withBranchItemCounts(new Collection([$group]))->first();
+        } catch (UniqueConstraintViolationException) {
+            throw ValidationException::withMessages(['slug' => 'Этот URL уже занят. Измените URL категории.']);
+        }
+    }
+
+    public function update(ShopGroup $group, array $data): ShopGroup
+    {
+        try {
+            $updated = DB::transaction(function () use ($group, $data): ShopGroup {
+                $groups = ShopGroup::query()->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+                $updating = $groups->get($group->id);
+                $parentId = $data['parent_id'];
+                $ancestorId = $parentId;
+                $visited = [];
+
+                while ($ancestorId !== null) {
+                    if ($ancestorId === $updating->id || isset($visited[$ancestorId])) {
+                        throw ValidationException::withMessages(['parent_id' => 'Нельзя выбрать дочернюю категорию в качестве родительской.']);
+                    }
+
+                    $visited[$ancestorId] = true;
+                    $ancestorId = $groups->get($ancestorId)?->parent_id;
+                }
+
+                $oldParentId = $updating->parent_id;
+                if ($oldParentId !== $parentId) {
+                    $data['sorting'] = ($groups
+                        ->where('parent_id', $parentId)
+                        ->where('id', '!=', $updating->id)
+                        ->max('sorting') ?? -1) + 1;
+                }
+
+                $updating->fill($data)->save();
+
+                if ($oldParentId !== $parentId) {
+                    $groups->where('parent_id', $oldParentId)
+                        ->where('id', '!=', $updating->id)
+                        ->sortBy([['sorting', 'asc'], ['id', 'asc']])
+                        ->values()
+                        ->each(function (ShopGroup $sibling, int $sorting): void {
+                            $sibling->fill(['sorting' => $sorting])->save();
+                        });
+                }
+
+                return $updating->refresh();
+            });
+
+            return $this->withBranchItemCounts(new Collection([$updated]))->first();
         } catch (UniqueConstraintViolationException) {
             throw ValidationException::withMessages(['slug' => 'Этот URL уже занят. Измените URL категории.']);
         }

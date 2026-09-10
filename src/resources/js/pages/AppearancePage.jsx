@@ -11,11 +11,13 @@ import HeroBannerModal from '../modals/Appearance/HeroBannerModal';
 import StoreHeaderModal from '../modals/Appearance/StoreHeaderModal';
 import TopBannerModal from '../modals/Appearance/TopBannerModal';
 import Breadcrumbs from '../components/admin/Breadcrumbs';
+import usePageScrollLock from '../hooks/usePageScrollLock';
 
 
 export default function AppearancePage() {
 
     const [activeModal, setActiveModal] = useState(null);
+    usePageScrollLock(Boolean(activeModal));
 
     const modalComponents = {
         'style-elements': StyleElementsModal,

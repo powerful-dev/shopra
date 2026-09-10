@@ -13,6 +13,12 @@ class ShopGroupResource extends JsonResource
             'id' => $this->id,
             'parent_id' => $this->parent_id,
             'name' => $this->name,
+            'slug' => $this->slug,
+            'url' => route('catalog.show', ['slug' => $this->slug]),
+            'description' => $this->description,
+            'text' => $this->text,
+            'seo_title' => $this->seo_title,
+            'seo_description' => $this->seo_description,
             'branch_count' => (int) $this->branch_count,
             'has_children' => $this->whenHas('children_exists', fn ($exists) => (bool) $exists),
         ];

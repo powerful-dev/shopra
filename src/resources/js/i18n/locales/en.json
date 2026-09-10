@@ -230,7 +230,8 @@
             "parents": "Could not load categories. Reopen the modal.",
             "tree": "Could not load the catalog structure. Reopen the modal.",
             "save": "Could not save the category. Try again.",
-            "slug": "Could not verify the URL. Change the name or URL to try again."
+            "slug": "Could not verify the URL. Change the name or URL to try again.",
+            "delete": "Could not delete the category. Try again."
         },
         "form": {
             "name": "Name",
@@ -253,6 +254,43 @@
             "actions": "Actions: {{name}}",
             "rename": "Rename",
             "delete": "Delete"
-        }
+        },
+        "confirmDeleteTitle": "Confirm deletion",
+        "confirmDeleteMessage": "Are you sure you want to delete the “{{name}}” group and all its contents?"
+    },
+    "categoryEditModal": {
+        "eyebrow": "Catalog category",
+        "title": "Edit category",
+        "close": "Close category editor",
+        "optional": "Optional",
+        "cancel": "Cancel",
+        "main": {
+            "title": "Main",
+            "id": "Group ID",
+            "name": "Group name",
+            "slugPreview": "urban-backpacks",
+            "parent": "Parent category",
+            "noParent": "No parent",
+            "parentBackpacks": "Backpacks",
+            "parentCity": "Backpacks → Urban",
+            "parentBags": "Bags",
+            "shortDescription": "Short description",
+            "shortDescriptionValue": "Urban backpacks for everyday travel.",
+            "fullDescription": "Full description",
+            "fullDescriptionValue": "Practical urban backpacks for work, study, and walks. Comfortable styles for every day."
+        },
+        "photo": {
+            "title": "Photo",
+            "add": "Add",
+            "image": "photo",
+            "hint": "Drag photos to change their order."
+        },
+        "seo": {
+            "title": "Search title",
+            "titleValue": "{{name}} — buy at Shopra",
+            "description": "Search description",
+            "descriptionValue": "{{name}} in the Shopra catalog. Easy selection and checkout."
+        },
+        "sectionsLabel": "Category sections"
     }
 }
