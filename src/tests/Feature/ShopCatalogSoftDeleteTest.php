@@ -22,7 +22,7 @@ class ShopCatalogSoftDeleteTest extends TestCase
         ]);
         $group = ShopGroup::query()->create([
             'name' => 'Test group',
-            'url' => 'test-group',
+            'slug' => 'test-group',
         ]);
         $item->groups()->attach($group);
 

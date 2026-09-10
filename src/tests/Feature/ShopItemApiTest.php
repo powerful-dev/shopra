@@ -38,8 +38,8 @@ class ShopItemApiTest extends TestCase
             'shop_unit_id' => $pieceUnit->getKey(),
         ]);
         $groups = collect([
-            ShopGroup::query()->create(['name' => 'Сумки', 'url' => 'sumki']),
-            ShopGroup::query()->create(['name' => 'Рюкзаки', 'url' => 'ryukzaki']),
+            ShopGroup::query()->create(['name' => 'Сумки', 'slug' => 'sumki']),
+            ShopGroup::query()->create(['name' => 'Рюкзаки', 'slug' => 'ryukzaki']),
         ]);
         $item->groups()->attach($groups->pluck('id'));
 

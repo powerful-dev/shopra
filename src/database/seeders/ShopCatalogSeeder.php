@@ -18,20 +18,20 @@ class ShopCatalogSeeder extends Seeder
             ->firstOrFail();
 
         $groups = collect([
-            ['name' => 'Сумки', 'url' => 'sumki'],
-            ['name' => 'Рюкзаки', 'url' => 'ryukzaki'],
-            ['name' => 'Кошельки', 'url' => 'koshelki'],
+            ['name' => 'Сумки', 'slug' => 'sumki'],
+            ['name' => 'Рюкзаки', 'slug' => 'ryukzaki'],
+            ['name' => 'Кошельки', 'slug' => 'koshelki'],
         ])->mapWithKeys(function (array $attributes): array {
             $group = ShopGroup::query()->updateOrCreate(
-                ['url' => $attributes['url']],
+                ['slug' => $attributes['slug']],
                 ['name' => $attributes['name']],
             );
 
-            return [$attributes['url'] => $group];
+            return [$attributes['slug'] => $group];
         });
 
         foreach ($this->items() as $index => $attributes) {
-            $groupUrls = $attributes['groups'];
+            $groupSlugs = $attributes['groups'];
             unset($attributes['groups']);
             $attributes['shop_unit_id'] = $pieceUnit->getKey();
             $attributes['status'] = match ($index % 5) {
@@ -46,7 +46,7 @@ class ShopCatalogSeeder extends Seeder
             );
 
             $item->groups()->sync(
-                $groups->only($groupUrls)->pluck('id')->all(),
+                $groups->only($groupSlugs)->pluck('id')->all(),
             );
         }
     }

@@ -7,17 +7,14 @@
         "price": "Ціна",
         "status": "Статус"
     },
-
     "userMenu": {
         "owner": "Власник",
         "administrator": "Адміністратор",
         "logout": "Вийти"
     },
-
     "pagination": {
         "shown": "Показано {{from}}–{{to}} з {{total}}"
     },
-
     "productsPage": {
         "title": "Товари",
         "description": "Усі товари, залишки та ціни — в одному місці.",
@@ -48,7 +45,6 @@
             "archived": "Неактивний"
         }
     },
-
     "modules": {
         "dashboard": "Головна",
         "appearance": "Зовнішній вигляд",
@@ -64,7 +60,6 @@
         "settings": "Налаштування",
         "administrators": "Адміністратори"
     },
-
     "commonSettingsPage": {
         "title": "Основні налаштування",
         "siteName": "Назва сайту",
@@ -80,20 +75,48 @@
         "defaultShopUnit": "Одиниця вимірювання товару за замовчуванням",
         "selectShopUnit": "Виберіть одиницю вимірювання"
     },
-
     "shopUnits": {
-        "piece": { "name": "Штука", "shortName": "шт." },
-        "kilogram": { "name": "Кілограм", "shortName": "кг" },
-        "gram": { "name": "Грам", "shortName": "г" },
-        "liter": { "name": "Літр", "shortName": "л" },
-        "milliliter": { "name": "Мілілітр", "shortName": "мл" },
-        "meter": { "name": "Метр", "shortName": "м" },
-        "centimeter": { "name": "Сантиметр", "shortName": "см" },
-        "square_meter": { "name": "Квадратний метр", "shortName": "м²" },
-        "package": { "name": "Упаковка", "shortName": "уп." },
-        "set": { "name": "Комплект", "shortName": "компл." }
+        "piece": {
+            "name": "Штука",
+            "shortName": "шт."
+        },
+        "kilogram": {
+            "name": "Кілограм",
+            "shortName": "кг"
+        },
+        "gram": {
+            "name": "Грам",
+            "shortName": "г"
+        },
+        "liter": {
+            "name": "Літр",
+            "shortName": "л"
+        },
+        "milliliter": {
+            "name": "Мілілітр",
+            "shortName": "мл"
+        },
+        "meter": {
+            "name": "Метр",
+            "shortName": "м"
+        },
+        "centimeter": {
+            "name": "Сантиметр",
+            "shortName": "см"
+        },
+        "square_meter": {
+            "name": "Квадратний метр",
+            "shortName": "м²"
+        },
+        "package": {
+            "name": "Упаковка",
+            "shortName": "уп."
+        },
+        "set": {
+            "name": "Комплект",
+            "shortName": "компл."
+        }
     },
-
     "breadcrumbs": {
         "products": "Товари",
         "appearance": "Зовнішній вигляд",
@@ -109,7 +132,6 @@
         "administrator_new": "Новий адміністратор",
         "administrator": "Адміністратор"
     },
-
     "settingsPage": {
         "title": "Налаштування",
         "description": "Основні дані магазину та додаткові інструменти.",
@@ -118,7 +140,6 @@
         "staffAccessTitle": "Доступи співробітників",
         "staffAccessDescription": "Ролі та права команди"
     },
-
     "administratorsPage": {
         "title": "Адміністратори",
         "description": "Керуйте доступом співробітників до розділів панелі адміністратора.",
@@ -153,7 +174,6 @@
         "deleted": "Адміністратора видалено.",
         "deleteError": "Не вдалося видалити адміністратора."
     },
-
     "administratorEditPage": {
         "loadAdministratorError": "Не вдалося завантажити адміністратора.",
         "passwordMismatch": "Паролі не збігаються.",
@@ -182,5 +202,57 @@
         "accessPanelLabel": "Доступи адміністратора",
         "accessGranted": "Доступ дозволено",
         "addAccess": "Додати доступ"
+    },
+    "categoriesModal": {
+        "eyebrow": "Навігація вітрини",
+        "title": "Категорії магазину",
+        "description": "Створюйте розділи каталогу, змінюйте вкладеність і порядок.",
+        "close": "Закрити категорії",
+        "searchPlaceholder": "Пошук категорій…",
+        "searchLabel": "Пошук категорій",
+        "newCategory": "Нова категорія",
+        "editorTitle": "Редактор структури каталогу",
+        "editorDescription": "Тут немає прив’язки товару: лише створення, перейменування, видалення та сортування категорій.",
+        "treeTitle": "Структура каталогу",
+        "treeLabel": "Структура каталогу",
+        "savingOrder": "Збереження порядку…",
+        "searching": "Пошук категорій…",
+        "noResults": "Категорії не знайдено",
+        "moveToRoot": "Перемістити в корінь",
+        "categoriesInStructure": "категорій у структурі",
+        "footerHint": "Зміни структури застосовуються до всього каталогу.",
+        "done": "Готово",
+        "errors": {
+            "search": "Не вдалося знайти категорії. Змініть запит, щоб повторити.",
+            "refreshAfterMove": "Переміщення збережено, але не вдалося оновити дерево. Відкрийте вікно повторно.",
+            "move": "Не вдалося перемістити категорію. Спробуйте ще раз.",
+            "children": "Не вдалося завантажити. Натисніть стрілку повторно.",
+            "parents": "Не вдалося завантажити категорії. Відкрийте модальне вікно повторно.",
+            "tree": "Не вдалося завантажити структуру каталогу. Відкрийте модальне вікно повторно.",
+            "save": "Не вдалося зберегти категорію. Спробуйте ще раз.",
+            "slug": "Не вдалося перевірити URL. Змініть назву або URL, щоб повторити."
+        },
+        "form": {
+            "name": "Назва",
+            "namePlaceholder": "Наприклад, Подарунки",
+            "slugLabel": "URL категорії",
+            "editUrl": "Редагувати URL {{url}}",
+            "checkingUrl": "Перевірка URL…",
+            "parent": "Батьківська категорія",
+            "loadingCategories": "Завантаження категорій…",
+            "noParent": "Без батьківської",
+            "cancel": "Скасувати",
+            "saving": "Збереження…",
+            "add": "Додати"
+        },
+        "row": {
+            "drag": "Перетягнути",
+            "collapse": "Згорнути {{name}}",
+            "expand": "Розгорнути {{name}}",
+            "loading": "Завантаження…",
+            "actions": "Дії: {{name}}",
+            "rename": "Перейменувати",
+            "delete": "Видалити"
+        }
     }
 }

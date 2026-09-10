@@ -48,9 +48,10 @@ export default function ActionsMenu({ actions, isOpen, onToggle, onClose, ariaLa
             }
         };
 
-        document.addEventListener('mousedown', handleOutsideClick);
+        // Capture also receives clicks inside dialogs that stop event bubbling.
+        document.addEventListener('mousedown', handleOutsideClick, true);
 
-        return () => document.removeEventListener('mousedown', handleOutsideClick);
+        return () => document.removeEventListener('mousedown', handleOutsideClick, true);
     }, [isOpen, onClose]);
 
     const selectAction = (action) => {

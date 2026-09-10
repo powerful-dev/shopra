@@ -7,17 +7,14 @@
         "price": "Цена",
         "status": "Статус"
     },
-
     "userMenu": {
         "owner": "Владелец",
         "administrator": "Администратор",
         "logout": "Выйти"
     },
-
     "pagination": {
         "shown": "Показано {{from}}–{{to}} из {{total}}"
     },
-
     "productsPage": {
         "title": "Товары",
         "description": "Все товары, остатки и цены — в одном месте.",
@@ -48,7 +45,6 @@
             "archived": "Неактивен"
         }
     },
-
     "modules": {
         "dashboard": "Главная",
         "appearance": "Внешний вид",
@@ -64,7 +60,6 @@
         "settings": "Настройки",
         "administrators": "Администраторы"
     },
-
     "commonSettingsPage": {
         "title": "Основные настройки",
         "siteName": "Название сайта",
@@ -80,20 +75,48 @@
         "defaultShopUnit": "Единица измерения товара по умолчанию",
         "selectShopUnit": "Выберите единицу измерения"
     },
-
     "shopUnits": {
-        "piece": { "name": "Штука", "shortName": "шт." },
-        "kilogram": { "name": "Килограмм", "shortName": "кг" },
-        "gram": { "name": "Грамм", "shortName": "г" },
-        "liter": { "name": "Литр", "shortName": "л" },
-        "milliliter": { "name": "Миллилитр", "shortName": "мл" },
-        "meter": { "name": "Метр", "shortName": "м" },
-        "centimeter": { "name": "Сантиметр", "shortName": "см" },
-        "square_meter": { "name": "Квадратный метр", "shortName": "м²" },
-        "package": { "name": "Упаковка", "shortName": "уп." },
-        "set": { "name": "Комплект", "shortName": "компл." }
+        "piece": {
+            "name": "Штука",
+            "shortName": "шт."
+        },
+        "kilogram": {
+            "name": "Килограмм",
+            "shortName": "кг"
+        },
+        "gram": {
+            "name": "Грамм",
+            "shortName": "г"
+        },
+        "liter": {
+            "name": "Литр",
+            "shortName": "л"
+        },
+        "milliliter": {
+            "name": "Миллилитр",
+            "shortName": "мл"
+        },
+        "meter": {
+            "name": "Метр",
+            "shortName": "м"
+        },
+        "centimeter": {
+            "name": "Сантиметр",
+            "shortName": "см"
+        },
+        "square_meter": {
+            "name": "Квадратный метр",
+            "shortName": "м²"
+        },
+        "package": {
+            "name": "Упаковка",
+            "shortName": "уп."
+        },
+        "set": {
+            "name": "Комплект",
+            "shortName": "компл."
+        }
     },
-
     "breadcrumbs": {
         "products": "Товары",
         "appearance": "Внешний вид",
@@ -109,7 +132,6 @@
         "administrator_new": "Новый администратор",
         "administrator": "Администратор"
     },
-
     "settingsPage": {
         "title": "Настройки",
         "description": "Основные данные магазина и дополнительные инструменты.",
@@ -118,7 +140,6 @@
         "staffAccessTitle": "Доступы сотрудников",
         "staffAccessDescription": "Роли и права команды"
     },
-
     "administratorsPage": {
         "title": "Администраторы",
         "description": "Управляйте доступом сотрудников к разделам панели администратора.",
@@ -153,7 +174,6 @@
         "deleted": "Администратор удалён.",
         "deleteError": "Не удалось удалить администратора."
     },
-
     "administratorEditPage": {
         "loadAdministratorError": "Не удалось загрузить администратора.",
         "passwordMismatch": "Пароли не совпадают.",
@@ -182,6 +202,57 @@
         "accessPanelLabel": "Доступы администратора",
         "accessGranted": "Доступ разрешен",
         "addAccess": "Добавить доступ"
+    },
+    "categoriesModal": {
+        "eyebrow": "Навигация витрины",
+        "title": "Категории магазина",
+        "description": "Создавайте разделы каталога, меняйте вложенность и порядок.",
+        "close": "Закрыть категории",
+        "searchPlaceholder": "Поиск категорий…",
+        "searchLabel": "Поиск категорий",
+        "newCategory": "Новая категория",
+        "editorTitle": "Редактор структуры каталога",
+        "editorDescription": "Здесь нет привязки товара: только создание, переименование, удаление и сортировка категорий.",
+        "treeTitle": "Структура каталога",
+        "treeLabel": "Структура каталога",
+        "savingOrder": "Сохранение порядка…",
+        "searching": "Поиск категорий…",
+        "noResults": "Категории не найдены",
+        "moveToRoot": "Переместить в корень",
+        "categoriesInStructure": "категорий в структуре",
+        "footerHint": "Изменения структуры применяются ко всему каталогу.",
+        "done": "Готово",
+        "errors": {
+            "search": "Не удалось найти категории. Измените запрос, чтобы повторить.",
+            "refreshAfterMove": "Перенос сохранён, но не удалось обновить дерево. Откройте окно повторно.",
+            "move": "Не удалось перенести категорию. Попробуйте снова.",
+            "children": "Не удалось загрузить. Нажмите стрелку повторно.",
+            "parents": "Не удалось загрузить категории. Откройте модальное окно повторно.",
+            "tree": "Не удалось загрузить структуру каталога. Откройте модальное окно повторно.",
+            "save": "Не удалось сохранить категорию. Попробуйте снова.",
+            "slug": "Не удалось проверить URL. Измените название или URL, чтобы повторить."
+        },
+        "form": {
+            "name": "Название",
+            "namePlaceholder": "Например, Подарки",
+            "slugLabel": "URL категории",
+            "editUrl": "Редактировать URL {{url}}",
+            "checkingUrl": "Проверка URL…",
+            "parent": "Родительская категория",
+            "loadingCategories": "Загрузка категорий…",
+            "noParent": "Без родительской",
+            "cancel": "Отмена",
+            "saving": "Сохранение…",
+            "add": "Добавить"
+        },
+        "row": {
+            "drag": "Перетащить",
+            "collapse": "Свернуть {{name}}",
+            "expand": "Развернуть {{name}}",
+            "loading": "Загрузка…",
+            "actions": "Действия: {{name}}",
+            "rename": "Переименовать",
+            "delete": "Удалить"
+        }
     }
-
 }

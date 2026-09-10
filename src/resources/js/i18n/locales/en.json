@@ -7,17 +7,14 @@
         "price": "Price",
         "status": "Status"
     },
-
     "userMenu": {
         "owner": "Owner",
         "administrator": "Administrator",
         "logout": "Logout"
     },
-
     "pagination": {
         "shown": "Showing {{from}}–{{to}} of {{total}}"
     },
-
     "productsPage": {
         "title": "Products",
         "description": "All products, stock, and prices in one place.",
@@ -48,7 +45,6 @@
             "archived": "Inactive"
         }
     },
-
     "modules": {
         "dashboard": "Home",
         "appearance": "Appearance",
@@ -64,7 +60,6 @@
         "settings": "Settings",
         "administrators": "Administrators"
     },
-
     "commonSettingsPage": {
         "title": "General settings",
         "siteName": "Site name",
@@ -80,20 +75,48 @@
         "defaultShopUnit": "Default product unit",
         "selectShopUnit": "Select a unit"
     },
-
     "shopUnits": {
-        "piece": { "name": "Piece", "shortName": "pcs." },
-        "kilogram": { "name": "Kilogram", "shortName": "kg" },
-        "gram": { "name": "Gram", "shortName": "g" },
-        "liter": { "name": "Liter", "shortName": "L" },
-        "milliliter": { "name": "Milliliter", "shortName": "ml" },
-        "meter": { "name": "Meter", "shortName": "m" },
-        "centimeter": { "name": "Centimeter", "shortName": "cm" },
-        "square_meter": { "name": "Square meter", "shortName": "m²" },
-        "package": { "name": "Package", "shortName": "pkg." },
-        "set": { "name": "Set", "shortName": "set" }
+        "piece": {
+            "name": "Piece",
+            "shortName": "pcs."
+        },
+        "kilogram": {
+            "name": "Kilogram",
+            "shortName": "kg"
+        },
+        "gram": {
+            "name": "Gram",
+            "shortName": "g"
+        },
+        "liter": {
+            "name": "Liter",
+            "shortName": "L"
+        },
+        "milliliter": {
+            "name": "Milliliter",
+            "shortName": "ml"
+        },
+        "meter": {
+            "name": "Meter",
+            "shortName": "m"
+        },
+        "centimeter": {
+            "name": "Centimeter",
+            "shortName": "cm"
+        },
+        "square_meter": {
+            "name": "Square meter",
+            "shortName": "m²"
+        },
+        "package": {
+            "name": "Package",
+            "shortName": "pkg."
+        },
+        "set": {
+            "name": "Set",
+            "shortName": "set"
+        }
     },
-
     "breadcrumbs": {
         "products": "Products",
         "appearance": "Appearance",
@@ -109,7 +132,6 @@
         "administrator_new": "New administrator",
         "administrator": "Administrator"
     },
-
     "settingsPage": {
         "title": "Settings",
         "description": "Basic store information and additional tools.",
@@ -118,7 +140,6 @@
         "staffAccessTitle": "Staff access",
         "staffAccessDescription": "Team roles and permissions"
     },
-
     "administratorsPage": {
         "title": "Administrators",
         "description": "Manage employee access to sections of the administration panel.",
@@ -153,7 +174,6 @@
         "deleted": "Administrator deleted.",
         "deleteError": "Failed to delete the administrator."
     },
-
     "administratorEditPage": {
         "loadAdministratorError": "Failed to load the administrator.",
         "passwordMismatch": "Passwords do not match.",
@@ -182,5 +202,57 @@
         "accessPanelLabel": "Administrator access",
         "accessGranted": "Access granted",
         "addAccess": "Add access"
+    },
+    "categoriesModal": {
+        "eyebrow": "Storefront navigation",
+        "title": "Store categories",
+        "description": "Create catalog sections and change their nesting and order.",
+        "close": "Close categories",
+        "searchPlaceholder": "Search categories…",
+        "searchLabel": "Search categories",
+        "newCategory": "New category",
+        "editorTitle": "Catalog structure editor",
+        "editorDescription": "Products are not assigned here: only category creation, renaming, deletion, and sorting.",
+        "treeTitle": "Catalog structure",
+        "treeLabel": "Catalog structure",
+        "savingOrder": "Saving order…",
+        "searching": "Searching categories…",
+        "noResults": "No categories found",
+        "moveToRoot": "Move to root",
+        "categoriesInStructure": "categories in structure",
+        "footerHint": "Structure changes apply to the entire catalog.",
+        "done": "Done",
+        "errors": {
+            "search": "Could not find categories. Change the query to try again.",
+            "refreshAfterMove": "The move was saved, but the tree could not be refreshed. Reopen the window.",
+            "move": "Could not move the category. Try again.",
+            "children": "Could not load categories. Click the arrow to try again.",
+            "parents": "Could not load categories. Reopen the modal.",
+            "tree": "Could not load the catalog structure. Reopen the modal.",
+            "save": "Could not save the category. Try again.",
+            "slug": "Could not verify the URL. Change the name or URL to try again."
+        },
+        "form": {
+            "name": "Name",
+            "namePlaceholder": "For example, Gifts",
+            "slugLabel": "Category URL",
+            "editUrl": "Edit URL {{url}}",
+            "checkingUrl": "Checking URL…",
+            "parent": "Parent category",
+            "loadingCategories": "Loading categories…",
+            "noParent": "No parent",
+            "cancel": "Cancel",
+            "saving": "Saving…",
+            "add": "Add"
+        },
+        "row": {
+            "drag": "Drag",
+            "collapse": "Collapse {{name}}",
+            "expand": "Expand {{name}}",
+            "loading": "Loading…",
+            "actions": "Actions: {{name}}",
+            "rename": "Rename",
+            "delete": "Delete"
+        }
     }
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AdminModuleController;
 use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\CommonSettingsController;
 use App\Http\Controllers\Api\ShopController;
+use App\Http\Controllers\Api\ShopGroupController;
 use App\Http\Controllers\Api\ShopItemController;
 use App\Http\Controllers\Api\SiteModuleController;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +39,13 @@ Route::middleware([
     });
 
     Route::middleware('module:products')->group(function (): void {
+        Route::get('/product-categories', [ShopGroupController::class, 'index']);
+        Route::get('/product-categories/roots', [ShopGroupController::class, 'roots']);
+        Route::get('/product-categories/search', [ShopGroupController::class, 'search']);
+        Route::get('/product-categories/{group}/children', [ShopGroupController::class, 'children']);
+        Route::patch('/product-categories/{group}/move', [ShopGroupController::class, 'move']);
+        Route::post('/product-categories', [ShopGroupController::class, 'store']);
+        Route::get('/product-categories/slug', [ShopGroupController::class, 'slug']);
         Route::get('/products', [ShopItemController::class, 'index']);
         Route::post('/products', [ShopItemController::class, 'store']);
         Route::get('/products/{product}', [ShopItemController::class, 'show']);
