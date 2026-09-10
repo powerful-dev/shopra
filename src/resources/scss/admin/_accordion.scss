@@ -1,0 +1,54 @@
+.accordion {
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 7px 24px rgba(70, 47, 31, 0.03);
+}
+
+.accordion__summary {
+    min-height: 50px;
+    display: grid;
+    grid-template-columns: 28px auto auto 1fr 18px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 14px;
+    cursor: pointer;
+    list-style: none;
+
+    &::-webkit-details-marker { display: none; }
+    &::marker { content: '' ; }
+}
+
+.accordion__icon {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: #f5f0ec;
+    color: #806f64;
+}
+
+.accordion__title { font-size: 13px; font-weight: 700; }
+
+.accordion__badge {
+    justify-self: start;
+    padding: 4px 7px;
+    border-radius: 999px;
+    background: var(--color-blue-soft);
+    color: var(--color-info);
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 720;
+}
+
+.accordion__chevron { grid-column: 5; transition: transform 0.2s ease; }
+.accordion[open] .accordion__chevron { transform: rotate(180deg); }
+.accordion__body { padding: 15px 17px 17px; border-top: 1px solid #f0ece8; }
+
+@media (max-width: 576px) {
+    .accordion { border-radius: 12px; }
+    .accordion__summary { padding: 0 11px; }
+    .accordion__body { padding: 13px; }
+}

@@ -4,6 +4,16 @@ export const breadcrumbRoutes = [
         labelKey: 'breadcrumbs.products',
     },
     {
+        path: '/admin/products/new',
+        labelKey: 'breadcrumbs.product_new',
+        parent: '/admin/products',
+    },
+    {
+        path: '/admin/products/:id',
+        labelKey: 'breadcrumbs.product',
+        parent: '/admin/products',
+    },
+    {
         path: '/admin/appearance',
         labelKey: 'breadcrumbs.appearance',
     },

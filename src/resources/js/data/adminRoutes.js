@@ -1,4 +1,5 @@
-import ProductsPage from '../pages/ProductsPage';
+import ProductsPage from '../pages/products/ProductsPage';
+import ProductEditPage from '../pages/products/ProductEditPage';
 import OrdersPage from '../pages/OrdersPage';
 import AdministratorsPage from '../pages/admin/AdministratorsPage';
 import AdministratorEditPage from '../pages/admin/AdministratorEditPage';
@@ -12,6 +13,8 @@ import CommonSettingsPage from '../pages/settings/CommonSettingsPage';
 
 export const adminRoutes = [
     { path: '/admin/products', module: 'products', component: ProductsPage },
+    { path: '/admin/products/new', module: 'products', component: ProductEditPage },
+    { path: '/admin/products/:id', module: 'products', component: ProductEditPage },
     { path: '/admin/orders', module: 'orders', component: OrdersPage },
     { path: '/admin/administrators', module: 'administrators', component: AdministratorsPage },
     { path: '/admin/administrators/new', module: 'administrators', component: AdministratorEditPage },

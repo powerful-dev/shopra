@@ -6,9 +6,32 @@ use App\Enums\ShopItemStatus;
 use App\Models\Shop;
 use App\Models\ShopItem;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Str;
 
 class ShopItemService
 {
+    /** @param array{name: string, price: numeric-string|int|float, old_price?: numeric-string|int|float|null, quantity: int, status: string} $data */
+    public function create(array $data): ShopItem
+    {
+        return ShopItem::query()->create([
+            ...$data,
+            'url' => Str::slug($data['name']),
+        ]);
+    }
+
+    /** @param array{name: string, price: numeric-string|int|float, old_price?: numeric-string|int|float|null, quantity: int, status: string} $data */
+    public function update(ShopItem $shopItem, array $data): ShopItem
+    {
+        $shopItem->update($data);
+
+        return $shopItem;
+    }
+
+    public function delete(ShopItem $shopItem): void
+    {
+        $shopItem->delete();
+    }
+
     /** @param array{search?: string|null, status?: string|null, stock?: string|null} $filters */
     public function paginate(array $filters = []): LengthAwarePaginator
     {

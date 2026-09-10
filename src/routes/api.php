@@ -39,6 +39,10 @@ Route::middleware([
 
     Route::middleware('module:products')->group(function (): void {
         Route::get('/products', [ShopItemController::class, 'index']);
+        Route::post('/products', [ShopItemController::class, 'store']);
+        Route::get('/products/{product}', [ShopItemController::class, 'show']);
+        Route::put('/products/{product}', [ShopItemController::class, 'update']);
+        Route::delete('/products/{product}', [ShopItemController::class, 'destroy']);
     });
 
 });

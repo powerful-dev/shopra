@@ -10,7 +10,6 @@ import Pagination from '../../components/admin/Pagination';
 import SearchField from '../../components/admin/SearchField';
 import Loading from '../../components/admin/Loading';
 import PlusIcon from '../../components/icons/PlusIcon';
-import MoreIcon from '../../components/icons/MoreIcon';
 import CheckIcon from '../../components/icons/CheckIcon';
 import PencilIcon from '../../components/icons/PencilIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
@@ -252,44 +251,30 @@ export default function AdministratorsPage() {
                                     </label>
 
                                     {(!isSuperAdmin || isCurrentUser) && (
-                                        <div className="relative col-start-2 row-start-1 !w-8 justify-self-end 2xl:col-auto 2xl:row-auto">
-                                            <button
-                                                className="grid h-8 w-8 place-items-center rounded-lg border-0 bg-transparent text-[#756d67] hover:bg-[#f2ede9]"
-                                                type="button"
-                                                aria-label={t('administratorsPage.actionsLabel', { name: displayName })}
-                                                aria-expanded={openActionsId === admin.id}
-                                                onClick={() =>
-                                                    setOpenActionsId((id) =>
-                                                        id === admin.id ? null : admin.id
-                                                    )
-                                                }
-                                            >
-                                                <MoreIcon />
-                                            </button>
-
-                                            {openActionsId === admin.id && (
-                                                <ActionsMenu
-                                                    actions={[
-                                                        {
-                                                            label: t('administratorsPage.edit'),
-                                                            icon: <PencilIcon />,
-                                                            onClick: () => navigate(`/admin/administrators/${admin.id}`),
-                                                        },
-                                                        {
-                                                            label: t('administratorsPage.delete'),
-                                                            icon: <TrashIcon />,
-                                                            variant: 'danger',
-                                                            disabled: isCurrentUser,
-                                                            onClick: () => {
-                                                                setAdminToDelete(admin);
-                                                                setMessage('');
-                                                            },
-                                                        },
-                                                    ]}
-                                                    onClose={() => setOpenActionsId(null)}
-                                                />
-                                            )}
-                                        </div>
+                                        <ActionsMenu
+                                            className="col-start-2 row-start-1 justify-self-end 2xl:col-auto 2xl:row-auto"
+                                            ariaLabel={t('administratorsPage.actionsLabel', { name: displayName })}
+                                            isOpen={openActionsId === admin.id}
+                                            onToggle={() => setOpenActionsId((id) => id === admin.id ? null : admin.id)}
+                                            actions={[
+                                                {
+                                                    label: t('administratorsPage.edit'),
+                                                    icon: <PencilIcon />,
+                                                    onClick: () => navigate(`/admin/administrators/${admin.id}`),
+                                                },
+                                                {
+                                                    label: t('administratorsPage.delete'),
+                                                    icon: <TrashIcon />,
+                                                    variant: 'danger',
+                                                    disabled: isCurrentUser,
+                                                    onClick: () => {
+                                                        setAdminToDelete(admin);
+                                                        setMessage('');
+                                                    },
+                                                },
+                                            ]}
+                                            onClose={() => setOpenActionsId(null)}
+                                        />
                                     )}
 
                                 </div>

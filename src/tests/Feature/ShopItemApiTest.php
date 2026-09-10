@@ -56,6 +56,60 @@ class ShopItemApiTest extends TestCase
 
         $this->actingAs($admin, 'sanctum');
 
+        $createdProductId = $this->postJson('/api/products', [
+            'name' => 'Новый товар',
+            'price' => 1200,
+            'old_price' => null,
+            'quantity' => 3,
+            'status' => 'draft',
+        ])
+            ->assertCreated()
+            ->assertJsonPath('data.status', 'draft')
+            ->json('data.id');
+
+        $this->putJson("/api/products/{$createdProductId}", [
+            'name' => 'Опубликованный товар',
+            'price' => 1300,
+            'old_price' => 1500,
+            'quantity' => 4,
+            'status' => 'active',
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.name', 'Опубликованный товар')
+            ->assertJsonPath('data.status', 'active');
+
+        $this->assertDatabaseHas('shop_items', [
+            'id' => $createdProductId,
+            'status' => 'active',
+            'quantity' => 4,
+        ]);
+
+        $this->putJson("/api/products/{$createdProductId}", [
+            'name' => 'Опубликованный товар',
+            'price' => 1300,
+            'old_price' => 1500,
+            'quantity' => 4,
+            'status' => 'archived',
+        ])->assertOk()->assertJsonPath('data.status', 'archived');
+
+        $this->putJson("/api/products/{$createdProductId}", [
+            'name' => 'Опубликованный товар',
+            'price' => 1300,
+            'old_price' => null,
+            'quantity' => 4,
+            'status' => 'unknown',
+        ])->assertUnprocessable()->assertJsonValidationErrors('status');
+
+        ShopItem::query()->findOrFail($createdProductId)->delete();
+
+        $this->getJson("/api/products/{$item->id}")
+            ->assertOk()
+            ->assertJsonPath('data.id', $item->id)
+            ->assertJsonPath('data.name', 'Сумка-рюкзак Urban Flex')
+            ->assertJsonPath('data.price', '4990.00')
+            ->assertJsonPath('data.old_price', '5690.00')
+            ->assertJsonPath('data.quantity', 8);
+
         $this->getJson('/api/products?page=1')
             ->assertOk()
             ->assertJsonPath('data.0.name', 'Сумка-рюкзак Urban Flex')
@@ -105,5 +159,20 @@ class ShopItemApiTest extends TestCase
             ->assertJsonPath('summary.active', 5)
             ->assertJsonPath('summary.draft', 16)
             ->assertJsonPath('summary.low_stock', 4);
+
+        $this->deleteJson("/api/products/{$item->id}")
+            ->assertNoContent();
+
+        $this->assertSoftDeleted('shop_items', ['id' => $item->id]);
+        $this->assertDatabaseHas('shop_group_shop_item', [
+            'shop_item_id' => $item->id,
+            'shop_group_id' => $groups->first()->id,
+        ]);
+
+        $this->getJson('/api/products?search=urban')
+            ->assertOk()
+            ->assertJsonCount(0, 'data')
+            ->assertJsonPath('meta.total', 0)
+            ->assertJsonPath('summary.total', 20);
     }
 }
