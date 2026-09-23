@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AdminModuleController;
 use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\CommonSettingsController;
+use App\Http\Controllers\Api\EditorImageController;
 use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\ShopGroupController;
 use App\Http\Controllers\Api\ShopItemController;
@@ -18,6 +19,8 @@ Route::middleware([
 ])->group(function (): void {
     Route::post('/logout', [AuthenticationController::class, 'logout']);
     Route::get('/user', [AuthenticationController::class, 'user']);
+
+    Route::post('/editor/images', [EditorImageController::class, 'store']);
 
     Route::get('/shop-themes', [ShopController::class, 'themes']);
     Route::post('/shops', [ShopController::class, 'store']);

@@ -1,16 +1,41 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Editor } from '@tinymce/tinymce-react';
+import 'tinymce/tinymce';
+import 'tinymce/icons/default';
+import 'tinymce/themes/silver';
+import 'tinymce/models/dom';
+import 'tinymce/plugins/code';
+import 'tinymce/plugins/image';
+import 'tinymce/skins/ui/oxide/skin.min.css';
+import contentUiCss from 'tinymce/skins/ui/oxide/content.min.css?inline';
+import contentCss from 'tinymce/skins/content/default/content.min.css?inline';
 import ChevronIcon from '../../components/icons/ChevronIcon';
 import UploadIcon from '../../components/icons/UploadIcon';
 import useSectionScroll from '../../hooks/useSectionScroll';
 import usePageScrollLock from '../../hooks/usePageScrollLock';
+import useTinyMceLanguage from '../../hooks/useTinyMceLanguage';
 import CategorySlugField from './CategorySlugField';
 import { updateShopGroup } from '../../services/shopGroups';
+import { uploadEditorImage } from '../../services/editorImages';
 
 const fieldClass = 'h-[42px] w-full rounded-[9px] border border-[#ddd5cf] bg-white px-[11px] text-[13px] text-[#3f3934] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]';
+const editorBaseInit = {
+    skin: false,
+    content_css: false,
+    content_style: `${contentUiCss}\n${contentCss}`,
+    plugins: 'code image',
+    toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | image code',
+    images_upload_handler: (blobInfo) => uploadEditorImage(blobInfo.blob(), blobInfo.filename()),
+};
 
 export default function CategoryEditModal({ category, parentOptions = [], isLoadingParents = false, parentsError = '', onClose, onUpdated }) {
     const { t } = useTranslation();
+    const editorLanguage = useTinyMceLanguage();
+    const editorInit = useMemo(() => ({
+        ...editorBaseInit,
+        ...editorLanguage,
+    }), [editorLanguage]);
     const scrollContainerRef = useRef(null);
     const sectionNavigationRef = useRef(null);
     const sectionRefs = useRef({});
@@ -133,12 +158,26 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
                     </div>
                     <div className="mt-[15px]">
                         <Field label={t('categoryEditModal.main.shortDescription')}>
-                            <textarea className="h-[78px] w-full resize-y rounded-[9px] border border-[#ddd5cf] bg-white p-[11px] text-[13px] leading-normal outline-none focus:border-[#c77d56]" value={description} onChange={(event) => setDescription(event.target.value)} disabled={isSaving} />
+                            <Editor
+                                key={`short-description-${editorLanguage.language}`}
+                                licenseKey="gpl"
+                                init={editorInit}
+                                value={description}
+                                onEditorChange={setDescription}
+                                disabled={isSaving}
+                            />
                         </Field>
                     </div>
                     <div className="mt-[15px]">
                         <Field label={t('categoryEditModal.main.fullDescription')}>
-                            <textarea className="h-[126px] w-full resize-y rounded-[9px] border border-[#ddd5cf] bg-white p-[11px] text-[13px] leading-normal outline-none focus:border-[#c77d56]" value={text} onChange={(event) => setText(event.target.value)} disabled={isSaving} />
+                            <Editor
+                                key={`full-description-${editorLanguage.language}`}
+                                licenseKey="gpl"
+                                init={editorInit}
+                                value={text}
+                                onEditorChange={setText}
+                                disabled={isSaving}
+                            />
                         </Field>
                     </div>
                 </Card>

@@ -18,12 +18,15 @@
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.3.3",
+        "@tinymce/tinymce-react": "^6.3.0",
         "echarts": "^6.0.0",
         "i18next": "^26.4.0",
         "react": "^19.2.8",
         "react-dom": "^19.2.8",
         "react-i18next": "^17.0.12",
         "react-router-dom": "^7.18.1",
-        "tailwindcss": "^4.3.3"
+        "tailwindcss": "^4.3.3",
+        "tinymce": "^8.9.2",
+        "tinymce-i18n": "^26.9.21"
     }
 }
