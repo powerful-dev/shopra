@@ -1,0 +1,3 @@
+export default function AdminCard({ sectionRef, id, title, children }) {
+    return <section ref={sectionRef} id={id} className="scroll-mt-[58px] rounded-[14px] border border-[color:var(--color-border)] bg-white shadow-[0_7px_24px_rgba(70,47,31,.03)]"><header className="flex min-h-[48px] items-center gap-[9px] border-b border-[#f0ece8] px-[17px]"><h2 className="text-[15px] font-[740]">{title}</h2></header><div className="p-[15px_17px_17px] max-sm:p-[13px]">{children}</div></section>;
+}

@@ -4,6 +4,7 @@ import ConfirmModal from '../../components/admin/ConfirmModal';
 import CategoryEditModal from './CategoryEditModal';
 import CategoryRow from './CategoryRow';
 import CategorySlugField from './CategorySlugField';
+import CloseIcon from '../../components/icons/CloseIcon';
 import usePageScrollLock from '../../hooks/usePageScrollLock';
 import { createShopGroup, deleteShopGroup, getRootShopGroups, getShopGroupChildren, getShopGroups, getUniqueShopGroupSlug, moveShopGroup, searchShopGroups } from '../../services/shopGroups';
 
@@ -282,7 +283,7 @@ export default function CategoriesModal({ isOpen, onClose }) {
                         <span className="text-xs text-[#8d857e]">{t('categoriesModal.description')}</span>
                     </div>
                     <button type="button" className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-[11px] border border-[color:var(--color-border)] bg-white text-[#706861] hover:text-[color:var(--color-accent)]" onClick={closeModal} aria-label={t('categoriesModal.close')}>
-                        <CloseIcon />
+                        <CloseIcon width="18" height="18" />
                     </button>
                 </header>
 
@@ -571,14 +572,8 @@ function buildParentOptions(groups) {
     return options;
 }
 
-function GuideItem({ icon, title, text }) {
-    return <p className="mb-3 flex items-start gap-[9px] text-[color:var(--color-accent)]">{icon}<span className="flex flex-col"><strong className="text-xs text-[#544c46]">{title}</strong><small className="mt-0.5 text-xs leading-[1.4] text-[#918880]">{text}</small></span></p>;
-}
 
 const Svg = ({ children, size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>;
-const CloseIcon = () => <Svg size={19}><path d="M18 6 6 18M6 6l12 12" /></Svg>;
 const SearchIcon = () => <Svg size={17}><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></Svg>;
 const PlusIcon = () => <Svg size={15}><path d="M5 12h14M12 5v14" /></Svg>;
 const SparklesIcon = () => <Svg size={15}><path d="m12 3-1.4 4.2a2 2 0 0 1-1.3 1.3L5 10l4.3 1.5a2 2 0 0 1 1.3 1.3L12 17l1.4-4.2a2 2 0 0 1 1.3-1.3L19 10l-4.3-1.5a2 2 0 0 1-1.3-1.3L12 3Z" /></Svg>;
-const FolderIcon = () => <Svg size={14}><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" /></Svg>;
-const LayersIcon = () => <Svg size={15}><path d="m12 2 9 5-9 5-9-5 9-5Z" /><path d="m3 12 9 5 9-5M3 17l9 5 9-5" /></Svg>;
