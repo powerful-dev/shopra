@@ -263,7 +263,8 @@
         "title": "Edit category",
         "close": "Close category editor",
         "optional": "Optional",
-        "cancel": "Cancel",
+        "closeButton": "Close",
+        "saveSuccess": "Data saved successfully",
         "main": {
             "title": "Main",
             "id": "Group ID",
@@ -281,9 +282,11 @@
         },
         "photo": {
             "title": "Photo",
-            "add": "Add",
-            "image": "photo",
-            "hint": "Drag photos to change their order."
+            "add": "Add photo",
+            "dropHint": "or drag and drop an image here",
+            "uploadError": "Unable to upload the category image.",
+            "delete": "Delete image",
+            "deleteError": "Unable to delete the category image."
         },
         "seo": {
             "title": "Search title",

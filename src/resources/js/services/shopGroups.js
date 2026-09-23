@@ -31,6 +31,24 @@ export async function updateShopGroup(id, data) {
     return response.data;
 }
 
+export async function uploadShopGroupImage(id, image) {
+    const formData = new FormData();
+    formData.append('image', image, image.name);
+
+    await csrf();
+    const response = await request(`/api/product-categories/${id}/image`, {
+        method: 'POST',
+        body: formData,
+    });
+
+    return response.data;
+}
+
+export async function deleteShopGroupImage(id) {
+    await csrf();
+    await request(`/api/product-categories/${id}/image`, { method: 'DELETE' });
+}
+
 export async function deleteShopGroup(id) {
     await csrf();
     await request(`/api/product-categories/${id}`, { method: 'DELETE' });

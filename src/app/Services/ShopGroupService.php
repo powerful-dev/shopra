@@ -2,15 +2,42 @@
 
 namespace App\Services;
 
+use App\Enums\ImageVariant;
 use App\Models\ShopGroup;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class ShopGroupService
 {
+    private const IMAGE_RESOURCE = 'categories';
+
+    public function __construct(private readonly ShopImageStorageService $images) {}
+
+    /** @return array{path: string, url: string} */
+    public function updateImage(ShopGroup $group, UploadedFile $image): array
+    {
+        $path = $this->images->storeOriginal(self::IMAGE_RESOURCE, $group->id, $image);
+
+        $group->update(['image' => $path]);
+
+        $url = $this->images->url(self::IMAGE_RESOURCE, $group->id, ImageVariant::Original);
+
+        return [
+            'path' => $path,
+            'url' => $url.'?v='.$group->updated_at->format('Uu'),
+        ];
+    }
+
+    public function deleteImage(ShopGroup $group): void
+    {
+        $this->images->delete(self::IMAGE_RESOURCE, $group->id, ImageVariant::Original);
+        $group->update(['image' => null]);
+    }
+
     public function delete(ShopGroup $group): void
     {
         DB::transaction(function () use ($group): void {

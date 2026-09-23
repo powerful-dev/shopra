@@ -50,6 +50,8 @@ Route::middleware([
         Route::delete('/product-categories/{group}', [ShopGroupController::class, 'destroy']);
         Route::post('/product-categories', [ShopGroupController::class, 'store']);
         Route::put('/product-categories/{group}', [ShopGroupController::class, 'update']);
+        Route::post('/product-categories/{group}/image', [ShopGroupController::class, 'image']);
+        Route::delete('/product-categories/{group}/image', [ShopGroupController::class, 'destroyImage']);
         Route::get('/product-categories/slug', [ShopGroupController::class, 'slug']);
         Route::get('/products', [ShopItemController::class, 'index']);
         Route::post('/products', [ShopItemController::class, 'store']);

@@ -10,13 +10,15 @@ import 'tinymce/plugins/image';
 import 'tinymce/skins/ui/oxide/skin.min.css';
 import contentUiCss from 'tinymce/skins/ui/oxide/content.min.css?inline';
 import contentCss from 'tinymce/skins/content/default/content.min.css?inline';
+import CheckIcon from '../../components/icons/CheckIcon';
 import ChevronIcon from '../../components/icons/ChevronIcon';
+import TrashIcon from '../../components/icons/TrashIcon';
 import UploadIcon from '../../components/icons/UploadIcon';
 import useSectionScroll from '../../hooks/useSectionScroll';
 import usePageScrollLock from '../../hooks/usePageScrollLock';
 import useTinyMceLanguage from '../../hooks/useTinyMceLanguage';
 import CategorySlugField from './CategorySlugField';
-import { updateShopGroup } from '../../services/shopGroups';
+import { deleteShopGroupImage, updateShopGroup, uploadShopGroupImage } from '../../services/shopGroups';
 import { uploadEditorImage } from '../../services/editorImages';
 
 const fieldClass = 'h-[42px] w-full rounded-[9px] border border-[#ddd5cf] bg-white px-[11px] text-[13px] text-[#3f3934] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]';
@@ -29,7 +31,7 @@ const editorBaseInit = {
     images_upload_handler: (blobInfo) => uploadEditorImage(blobInfo.blob(), blobInfo.filename()),
 };
 
-export default function CategoryEditModal({ category, parentOptions = [], isLoadingParents = false, parentsError = '', onClose, onUpdated }) {
+export default function CategoryEditModal({ category, parentOptions = [], isLoadingParents = false, parentsError = '', onClose, onUpdated, onImageChanged }) {
     const { t } = useTranslation();
     const editorLanguage = useTinyMceLanguage();
     const editorInit = useMemo(() => ({
@@ -39,6 +41,11 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
     const scrollContainerRef = useRef(null);
     const sectionNavigationRef = useRef(null);
     const sectionRefs = useRef({});
+    const photoDragDepthRef = useRef(0);
+    const photoInputRef = useRef(null);
+    const photoUploadInProgressRef = useRef(false);
+    const activeCategoryIdRef = useRef(null);
+    const saveFeedbackTimerRef = useRef(null);
     const [slug, setSlug] = useState('');
     const [isEditingSlug, setIsEditingSlug] = useState(false);
     const [name, setName] = useState('');
@@ -47,7 +54,13 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
     const [text, setText] = useState('');
     const [seoTitle, setSeoTitle] = useState('');
     const [seoDescription, setSeoDescription] = useState('');
+    const [selectedPhoto, setSelectedPhoto] = useState(null);
+    const [savedPhotoUrl, setSavedPhotoUrl] = useState('');
+    const [photoPreviewUrl, setPhotoPreviewUrl] = useState('');
+    const [isPhotoDragActive, setIsPhotoDragActive] = useState(false);
+    const [isDeletingPhoto, setIsDeletingPhoto] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [showSaveSuccess, setShowSaveSuccess] = useState(false);
     const [saveError, setSaveError] = useState('');
     usePageScrollLock(Boolean(category));
     const scrollToSection = useSectionScroll({
@@ -61,6 +74,7 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
     ];
 
     useEffect(() => {
+        window.clearTimeout(saveFeedbackTimerRef.current);
         setName(category?.name ?? '');
         setSlug(category?.slug ?? '');
         setParentId(category?.parent_id == null ? '' : String(category.parent_id));
@@ -68,19 +82,105 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
         setText(category?.text ?? '');
         setSeoTitle(category?.seo_title ?? '');
         setSeoDescription(category?.seo_description ?? '');
+        setSavedPhotoUrl(category?.image_url ?? '');
+        setSelectedPhoto(null);
+        setIsPhotoDragActive(false);
+        setIsDeletingPhoto(false);
+        activeCategoryIdRef.current = category?.id ?? null;
+        photoDragDepthRef.current = 0;
         setIsEditingSlug(false);
+        setShowSaveSuccess(false);
         setSaveError('');
     }, [category]);
+
+    useEffect(() => () => window.clearTimeout(saveFeedbackTimerRef.current), []);
+
+    useEffect(() => {
+        if (!selectedPhoto) {
+            setPhotoPreviewUrl(savedPhotoUrl);
+
+            return undefined;
+        }
+
+        const previewUrl = URL.createObjectURL(selectedPhoto);
+        setPhotoPreviewUrl(previewUrl);
+
+        return () => URL.revokeObjectURL(previewUrl);
+    }, [savedPhotoUrl, selectedPhoto]);
+
+    async function selectPhoto(file) {
+        if (!file?.type.startsWith('image/') || !category || photoUploadInProgressRef.current || isDeletingPhoto) return;
+
+        const categoryId = category.id;
+        photoUploadInProgressRef.current = true;
+        setSelectedPhoto(file);
+        setSaveError('');
+
+        try {
+            const uploadedImage = await uploadShopGroupImage(categoryId, file);
+
+            if (activeCategoryIdRef.current === categoryId) {
+                setSavedPhotoUrl(uploadedImage.url);
+                onImageChanged?.();
+            }
+        } catch (error) {
+            if (activeCategoryIdRef.current === categoryId) {
+                setSaveError(Object.values(error.errors ?? {}).flat().join(' ') || t('categoryEditModal.photo.uploadError'));
+            }
+        } finally {
+            if (activeCategoryIdRef.current === categoryId) {
+                setSelectedPhoto(null);
+            }
+
+            photoUploadInProgressRef.current = false;
+        }
+    }
+
+    function dropPhoto(event) {
+        event.preventDefault();
+        photoDragDepthRef.current = 0;
+        setIsPhotoDragActive(false);
+        void selectPhoto(event.dataTransfer.files[0]);
+    }
+
+    async function deletePhoto() {
+        if (!category || !savedPhotoUrl || isDeletingPhoto || photoUploadInProgressRef.current) return;
+
+        const categoryId = category.id;
+        setIsDeletingPhoto(true);
+        setSaveError('');
+
+        try {
+            await deleteShopGroupImage(categoryId);
+
+            if (activeCategoryIdRef.current === categoryId) {
+                setSavedPhotoUrl('');
+                setSelectedPhoto(null);
+                onImageChanged?.();
+            }
+        } catch (error) {
+            if (activeCategoryIdRef.current === categoryId) {
+                setSaveError(Object.values(error.errors ?? {}).flat().join(' ') || t('categoryEditModal.photo.deleteError'));
+            }
+        } finally {
+            if (activeCategoryIdRef.current === categoryId) {
+                setIsDeletingPhoto(false);
+            }
+        }
+    }
 
     async function saveCategory(event) {
         event.preventDefault();
         if (!category || isSaving) return;
 
+        const categoryId = category.id;
+        window.clearTimeout(saveFeedbackTimerRef.current);
         setIsSaving(true);
+        setShowSaveSuccess(false);
         setSaveError('');
 
         try {
-            const updatedCategory = await updateShopGroup(category.id, {
+            const updatedCategory = await updateShopGroup(categoryId, {
                 name,
                 slug,
                 parent_id: parentId ? Number(parentId) : null,
@@ -90,8 +190,17 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
                 seo_description: seoDescription || null,
             });
             onUpdated(updatedCategory);
+
+            if (activeCategoryIdRef.current === categoryId) {
+                setShowSaveSuccess(true);
+                saveFeedbackTimerRef.current = window.setTimeout(() => {
+                    setShowSaveSuccess(false);
+                }, 3500);
+            }
         } catch (error) {
-            setSaveError(Object.values(error.errors ?? {}).flat().join(' ') || t('categoriesModal.errors.save'));
+            if (activeCategoryIdRef.current === categoryId) {
+                setSaveError(Object.values(error.errors ?? {}).flat().join(' ') || t('categoriesModal.errors.save'));
+            }
         } finally {
             setIsSaving(false);
         }
@@ -183,18 +292,63 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
                 </Card>
 
                 <Card sectionRef={(element) => { sectionRefs.current['category-edit-photo'] = element; }} id="category-edit-photo" title={t('categoryEditModal.photo.title')}>
-                    <div className="flex flex-wrap gap-2">
-                        <div className="relative h-[178px] w-[139px] overflow-hidden rounded-[10px] border border-[color:var(--color-border)] bg-[linear-gradient(145deg,#86939d,#2b3c48)] max-sm:h-[153px] max-sm:w-[119px]">
-                            <i className="absolute inset-[24%] rounded-[36%_36%_18%_18%] border border-white/40 bg-[#314555]/55" />
+                    <div className="flex gap-2">
+                        <div className="relative h-[178px] w-[139px] shrink-0 overflow-hidden rounded-[10px] border border-[color:var(--color-border)] bg-[linear-gradient(145deg,#86939d,#2b3c48)] max-sm:h-[153px] max-sm:w-[119px]">
+                            {photoPreviewUrl
+                                ? <img className="h-full w-full object-cover" src={photoPreviewUrl} alt="" />
+                                : <i className="absolute inset-[24%] rounded-[36%_36%_18%_18%] border border-white/40 bg-[#314555]/55" />}
+                            {savedPhotoUrl && (
+                                <button
+                                    type="button"
+                                    className="absolute right-2 top-2 z-10 grid h-8 w-8 place-items-center rounded-lg border border-white/70 bg-white/90 text-[#b5443c] shadow-sm backdrop-blur hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+                                    aria-label={t('categoryEditModal.photo.delete')}
+                                    title={t('categoryEditModal.photo.delete')}
+                                    disabled={isDeletingPhoto || photoUploadInProgressRef.current}
+                                    onClick={() => void deletePhoto()}
+                                >
+                                    <TrashIcon />
+                                </button>
+                            )}
                         </div>
-                        <label className="flex h-[178px] w-[139px] cursor-pointer flex-col items-center justify-center rounded-[10px] border border-[color:var(--color-border)] bg-[#f8f5f2] text-[color:var(--color-accent)] max-sm:h-[153px] max-sm:w-[119px]">
-                            <input className="sr-only" type="file" accept="image/*" />
+                        <button
+                            type="button"
+                            className={`flex h-[178px] min-w-0 flex-1 cursor-pointer flex-col items-center justify-center rounded-[10px] border border-dashed px-4 text-center text-[color:var(--color-accent)] transition-colors max-sm:h-[153px] ${isPhotoDragActive ? 'border-[color:var(--color-accent)] bg-[#fff4ec]' : 'border-[#d0b09d] bg-[#f8f5f2]'}`}
+                            onClick={() => photoInputRef.current?.click()}
+                            onDragEnter={(event) => {
+                                event.preventDefault();
+                                photoDragDepthRef.current += 1;
+                                setIsPhotoDragActive(true);
+                            }}
+                            onDragOver={(event) => {
+                                event.preventDefault();
+                                event.dataTransfer.dropEffect = 'copy';
+                            }}
+                            onDragLeave={(event) => {
+                                event.preventDefault();
+                                photoDragDepthRef.current = Math.max(0, photoDragDepthRef.current - 1);
+
+                                if (photoDragDepthRef.current === 0) {
+                                    setIsPhotoDragActive(false);
+                                }
+                            }}
+                            onDrop={dropPhoto}
+                        >
                             <UploadIcon />
-                            <strong className="mt-1.5 text-[11px] text-[#5d554f]">{t('categoryEditModal.photo.add')}</strong>
-                            <small className="text-[11px] text-[#98918a]">{t('categoryEditModal.photo.image')}</small>
-                        </label>
+                            <strong className="mt-2 text-[13px] text-[#5d554f]">{t('categoryEditModal.photo.add')}</strong>
+                            <small className="mt-1 text-[11px] leading-[1.4] text-[#98918a]">{t('categoryEditModal.photo.dropHint')}</small>
+                        </button>
+                        <input
+                            ref={photoInputRef}
+                            className="hidden"
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            tabIndex={-1}
+                            onChange={(event) => {
+                                void selectPhoto(event.target.files[0]);
+                                event.target.value = '';
+                            }}
+                        />
                     </div>
-                    <p className="mb-0 mt-2 text-[12px] text-[#9c948e]">{t('categoryEditModal.photo.hint')}</p>
                 </Card>
 
                 <details ref={(element) => { sectionRefs.current['category-edit-seo'] = element; }} id="category-edit-seo" className="accordion scroll-mt-[58px]">
@@ -224,9 +378,19 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
                 </div>
             </form>
 
-            <footer className="flex justify-end gap-2 border-t border-[color:var(--color-border)] bg-white px-6 py-3 max-[620px]:px-4">
-                <button type="button" className="button button--secondary" onClick={onClose} disabled={isSaving}>{t('categoryEditModal.cancel')}</button>
-                <button type="submit" form="category-edit-form" className="button button--primary" disabled={isSaving}>{isSaving ? t('categoriesModal.form.saving') : t('common.save')}</button>
+            <footer className="flex items-center gap-3 border-t border-[color:var(--color-border)] bg-white px-6 py-3 max-[620px]:px-4">
+                <div className="min-w-0 flex-1" aria-live="polite">
+                    {showSaveSuccess && (
+                        <span className="flex items-center gap-1.5 text-[12px] font-semibold text-[color:var(--color-success)]" role="status">
+                            <CheckIcon />
+                            {t('categoryEditModal.saveSuccess')}
+                        </span>
+                    )}
+                </div>
+                <div className="flex shrink-0 gap-2">
+                    <button type="button" className="button button--secondary" onClick={onClose}>{t('categoryEditModal.closeButton')}</button>
+                    <button type="submit" form="category-edit-form" className="button button--primary" disabled={isSaving}>{isSaving ? t('categoriesModal.form.saving') : t('common.save')}</button>
+                </div>
             </footer>
         </section>
     );

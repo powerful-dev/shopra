@@ -407,9 +407,9 @@ export default function CategoriesModal({ isOpen, onClose }) {
                 parentsError={parentsError}
                 onClose={() => setCategoryToEdit(null)}
                 onUpdated={() => {
-                    setCategoryToEdit(null);
                     setReloadKey((key) => key + 1);
                 }}
+                onImageChanged={() => setReloadKey((key) => key + 1)}
             />
         </div>
     );

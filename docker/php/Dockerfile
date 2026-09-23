@@ -5,9 +5,14 @@ RUN apt-get update && apt-get install -y \
     unzip \
     zip \
     curl \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
     libpq-dev \
+    libwebp-dev \
     libzip-dev \
-    && docker-php-ext-install pdo_pgsql zip
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install gd pdo_pgsql zip
 
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer

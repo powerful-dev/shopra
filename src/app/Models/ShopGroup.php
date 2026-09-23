@@ -21,6 +21,7 @@ class ShopGroup extends Model
         'text',
         'seo_title',
         'seo_description',
+        'image',
     ];
 
     protected function casts(): array
