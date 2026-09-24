@@ -22,6 +22,11 @@
         "searchPlaceholder": "Search products…",
         "searchLabel": "Search products",
         "loading": "Loading products…",
+        "categoryFilter": {
+            "placeholder": "Category",
+            "searchPlaceholder": "Search categories…",
+            "all": "All categories"
+        },
         "copyExisting": "Create from an existing product",
         "selectProduct": "Select {{name}}",
         "productActions": "Actions for {{name}}",

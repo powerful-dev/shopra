@@ -143,6 +143,26 @@ class ShopItemApiTest extends TestCase
             ->assertJsonPath('data.0.name', 'Сумка-рюкзак Urban Flex')
             ->assertJsonPath('meta.total', 1);
 
+        $this->getJson('/api/products?'.http_build_query([
+            'category_id' => $groups->first()->id,
+        ]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name', 'Сумка-рюкзак Urban Flex')
+            ->assertJsonPath('meta.total', 1);
+
+        $this->getJson('/api/products?'.http_build_query([
+            'search' => 'Товар',
+            'category_id' => $groups->first()->id,
+        ]))
+            ->assertOk()
+            ->assertJsonCount(0, 'data')
+            ->assertJsonPath('meta.total', 0);
+
+        $this->getJson('/api/products?category_id=999999')
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('category_id');
+
         $filters = http_build_query([
             'search' => 'Товар 1',
             'status' => 'active',

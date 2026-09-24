@@ -22,6 +22,11 @@
         "searchPlaceholder": "Найти товар…",
         "searchLabel": "Найти товар",
         "loading": "Загрузка товаров…",
+        "categoryFilter": {
+            "placeholder": "Категория",
+            "searchPlaceholder": "Найти категорию…",
+            "all": "Все категории"
+        },
         "copyExisting": "Создать на основе существующего товара",
         "selectProduct": "Выбрать {{name}}",
         "productActions": "Действия {{name}}",

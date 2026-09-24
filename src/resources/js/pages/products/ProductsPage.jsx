@@ -7,9 +7,11 @@ import ConfirmModal from '../../components/admin/ConfirmModal';
 import Pagination from '../../components/admin/Pagination';
 import ProductStatusBadge from '../../components/admin/ProductStatusBadge';
 import SearchField from '../../components/admin/SearchField';
+import SearchableSelect from '../../components/admin/SearchableSelect';
 import Skeleton from '../../components/admin/Skeleton';
 import Summary from '../../components/admin/Summary';
 import { csrf, request } from '../../services/api';
+import { getShopGroups } from '../../services/shopGroups';
 import CategoriesIcon from "../../components/icons/CategoriesIcon";
 import PlusIcon from "../../components/icons/PlusIcon";
 import CopyIcon from "../../components/icons/CopyIcon";
@@ -44,15 +46,34 @@ export default function ProductsPage() {
     const [openActionsId, setOpenActionsId] = useState(null);
     const [reloadKey, setReloadKey] = useState(0);
     const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+    const [categoryOptions, setCategoryOptions] = useState([]);
     const navigate = useNavigate();
     const currentSearch = searchParams.get('search') ?? '';
     const currentStatus = searchParams.get('status') ?? '';
     const currentStock = searchParams.get('stock') ?? '';
+    const currentCategoryParam = searchParams.get('category_id') ?? '';
+    const currentCategoryId = /^\d+$/.test(currentCategoryParam) ? Number(currentCategoryParam) : '';
     const currentPage = Number(searchParams.get('page') ?? DEFAULT_PAGE);
     const currentParams = searchParams.toString();
     const selectedSummary = currentStatus === 'active' || currentStatus === 'draft'
         ? currentStatus
         : currentStock === 'low' ? 'low' : 'all';
+
+    useEffect(() => {
+        const controller = new AbortController();
+
+        getShopGroups({ signal: controller.signal })
+            .then((groups) => {
+                if (!controller.signal.aborted) {
+                    setCategoryOptions(buildCategoryOptions(groups));
+                }
+            })
+            .catch((error) => {
+                if (!controller.signal.aborted) console.error('Unable to load product categories.', error);
+            });
+
+        return () => controller.abort();
+    }, []);
 
     useEffect(() => {
         if (!Number.isInteger(currentPage) || currentPage < 1) {
@@ -106,6 +127,17 @@ export default function ProductsPage() {
             params.set(filter, value);
         }
 
+        params.set('page', String(DEFAULT_PAGE));
+        setSearchParams(params, { replace: true });
+    };
+
+    const setCategory = (categoryId) => {
+        const params = new URLSearchParams(searchParams);
+        if (categoryId === '') {
+            params.delete('category_id');
+        } else {
+            params.set('category_id', String(categoryId));
+        }
         params.set('page', String(DEFAULT_PAGE));
         setSearchParams(params, { replace: true });
     };
@@ -189,6 +221,15 @@ export default function ProductsPage() {
                         className="flex h-[41px] w-[min(390px,42%)] items-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] text-[#8a827b] focus-within:border-[#c77d56] focus-within:shadow-[0_0_0_3px_rgba(184,79,24,.07)] max-lg:w-full"
                         inputClassName="min-w-0 flex-1 border-0 bg-transparent text-[13px] outline-none"
                     />
+                    <SearchableSelect
+                        className="w-[240px] max-lg:w-full"
+                        options={[{ value: '', label: t('productsPage.categoryFilter.all') }, ...categoryOptions]}
+                        value={currentCategoryId}
+                        onChange={setCategory}
+                        placeholder={t('productsPage.categoryFilter.placeholder')}
+                        searchPlaceholder={t('productsPage.categoryFilter.searchPlaceholder')}
+                        ariaLabel={t('productsPage.categoryFilter.placeholder')}
+                    />
                     <button type="button" className="button button--outline ml-auto min-h-[41px] whitespace-nowrap border-[#dfc0ac] bg-[#fff8f3] text-[color:var(--color-accent)] hover:border-[color:var(--color-accent)] hover:bg-[#fff3eb] max-lg:ml-0 max-lg:w-full"><CopyIcon />{t('productsPage.copyExisting')}</button>
                 </div>
 
@@ -236,6 +277,34 @@ export default function ProductsPage() {
             <CategoriesModal isOpen={isCategoriesOpen} onClose={() => setIsCategoriesOpen(false)} />
         </>
     );
+}
+
+function buildCategoryOptions(groups) {
+    const ids = new Set(groups.map((group) => group.id));
+    const children = new Map();
+
+    for (const group of groups) {
+        const parentId = ids.has(group.parent_id) ? group.parent_id : null;
+        if (!children.has(parentId)) children.set(parentId, []);
+        children.get(parentId).push(group);
+    }
+
+    const options = [];
+    const visited = new Set();
+    const visit = (group, path = []) => {
+        if (visited.has(group.id)) return;
+        visited.add(group.id);
+
+        const names = [...path, group.name];
+        options.push({ value: group.id, label: names.join(' → ') });
+        for (const child of children.get(group.id) ?? []) visit(child, names);
+    };
+
+    for (const group of children.get(null) ?? []) visit(group);
+    // Preserve categories even if legacy data contains a missing parent or cycle.
+    for (const group of groups) visit(group);
+
+    return options;
 }
 
 function ProductsListSkeleton({ rowCount, label }) {

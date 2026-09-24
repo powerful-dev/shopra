@@ -32,12 +32,13 @@ class ShopItemService
         $shopItem->delete();
     }
 
-    /** @param array{search?: string|null, status?: string|null, stock?: string|null} $filters */
+    /** @param array{search?: string|null, status?: string|null, stock?: string|null, category_id?: int|null} $filters */
     public function paginate(array $filters = []): LengthAwarePaginator
     {
         $search = trim((string) ($filters['search'] ?? ''));
         $status = $filters['status'] ?? null;
         $stock = $filters['stock'] ?? null;
+        $categoryId = $filters['category_id'] ?? null;
         $lowStockThreshold = $this->lowStockThreshold();
 
         return ShopItem::query()
@@ -50,6 +51,10 @@ class ShopItemService
                 });
             })
             ->when($status, fn ($query) => $query->where('status', $status))
+            ->when($categoryId, fn ($query) => $query->whereHas(
+                'groups',
+                fn ($query) => $query->where('shop_groups.id', $categoryId),
+            ))
             ->when($stock === 'low', fn ($query) => $query
                 ->where('quantity', '>', 0)
                 ->where('quantity', '<', $lowStockThreshold))

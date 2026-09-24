@@ -22,6 +22,11 @@
         "searchPlaceholder": "Знайти товар…",
         "searchLabel": "Знайти товар",
         "loading": "Завантаження товарів…",
+        "categoryFilter": {
+            "placeholder": "Категорія",
+            "searchPlaceholder": "Знайти категорію…",
+            "all": "Усі категорії"
+        },
         "copyExisting": "Створити на основі наявного товару",
         "selectProduct": "Вибрати {{name}}",
         "productActions": "Дії {{name}}",
