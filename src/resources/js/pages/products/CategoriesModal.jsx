@@ -6,6 +6,9 @@ import CategoryRow from './CategoryRow';
 import CategorySlugField from './CategorySlugField';
 import CloseIcon from '../../components/icons/CloseIcon';
 import usePageScrollLock from '../../hooks/usePageScrollLock';
+import SearchIcon from '../../components/icons/SearchIcon';
+import PlusIcon from '../../components/icons/PlusIcon';
+import SparklesIcon from '../../components/icons/SparklesIcon';
 import { createShopGroup, deleteShopGroup, getRootShopGroups, getShopGroupChildren, getShopGroups, getUniqueShopGroupSlug, moveShopGroup, searchShopGroups } from '../../services/shopGroups';
 
 export default function CategoriesModal({ isOpen, onClose }) {
@@ -574,6 +577,3 @@ function buildParentOptions(groups) {
 
 
 const Svg = ({ children, size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>;
-const SearchIcon = () => <Svg size={17}><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></Svg>;
-const PlusIcon = () => <Svg size={15}><path d="M5 12h14M12 5v14" /></Svg>;
-const SparklesIcon = () => <Svg size={15}><path d="m12 3-1.4 4.2a2 2 0 0 1-1.3 1.3L5 10l4.3 1.5a2 2 0 0 1 1.3 1.3L12 17l1.4-4.2a2 2 0 0 1 1.3-1.3L19 10l-4.3-1.5a2 2 0 0 1-1.3-1.3L12 3Z" /></Svg>;
