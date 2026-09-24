@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NavLink } from 'react-router-dom'
 import Brand from './Brand';
+import Skeleton from './Skeleton';
 import UserMenu from './UserMenu';
 import HomeIcon from '../icons/HomeIcon';
 import AppearanceIcon from '../icons/AppearanceIcon';
@@ -34,7 +35,7 @@ export default function Sidebar({ isOpen, user, onClose, onLogout }) {
 
     const { t } = useTranslation();
     const [navigation, setNavigation] = useState([]);
-    const { modules } = useModules();
+    const { modules, loading } = useModules();
 
     useEffect(() => {
         fetch('/api/sites/1/modules', {
@@ -74,10 +75,9 @@ export default function Sidebar({ isOpen, user, onClose, onLogout }) {
                 <NavLink to="/admin/dashboard"><Brand /></NavLink>
             </div>
 
-            <nav className="flex-1 overflow-y-auto px-[10px] pb-[14px] max-lg:px-0">
+            <nav className="flex-1 overflow-y-auto px-[10px] pb-[14px] max-lg:px-0" aria-busy={loading}>
                 <div className="space-y-1">
-
-                    {modules
+                    {loading ? <SidebarMenuSkeleton /> : modules
                         .filter((module) => module.show_in_menu)
                         .map((module) => {
                             
@@ -122,4 +122,17 @@ export default function Sidebar({ isOpen, user, onClose, onLogout }) {
             </div>
         </aside>
     );
+}
+
+function SidebarMenuSkeleton() {
+    const labelWidths = ['w-[78px]', 'w-[102px]', 'w-[86px]', 'w-[112px]', 'w-[94px]', 'w-[72px]', 'w-[106px]', 'w-[82px]'];
+
+    return Array.from({ length: 8 }, (_, index) => (
+        <div className="sidebar-nav-link pointer-events-none" aria-hidden="true" key={index}>
+            <span className="sidebar-icon">
+                <Skeleton className="h-[18px] w-[18px] rounded-[5px]" />
+            </span>
+            <Skeleton className={`h-[13px] ${labelWidths[index]}`} />
+        </div>
+    ));
 }
