@@ -21,6 +21,7 @@
         "addProduct": "Добавить товар",
         "searchPlaceholder": "Найти товар…",
         "searchLabel": "Найти товар",
+        "loading": "Загрузка товаров…",
         "copyExisting": "Создать на основе существующего товара",
         "selectProduct": "Выбрать {{name}}",
         "productActions": "Действия {{name}}",

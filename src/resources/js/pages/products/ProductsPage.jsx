@@ -4,10 +4,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import ActionsMenu from '../../components/admin/ActionsMenu';
 import Breadcrumbs from '../../components/admin/Breadcrumbs';
 import ConfirmModal from '../../components/admin/ConfirmModal';
-import Loading from '../../components/admin/Loading';
 import Pagination from '../../components/admin/Pagination';
 import ProductStatusBadge from '../../components/admin/ProductStatusBadge';
 import SearchField from '../../components/admin/SearchField';
+import Skeleton from '../../components/admin/Skeleton';
 import Summary from '../../components/admin/Summary';
 import { csrf, request } from '../../services/api';
 import CategoriesIcon from "../../components/icons/CategoriesIcon";
@@ -30,6 +30,7 @@ const productThumbs = [
 ];
 
 const DEFAULT_PAGE = 1;
+const DEFAULT_SKELETON_ROW_COUNT = 15;
 
 export default function ProductsPage() {
     const { t } = useTranslation();
@@ -191,11 +192,11 @@ export default function ProductsPage() {
                     <button type="button" className="button button--outline ml-auto min-h-[41px] whitespace-nowrap border-[#dfc0ac] bg-[#fff8f3] text-[color:var(--color-accent)] hover:border-[color:var(--color-accent)] hover:bg-[#fff3eb] max-lg:ml-0 max-lg:w-full"><CopyIcon />{t('productsPage.copyExisting')}</button>
                 </div>
 
-                <div className="data-list !p-0">
+                <div className="data-list !p-0" aria-busy={isSearching}>
                     <div className="products-list__header min-h-[43px] items-center gap-2.5 bg-[#faf8f6] px-[15px] py-[7px] text-xs font-[720] uppercase tracking-[0.04em] text-[#8e8781]">
                         <span /><span>{t('common.product')}</span><span>{t('common.categories')}</span><span>{t('common.stock')}</span><span>{t('common.price')}</span><span>{t('common.status')}</span><span />
                     </div>
-                    {isSearching ? <Loading /> : products.map((product, index) => (
+                    {isSearching ? <ProductsListSkeleton rowCount={products.length || meta?.per_page || DEFAULT_SKELETON_ROW_COUNT} label={t('productsPage.loading')} /> : products.map((product, index) => (
                         <ProductRow
                             key={product.id}
                             product={product}
@@ -233,6 +234,34 @@ export default function ProductsPage() {
                 onClose={() => setProductToDelete(null)}
             />
             <CategoriesModal isOpen={isCategoriesOpen} onClose={() => setIsCategoriesOpen(false)} />
+        </>
+    );
+}
+
+function ProductsListSkeleton({ rowCount, label }) {
+    const nameWidths = ['w-[58%]', 'w-[46%]', 'w-[67%]', 'w-[52%]', 'w-[61%]'];
+    const categoryWidths = ['w-[68px]', 'w-[54px]', 'w-[82px]', 'w-[62px]'];
+
+    return (
+        <>
+            <span className="sr-only" role="status">{label}</span>
+            {Array.from({ length: rowCount }, (_, index) => (
+                <div className="data-list__item products-list__row pointer-events-none" aria-hidden="true" key={index}>
+                    <Skeleton className="h-4 w-4 rounded-[4px]" />
+                    <span className="flex min-w-0 items-center gap-[11px]">
+                        <Skeleton className="h-[51px] w-12 flex-none rounded-lg" />
+                        <span className="flex min-w-0 flex-1 flex-col">
+                            <Skeleton className={`h-[13px] max-w-[210px] ${nameWidths[index % nameWidths.length]}`} />
+                            <Skeleton className="mt-[7px] h-3 w-[76px]" />
+                        </span>
+                    </span>
+                    <Skeleton className={`h-3 ${categoryWidths[index % categoryWidths.length]}`} />
+                    <Skeleton className="h-3 w-[44px]" />
+                    <Skeleton className="h-[13px] w-[68px]" />
+                    <Skeleton className="h-[26px] w-[82px] rounded-full max-md:col-start-3" />
+                    <Skeleton className="h-8 w-8 rounded-lg max-md:col-start-4" />
+                </div>
+            ))}
         </>
     );
 }
