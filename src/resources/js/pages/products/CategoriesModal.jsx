@@ -9,6 +9,7 @@ import usePageScrollLock from '../../hooks/usePageScrollLock';
 import SearchIcon from '../../components/icons/SearchIcon';
 import PlusIcon from '../../components/icons/PlusIcon';
 import SparklesIcon from '../../components/icons/SparklesIcon';
+import Skeleton from '../../components/admin/Skeleton';
 import { createShopGroup, deleteShopGroup, getRootShopGroups, getShopGroupChildren, getShopGroups, getUniqueShopGroupSlug, moveShopGroup, searchShopGroups } from '../../services/shopGroups';
 
 export default function CategoriesModal({ isOpen, onClose }) {
@@ -22,6 +23,7 @@ export default function CategoriesModal({ isOpen, onClose }) {
     const [reloadKey, setReloadKey] = useState(0);
     const parentOptions = buildParentOptions(groups);
     const [categories, setCategories] = useState([]);
+    const [isLoadingCategories, setIsLoadingCategories] = useState(true);
     const [categoriesError, setCategoriesError] = useState('');
     const [branches, setBranches] = useState({});
     const pendingBranches = useRef(new Map());
@@ -213,6 +215,7 @@ export default function CategoriesModal({ isOpen, onClose }) {
         setCategoryToEdit(null);
         setSearch('');
         setIsCreateFormOpen(false);
+        setIsLoadingCategories(true);
         onClose();
     }, [onClose]);
 
@@ -255,6 +258,7 @@ export default function CategoriesModal({ isOpen, onClose }) {
         if (!isOpen) return undefined;
 
         const controller = new AbortController();
+        setIsLoadingCategories(true);
         setCategoriesError('');
 
         getRootShopGroups({ signal: controller.signal })
@@ -263,6 +267,9 @@ export default function CategoriesModal({ isOpen, onClose }) {
             })
             .catch(() => {
                 if (!controller.signal.aborted) setCategoriesError(t('categoriesModal.errors.tree'));
+            })
+            .finally(() => {
+                if (!controller.signal.aborted) setIsLoadingCategories(false);
             });
 
         return () => controller.abort();
@@ -332,14 +339,15 @@ export default function CategoriesModal({ isOpen, onClose }) {
                         <div className="flex items-center justify-between pb-2 text-xs font-bold text-[#5f5751]">
                             <span>{t('categoriesModal.treeTitle')}</span>
                         </div>
-                        <div className="category-tree-list rounded-xl border border-[color:var(--color-border)] bg-white p-1" role="tree" aria-label={t('categoriesModal.treeLabel')}>
+                        <div className="category-tree-list rounded-xl border border-[color:var(--color-border)] bg-white p-1" role="tree" aria-label={t('categoriesModal.treeLabel')} aria-busy={!isSearching && isLoadingCategories}>
                             {moveError && <p role="alert" className="m-0 p-2 text-xs text-[#8d857e]">{moveError}</p>}
                             {isMoving && <p role="status" className="m-0 p-2 text-xs text-[#8d857e]">{t('categoriesModal.savingOrder')}</p>}
-                            {!isSearching && categoriesError && <p role="alert" className="m-0 p-2 text-xs text-[#8d857e]">{categoriesError}</p>}
+                            {!isSearching && isLoadingCategories && <CategoryTreeSkeleton label={t('categoriesModal.form.loadingCategories')} />}
+                            {!isSearching && !isLoadingCategories && categoriesError && <p role="alert" className="m-0 p-2 text-xs text-[#8d857e]">{categoriesError}</p>}
                             {isSearching && searchError && <p role="alert" className="m-0 p-2 text-xs text-[#8d857e]">{searchError}</p>}
                             {isSearching && !searchError && searchResult?.query !== query && <p role="status" className="m-0 p-2 text-xs text-[#8d857e]">{t('categoriesModal.searching')}</p>}
                             {isSearching && searchResult?.query === query && searchGroups.length === 0 && <p role="status" className="m-0 p-2 text-xs text-[#8d857e]">{t('categoriesModal.noResults')}</p>}
-                            {visibleCategories.map(({ category, depth }) => (
+                            {(!isLoadingCategories || isSearching) && visibleCategories.map(({ category, depth }) => (
                                 <CategoryRow
                                     key={category.id}
                                     category={category}
@@ -415,6 +423,40 @@ export default function CategoriesModal({ isOpen, onClose }) {
                 }}
                 onImageChanged={() => setReloadKey((key) => key + 1)}
             />
+        </div>
+    );
+}
+
+function CategoryTreeSkeleton({ label }) {
+    const rows = [
+        { depth: 0, width: 'w-[42%]', expandable: true },
+        { depth: 1, width: 'w-[34%]', expandable: true },
+        { depth: 2, width: 'w-[48%]', expandable: false },
+        { depth: 1, width: 'w-[39%]', expandable: false },
+        { depth: 0, width: 'w-[31%]', expandable: true },
+        { depth: 1, width: 'w-[44%]', expandable: false },
+    ];
+
+    return (
+        <div role="status">
+            {rows.map((row, index) => (
+                <div
+                    key={index}
+                    className={`category-tree-row category-tree-row--depth-${row.depth}`}
+                    aria-hidden="true"
+                >
+                    <span className="grid h-[15px] w-[11px] grid-cols-2 place-content-center gap-[2px]">
+                        {Array.from({ length: 6 }, (_, dot) => <Skeleton key={dot} className="h-[3px] w-[3px] rounded-full" />)}
+                    </span>
+                    {row.expandable ? <Skeleton className="h-[15px] w-[15px] rounded-full" /> : <span />}
+                    <span />
+                    <Skeleton className="h-6 w-6 rounded-[7px]" />
+                    <Skeleton className={`h-3 ${row.width}`} />
+                    <Skeleton className="h-[22px] w-[30px] rounded-full" />
+                    <Skeleton className="h-7 w-7 rounded-[7px]" />
+                </div>
+            ))}
+            <span className="sr-only">{label}</span>
         </div>
     );
 }
