@@ -4,17 +4,17 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Breadcrumbs from '../../components/admin/Breadcrumbs';
 import { csrf, request } from '../../services/api';
 import ActionsMenu from '../../components/admin/ActionsMenu';
-import PageLoader from '../../components/admin/PageLoader';
 import ConfirmModal from '../../components/admin/ConfirmModal';
 import Pagination from '../../components/admin/Pagination';
 import SearchField from '../../components/admin/SearchField';
-import Loading from '../../components/admin/Loading';
+import Skeleton from '../../components/admin/Skeleton';
 import PlusIcon from '../../components/icons/PlusIcon';
 import CheckIcon from '../../components/icons/CheckIcon';
 import PencilIcon from '../../components/icons/PencilIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
 
 const DEFAULT_PAGE = 1;
+const DEFAULT_SKELETON_ROW_COUNT = 10;
 
 export default function AdministratorsPage() {
     const { t } = useTranslation();
@@ -148,10 +148,6 @@ export default function AdministratorsPage() {
         setSearchParams(params, { replace: true });
     };
 
-    if (isLoading) {
-        return <PageLoader />;
-    }
-
     return (
         <>
             <section className="mb-5 flex flex-wrap items-end justify-between gap-6 max-md:items-start">
@@ -184,7 +180,11 @@ export default function AdministratorsPage() {
                     <span>{t('administratorsPage.name')}</span><span>{t('administratorsPage.access')}</span><span>{t('administratorsPage.email')}</span><span>{t('administratorsPage.activity')}</span><span className="sr-only">{t('administratorsPage.actions')}</span>
                 </div>
 
-                {isSearching ? <Loading /> : admins.length > 0 ? (
+                {isLoading || isSearching ? (
+                    <div className="data-list data-list--uniform-typography grid !min-h-0 gap-2 bg-[#faf8f6] !p-2 md:grid-cols-2 2xl:block 2xl:gap-0 2xl:bg-transparent 2xl:!p-0" role="list" aria-busy="true">
+                        <AdministratorsListSkeleton rowCount={admins.length || meta?.per_page || DEFAULT_SKELETON_ROW_COUNT} />
+                    </div>
+                ) : admins.length > 0 ? (
                     <div className="data-list data-list--uniform-typography grid !min-h-0 gap-2 bg-[#faf8f6] !p-2 md:grid-cols-2 2xl:block 2xl:gap-0 2xl:bg-transparent 2xl:!p-0" role="list">
                         {admins.map((admin) => {
                             const isCurrentUser = admin.id === currentAdminId;
@@ -308,4 +308,26 @@ export default function AdministratorsPage() {
             />
         </>
     );
+}
+
+function AdministratorsListSkeleton({ rowCount }) {
+    const nameWidths = ['w-[132px]', 'w-[154px]', 'w-[118px]', 'w-[143px]'];
+    const accessWidths = ['w-[104px]', 'w-[126px]', 'w-[94px]'];
+    const emailWidths = ['w-[168px]', 'w-[192px]', 'w-[148px]', 'w-[180px]'];
+
+    return Array.from({ length: rowCount }, (_, index) => (
+        <div className="data-list__item pointer-events-none relative !min-h-[152px] !grid-cols-[minmax(0,1fr)_auto] !gap-[9px] !rounded-[10px] !border !p-[12px] max-2xl:!rounded-[10px] 2xl:!min-h-[73px] 2xl:!grid-cols-[minmax(230px,1.2fr)_minmax(220px,1fr)_minmax(210px,1fr)_100px_50px] 2xl:!gap-[10px] 2xl:!rounded-none 2xl:!border-x-0 2xl:!border-b 2xl:!border-t-0 2xl:!px-[15px] 2xl:!py-[7px]" role="listitem" aria-hidden="true" key={index}>
+            <span className="flex min-w-0 flex-col">
+                <Skeleton className={`h-[13px] max-w-full ${nameWidths[index % nameWidths.length]}`} />
+                <Skeleton className="mt-[7px] h-[11px] w-[92px]" />
+            </span>
+            <span className="col-span-2 row-start-2 flex min-w-0 flex-col gap-[7px] max-sm:!col-start-1 max-sm:!row-start-2 2xl:col-span-1 2xl:row-auto">
+                <Skeleton className="h-[22px] w-[88px] rounded-full" />
+                <Skeleton className={`h-[11px] max-w-full ${accessWidths[index % accessWidths.length]}`} />
+            </span>
+            <Skeleton className={`h-3 max-w-full ${emailWidths[index % emailWidths.length]} max-sm:col-start-1 max-sm:row-start-3`} />
+            <Skeleton className="h-[21px] w-9 rounded-full justify-self-end max-sm:col-start-2 max-sm:row-start-3 max-sm:ml-3 max-sm:self-center 2xl:justify-self-start" />
+            <Skeleton className="col-start-2 row-start-1 h-8 w-8 rounded-lg justify-self-end 2xl:col-auto 2xl:row-auto" />
+        </div>
+    ));
 }
