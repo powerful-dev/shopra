@@ -3,10 +3,23 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import Breadcrumbs from '../../components/admin/Breadcrumbs';
 import Field from '../../components/form/Field';
+import Input from '../../components/form/Input';
+import Select from '../../components/form/Select';
 import SaveIcon from '../../components/icons/SaveIcon';
 import BackIcon from '../../components/icons/BackIcon';
 import CheckIcon from '../../components/icons/CheckIcon';
 import { csrf, request } from '../../services/api';
+
+const IMAGE_SIZE_FIELDS = [
+    'group_small_image_max_width',
+    'group_small_image_max_height',
+    'group_large_image_max_width',
+    'group_large_image_max_height',
+    'product_small_image_max_width',
+    'product_small_image_max_height',
+    'product_large_image_max_width',
+    'product_large_image_max_height',
+];
 
 const formFromData = (data) => ({
     site_name: data.site_name ?? '',
@@ -14,17 +27,85 @@ const formFromData = (data) => ({
     site_language_id: data.site_language_id ?? '',
     low_stock_threshold: data.low_stock_threshold ?? 5,
     default_shop_unit_id: data.default_shop_unit_id ?? '',
+    group_small_image_max_width: data.group_small_image_max_width ?? '',
+    group_small_image_max_height: data.group_small_image_max_height ?? '',
+    group_small_image_fit: data.group_small_image_fit ?? 'contain',
+    group_large_image_max_width: data.group_large_image_max_width ?? '',
+    group_large_image_max_height: data.group_large_image_max_height ?? '',
+    group_large_image_fit: data.group_large_image_fit ?? 'contain',
+    group_image_format: data.group_image_format ?? 'webp',
+    product_small_image_max_width: data.product_small_image_max_width ?? '',
+    product_small_image_max_height: data.product_small_image_max_height ?? '',
+    product_small_image_fit: data.product_small_image_fit ?? 'contain',
+    product_large_image_max_width: data.product_large_image_max_width ?? '',
+    product_large_image_max_height: data.product_large_image_max_height ?? '',
+    product_large_image_fit: data.product_large_image_fit ?? 'contain',
+    product_image_format: data.product_image_format ?? 'webp',
 });
+
+const formForRequest = (form) => ({
+    ...form,
+    ...Object.fromEntries(IMAGE_SIZE_FIELDS.map((field) => [field, form[field] === '' ? null : form[field]])),
+});
+
+function ImageSizeSettings({ title, namePrefix, form, formErrors, isLoading, onChange, t }) {
+    const widthField = `${namePrefix}_image_max_width`;
+    const heightField = `${namePrefix}_image_max_height`;
+    const fitField = `${namePrefix}_image_fit`;
+
+    return (
+        <div>
+            <h4 className="mb-3 text-[13px] font-[700] text-[color:var(--color-primary)]">
+                {title}
+            </h4>
+
+            <div className="grid grid-cols-3 gap-x-4 gap-y-[18px] max-md:grid-cols-1">
+                <Field label={t('commonSettingsPage.imageMaxWidth')} error={formErrors[widthField]}>
+                    <Input
+                        className={formErrors[widthField] ? '!border-red-500' : ''}
+                        type="number"
+                        name={widthField}
+                        min="1"
+                        step="1"
+                        value={form[widthField]}
+                        onChange={onChange}
+                        disabled={isLoading}
+                    />
+                </Field>
+
+                <Field label={t('commonSettingsPage.imageMaxHeight')} error={formErrors[heightField]}>
+                    <Input
+                        className={formErrors[heightField] ? '!border-red-500' : ''}
+                        type="number"
+                        name={heightField}
+                        min="1"
+                        step="1"
+                        value={form[heightField]}
+                        onChange={onChange}
+                        disabled={isLoading}
+                    />
+                </Field>
+
+                <Field label={t('commonSettingsPage.imageFit')} error={formErrors[fitField]}>
+                    <Select
+                        className={formErrors[fitField] ? '!border-red-500' : ''}
+                        name={fitField}
+                        value={form[fitField]}
+                        onChange={onChange}
+                        disabled={isLoading}
+                    >
+                        <option value="contain">{t('commonSettingsPage.imageFitOptions.contain')}</option>
+                        <option value="cover">{t('commonSettingsPage.imageFitOptions.cover')}</option>
+                    </Select>
+                </Field>
+            </div>
+        </div>
+    );
+}
 
 export default function CommonSettingsPage() {
     const { t, i18n } = useTranslation();
-    const [form, setForm] = useState({
-        site_name: '',
-        admin_language_id: '',
-        site_language_id: '',
-        low_stock_threshold: 5,
-        default_shop_unit_id: '',
-    });
+    const [form, setForm] = useState(() => formFromData({}));
     const [adminLanguages, setAdminLanguages] = useState([]);
     const [siteLanguages, setSiteLanguages] = useState([]);
     const [shopUnits, setShopUnits] = useState([]);
@@ -77,7 +158,7 @@ export default function CommonSettingsPage() {
             const { data } = await request('/api/settings/common', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form),
+                body: JSON.stringify(formForRequest(form)),
             });
 
             setForm(formFromData(data));
@@ -238,6 +319,100 @@ export default function CommonSettingsPage() {
                                 ))}
                             </select>
                         </Field>
+
+                            <div className="mt-1 border-t border-[color:var(--color-border)] pt-5 md:col-span-2">
+                                <h2 className="m-0 text-[16px] font-[760] text-[color:var(--color-primary)]">
+                                    {t('commonSettingsPage.imageSettingsTitle')}
+                                </h2>
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <h3 className="mb-3 text-[14px] font-[700] text-[color:var(--color-primary)]">
+                                    {t('commonSettingsPage.categoryImagesTitle')}
+                                </h3>
+
+                                <div className="space-y-[18px]">
+                                    <ImageSizeSettings
+                                        title={t('commonSettingsPage.smallImagesTitle')}
+                                        namePrefix="group_small"
+                                        form={form}
+                                        formErrors={formErrors}
+                                        isLoading={isLoading}
+                                        onChange={updateField}
+                                        t={t}
+                                    />
+
+                                    <ImageSizeSettings
+                                        title={t('commonSettingsPage.largeImagesTitle')}
+                                        namePrefix="group_large"
+                                        form={form}
+                                        formErrors={formErrors}
+                                        isLoading={isLoading}
+                                        onChange={updateField}
+                                        t={t}
+                                    />
+
+                                    <div className="grid grid-cols-2 gap-x-4 max-md:grid-cols-1">
+                                        <Field label={t('commonSettingsPage.imageFormat')} error={formErrors.group_image_format}>
+                                            <Select
+                                                className={formErrors.group_image_format ? '!border-red-500' : ''}
+                                                name="group_image_format"
+                                                value={form.group_image_format}
+                                                onChange={updateField}
+                                                disabled={isLoading}
+                                            >
+                                                <option value="original">{t('commonSettingsPage.imageFormatOptions.original')}</option>
+                                                <option value="webp">{t('commonSettingsPage.imageFormatOptions.webp')}</option>
+                                                <option value="avif">{t('commonSettingsPage.imageFormatOptions.avif')}</option>
+                                            </Select>
+                                        </Field>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <h3 className="mb-3 text-[14px] font-[700] text-[color:var(--color-primary)]">
+                                    {t('commonSettingsPage.productImagesTitle')}
+                                </h3>
+
+                                <div className="space-y-[18px]">
+                                    <ImageSizeSettings
+                                        title={t('commonSettingsPage.smallImagesTitle')}
+                                        namePrefix="product_small"
+                                        form={form}
+                                        formErrors={formErrors}
+                                        isLoading={isLoading}
+                                        onChange={updateField}
+                                        t={t}
+                                    />
+
+                                    <ImageSizeSettings
+                                        title={t('commonSettingsPage.largeImagesTitle')}
+                                        namePrefix="product_large"
+                                        form={form}
+                                        formErrors={formErrors}
+                                        isLoading={isLoading}
+                                        onChange={updateField}
+                                        t={t}
+                                    />
+
+                                    <div className="grid grid-cols-2 gap-x-4 max-md:grid-cols-1">
+                                        <Field label={t('commonSettingsPage.imageFormat')} error={formErrors.product_image_format}>
+                                            <Select
+                                                className={formErrors.product_image_format ? '!border-red-500' : ''}
+                                                name="product_image_format"
+                                                value={form.product_image_format}
+                                                onChange={updateField}
+                                                disabled={isLoading}
+                                            >
+                                                <option value="original">{t('commonSettingsPage.imageFormatOptions.original')}</option>
+                                                <option value="webp">{t('commonSettingsPage.imageFormatOptions.webp')}</option>
+                                                <option value="avif">{t('commonSettingsPage.imageFormatOptions.avif')}</option>
+                                            </Select>
+                                        </Field>
+                                    </div>
+                                </div>
+                            </div>
                     </div>
                     </div>
                 </section>

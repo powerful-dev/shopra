@@ -80,6 +80,20 @@ class CommonSettingsApiTest extends TestCase
             ->assertJsonPath('data.site_language_id', $english->getKey())
             ->assertJsonPath('data.low_stock_threshold', 5)
             ->assertJsonPath('data.default_shop_unit_id', $this->pieceUnit->getKey())
+            ->assertJsonPath('data.group_small_image_max_width', null)
+            ->assertJsonPath('data.group_small_image_max_height', null)
+            ->assertJsonPath('data.group_small_image_fit', 'contain')
+            ->assertJsonPath('data.group_large_image_max_width', null)
+            ->assertJsonPath('data.group_large_image_max_height', null)
+            ->assertJsonPath('data.group_large_image_fit', 'contain')
+            ->assertJsonPath('data.group_image_format', 'webp')
+            ->assertJsonPath('data.product_small_image_max_width', null)
+            ->assertJsonPath('data.product_small_image_max_height', null)
+            ->assertJsonPath('data.product_small_image_fit', 'contain')
+            ->assertJsonPath('data.product_large_image_max_width', null)
+            ->assertJsonPath('data.product_large_image_max_height', null)
+            ->assertJsonPath('data.product_large_image_fit', 'contain')
+            ->assertJsonPath('data.product_image_format', 'webp')
             ->assertJsonPath('data.shop_units.0.code', 'piece')
             ->assertJsonPath('data.shop_units.0.name', null)
             ->assertJsonPath('data.admin_languages.0.code', 'en')
@@ -100,6 +114,7 @@ class CommonSettingsApiTest extends TestCase
             'site_language_id' => $siteLanguage->getKey(),
             'low_stock_threshold' => 8,
             'default_shop_unit_id' => $this->pieceUnit->getKey(),
+            ...$this->imageSettings(),
         ]);
 
         $response->assertOk()
@@ -107,7 +122,21 @@ class CommonSettingsApiTest extends TestCase
             ->assertJsonPath('data.admin_language_id', $adminLanguage->getKey())
             ->assertJsonPath('data.site_language_id', $siteLanguage->getKey())
             ->assertJsonPath('data.low_stock_threshold', 8)
-            ->assertJsonPath('data.default_shop_unit_id', $this->pieceUnit->getKey());
+            ->assertJsonPath('data.default_shop_unit_id', $this->pieceUnit->getKey())
+            ->assertJsonPath('data.group_small_image_max_width', 320)
+            ->assertJsonPath('data.group_small_image_max_height', null)
+            ->assertJsonPath('data.group_small_image_fit', 'cover')
+            ->assertJsonPath('data.group_large_image_max_width', 1280)
+            ->assertJsonPath('data.group_large_image_max_height', 960)
+            ->assertJsonPath('data.group_large_image_fit', 'contain')
+            ->assertJsonPath('data.group_image_format', 'avif')
+            ->assertJsonPath('data.product_small_image_max_width', null)
+            ->assertJsonPath('data.product_small_image_max_height', 480)
+            ->assertJsonPath('data.product_small_image_fit', 'contain')
+            ->assertJsonPath('data.product_large_image_max_width', 1920)
+            ->assertJsonPath('data.product_large_image_max_height', null)
+            ->assertJsonPath('data.product_large_image_fit', 'cover')
+            ->assertJsonPath('data.product_image_format', 'original');
 
         $this->assertDatabaseHas('sites', [
             'id' => $this->site->getKey(),
@@ -122,7 +151,56 @@ class CommonSettingsApiTest extends TestCase
             'id' => $this->shop->getKey(),
             'low_stock_threshold' => 8,
             'default_shop_unit_id' => $this->pieceUnit->getKey(),
+            ...$this->imageSettings(),
         ]);
+    }
+
+    public function test_image_settings_are_validated(): void
+    {
+        $adminLanguage = Language::query()->create($this->language('en', 'English', true, false));
+        $siteLanguage = Language::query()->create($this->language('uk', 'Українська', false, true));
+
+        $response = $this->putJson('/api/settings/common', [
+            'site_name' => 'Updated site',
+            'admin_language_id' => $adminLanguage->getKey(),
+            'site_language_id' => $siteLanguage->getKey(),
+            'low_stock_threshold' => 8,
+            'default_shop_unit_id' => null,
+            ...$this->imageSettings(),
+            'group_small_image_max_width' => 0,
+            'group_large_image_max_height' => 1.5,
+            'product_small_image_fit' => 'stretch',
+            'product_image_format' => 'jpeg',
+        ]);
+
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'group_small_image_max_width',
+                'group_large_image_max_height',
+                'product_small_image_fit',
+                'product_image_format',
+            ]);
+    }
+
+    /** @return array<string, int|string|null> */
+    private function imageSettings(): array
+    {
+        return [
+            'group_small_image_max_width' => 320,
+            'group_small_image_max_height' => null,
+            'group_small_image_fit' => 'cover',
+            'group_large_image_max_width' => 1280,
+            'group_large_image_max_height' => 960,
+            'group_large_image_fit' => 'contain',
+            'group_image_format' => 'avif',
+            'product_small_image_max_width' => null,
+            'product_small_image_max_height' => 480,
+            'product_small_image_fit' => 'contain',
+            'product_large_image_max_width' => 1920,
+            'product_large_image_max_height' => null,
+            'product_large_image_fit' => 'cover',
+            'product_image_format' => 'original',
+        ];
     }
 
     /** @return array<string, mixed> */

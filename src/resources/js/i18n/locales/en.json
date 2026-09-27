@@ -79,7 +79,25 @@
         "shopSettingsTitle": "Online store settings",
         "lowStockThreshold": "Low product stock threshold",
         "defaultShopUnit": "Default product unit",
-        "selectShopUnit": "Select a unit"
+        "selectShopUnit": "Select a unit",
+        "imageSettingsTitle": "Image settings",
+        "categoryImagesTitle": "Category images",
+        "productImagesTitle": "Product images",
+        "smallImagesTitle": "Small images",
+        "largeImagesTitle": "Large images",
+        "imageMaxWidth": "Maximum width",
+        "imageMaxHeight": "Maximum height",
+        "imageFit": "Fit mode",
+        "imageFormat": "Image format",
+        "imageFitOptions": {
+            "contain": "Contain",
+            "cover": "Cover"
+        },
+        "imageFormatOptions": {
+            "original": "Original format",
+            "webp": "WebP",
+            "avif": "AVIF"
+        }
     },
     "shopUnits": {
         "piece": {

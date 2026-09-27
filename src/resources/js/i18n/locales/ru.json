@@ -79,7 +79,25 @@
         "shopSettingsTitle": "Настройки интернет-магазина",
         "lowStockThreshold": "Порог малого остатка товара",
         "defaultShopUnit": "Единица измерения товара по умолчанию",
-        "selectShopUnit": "Выберите единицу измерения"
+        "selectShopUnit": "Выберите единицу измерения",
+        "imageSettingsTitle": "Настройки изображений",
+        "categoryImagesTitle": "Изображения категорий",
+        "productImagesTitle": "Изображения товаров",
+        "smallImagesTitle": "Маленькие изображения",
+        "largeImagesTitle": "Большие изображения",
+        "imageMaxWidth": "Максимальная ширина",
+        "imageMaxHeight": "Максимальная высота",
+        "imageFit": "Режим масштабирования",
+        "imageFormat": "Формат изображения",
+        "imageFitOptions": {
+            "contain": "Вместить",
+            "cover": "Заполнить"
+        },
+        "imageFormatOptions": {
+            "original": "Исходный формат",
+            "webp": "WebP",
+            "avif": "AVIF"
+        }
     },
     "shopUnits": {
         "piece": {

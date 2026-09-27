@@ -79,7 +79,25 @@
         "shopSettingsTitle": "Налаштування інтернет-магазину",
         "lowStockThreshold": "Поріг малого залишку товару",
         "defaultShopUnit": "Одиниця вимірювання товару за замовчуванням",
-        "selectShopUnit": "Виберіть одиницю вимірювання"
+        "selectShopUnit": "Виберіть одиницю вимірювання",
+        "imageSettingsTitle": "Налаштування зображень",
+        "categoryImagesTitle": "Зображення категорій",
+        "productImagesTitle": "Зображення товарів",
+        "smallImagesTitle": "Малі зображення",
+        "largeImagesTitle": "Великі зображення",
+        "imageMaxWidth": "Максимальна ширина",
+        "imageMaxHeight": "Максимальна висота",
+        "imageFit": "Режим масштабування",
+        "imageFormat": "Формат зображення",
+        "imageFitOptions": {
+            "contain": "Вмістити",
+            "cover": "Заповнити"
+        },
+        "imageFormatOptions": {
+            "original": "Оригінальний формат",
+            "webp": "WebP",
+            "avif": "AVIF"
+        }
     },
     "shopUnits": {
         "piece": {
