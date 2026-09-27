@@ -363,7 +363,6 @@ export default function CommonSettingsPage() {
                                             >
                                                 <option value="original">{t('commonSettingsPage.imageFormatOptions.original')}</option>
                                                 <option value="webp">{t('commonSettingsPage.imageFormatOptions.webp')}</option>
-                                                <option value="avif">{t('commonSettingsPage.imageFormatOptions.avif')}</option>
                                             </Select>
                                         </Field>
                                     </div>
@@ -407,7 +406,6 @@ export default function CommonSettingsPage() {
                                             >
                                                 <option value="original">{t('commonSettingsPage.imageFormatOptions.original')}</option>
                                                 <option value="webp">{t('commonSettingsPage.imageFormatOptions.webp')}</option>
-                                                <option value="avif">{t('commonSettingsPage.imageFormatOptions.avif')}</option>
                                             </Select>
                                         </Field>
                                     </div>

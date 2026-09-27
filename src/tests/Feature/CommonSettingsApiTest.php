@@ -129,7 +129,7 @@ class CommonSettingsApiTest extends TestCase
             ->assertJsonPath('data.group_large_image_max_width', 1280)
             ->assertJsonPath('data.group_large_image_max_height', 960)
             ->assertJsonPath('data.group_large_image_fit', 'contain')
-            ->assertJsonPath('data.group_image_format', 'avif')
+            ->assertJsonPath('data.group_image_format', 'webp')
             ->assertJsonPath('data.product_small_image_max_width', null)
             ->assertJsonPath('data.product_small_image_max_height', 480)
             ->assertJsonPath('data.product_small_image_fit', 'contain')
@@ -192,7 +192,7 @@ class CommonSettingsApiTest extends TestCase
             'group_large_image_max_width' => 1280,
             'group_large_image_max_height' => 960,
             'group_large_image_fit' => 'contain',
-            'group_image_format' => 'avif',
+            'group_image_format' => 'webp',
             'product_small_image_max_width' => null,
             'product_small_image_max_height' => 480,
             'product_small_image_fit' => 'contain',

@@ -42,7 +42,7 @@ class ShopImageSettingsTest extends TestCase
             'group_large_image_max_width' => 1200,
             'group_large_image_max_height' => 800,
             'group_large_image_fit' => ImageFit::Cover,
-            'group_image_format' => ImageFormat::Avif,
+            'group_image_format' => ImageFormat::Original,
             'product_small_image_max_width' => 500,
             'product_small_image_max_height' => 400,
             'product_small_image_fit' => ImageFit::Cover,
@@ -58,7 +58,7 @@ class ShopImageSettingsTest extends TestCase
         $this->assertSame(1200, $shop->group_large_image_max_width);
         $this->assertSame(800, $shop->group_large_image_max_height);
         $this->assertSame(ImageFit::Cover, $shop->group_large_image_fit);
-        $this->assertSame(ImageFormat::Avif, $shop->group_image_format);
+        $this->assertSame(ImageFormat::Original, $shop->group_image_format);
         $this->assertSame(500, $shop->product_small_image_max_width);
         $this->assertSame(400, $shop->product_small_image_max_height);
         $this->assertSame(ImageFit::Cover, $shop->product_small_image_fit);

@@ -51,7 +51,7 @@ class ShopImageStorageService
     public function storeOriginal(string $resource, int $resourceId, File $image): string
     {
         $path = $this->path($resource, $resourceId, ImageVariant::Original);
-        $encodedImage = $this->images->read($image->getPathname())->toWebp();
+        $encodedImage = $this->images->decodePath($image->getPathname())->encodeUsingFileExtension('webp');
         $stored = $this->filesystems->disk('public')->put($path, (string) $encodedImage);
 
         if (! $stored) {

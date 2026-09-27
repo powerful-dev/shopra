@@ -95,8 +95,7 @@
         },
         "imageFormatOptions": {
             "original": "Исходный формат",
-            "webp": "WebP",
-            "avif": "AVIF"
+            "webp": "WebP"
         }
     },
     "shopUnits": {
