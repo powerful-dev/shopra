@@ -27,6 +27,7 @@
         "react-router-dom": "^7.18.1",
         "tailwindcss": "^4.3.3",
         "tinymce": "^8.9.2",
-        "tinymce-i18n": "^26.9.21"
+        "tinymce-i18n": "^26.9.21",
+        "yet-another-react-lightbox": "^3.32.2"
     }
 }

@@ -27,10 +27,12 @@ import usePageScrollLock from '../../hooks/usePageScrollLock';
 import useTinyMceLanguage from '../../hooks/useTinyMceLanguage';
 import CategorySlugField from './CategorySlugField';
 import AdminCard from '../../components/admin/AdminCard';
+import ImageLightbox from '../../components/admin/ImageLightbox';
 import { deleteShopGroupImage, updateShopGroup, uploadShopGroupImage } from '../../services/shopGroups';
 import { uploadEditorImage } from '../../services/editorImages';
 
 const fieldWrapperClass = '[&.form-field]:gap-[7px] [&>.form-label]:text-[12px] [&>.form-label]:leading-normal [&>.form-label]:text-[#554e48]';
+const categoryImageUploadMaxBytes = Number(document.querySelector('meta[name="category-image-upload-max-bytes"]')?.content);
 const editorBaseInit = {
     skin: false,
     content_css: false,
@@ -41,7 +43,7 @@ const editorBaseInit = {
 };
 
 export default function CategoryEditModal({ category, parentOptions = [], isLoadingParents = false, parentsError = '', onClose, onUpdated, onImageChanged }) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const editorLanguage = useTinyMceLanguage();
     const editorInit = useMemo(() => ({
         ...editorBaseInit,
@@ -65,11 +67,15 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
     const [seoDescription, setSeoDescription] = useState('');
     const [selectedPhoto, setSelectedPhoto] = useState(null);
     const [savedPhotoUrl, setSavedPhotoUrl] = useState('');
+    const [savedLargePhotoUrl, setSavedLargePhotoUrl] = useState('');
     const [photoPreviewUrl, setPhotoPreviewUrl] = useState('');
+    const [isPhotoLightboxOpen, setIsPhotoLightboxOpen] = useState(false);
+    const [photoLightboxIndex, setPhotoLightboxIndex] = useState(0);
     const [isPhotoDragActive, setIsPhotoDragActive] = useState(false);
     const [isDeletingPhoto, setIsDeletingPhoto] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+    const [photoError, setPhotoError] = useState('');
     const [saveError, setSaveError] = useState('');
     usePageScrollLock(Boolean(category));
     const scrollToSection = useSectionScroll({
@@ -81,6 +87,13 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
         ['category-edit-photo', t('categoryEditModal.photo.title'), PhotoIcon],
         ['category-edit-seo', 'SEO', LinkIcon],
     ];
+    const maximumPhotoSizeError = () => categoryImageUploadMaxBytes
+        ? t('categoryEditModal.photo.maxSize', {
+            size: new Intl.NumberFormat(i18n.resolvedLanguage ?? i18n.language, {
+                maximumFractionDigits: 1,
+            }).format(categoryImageUploadMaxBytes / (1024 * 1024)),
+        })
+        : t('categoryEditModal.photo.uploadError');
 
     useEffect(() => {
         window.clearTimeout(saveFeedbackTimerRef.current);
@@ -92,13 +105,17 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
         setSeoTitle(category?.seo_title ?? '');
         setSeoDescription(category?.seo_description ?? '');
         setSavedPhotoUrl(category?.image_url ?? '');
+        setSavedLargePhotoUrl(category?.image_large_url ?? '');
         setSelectedPhoto(null);
+        setIsPhotoLightboxOpen(false);
+        setPhotoLightboxIndex(0);
         setIsPhotoDragActive(false);
         setIsDeletingPhoto(false);
         activeCategoryIdRef.current = category?.id ?? null;
         photoDragDepthRef.current = 0;
         setIsEditingSlug(false);
         setShowSaveSuccess(false);
+        setPhotoError('');
         setSaveError('');
     }, [category]);
 
@@ -118,23 +135,35 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
     }, [savedPhotoUrl, selectedPhoto]);
 
     async function selectPhoto(file) {
+        setPhotoError('');
+
         if (!file?.type.startsWith('image/') || !category || photoUploadInProgressRef.current || isDeletingPhoto) return;
+
+        if (categoryImageUploadMaxBytes && file.size > categoryImageUploadMaxBytes) {
+            setPhotoError(maximumPhotoSizeError());
+
+            return;
+        }
 
         const categoryId = category.id;
         photoUploadInProgressRef.current = true;
         setSelectedPhoto(file);
-        setSaveError('');
 
         try {
             const uploadedImage = await uploadShopGroupImage(categoryId, file);
 
             if (activeCategoryIdRef.current === categoryId) {
                 setSavedPhotoUrl(uploadedImage.url);
+                setSavedLargePhotoUrl(uploadedImage.large_url);
                 onImageChanged?.();
             }
         } catch (error) {
             if (activeCategoryIdRef.current === categoryId) {
-                setSaveError(Object.values(error.errors ?? {}).flat().join(' ') || t('categoryEditModal.photo.uploadError'));
+                const validationMessage = Object.values(error.errors ?? {}).flat().join(' ');
+
+                setPhotoError(error.status === 413
+                    ? t('categoryEditModal.photo.requestTooLarge')
+                    : validationMessage || t('categoryEditModal.photo.uploadError'));
             }
         } finally {
             if (activeCategoryIdRef.current === categoryId) {
@@ -157,19 +186,21 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
 
         const categoryId = category.id;
         setIsDeletingPhoto(true);
-        setSaveError('');
+        setPhotoError('');
 
         try {
             await deleteShopGroupImage(categoryId);
 
             if (activeCategoryIdRef.current === categoryId) {
                 setSavedPhotoUrl('');
+                setSavedLargePhotoUrl('');
                 setSelectedPhoto(null);
+                setIsPhotoLightboxOpen(false);
                 onImageChanged?.();
             }
         } catch (error) {
             if (activeCategoryIdRef.current === categoryId) {
-                setSaveError(Object.values(error.errors ?? {}).flat().join(' ') || t('categoryEditModal.photo.deleteError'));
+                setPhotoError(Object.values(error.errors ?? {}).flat().join(' ') || t('categoryEditModal.photo.deleteError'));
             }
         } finally {
             if (activeCategoryIdRef.current === categoryId) {
@@ -302,9 +333,23 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
                 <AdminCard sectionRef={(element) => { sectionRefs.current['category-edit-photo'] = element; }} id="category-edit-photo" title={t('categoryEditModal.photo.title')}>
                     <div className="flex gap-2">
                         <div className="relative h-[178px] w-[139px] shrink-0 overflow-hidden rounded-[10px] border border-[color:var(--color-border)] bg-[linear-gradient(145deg,#86939d,#2b3c48)] max-sm:h-[153px] max-sm:w-[119px]">
-                            {photoPreviewUrl
-                                ? <img className="h-full w-full object-cover" src={photoPreviewUrl} alt="" />
-                                : <i className="absolute inset-[24%] rounded-[36%_36%_18%_18%] border border-white/40 bg-[#314555]/55" />}
+                            {photoPreviewUrl && savedLargePhotoUrl && !selectedPhoto ? (
+                                <button
+                                    type="button"
+                                    className="block h-full w-full cursor-zoom-in border-0 bg-transparent p-0"
+                                    aria-label={t('categoryEditModal.photo.openLarge')}
+                                    onClick={() => {
+                                        setPhotoLightboxIndex(0);
+                                        setIsPhotoLightboxOpen(true);
+                                    }}
+                                >
+                                    <img className="h-full w-full object-cover" src={photoPreviewUrl} alt="" />
+                                </button>
+                            ) : photoPreviewUrl ? (
+                                <img className="h-full w-full object-cover" src={photoPreviewUrl} alt="" />
+                            ) : (
+                                <i className="absolute inset-[24%] rounded-[36%_36%_18%_18%] border border-white/40 bg-[#314555]/55" />
+                            )}
                             {savedPhotoUrl && (
                                 <button
                                     type="button"
@@ -357,6 +402,7 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
                             }}
                         />
                     </div>
+                    {photoError && <p className="mb-0 mt-2 text-xs text-red-600" role="alert">{photoError}</p>}
                 </AdminCard>
 
                 <details ref={(element) => { sectionRefs.current['category-edit-seo'] = element; }} id="category-edit-seo" className="accordion scroll-mt-[58px]">
@@ -400,6 +446,13 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
                     <button type="submit" form="category-edit-form" className="button button--primary" disabled={isSaving}>{isSaving ? t('categoriesModal.form.saving') : t('common.save')}</button>
                 </div>
             </footer>
+            <ImageLightbox
+                images={savedLargePhotoUrl ? [{ src: savedLargePhotoUrl, alt: name }] : []}
+                index={photoLightboxIndex}
+                open={isPhotoLightboxOpen}
+                onClose={() => setIsPhotoLightboxOpen(false)}
+                onIndexChange={setPhotoLightboxIndex}
+            />
         </section>
     );
 }

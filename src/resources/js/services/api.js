@@ -35,10 +35,21 @@ export async function request(url, options = {}) {
         credentials: 'same-origin',
         headers,
     });
-    const payload = response.status === 204 ? null : await response.json();
+    let payload = null;
+
+    if (response.status !== 204) {
+        const contentType = response.headers.get('content-type') ?? '';
+
+        if (contentType.includes('application/json')) {
+            payload = await response.json();
+        } else {
+            const message = await response.text();
+            payload = message ? { message } : {};
+        }
+    }
 
     if (!response.ok) {
-        throw new ApiError(response, payload);
+        throw new ApiError(response, payload ?? {});
     }
 
     return payload;

@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="category-image-upload-max-bytes" content="{{ config('images.category_upload_max_kilobytes') * 1024 }}">
     <title>{{ config('app.name') }} — Administration</title>
     @viteReactRefresh
     @vite('resources/js/admin.jsx')

@@ -24,8 +24,17 @@ class ShopGroupResource extends JsonResource
                 $this->image !== null,
                 fn (): string => Storage::disk('public')->url($this->image).'?v='.$this->updated_at->format('Uu'),
             ),
+            'image_large_url' => $this->when(
+                $this->image !== null,
+                fn (): string => Storage::disk('public')->url($this->largeImagePath()).'?v='.$this->updated_at->format('Uu'),
+            ),
             'branch_count' => (int) $this->branch_count,
             'has_children' => $this->whenHas('children_exists', fn ($exists) => (bool) $exists),
         ];
+    }
+
+    private function largeImagePath(): string
+    {
+        return dirname($this->image).'/large.'.pathinfo($this->image, PATHINFO_EXTENSION);
     }
 }

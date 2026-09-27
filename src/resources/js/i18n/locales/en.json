@@ -281,6 +281,18 @@
         "confirmDeleteTitle": "Confirm deletion",
         "confirmDeleteMessage": "Are you sure you want to delete the “{{name}}” group and all its contents?"
     },
+    "imageLightbox": {
+        "previous": "Previous image",
+        "next": "Next image",
+        "close": "Close",
+        "title": "Image viewer",
+        "carousel": "Image gallery",
+        "gallery": "Photo gallery",
+        "slide": "Image",
+        "position": "{index} of {total}",
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out"
+    },
     "categoryEditModal": {
         "eyebrow": "Catalog category",
         "title": "Edit category",
@@ -306,7 +318,10 @@
         "photo": {
             "title": "Photo",
             "add": "Add photo",
+            "openLarge": "Open large image",
             "dropHint": "or drag and drop an image here",
+            "maxSize": "The image exceeds the allowed size. Maximum: {{size}} MB",
+            "requestTooLarge": "The server rejected the image because of its request size limit.",
             "uploadError": "Unable to upload the category image.",
             "delete": "Delete image",
             "deleteError": "Unable to delete the category image."

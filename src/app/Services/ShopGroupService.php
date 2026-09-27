@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\ImageVariant;
+use App\Models\Shop;
 use App\Models\ShopGroup;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -15,26 +16,58 @@ class ShopGroupService
 {
     private const IMAGE_RESOURCE = 'categories';
 
-    public function __construct(private readonly ShopImageStorageService $images) {}
+    public function __construct(
+        private readonly ShopImageStorageService $images,
+        private readonly ImageProcessingService $imageProcessor,
+    ) {}
 
-    /** @return array{path: string, url: string} */
+    /** @return array{path: string, url: string, large_url: string} */
     public function updateImage(ShopGroup $group, UploadedFile $image): array
     {
-        $path = $this->images->storeOriginal(self::IMAGE_RESOURCE, $group->id, $image);
+        $shop = Shop::query()->firstOrFail();
+        $small = $this->imageProcessor->process(
+            $image,
+            $shop->group_small_image_max_width,
+            $shop->group_small_image_max_height,
+            $shop->group_small_image_fit,
+            $shop->group_image_format,
+        );
+        $large = $this->imageProcessor->process(
+            $image,
+            $shop->group_large_image_max_width,
+            $shop->group_large_image_max_height,
+            $shop->group_large_image_fit,
+            $shop->group_image_format,
+        );
+        $paths = DB::transaction(function () use ($group, $small, $large): array {
+            $lockedGroup = ShopGroup::query()->lockForUpdate()->findOrFail($group->id);
 
-        $group->update(['image' => $path]);
+            return $this->images->replace(
+                self::IMAGE_RESOURCE,
+                $lockedGroup->id,
+                $small,
+                $large,
+                function (array $paths) use ($lockedGroup): void {
+                    $lockedGroup->update(['image' => $paths[ImageVariant::Small->value]]);
+                },
+            );
+        });
+        $path = $paths[ImageVariant::Small->value];
 
-        $url = $this->images->url(self::IMAGE_RESOURCE, $group->id, ImageVariant::Original);
+        $group->refresh();
+
+        $url = $this->images->urlForPath($path);
 
         return [
             'path' => $path,
             'url' => $url.'?v='.$group->updated_at->format('Uu'),
+            'large_url' => $this->images->urlForPath($paths[ImageVariant::Large->value]).'?v='.$group->updated_at->format('Uu'),
         ];
     }
 
     public function deleteImage(ShopGroup $group): void
     {
-        $this->images->delete(self::IMAGE_RESOURCE, $group->id, ImageVariant::Original);
+        $this->images->deleteAll(self::IMAGE_RESOURCE, $group->id);
         $group->update(['image' => null]);
     }
 

@@ -7,9 +7,13 @@ use App\Enums\ImageFormat;
 use App\Services\ImageProcessingService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Encoders\PngEncoder;
+use Intervention\Image\Encoders\WebpEncoder;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Interfaces\EncodedImageInterface;
+use Intervention\Image\Interfaces\ImageInterface;
 use InvalidArgumentException;
+use Mockery;
 use Tests\TestCase;
 
 class ImageProcessingServiceTest extends TestCase
@@ -50,6 +54,19 @@ class ImageProcessingServiceTest extends TestCase
         $this->assertImageSize($processed, 100, 100);
     }
 
+    public function test_cover_can_upscale_and_crop_a_smaller_source(): void
+    {
+        $processed = app(ImageProcessingService::class)->process(
+            UploadedFile::fake()->image('source.jpg', 40, 20),
+            100,
+            100,
+            ImageFit::Cover,
+            ImageFormat::Webp,
+        );
+
+        $this->assertImageSize($processed, 100, 100);
+    }
+
     public function test_nullable_dimensions_preserve_aspect_ratio(): void
     {
         $service = app(ImageProcessingService::class);
@@ -81,6 +98,29 @@ class ImageProcessingServiceTest extends TestCase
         $this->assertImageSize($withoutDimensions, 400, 200);
     }
 
+    public function test_nullable_dimensions_do_not_upscale_the_source(): void
+    {
+        $service = app(ImageProcessingService::class);
+
+        $widthOnly = $service->process(
+            UploadedFile::fake()->image('source.png', 40, 20),
+            100,
+            null,
+            ImageFit::Contain,
+            ImageFormat::Webp,
+        );
+        $heightOnly = $service->process(
+            UploadedFile::fake()->image('source.png', 40, 20),
+            null,
+            100,
+            ImageFit::Cover,
+            ImageFormat::Webp,
+        );
+
+        $this->assertImageSize($widthOnly, 40, 20);
+        $this->assertImageSize($heightOnly, 40, 20);
+    }
+
     public function test_it_preserves_the_original_format_or_converts_to_webp(): void
     {
         $service = app(ImageProcessingService::class);
@@ -110,6 +150,48 @@ class ImageProcessingServiceTest extends TestCase
         $this->assertSame('image/png', $png->mediaType());
         $this->assertSame('image/jpeg', $jpeg->mediaType());
         $this->assertSame('image/webp', $webp->mediaType());
+    }
+
+    public function test_webp_is_encoded_with_quality_80(): void
+    {
+        $manager = Mockery::mock(ImageManager::class);
+        $image = Mockery::mock(ImageInterface::class);
+        $encoded = Mockery::mock(EncodedImageInterface::class);
+        $manager->shouldReceive('decode')->once()->with('source')->andReturn($image);
+        $image->shouldReceive('encode')
+            ->once()
+            ->with(Mockery::on(
+                fn (mixed $encoder): bool => $encoder instanceof WebpEncoder && $encoder->quality === 80,
+            ))
+            ->andReturn($encoded);
+
+        $result = (new ImageProcessingService($manager))->process(
+            'source',
+            null,
+            null,
+            ImageFit::Contain,
+            ImageFormat::Webp,
+        );
+
+        $this->assertSame($encoded, $result);
+    }
+
+    public function test_png_transparency_is_preserved_when_converted_to_webp(): void
+    {
+        $manager = app(ImageManager::class);
+        $source = $manager->createImage(20, 20)->encode(new PngEncoder);
+
+        $processed = app(ImageProcessingService::class)->process(
+            $source,
+            10,
+            10,
+            ImageFit::Contain,
+            ImageFormat::Webp,
+        );
+        $decoded = $manager->decode($processed);
+
+        $this->assertSame('image/webp', $processed->mediaType());
+        $this->assertTrue($decoded->colorAt(5, 5)->isClear());
     }
 
     public function test_result_can_be_saved_with_laravel_storage(): void

@@ -26,13 +26,15 @@ class ImageProcessingService
 
         $image = $this->images->decode($source);
 
+        $quality = config('images.webp_quality');
+
         if ($maxWidth !== null || $maxHeight !== null) {
             $image = $this->resize($image, $maxWidth, $maxHeight, $fit);
         }
 
         return match ($format) {
             ImageFormat::Original => $image->encode(),
-            ImageFormat::Webp => $image->encode(new WebpEncoder),
+            ImageFormat::Webp => $image->encode(new WebpEncoder(quality: $quality)),
         };
     }
 
