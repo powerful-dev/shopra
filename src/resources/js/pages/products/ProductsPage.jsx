@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import ActionsMenu from '../../components/admin/ActionsMenu';
 import Breadcrumbs from '../../components/admin/Breadcrumbs';
+import BulkActionsBar from '../../components/admin/BulkActionsBar';
 import ConfirmModal from '../../components/admin/ConfirmModal';
 import Pagination from '../../components/admin/Pagination';
 import ProductStatusBadge from '../../components/admin/ProductStatusBadge';
@@ -43,10 +44,15 @@ export default function ProductsPage() {
     const [isSearching, setIsSearching] = useState(true);
     const [productToDelete, setProductToDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isBulkDeleteConfirmOpen, setIsBulkDeleteConfirmOpen] = useState(false);
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+    const [bulkDeleteError, setBulkDeleteError] = useState('');
     const [openActionsId, setOpenActionsId] = useState(null);
     const [reloadKey, setReloadKey] = useState(0);
     const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
     const [categoryOptions, setCategoryOptions] = useState([]);
+    const [selectedProductIds, setSelectedProductIds] = useState(() => new Set());
+    const selectAllRef = useRef(null);
     const navigate = useNavigate();
     const currentSearch = searchParams.get('search') ?? '';
     const currentStatus = searchParams.get('status') ?? '';
@@ -58,6 +64,18 @@ export default function ProductsPage() {
     const selectedSummary = currentStatus === 'active' || currentStatus === 'draft'
         ? currentStatus
         : currentStock === 'low' ? 'low' : 'all';
+    const allPageProductsSelected = products.length > 0 && products.every((product) => selectedProductIds.has(product.id));
+    const somePageProductsSelected = products.some((product) => selectedProductIds.has(product.id));
+
+    useEffect(() => {
+        setSelectedProductIds(new Set());
+    }, [currentParams]);
+
+    useEffect(() => {
+        if (selectAllRef.current) {
+            selectAllRef.current.indeterminate = somePageProductsSelected && !allPageProductsSelected;
+        }
+    }, [allPageProductsSelected, somePageProductsSelected]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -90,11 +108,19 @@ export default function ProductsPage() {
 
         request(`/api/products?${params.toString()}`)
             .then(({ data, meta: paginationMeta, summary: summaryData }) => {
-                if (isActive) {
-                    setProducts(data);
-                    setMeta(paginationMeta);
-                    setSummary(summaryData);
+                if (!isActive) return;
+
+                if (data.length === 0 && currentPage > paginationMeta.last_page) {
+                    const targetParams = new URLSearchParams(currentParams);
+                    targetParams.set('page', String(paginationMeta.last_page));
+                    setSearchParams(targetParams, { replace: true });
+
+                    return;
                 }
+
+                setProducts(data);
+                setMeta(paginationMeta);
+                setSummary(summaryData);
             })
             .catch((error) => console.error(error))
             .finally(() => {
@@ -143,9 +169,38 @@ export default function ProductsPage() {
     };
 
     const setPage = (page) => {
+        setSelectedProductIds(new Set());
         const params = new URLSearchParams(searchParams);
         params.set('page', String(page));
         setSearchParams(params, { replace: true });
+    };
+
+    const toggleProductSelection = (productId) => {
+        setSelectedProductIds((current) => {
+            const next = new Set(current);
+
+            if (next.has(productId)) {
+                next.delete(productId);
+            } else {
+                next.add(productId);
+            }
+
+            return next;
+        });
+    };
+
+    const toggleAllPageProducts = () => {
+        setSelectedProductIds((current) => {
+            const next = new Set(current);
+
+            if (products.length > 0 && products.every((product) => next.has(product.id))) {
+                products.forEach((product) => next.delete(product.id));
+            } else {
+                products.forEach((product) => next.add(product.id));
+            }
+
+            return next;
+        });
     };
 
     const removeProduct = async () => {
@@ -156,6 +211,12 @@ export default function ProductsPage() {
         try {
             await csrf();
             await request(`/api/products/${productToDelete.id}`, { method: 'DELETE' });
+            setSelectedProductIds((current) => {
+                const next = new Set(current);
+                next.delete(productToDelete.id);
+
+                return next;
+            });
             setProductToDelete(null);
 
             const targetPage = products.length === 1 && currentPage > 1 ? currentPage - 1 : currentPage;
@@ -171,6 +232,30 @@ export default function ProductsPage() {
             console.error(error);
         } finally {
             setIsDeleting(false);
+        }
+    };
+
+    const removeSelectedProducts = async () => {
+        if (selectedProductIds.size === 0 || isBulkDeleting) return;
+
+        setIsBulkDeleting(true);
+        setBulkDeleteError('');
+
+        try {
+            await csrf();
+            await request('/api/products/bulk', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids: [...selectedProductIds] }),
+            });
+            setIsBulkDeleteConfirmOpen(false);
+            setSelectedProductIds(new Set());
+            setReloadKey((value) => value + 1);
+        } catch (error) {
+            const validationMessage = Object.values(error.errors ?? {}).flat().join(' ');
+            setBulkDeleteError(validationMessage || t('productsPage.bulkDeleteError'));
+        } finally {
+            setIsBulkDeleting(false);
         }
     };
 
@@ -212,36 +297,75 @@ export default function ProductsPage() {
             </section>
 
             <section className="overflow-hidden rounded-2xl border border-[color:var(--color-border)] bg-[rgba(255,255,255,.95)] shadow-[0_10px_28px_rgba(28,20,12,0.05)]">
-                <div className="flex min-h-[70px] items-center gap-[9px] border-b border-[color:var(--color-border)] px-[15px] py-[13px] max-lg:grid max-lg:grid-cols-1">
-                    <SearchField
-                        value={currentSearch}
-                        onSearch={setSearch}
-                        placeholder={t('productsPage.searchPlaceholder')}
-                        ariaLabel={t('productsPage.searchLabel')}
-                        className="flex h-[41px] w-[min(390px,42%)] items-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] text-[#8a827b] focus-within:border-[#c77d56] focus-within:shadow-[0_0_0_3px_rgba(184,79,24,.07)] max-lg:w-full"
-                        inputClassName="min-w-0 flex-1 border-0 bg-transparent text-[13px] outline-none"
-                    />
-                    <SearchableSelect
-                        className="w-[240px] max-lg:w-full"
-                        options={[{ value: '', label: t('productsPage.categoryFilter.all') }, ...categoryOptions]}
-                        value={currentCategoryId}
-                        onChange={setCategory}
-                        placeholder={t('productsPage.categoryFilter.placeholder')}
-                        searchPlaceholder={t('productsPage.categoryFilter.searchPlaceholder')}
-                        ariaLabel={t('productsPage.categoryFilter.placeholder')}
-                    />
-                    <button type="button" className="button button--outline ml-auto min-h-[41px] whitespace-nowrap border-[#dfc0ac] bg-[#fff8f3] text-[color:var(--color-accent)] hover:border-[color:var(--color-accent)] hover:bg-[#fff3eb] max-lg:ml-0 max-lg:w-full"><CopyIcon />{t('productsPage.copyExisting')}</button>
+                <div className="flex min-h-[70px] items-center gap-2.5 border-b border-[color:var(--color-border)] px-[15px] py-[13px]">
+                    {selectedProductIds.size > 0 ? (
+                        <BulkActionsBar
+                            selectedCount={selectedProductIds.size}
+                            countLabel={(count) => t('productsPage.selectedCount', { count })}
+                            actions={[
+                                {
+                                    key: 'delete',
+                                    label: t('productsPage.delete'),
+                                    icon: <TrashIcon />,
+                                    variant: 'danger',
+                                    disabled: isBulkDeleting,
+                                    onClick: () => {
+                                        setBulkDeleteError('');
+                                        setIsBulkDeleteConfirmOpen(true);
+                                    },
+                                },
+                                {
+                                    key: 'clear',
+                                    label: t('productsPage.clearSelection'),
+                                    disabled: isBulkDeleting,
+                                    onClick: () => setSelectedProductIds(new Set()),
+                                },
+                            ]}
+                        />
+                    ) : (
+                        <div className="flex min-w-0 flex-1 items-center gap-2.5 max-lg:grid max-lg:grid-cols-1">
+                            <SearchField
+                                value={currentSearch}
+                                onSearch={setSearch}
+                                placeholder={t('productsPage.searchPlaceholder')}
+                                ariaLabel={t('productsPage.searchLabel')}
+                                className="flex h-[41px] w-[min(390px,42%)] items-center gap-2 rounded-[10px] border border-[color:var(--color-border)] bg-white px-[11px] text-[#8a827b] focus-within:border-[#c77d56] focus-within:shadow-[0_0_0_3px_rgba(184,79,24,.07)] max-lg:w-full"
+                                inputClassName="min-w-0 flex-1 border-0 bg-transparent text-[13px] outline-none"
+                            />
+                            <SearchableSelect
+                                className="w-[240px] max-lg:w-full"
+                                options={[{ value: '', label: t('productsPage.categoryFilter.all') }, ...categoryOptions]}
+                                value={currentCategoryId}
+                                onChange={setCategory}
+                                placeholder={t('productsPage.categoryFilter.placeholder')}
+                                searchPlaceholder={t('productsPage.categoryFilter.searchPlaceholder')}
+                                ariaLabel={t('productsPage.categoryFilter.placeholder')}
+                            />
+                            <button type="button" className="button button--outline ml-auto min-h-[41px] whitespace-nowrap border-[#dfc0ac] bg-[#fff8f3] text-[color:var(--color-accent)] hover:border-[color:var(--color-accent)] hover:bg-[#fff3eb] max-lg:ml-0 max-lg:w-full"><CopyIcon />{t('productsPage.copyExisting')}</button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="data-list !p-0" aria-busy={isSearching}>
                     <div className="products-list__header min-h-[43px] items-center gap-2.5 bg-[#faf8f6] px-[15px] py-[7px] text-xs font-[720] uppercase tracking-[0.04em] text-[#8e8781]">
-                        <span /><span>{t('common.product')}</span><span>{t('common.categories')}</span><span>{t('common.stock')}</span><span>{t('common.price')}</span><span>{t('common.status')}</span><span />
+                        <input
+                            ref={selectAllRef}
+                            className="h-4 w-4 accent-[color:var(--color-accent)]"
+                            type="checkbox"
+                            checked={allPageProductsSelected}
+                            disabled={isSearching || products.length === 0}
+                            aria-label={t(allPageProductsSelected ? 'productsPage.deselectAll' : 'productsPage.selectAll')}
+                            onChange={toggleAllPageProducts}
+                        />
+                        <span>{t('common.product')}</span><span>{t('common.categories')}</span><span>{t('common.stock')}</span><span>{t('common.price')}</span><span>{t('common.status')}</span><span />
                     </div>
                     {isSearching ? <ProductsListSkeleton rowCount={products.length || meta?.per_page || DEFAULT_SKELETON_ROW_COUNT} label={t('productsPage.loading')} /> : products.map((product, index) => (
                         <ProductRow
                             key={product.id}
                             product={product}
                             index={index}
+                            isSelected={selectedProductIds.has(product.id)}
+                            onSelectionChange={() => toggleProductSelection(product.id)}
                             isActionsOpen={openActionsId === product.id}
                             onToggleActions={() => setOpenActionsId((id) => id === product.id ? null : product.id)}
                             onCloseActions={() => setOpenActionsId(null)}
@@ -263,6 +387,21 @@ export default function ProductsPage() {
                 </footer>
             </section>
 
+            <ConfirmModal
+                isOpen={isBulkDeleteConfirmOpen}
+                title={t('productsPage.bulkDeleteTitle')}
+                message={t('productsPage.bulkDeleteMessage', { count: selectedProductIds.size })}
+                confirmText={t('productsPage.delete')}
+                cancelText={t('productsPage.cancel')}
+                isLoading={isBulkDeleting}
+                error={bulkDeleteError}
+                variant="danger"
+                onConfirm={removeSelectedProducts}
+                onClose={() => {
+                    setIsBulkDeleteConfirmOpen(false);
+                    setBulkDeleteError('');
+                }}
+            />
             <ConfirmModal
                 isOpen={Boolean(productToDelete)}
                 title={t('productsPage.confirmDeleteTitle')}
@@ -335,7 +474,7 @@ function ProductsListSkeleton({ rowCount, label }) {
     );
 }
 
-function ProductRow({ product, index, isActionsOpen, onToggleActions, onCloseActions, onEdit, onDelete }) {
+function ProductRow({ product, index, isSelected, onSelectionChange, isActionsOpen, onToggleActions, onCloseActions, onEdit, onDelete }) {
     const { t } = useTranslation();
     const thumb = productThumbs[index % productThumbs.length];
     const categories = product.categories.map((category) => category.name).join(', ');
@@ -347,7 +486,13 @@ function ProductRow({ product, index, isActionsOpen, onToggleActions, onCloseAct
 
     return (
         <div className="data-list__item products-list__row">
-            <input className="h-4 w-4 accent-[color:var(--color-accent)]" type="checkbox" aria-label={t('productsPage.selectProduct', { name: product.name })} />
+            <input
+                className="h-4 w-4 accent-[color:var(--color-accent)]"
+                type="checkbox"
+                checked={isSelected}
+                aria-label={t('productsPage.selectProduct', { name: product.name })}
+                onChange={onSelectionChange}
+            />
             <button className="flex min-w-0 items-center gap-[11px] border-0 bg-transparent p-0 text-left" type="button">
                 <ProductThumb product={thumb} />
                 <span className="flex min-w-0 flex-col"><strong className="truncate text-[13px] text-[#312d29] max-md:text-xs">{product.name}</strong>

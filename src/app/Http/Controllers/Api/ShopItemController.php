@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BulkDeleteShopItemsRequest;
 use App\Http\Requests\IndexShopItemsRequest;
 use App\Http\Requests\SaveShopItemRequest;
 use App\Http\Resources\ShopItemResource;
@@ -13,9 +14,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ShopItemController extends Controller
 {
-    public function __construct(private readonly ShopItemService $shopItemService)
-    {
-    }
+    public function __construct(private readonly ShopItemService $shopItemService) {}
 
     public function index(IndexShopItemsRequest $request): AnonymousResourceCollection
     {
@@ -44,6 +43,13 @@ class ShopItemController extends Controller
     public function destroy(ShopItem $product): JsonResponse
     {
         $this->shopItemService->delete($product);
+
+        return response()->json(null, 204);
+    }
+
+    public function bulkDestroy(BulkDeleteShopItemsRequest $request): JsonResponse
+    {
+        $this->shopItemService->deleteMany($request->validated('ids'));
 
         return response()->json(null, 204);
     }

@@ -6,6 +6,7 @@ use App\Enums\ShopItemStatus;
 use App\Models\Shop;
 use App\Models\ShopItem;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ShopItemService
@@ -30,6 +31,17 @@ class ShopItemService
     public function delete(ShopItem $shopItem): void
     {
         $shopItem->delete();
+    }
+
+    /** @param array<int, int> $ids */
+    public function deleteMany(array $ids): void
+    {
+        DB::transaction(function () use ($ids): void {
+            ShopItem::query()
+                ->whereKey($ids)
+                ->get()
+                ->each(fn (ShopItem $shopItem) => $this->delete($shopItem));
+        });
     }
 
     /** @param array{search?: string|null, status?: string|null, stock?: string|null, category_id?: int|null} $filters */

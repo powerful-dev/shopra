@@ -55,6 +55,7 @@ Route::middleware([
         Route::get('/product-categories/slug', [ShopGroupController::class, 'slug']);
         Route::get('/products', [ShopItemController::class, 'index']);
         Route::post('/products', [ShopItemController::class, 'store']);
+        Route::delete('/products/bulk', [ShopItemController::class, 'bulkDestroy']);
         Route::get('/products/{product}', [ShopItemController::class, 'show']);
         Route::put('/products/{product}', [ShopItemController::class, 'update']);
         Route::delete('/products/{product}', [ShopItemController::class, 'destroy']);

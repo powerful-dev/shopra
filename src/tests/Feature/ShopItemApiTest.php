@@ -195,4 +195,42 @@ class ShopItemApiTest extends TestCase
             ->assertJsonPath('meta.total', 0)
             ->assertJsonPath('summary.total', 20);
     }
+
+    public function test_products_can_be_bulk_soft_deleted(): void
+    {
+        $admin = User::factory()->create(['is_active' => true]);
+        $productsModule = Module::query()->create([
+            'code' => 'products',
+            'show_in_menu' => true,
+            'is_required' => false,
+        ]);
+        $admin->modules()->attach($productsModule);
+
+        $products = collect(range(1, 3))->map(fn (int $index) => ShopItem::query()->create([
+            'name' => "Товар {$index}",
+            'url' => "product-{$index}",
+            'price' => 1000 + $index,
+        ]));
+
+        $this->actingAs($admin, 'sanctum');
+
+        $this->deleteJson('/api/products/bulk', [
+            'ids' => [$products[0]->id, $products[1]->id],
+        ])->assertNoContent();
+
+        $this->assertSoftDeleted('shop_items', ['id' => $products[0]->id]);
+        $this->assertSoftDeleted('shop_items', ['id' => $products[1]->id]);
+        $this->assertDatabaseHas('shop_items', [
+            'id' => $products[2]->id,
+            'deleted_at' => null,
+        ]);
+
+        $this->deleteJson('/api/products/bulk', [
+            'ids' => [$products[0]->id],
+        ])->assertUnprocessable()->assertJsonValidationErrors('ids.0');
+
+        $this->deleteJson('/api/products/bulk', [
+            'ids' => [$products[2]->id, $products[2]->id],
+        ])->assertUnprocessable()->assertJsonValidationErrors('ids.1');
+    }
 }
