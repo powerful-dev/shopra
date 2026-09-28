@@ -1,58 +1,33 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Editor } from '@tinymce/tinymce-react';
-import 'tinymce/tinymce';
-import 'tinymce/icons/default';
-import 'tinymce/themes/silver';
-import 'tinymce/models/dom';
-import 'tinymce/plugins/code';
-import 'tinymce/plugins/image';
-import 'tinymce/skins/ui/oxide/skin.min.css';
-import contentUiCss from 'tinymce/skins/ui/oxide/content.min.css?inline';
-import contentCss from 'tinymce/skins/content/default/content.min.css?inline';
 import CloseIcon from '../../components/icons/CloseIcon';
 import CheckIcon from '../../components/icons/CheckIcon';
 import ChevronIcon from '../../components/icons/ChevronIcon';
 import LinkIcon from '../../components/icons/LinkIcon';
 import PhotoIcon from '../../components/icons/PhotoIcon';
 import SectionBoxIcon from '../../components/icons/SectionBoxIcon';
-import TrashIcon from '../../components/icons/TrashIcon';
 import UploadIcon from '../../components/icons/UploadIcon';
+import { MediaDeleteButton } from '../../components/admin/MediaCardControls';
+import RichTextEditor from '../../components/admin/RichTextEditor';
 import SearchableSelect from '../../components/admin/SearchableSelect';
 import Field from '../../components/form/Field';
 import Input from '../../components/form/Input';
 import Textarea from '../../components/form/Textarea';
 import useSectionScroll from '../../hooks/useSectionScroll';
+import useFileDropZone from '../../hooks/useFileDropZone';
 import usePageScrollLock from '../../hooks/usePageScrollLock';
-import useTinyMceLanguage from '../../hooks/useTinyMceLanguage';
 import CategorySlugField from './CategorySlugField';
 import AdminCard from '../../components/admin/AdminCard';
 import ImageLightbox from '../../components/admin/ImageLightbox';
 import { deleteShopGroupImage, updateShopGroup, uploadShopGroupImage } from '../../services/shopGroups';
-import { uploadEditorImage } from '../../services/editorImages';
 
 const fieldWrapperClass = '[&.form-field]:gap-[7px] [&>.form-label]:text-[12px] [&>.form-label]:leading-normal [&>.form-label]:text-[#554e48]';
 const categoryImageUploadMaxBytes = Number(document.querySelector('meta[name="category-image-upload-max-bytes"]')?.content);
-const editorBaseInit = {
-    skin: false,
-    content_css: false,
-    content_style: `${contentUiCss}\n${contentCss}`,
-    plugins: 'code image',
-    toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | image code',
-    images_upload_handler: (blobInfo) => uploadEditorImage(blobInfo.blob(), blobInfo.filename()),
-};
-
 export default function CategoryEditModal({ category, parentOptions = [], isLoadingParents = false, parentsError = '', onClose, onUpdated, onImageChanged }) {
     const { t, i18n } = useTranslation();
-    const editorLanguage = useTinyMceLanguage();
-    const editorInit = useMemo(() => ({
-        ...editorBaseInit,
-        ...editorLanguage,
-    }), [editorLanguage]);
     const scrollContainerRef = useRef(null);
     const sectionNavigationRef = useRef(null);
     const sectionRefs = useRef({});
-    const photoDragDepthRef = useRef(0);
     const photoInputRef = useRef(null);
     const photoUploadInProgressRef = useRef(false);
     const activeCategoryIdRef = useRef(null);
@@ -71,7 +46,6 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
     const [photoPreviewUrl, setPhotoPreviewUrl] = useState('');
     const [isPhotoLightboxOpen, setIsPhotoLightboxOpen] = useState(false);
     const [photoLightboxIndex, setPhotoLightboxIndex] = useState(0);
-    const [isPhotoDragActive, setIsPhotoDragActive] = useState(false);
     const [isPhotoUploading, setIsPhotoUploading] = useState(false);
     const [isDeletingPhoto, setIsDeletingPhoto] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -95,6 +69,15 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
             }).format(categoryImageUploadMaxBytes / (1024 * 1024)),
         })
         : t('categoryEditModal.photo.uploadError');
+    const isPhotoUploadDisabled = isPhotoUploading || isDeletingPhoto;
+    const {
+        isDragActive: isPhotoDragActive,
+        reset: resetPhotoDropZone,
+        dropZoneProps: photoDropZoneProps,
+    } = useFileDropZone({
+        disabled: isPhotoUploadDisabled,
+        onDrop: (files) => void selectPhoto(files[0]),
+    });
 
     useEffect(() => {
         window.clearTimeout(saveFeedbackTimerRef.current);
@@ -110,16 +93,15 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
         setSelectedPhoto(null);
         setIsPhotoLightboxOpen(false);
         setPhotoLightboxIndex(0);
-        setIsPhotoDragActive(false);
+        resetPhotoDropZone();
         setIsPhotoUploading(false);
         setIsDeletingPhoto(false);
         activeCategoryIdRef.current = category?.id ?? null;
-        photoDragDepthRef.current = 0;
         setIsEditingSlug(false);
         setShowSaveSuccess(false);
         setPhotoError('');
         setSaveError('');
-    }, [category]);
+    }, [category, resetPhotoDropZone]);
 
     useEffect(() => () => window.clearTimeout(saveFeedbackTimerRef.current), []);
 
@@ -176,13 +158,6 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
 
             photoUploadInProgressRef.current = false;
         }
-    }
-
-    function dropPhoto(event) {
-        event.preventDefault();
-        photoDragDepthRef.current = 0;
-        setIsPhotoDragActive(false);
-        void selectPhoto(event.dataTransfer.files[0]);
     }
 
     async function deletePhoto() {
@@ -323,118 +298,89 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
                     </div>
                     <div className="mt-[15px]">
                         <Field label={t('categoryEditModal.main.shortDescription')} className={fieldWrapperClass}>
-                            <Editor
-                                key={`short-description-${editorLanguage.language}`}
-                                licenseKey="gpl"
-                                init={editorInit}
+                            <RichTextEditor
+                                instanceKey="short-description"
                                 value={description}
-                                onEditorChange={setDescription}
+                                onChange={setDescription}
                                 disabled={isSaving}
                             />
                         </Field>
                     </div>
                     <div className="mt-[15px]">
                         <Field label={t('categoryEditModal.main.fullDescription')} className={fieldWrapperClass}>
-                            <Editor
-                                key={`full-description-${editorLanguage.language}`}
-                                licenseKey="gpl"
-                                init={editorInit}
+                            <RichTextEditor
+                                instanceKey="full-description"
                                 value={text}
-                                onEditorChange={setText}
+                                onChange={setText}
                                 disabled={isSaving}
                             />
                         </Field>
                     </div>
                 </AdminCard>
 
-                <AdminCard sectionRef={(element) => { sectionRefs.current['category-edit-photo'] = element; }} id="category-edit-photo" title={t('categoryEditModal.photo.title')}>
+                <AdminCard
+                    sectionRef={(element) => { sectionRefs.current['category-edit-photo'] = element; }}
+                    id="category-edit-photo"
+                    title={t('categoryEditModal.photo.title')}
+                    className={`transition-[border-color,box-shadow] ${isPhotoDragActive ? 'border-[color:var(--color-accent)] ring-[3px] ring-[rgba(184,79,24,.09)]' : ''}`}
+                    sectionProps={photoDropZoneProps}
+                >
                     <div className="flex gap-2">
-                        <div className="relative h-[178px] w-[139px] shrink-0 overflow-hidden rounded-[10px] border border-[color:var(--color-border)] bg-[linear-gradient(145deg,#86939d,#2b3c48)] max-sm:h-[153px] max-sm:w-[119px]">
-                            {photoPreviewUrl && savedLargePhotoUrl && !selectedPhoto ? (
-                                <button
-                                    type="button"
-                                    className="block h-full w-full cursor-zoom-in border-0 bg-transparent p-0"
-                                    aria-label={t('categoryEditModal.photo.openLarge')}
-                                    onClick={() => {
-                                        setPhotoLightboxIndex(0);
-                                        setIsPhotoLightboxOpen(true);
-                                    }}
-                                >
+                        {photoPreviewUrl && (
+                            <div className="media-card relative h-[178px] w-[139px] shrink-0 overflow-hidden rounded-[10px] border border-[color:var(--color-border)] bg-[#f5f1ee] max-sm:h-[153px] max-sm:w-[119px]">
+                                {savedLargePhotoUrl && !selectedPhoto ? (
+                                    <button
+                                        type="button"
+                                        className="block h-full w-full cursor-zoom-in border-0 bg-transparent p-0"
+                                        aria-label={t('categoryEditModal.photo.openLarge')}
+                                        onClick={() => {
+                                            setPhotoLightboxIndex(0);
+                                            setIsPhotoLightboxOpen(true);
+                                        }}
+                                    >
+                                        <img className="h-full w-full object-cover" src={photoPreviewUrl} alt="" />
+                                    </button>
+                                ) : (
                                     <img className="h-full w-full object-cover" src={photoPreviewUrl} alt="" />
-                                </button>
-                            ) : photoPreviewUrl ? (
-                                <img className="h-full w-full object-cover" src={photoPreviewUrl} alt="" />
-                            ) : (
-                                <i className="absolute inset-[24%] rounded-[36%_36%_18%_18%] border border-white/40 bg-[#314555]/55" />
-                            )}
-                            {savedPhotoUrl && !isPhotoUploading && (
-                                <button
-                                    type="button"
-                                    className="absolute right-2 top-2 z-10 grid h-8 w-8 place-items-center rounded-lg border border-white/70 bg-white/90 text-[#b5443c] shadow-sm backdrop-blur hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
-                                    aria-label={t('categoryEditModal.photo.delete')}
-                                    title={t('categoryEditModal.photo.delete')}
-                                    disabled={isDeletingPhoto}
-                                    onClick={() => void deletePhoto()}
-                                >
-                                    <TrashIcon />
-                                </button>
-                            )}
-                            {isPhotoUploading && (
-                                <div
-                                    className="absolute inset-0 z-20 grid place-items-center bg-black/35"
-                                    role="status"
-                                    aria-label={t('categoriesModal.form.loading')}
-                                >
-                                    <span className="h-7 w-7 animate-spin rounded-full border-[3px] border-white/40 border-t-white" aria-hidden="true" />
-                                </div>
-                            )}
-                        </div>
-                        <button
-                            type="button"
-                            className={`flex h-[178px] min-w-0 flex-1 cursor-pointer flex-col items-center justify-center rounded-[10px] border border-dashed px-4 text-center text-[color:var(--color-accent)] transition-colors max-sm:h-[153px] disabled:cursor-not-allowed disabled:opacity-60 ${isPhotoDragActive ? 'border-[color:var(--color-accent)] bg-[#fff4ec]' : 'border-[#d0b09d] bg-[#f8f5f2]'}`}
-                            disabled={isPhotoUploading || isDeletingPhoto}
-                            onClick={() => photoInputRef.current?.click()}
-                            onDragEnter={(event) => {
-                                event.preventDefault();
-
-                                if (isPhotoUploading || isDeletingPhoto) return;
-
-                                photoDragDepthRef.current += 1;
-                                setIsPhotoDragActive(true);
-                            }}
-                            onDragOver={(event) => {
-                                event.preventDefault();
-                                event.dataTransfer.dropEffect = isPhotoUploading || isDeletingPhoto ? 'none' : 'copy';
-                            }}
-                            onDragLeave={(event) => {
-                                event.preventDefault();
-                                photoDragDepthRef.current = Math.max(0, photoDragDepthRef.current - 1);
-
-                                if (photoDragDepthRef.current === 0) {
-                                    setIsPhotoDragActive(false);
-                                }
-                            }}
-                            onDrop={(event) => {
-                                if (isPhotoUploading || isDeletingPhoto) {
-                                    event.preventDefault();
-
-                                    return;
-                                }
-
-                                dropPhoto(event);
-                            }}
-                        >
-                            <UploadIcon />
-                            <strong className="mt-2 text-[13px] text-[#5d554f]">{t('categoryEditModal.photo.add')}</strong>
-                            <small className="mt-1 text-[11px] leading-[1.4] text-[#98918a]">{t('categoryEditModal.photo.dropHint')}</small>
-                        </button>
+                                )}
+                                {savedPhotoUrl && !isPhotoUploading && (
+                                    <MediaDeleteButton
+                                        aria-label={t('categoryEditModal.photo.delete')}
+                                        title={t('categoryEditModal.photo.delete')}
+                                        disabled={isDeletingPhoto}
+                                        onClick={() => void deletePhoto()}
+                                    />
+                                )}
+                                {isPhotoUploading && (
+                                    <div
+                                        className="absolute inset-0 z-20 grid place-items-center bg-black/35"
+                                        role="status"
+                                        aria-label={t('categoriesModal.form.loading')}
+                                    >
+                                        <span className="h-7 w-7 animate-spin rounded-full border-[3px] border-white/40 border-t-white" aria-hidden="true" />
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        {!photoPreviewUrl && (
+                            <button
+                                type="button"
+                                className="flex h-[178px] min-w-0 flex-1 cursor-pointer flex-col items-center justify-center rounded-[10px] border border-dashed border-[#d0b09d] bg-[#f8f5f2] px-4 text-center text-[color:var(--color-accent)] transition-colors max-sm:h-[153px] disabled:cursor-not-allowed disabled:opacity-60"
+                                disabled={isPhotoUploadDisabled}
+                                onClick={() => photoInputRef.current?.click()}
+                            >
+                                <UploadIcon />
+                                <strong className="mt-2 text-[13px] text-[#5d554f]">{t('categoryEditModal.photo.add')}</strong>
+                                <small className="mt-1 text-[11px] leading-[1.4] text-[#98918a]">{t('categoryEditModal.photo.dropHint')}</small>
+                            </button>
+                        )}
                         <Input
                             ref={photoInputRef}
                             className="hidden"
                             type="file"
                             accept="image/jpeg,image/png,image/webp"
                             tabIndex={-1}
-                            disabled={isPhotoUploading || isDeletingPhoto}
+                            disabled={isPhotoUploadDisabled}
                             onChange={(event) => {
                                 void selectPhoto(event.target.files[0]);
                                 event.target.value = '';

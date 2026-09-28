@@ -20,6 +20,7 @@ class ShopItem extends Model
         'price',
         'old_price',
         'quantity',
+        'description',
         'shop_unit_id',
         'show_stock',
         'status',

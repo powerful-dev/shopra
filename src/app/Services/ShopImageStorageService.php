@@ -132,6 +132,47 @@ class ShopImageStorageService
         return $paths;
     }
 
+    /**
+     * @param  callable(string): void  $activate
+     * @return array{filename: string, small: string, large: string}
+     */
+    public function storeVariants(
+        string $resource,
+        int $resourceId,
+        EncodedImageInterface $small,
+        EncodedImageInterface $large,
+        callable $activate,
+    ): array {
+        $smallExtension = $this->extension($small);
+        $largeExtension = $this->extension($large);
+
+        if ($smallExtension !== $largeExtension) {
+            throw new RuntimeException('Shop image variants must use the same format.');
+        }
+
+        $filename = Str::uuid()->toString().'.'.$smallExtension;
+        $directory = $this->directory($resource, $resourceId);
+        $paths = [
+            ImageVariant::Small->value => $directory.'/'.ImageVariant::Small->value.'/'.$filename,
+            ImageVariant::Large->value => $directory.'/'.ImageVariant::Large->value.'/'.$filename,
+        ];
+
+        try {
+            $this->store($paths[ImageVariant::Small->value], $small->toString());
+            $this->store($paths[ImageVariant::Large->value], $large->toString());
+            $activate($filename);
+        } catch (Throwable $exception) {
+            $this->deletePaths(array_values($paths), false);
+
+            throw $exception;
+        }
+
+        return [
+            'filename' => $filename,
+            ...$paths,
+        ];
+    }
+
     public function deleteAll(string $resource, int $resourceId): void
     {
         $disk = $this->filesystems->disk('public');
@@ -163,7 +204,7 @@ class ShopImageStorageService
     }
 
     /** @param list<string> $paths */
-    private function deletePaths(array $paths, bool $throw = true): void
+    public function deletePaths(array $paths, bool $throw = true): void
     {
         if ($paths === []) {
             return;

@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ShopItemMedia extends Model
 {
+    public const TYPE_IMAGE = 'image';
+
+    public const TYPE_VIDEO = 'video';
+
     protected $table = 'shop_item_media';
 
     protected $fillable = [

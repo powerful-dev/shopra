@@ -2,10 +2,11 @@
 
 namespace App\Http\Resources;
 
+use App\Models\ShopItem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin \App\Models\ShopItem */
+/** @mixin ShopItem */
 class ShopItemResource extends JsonResource
 {
     /**
@@ -21,6 +22,7 @@ class ShopItemResource extends JsonResource
             'price' => $this->price,
             'old_price' => $this->old_price,
             'quantity' => $this->quantity,
+            'description' => $this->description,
             'show_stock' => $this->show_stock,
             'status' => $this->status->value,
             'unit' => $this->whenLoaded('unit', fn () => $this->unit === null ? null : [
@@ -34,6 +36,7 @@ class ShopItemResource extends JsonResource
                 'name' => $group->name,
                 'url' => $group->url,
             ])->values(),
+            'media' => ShopItemMediaResource::collection($this->whenLoaded('media')),
         ];
     }
 }

@@ -1,0 +1,64 @@
+.media-card {
+    .media-control {
+        position: absolute;
+        top: 8px;
+        z-index: 20;
+        width: 32px;
+        height: 32px;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.5);
+        box-shadow: 0 1px 3px rgba(48, 35, 27, 0.12);
+        backdrop-filter: blur(4px);
+        transition: opacity 150ms ease, transform 150ms ease, background 150ms ease, box-shadow 150ms ease;
+
+        &:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(184, 79, 24, 0.2);
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+        }
+
+        &--drag {
+            left: 8px;
+            color: #766d66;
+            cursor: grab;
+
+            &:active {
+                cursor: grabbing;
+            }
+        }
+
+        &--delete {
+            right: 8px;
+            color: #b5443c;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-2px);
+
+            &:hover {
+                background: #fff;
+            }
+        }
+    }
+
+    &:hover .media-control--delete,
+    &:focus-within .media-control--delete {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+}
+
+@media (hover: none) {
+    .media-card .media-control--delete {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+}

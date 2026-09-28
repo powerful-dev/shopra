@@ -17,10 +17,16 @@ class SaveShopItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => [
+                Rule::requiredIf($this->input('status') !== ShopItemStatus::Draft->value),
+                'nullable',
+                'string',
+                'max:255',
+            ],
             'price' => ['required', 'numeric', 'min:0'],
             'old_price' => ['nullable', 'numeric', 'min:0'],
             'quantity' => ['required', 'integer', 'min:0'],
+            'description' => ['nullable', 'string'],
             'status' => ['required', Rule::enum(ShopItemStatus::class)],
         ];
     }

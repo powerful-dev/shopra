@@ -3,6 +3,9 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import ActionsMenu from '../../components/admin/ActionsMenu';
 import Breadcrumbs from '../../components/admin/Breadcrumbs';
 import ConfirmModal from '../../components/admin/ConfirmModal';
+import ImageLightbox from '../../components/admin/ImageLightbox';
+import { MediaDeleteButton, MediaDragHandle } from '../../components/admin/MediaCardControls';
+import RichTextEditor from '../../components/admin/RichTextEditor';
 import BackIcon from '../../components/icons/BackIcon';
 import BoxIcon from '../../components/icons/BoxIcon';
 import PlusIcon from '../../components/icons/PlusIcon';
@@ -14,6 +17,8 @@ import RocketIcon from '../../components/icons/RocketIcon';
 import ChevronIcon from '../../components/icons/ChevronIcon';
 import SaveIcon from '../../components/icons/SaveIcon';
 import { csrf, request } from '../../services/api';
+import { deleteShopItemMedia, reorderShopItemMedia, uploadShopItemMedia } from '../../services/shopItems';
+import useFileDropZone from '../../hooks/useFileDropZone';
 import useSectionScroll from '../../hooks/useSectionScroll';
 
 
@@ -34,19 +39,45 @@ export default function ProductEditPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const isNew = id === 'new' || !id;
-    const [form, setForm] = useState({ name: '', price: '', old_price: '', quantity: '', status: isNew ? 'draft' : null });
+    const [form, setForm] = useState({ name: '', price: '', old_price: '', quantity: '', description: '', status: isNew ? 'draft' : null });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isActionsOpen, setIsActionsOpen] = useState(false);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [media, setMedia] = useState([]);
+    const [isMediaLoading, setIsMediaLoading] = useState(!isNew);
+    const [mediaLoadError, setMediaLoadError] = useState('');
     const sectionNavigationRef = useRef(null);
     const sectionRefs = useRef({});
+    const productCreationPromiseRef = useRef(null);
+    const createdProductIdRef = useRef(isNew ? null : id);
+    const skipProductLoadIdRef = useRef(null);
     const scrollToSection = useSectionScroll({ stickyRef: sectionNavigationRef });
 
     useEffect(() => {
-        if (isNew) return undefined;
+        if (isNew) {
+            createdProductIdRef.current = null;
+            setMedia([]);
+            setIsMediaLoading(false);
+            setMediaLoadError('');
+
+            return undefined;
+        }
+
+        createdProductIdRef.current = id;
+
+        if (skipProductLoadIdRef.current === String(id)) {
+            skipProductLoadIdRef.current = null;
+            setIsMediaLoading(false);
+            setMediaLoadError('');
+
+            return undefined;
+        }
 
         let isActive = true;
+        setIsMediaLoading(true);
+        setMediaLoadError('');
+        setMedia([]);
 
         request(`/api/products/${id}`)
             .then(({ data: product }) => {
@@ -57,10 +88,19 @@ export default function ProductEditPage() {
                     price: product.price ?? '',
                     old_price: product.old_price ?? '',
                     quantity: product.quantity ?? '',
+                    description: product.description ?? '',
                     status: product.status,
                 });
+                setMedia(product.media ?? []);
             })
-            .catch((error) => console.error(error));
+            .catch((error) => {
+                console.error(error);
+
+                if (isActive) setMediaLoadError('Не удалось загрузить медиафайлы товара.');
+            })
+            .finally(() => {
+                if (isActive) setIsMediaLoading(false);
+            });
 
         return () => {
             isActive = false;
@@ -71,20 +111,80 @@ export default function ProductEditPage() {
         setForm((current) => ({ ...current, [target.name]: target.value }));
     };
 
+    const createProduct = (status, useDraftDefaults = false) => {
+        if (createdProductIdRef.current) {
+            return Promise.resolve({ id: createdProductIdRef.current, status: form.status ?? status });
+        }
+
+        if (productCreationPromiseRef.current) return productCreationPromiseRef.current;
+
+        const payload = {
+            ...form,
+            name: form.name.trim() || null,
+            price: useDraftDefaults && form.price === '' ? 0 : form.price,
+            old_price: form.old_price || null,
+            quantity: useDraftDefaults && form.quantity === '' ? 0 : form.quantity,
+            status,
+        };
+        let creationPromise;
+
+        creationPromise = (async () => {
+            await csrf();
+            const { data: product } = await request('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            createdProductIdRef.current = product.id;
+            skipProductLoadIdRef.current = String(product.id);
+            setForm((current) => ({ ...current, status: product.status }));
+            navigate(`/admin/products/${product.id}`, { replace: true });
+
+            return product;
+        })().finally(() => {
+            if (productCreationPromiseRef.current === creationPromise) {
+                productCreationPromiseRef.current = null;
+            }
+        });
+
+        productCreationPromiseRef.current = creationPromise;
+
+        return creationPromise;
+    };
+
+    const ensureProductForMedia = async () => {
+        if (createdProductIdRef.current) return createdProductIdRef.current;
+
+        setIsSubmitting(true);
+
+        try {
+            const product = await createProduct('draft', true);
+
+            return product.id;
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const saveProduct = async (status) => {
         setIsSubmitting(true);
 
         try {
-            await csrf();
-            const { data: product } = await request(isNew ? '/api/products' : `/api/products/${id}`, {
-                method: isNew ? 'POST' : 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...form, old_price: form.old_price || null, status }),
-            });
+            let product;
 
-            setForm((current) => ({ ...current, status: product.status }));
+            if (isNew) {
+                product = await createProduct(status);
+            } else {
+                await csrf();
+                ({ data: product } = await request(`/api/products/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...form, name: form.name.trim() || null, old_price: form.old_price || null, status }),
+                }));
 
-            if (isNew) navigate(`/admin/products/${product.id}`, { replace: true });
+                setForm((current) => ({ ...current, status: product.status }));
+            }
         } catch (error) {
             console.error(error);
         } finally {
@@ -171,7 +271,20 @@ export default function ProductEditPage() {
             <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
                 <form className="space-y-3" aria-label="Данные товара" onSubmit={(event) => event.preventDefault()}>
                     <MainSection sectionRef={(element) => { sectionRefs.current.main = element; }} form={form} onChange={updateField} />
-                    <MediaSection sectionRef={(element) => { sectionRefs.current.photo = element; }} />
+                    <MediaSection
+                        sectionRef={(element) => { sectionRefs.current.photo = element; }}
+                        productId={id}
+                        isNew={isNew}
+                        media={media}
+                        isLoading={isMediaLoading}
+                        loadError={mediaLoadError}
+                        resolveProductId={ensureProductForMedia}
+                        onMediaUploaded={(uploadedMedia) => {
+                            setMedia((current) => [...current, uploadedMedia]
+                                .sort((left, right) => left.sort_order - right.sort_order || left.id - right.id));
+                        }}
+                        onMediaOrderChanged={setMedia}
+                    />
                     <PriceSection sectionRef={(element) => { sectionRefs.current.price = element; }} form={form} onChange={updateField} />
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.variants = element; }} id="variants" title="Модификации товара" icon="layers" open>
                         <article className="grid min-h-[82px] grid-cols-[42px_minmax(0,1fr)_auto] items-center gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[12px_13px] max-md:grid-cols-[38px_minmax(0,1fr)]">
@@ -181,7 +294,15 @@ export default function ProductEditPage() {
                         </article>
                     </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.description = element; }} id="description" title="Описание" icon="file">
-                        <label className="flex flex-col gap-[7px]"><span className="flex items-center justify-between text-[12px] font-bold text-[#554e48]">Описание товара<button type="button" className="inline-flex items-center gap-[5px] rounded-[7px] border-0 bg-[#f9eee7] px-[7px] py-[5px] text-[11px] font-[720] text-[color:var(--color-accent)]">◇ Помочь написать</button></span><textarea className="h-[116px] w-full resize-y rounded-[9px] border border-[#ddd5cf] bg-white p-[11px] text-[13px] leading-normal outline-none" placeholder="Расскажите о товаре" /></label>
+                        <label className="flex flex-col gap-[7px]">
+                            <span className="flex items-center justify-between text-[12px] font-bold text-[#554e48]">Описание товара</span>
+                            <RichTextEditor
+                                instanceKey="product-description"
+                                value={form.description}
+                                onChange={(description) => setForm((current) => ({ ...current, description }))}
+                                disabled={isSubmitting}
+                            />
+                        </label>
                     </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title="Характеристики" icon="sliders"><Field label="Характеристики товара"><input className={fieldClass} type="text" placeholder="Например: материал — натуральная кожа" /></Field></AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.delivery = element; }} id="delivery" title="Доставка" icon="truck"><Field label="Группа доставки"><select className={fieldClass} defaultValue="standard"><option value="standard">Стандартная доставка</option><option>Крупногабаритный товар</option><option>Самовывоз</option></select></Field></AccordionSection>
@@ -255,9 +376,307 @@ function MainSection({ sectionRef, form, onChange }) {
     );
 }
 
-function MediaSection({ sectionRef }) {
-    const photos = ['bg-[linear-gradient(145deg,#d9ae84,#8d512b)]', 'bg-[linear-gradient(145deg,#c99a70,#714226)]', 'bg-[linear-gradient(145deg,#937565,#4c3328)]'];
-    return <Card sectionRef={sectionRef} id="photo" title="Фото и видео" required><div className="flex flex-wrap gap-2">{photos.map((background, index) => <div key={background} className={`relative h-[178px] w-[139px] overflow-hidden rounded-[10px] border border-[color:var(--color-border)] ${background} max-sm:h-[153px] max-sm:w-[119px]`}>{index === 0 && <span className="absolute bottom-[5px] right-[5px] rounded-[5px] bg-white/90 px-[5px] py-[3px] text-[11px] font-[750] text-[#9b3f14]">Главное</span>}<i className="absolute inset-[24%] rounded-[36%_36%_18%_18%] border border-white/40 bg-[#62391f]/50" /></div>)}<label className="flex h-[178px] w-[139px] cursor-pointer flex-col items-center justify-center rounded-[10px] border border-[color:var(--color-border)] bg-[#f8f5f2] text-[color:var(--color-accent)] max-sm:h-[153px] max-sm:w-[119px]"><input className="sr-only" type="file" accept="image/*" multiple /><UploadIcon /><strong className="mt-1.5 text-[11px] text-[#5d554f]">Добавить</strong><small className="text-[11px] text-[#98918a]">фото или видео</small></label></div><p className="mt-2 text-[12px] text-[#9c948e]">Перетащите фото, чтобы изменить порядок. Можно добавить ещё 17 фото и 2 видео.</p></Card>;
+function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductId, onMediaUploaded, onMediaOrderChanged }) {
+    const inputRef = useRef(null);
+    const uploadInProgressRef = useRef(false);
+    const draggedMediaIdRef = useRef(null);
+    const deletedMediaIdsRef = useRef(new Set());
+    const deletingMediaIdsRef = useRef(new Set());
+    const [pendingMedia, setPendingMedia] = useState([]);
+    const [uploadError, setUploadError] = useState('');
+    const [sortError, setSortError] = useState('');
+    const [deleteError, setDeleteError] = useState('');
+    const [deletingMediaIds, setDeletingMediaIds] = useState([]);
+    const [lightboxIndex, setLightboxIndex] = useState(0);
+    const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+    const [draggedMediaId, setDraggedMediaId] = useState(null);
+    const [mediaDropTarget, setMediaDropTarget] = useState(null);
+    const [isSortingMedia, setIsSortingMedia] = useState(false);
+    const isUploading = pendingMedia.length > 0;
+    const isDeletingMedia = deletingMediaIds.length > 0;
+    const images = media.filter((item) => item.type === 'image');
+    const lightboxImages = images.map((item) => ({ src: item.large_url, alt: '' }));
+    const isAddDisabled = isLoading || isUploading || isSortingMedia || isDeletingMedia;
+
+    const endMediaDrag = () => {
+        draggedMediaIdRef.current = null;
+        setDraggedMediaId(null);
+        setMediaDropTarget(null);
+    };
+
+    const moveMedia = async (event, target) => {
+        const draggedId = draggedMediaIdRef.current;
+
+        if (draggedId === null || draggedId === target.id || isSortingMedia || isDeletingMedia) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        const previousMedia = media;
+        const targetRect = event.currentTarget.getBoundingClientRect();
+        const position = event.clientX < targetRect.left + targetRect.width / 2 ? 'before' : 'after';
+        const reordered = media.filter((item) => item.id !== draggedId);
+        const targetIndex = reordered.findIndex((item) => item.id === target.id);
+        const insertIndex = targetIndex + (position === 'after' ? 1 : 0);
+        const draggedMedia = media.find((item) => item.id === draggedId);
+
+        if (!draggedMedia || targetIndex < 0) {
+            endMediaDrag();
+
+            return;
+        }
+
+        reordered.splice(insertIndex, 0, draggedMedia);
+        const mainImageId = reordered.find((item) => item.type === 'image')?.id ?? null;
+        const optimisticMedia = reordered.map((item, index) => ({
+            ...item,
+            sort_order: index,
+            is_main: item.id === mainImageId,
+        }));
+
+        endMediaDrag();
+
+        if (optimisticMedia.every((item, index) => item.id === previousMedia[index]?.id)) return;
+
+        setIsSortingMedia(true);
+        setSortError('');
+        onMediaOrderChanged(optimisticMedia);
+
+        try {
+            const productId = await resolveProductId();
+            const savedMedia = await reorderShopItemMedia(productId, optimisticMedia.map((item) => item.id));
+
+            onMediaOrderChanged(savedMedia);
+        } catch (error) {
+            onMediaOrderChanged(previousMedia);
+            setSortError(Object.values(error.errors ?? {}).flat().join(' ') || 'Не удалось сохранить порядок медиафайлов.');
+        } finally {
+            setIsSortingMedia(false);
+        }
+    };
+
+    const uploadFiles = async (fileList) => {
+        const files = Array.from(fileList ?? []);
+
+        if (uploadInProgressRef.current || files.length === 0) return;
+
+        const pending = files.map((file, index) => {
+            const extension = file.name.split('.').pop()?.toLowerCase();
+            const type = file.type.startsWith('video/') || ['mp4', 'mov', 'webm'].includes(extension)
+                ? 'video'
+                : file.type.startsWith('image/') || ['jpg', 'jpeg', 'png', 'webp'].includes(extension)
+                    ? 'image'
+                    : null;
+
+            return {
+                id: `${Date.now()}-${index}-${file.name}`,
+                file,
+                type,
+                previewUrl: URL.createObjectURL(file),
+            };
+        });
+        const errors = [];
+
+        uploadInProgressRef.current = true;
+        setUploadError('');
+        setPendingMedia(pending);
+
+        let productId;
+
+        try {
+            productId = await resolveProductId();
+        } catch (error) {
+            const validationMessage = Object.values(error.errors ?? {}).flat().join(' ');
+            const message = validationMessage || error.message || 'Не удалось создать черновик товара.';
+
+            pending.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+            setPendingMedia([]);
+            setUploadError(message);
+            uploadInProgressRef.current = false;
+
+            return;
+        }
+
+        for (const item of pending) {
+            try {
+                if (!item.type) throw new Error('Поддерживаются только фотографии и видео.');
+
+                const uploadedMedia = await uploadShopItemMedia(productId, item.type, item.file);
+                onMediaUploaded(uploadedMedia);
+            } catch (error) {
+                const validationMessage = Object.values(error.errors ?? {}).flat().join(' ');
+                const message = error.status === 413
+                    ? 'Файл слишком большой для загрузки.'
+                    : validationMessage || error.message || 'Не удалось загрузить файл.';
+
+                errors.push(`${item.file.name}: ${message}`);
+                setUploadError(errors.join(' '));
+            } finally {
+                URL.revokeObjectURL(item.previewUrl);
+                setPendingMedia((current) => current.filter((pendingItem) => pendingItem.id !== item.id));
+            }
+        }
+
+        uploadInProgressRef.current = false;
+    };
+
+    const deleteMedia = async (item) => {
+        if (deletingMediaIdsRef.current.has(item.id)) return;
+
+        deletingMediaIdsRef.current.add(item.id);
+        setDeleteError('');
+        setDeletingMediaIds((current) => [...current, item.id]);
+
+        try {
+            const productId = await resolveProductId();
+            const savedMedia = await deleteShopItemMedia(productId, item.id);
+
+            deletedMediaIdsRef.current.add(item.id);
+            onMediaOrderChanged(savedMedia.filter((mediaItem) => !deletedMediaIdsRef.current.has(mediaItem.id)));
+        } catch (error) {
+            const validationMessage = Object.values(error.errors ?? {}).flat().join(' ');
+
+            setDeleteError(validationMessage || error.message || 'Не удалось удалить медиафайл.');
+        } finally {
+            deletingMediaIdsRef.current.delete(item.id);
+            setDeletingMediaIds((current) => current.filter((mediaId) => mediaId !== item.id));
+        }
+    };
+    const { isDragActive, dropZoneProps } = useFileDropZone({
+        disabled: isAddDisabled,
+        onDrop: (files) => void uploadFiles(files),
+    });
+
+    return (
+        <Card
+            sectionRef={sectionRef}
+            id="photo"
+            title="Фото и видео"
+            required
+            className={`transition-[border-color,box-shadow] ${isDragActive ? 'border-[color:var(--color-accent)] ring-[3px] ring-[rgba(184,79,24,.09)]' : ''}`}
+            sectionProps={dropZoneProps}
+        >
+            <div className="flex flex-wrap gap-2">
+                {media.map((item) => {
+                    const isDeleting = deletingMediaIds.includes(item.id);
+
+                    return (
+                        <div
+                            key={item.id}
+                            data-media-card
+                            className={`media-card relative h-[178px] w-[139px] overflow-hidden rounded-[10px] border bg-[#f5f1ee] transition-[border-color,box-shadow,opacity,transform] max-sm:h-[153px] max-sm:w-[119px] ${draggedMediaId === item.id ? 'scale-[.97] border-[color:var(--color-accent)] opacity-45' : 'border-[color:var(--color-border)]'} ${mediaDropTarget?.id === item.id ? 'border-[color:var(--color-accent)] ring-2 ring-[rgba(184,79,24,.18)]' : ''}`}
+                            onDragOver={(event) => {
+                                if (draggedMediaIdRef.current === null || isSortingMedia || isDeletingMedia) return;
+
+                                event.preventDefault();
+                                event.stopPropagation();
+                                const rect = event.currentTarget.getBoundingClientRect();
+                                const position = event.clientX < rect.left + rect.width / 2 ? 'before' : 'after';
+                                event.dataTransfer.dropEffect = draggedMediaIdRef.current === item.id ? 'none' : 'move';
+                                setMediaDropTarget(draggedMediaIdRef.current === item.id ? null : { id: item.id, position });
+                            }}
+                            onDrop={(event) => void moveMedia(event, item)}
+                        >
+                            {item.type === 'image' ? (
+                                <button
+                                    type="button"
+                                    draggable={false}
+                                    className="block h-full w-full cursor-zoom-in border-0 bg-transparent p-0"
+                                    aria-label="Открыть фотографию"
+                                    onClick={() => {
+                                        setLightboxIndex(images.findIndex((image) => image.id === item.id));
+                                        setIsLightboxOpen(true);
+                                    }}
+                                >
+                                    <img className="h-full w-full object-cover" src={item.small_url} alt="" draggable={false} />
+                                </button>
+                            ) : (
+                                <video className="h-full w-full bg-black object-cover" src={item.url} controls preload="metadata" draggable={false} />
+                            )}
+                            <MediaDragHandle
+                                className={`${isSortingMedia || isDeletingMedia ? '!cursor-not-allowed opacity-60' : ''} ${draggedMediaId === item.id ? '!cursor-grabbing' : ''}`}
+                                aria-label="Изменить порядок медиафайла"
+                                title="Перетащить"
+                                draggable={!isSortingMedia && !isUploading && !isDeletingMedia}
+                                onDragStart={(event) => {
+                                    if (isDeletingMedia) {
+                                        event.preventDefault();
+
+                                        return;
+                                    }
+
+                                    draggedMediaIdRef.current = item.id;
+                                    setDraggedMediaId(item.id);
+                                    setSortError('');
+                                    event.dataTransfer.effectAllowed = 'move';
+                                    event.dataTransfer.setData('application/x-shopra-media-id', String(item.id));
+                                    event.dataTransfer.setDragImage(event.currentTarget.closest('[data-media-card]') ?? event.currentTarget.parentElement, 20, 20);
+                                }}
+                                onDragEnd={endMediaDrag}
+                            />
+                            <MediaDeleteButton
+                                aria-label="Удалить медиафайл"
+                                title="Удалить"
+                                disabled={isDeleting || isSortingMedia}
+                                onClick={() => void deleteMedia(item)}
+                            />
+                            {mediaDropTarget?.id === item.id && (
+                                <span className={`pointer-events-none absolute inset-y-2 z-30 w-0.5 rounded-full bg-[color:var(--color-accent)] ${mediaDropTarget.position === 'before' ? 'left-1' : 'right-1'}`} aria-hidden="true" />
+                            )}
+                            {item.is_main && <span className="pointer-events-none absolute bottom-[5px] right-[5px] rounded-[5px] bg-white/90 px-[5px] py-[3px] text-[11px] font-[750] text-[#9b3f14]">Главное</span>}
+                            {isDeleting && (
+                                <div className="absolute inset-0 z-30 grid place-items-center bg-black/35" role="status" aria-label="Удаление медиафайла">
+                                    <span className="h-7 w-7 animate-spin rounded-full border-[3px] border-white/40 border-t-white" aria-hidden="true" />
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+                {pendingMedia.map((item) => (
+                    <div key={item.id} className="relative h-[178px] w-[139px] overflow-hidden rounded-[10px] border border-[color:var(--color-border)] bg-[#f5f1ee] max-sm:h-[153px] max-sm:w-[119px]">
+                        {item.type === 'video' ? (
+                            <video className="h-full w-full bg-black object-cover" src={item.previewUrl} muted preload="metadata" draggable={false} />
+                        ) : item.type === 'image' ? (
+                            <img className="h-full w-full object-cover" src={item.previewUrl} alt="" draggable={false} />
+                        ) : null}
+                        <div className="absolute inset-0 z-20 grid place-items-center bg-black/35" role="status" aria-label={`Загрузка ${item.file.name}`}>
+                            <span className="h-7 w-7 animate-spin rounded-full border-[3px] border-white/40 border-t-white" aria-hidden="true" />
+                        </div>
+                    </div>
+                ))}
+                {isLoading && (
+                    <div className="grid h-[178px] w-[139px] place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#f8f5f2] max-sm:h-[153px] max-sm:w-[119px]" role="status" aria-label="Загрузка медиафайлов">
+                        <span className="h-7 w-7 animate-spin rounded-full border-[3px] border-[#d8cbc2] border-t-[color:var(--color-accent)]" aria-hidden="true" />
+                    </div>
+                )}
+                <label className={`flex h-[178px] min-w-[139px] basis-[139px] grow flex-col items-center justify-center rounded-[10px] border border-[color:var(--color-border)] bg-[#f8f5f2] text-[color:var(--color-accent)] max-sm:h-[153px] max-sm:min-w-[119px] max-sm:basis-[119px] ${isAddDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+                    <input
+                        ref={inputRef}
+                        className="sr-only"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm"
+                        multiple
+                        disabled={isAddDisabled}
+                        onChange={(event) => {
+                            void uploadFiles(event.target.files);
+                            event.target.value = '';
+                        }}
+                    />
+                    <UploadIcon />
+                    <strong className="mt-1.5 text-[11px] text-[#5d554f]">Добавить</strong>
+                    <small className="text-[11px] text-[#98918a]">фото или видео</small>
+                </label>
+            </div>
+            <p className="mt-2 text-[12px] text-[#9c948e]">Можно выбрать несколько фото и видео.</p>
+            {(loadError || uploadError || sortError || deleteError) && <p className="mb-0 mt-2 text-xs text-red-600" role="alert">{deleteError || sortError || uploadError || loadError}</p>}
+            <ImageLightbox
+                images={lightboxImages}
+                index={lightboxIndex}
+                open={isLightboxOpen}
+                onClose={() => setIsLightboxOpen(false)}
+                onIndexChange={setLightboxIndex}
+            />
+        </Card>
+    );
 }
 
 function PriceSection({ sectionRef, form, onChange }) {
@@ -305,8 +724,8 @@ function ProductAside() {
         </aside>);
 }
 
-function Card({ sectionRef, id, title, required, children, bodyClassName = 'p-[15px_17px_17px] max-sm:p-[13px]' }) {
-    return <section ref={sectionRef} id={id} className="rounded-[14px] border border-[color:var(--color-border)] bg-white shadow-[0_7px_24px_rgba(70,47,31,.03)]"><header className="flex min-h-[48px] items-center gap-[9px] border-b border-[#f0ece8] px-[17px]"><h2 className="text-[15px] font-[740]">{title}</h2>{required && <em className="rounded-full bg-[color:var(--color-success-soft)] px-[7px] py-1 text-[11px] font-[720] not-italic text-[color:var(--color-success)]">Обязательно</em>}</header><div className={bodyClassName}>{children}</div></section>;
+function Card({ sectionRef, id, title, required, children, bodyClassName = 'p-[15px_17px_17px] max-sm:p-[13px]', className = '', sectionProps = {} }) {
+    return <section ref={sectionRef} id={id} className={`rounded-[14px] border border-[color:var(--color-border)] bg-white shadow-[0_7px_24px_rgba(70,47,31,.03)] ${className}`} {...sectionProps}><header className="flex min-h-[48px] items-center gap-[9px] border-b border-[#f0ece8] px-[17px]"><h2 className="text-[15px] font-[740]">{title}</h2>{required && <em className="rounded-full bg-[color:var(--color-success-soft)] px-[7px] py-1 text-[11px] font-[720] not-italic text-[color:var(--color-success)]">Обязательно</em>}</header><div className={bodyClassName}>{children}</div></section>;
 }
 
 function AccordionSection({ sectionRef, id, title, icon, children, open = false }) {

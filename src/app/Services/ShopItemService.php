@@ -11,16 +11,18 @@ use Illuminate\Support\Str;
 
 class ShopItemService
 {
-    /** @param array{name: string, price: numeric-string|int|float, old_price?: numeric-string|int|float|null, quantity: int, status: string} $data */
+    /** @param array{name: string|null, price: numeric-string|int|float, old_price?: numeric-string|int|float|null, quantity: int, description?: string|null, status: string} $data */
     public function create(array $data): ShopItem
     {
         return ShopItem::query()->create([
             ...$data,
-            'url' => Str::slug($data['name']),
+            'url' => $data['name'] === null
+                ? 'draft-'.Str::uuid()->toString()
+                : Str::slug($data['name']),
         ]);
     }
 
-    /** @param array{name: string, price: numeric-string|int|float, old_price?: numeric-string|int|float|null, quantity: int, status: string} $data */
+    /** @param array{name: string|null, price: numeric-string|int|float, old_price?: numeric-string|int|float|null, quantity: int, description?: string|null, status: string} $data */
     public function update(ShopItem $shopItem, array $data): ShopItem
     {
         $shopItem->update($data);

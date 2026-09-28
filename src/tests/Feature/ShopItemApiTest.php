@@ -61,27 +61,59 @@ class ShopItemApiTest extends TestCase
             'price' => 1200,
             'old_price' => null,
             'quantity' => 3,
+            'description' => '<p>Описание нового товара</p>',
             'status' => 'draft',
         ])
             ->assertCreated()
             ->assertJsonPath('data.status', 'draft')
+            ->assertJsonPath('data.description', '<p>Описание нового товара</p>')
             ->json('data.id');
+
+        $emptyDraftId = $this->postJson('/api/products', [
+            'name' => null,
+            'price' => 0,
+            'old_price' => null,
+            'quantity' => 0,
+            'description' => null,
+            'status' => 'draft',
+        ])
+            ->assertCreated()
+            ->assertJsonPath('data.name', null)
+            ->assertJsonPath('data.status', 'draft')
+            ->json('data.id');
+
+        $this->assertDatabaseHas('shop_items', [
+            'id' => $emptyDraftId,
+            'name' => null,
+            'status' => 'draft',
+        ]);
+        ShopItem::query()->findOrFail($emptyDraftId)->forceDelete();
+
+        $this->postJson('/api/products', [
+            'name' => null,
+            'price' => 0,
+            'quantity' => 0,
+            'status' => 'active',
+        ])->assertUnprocessable()->assertJsonValidationErrors('name');
 
         $this->putJson("/api/products/{$createdProductId}", [
             'name' => 'Опубликованный товар',
             'price' => 1300,
             'old_price' => 1500,
             'quantity' => 4,
+            'description' => '<p>Обновлённое описание товара</p>',
             'status' => 'active',
         ])
             ->assertOk()
             ->assertJsonPath('data.name', 'Опубликованный товар')
+            ->assertJsonPath('data.description', '<p>Обновлённое описание товара</p>')
             ->assertJsonPath('data.status', 'active');
 
         $this->assertDatabaseHas('shop_items', [
             'id' => $createdProductId,
             'status' => 'active',
             'quantity' => 4,
+            'description' => '<p>Обновлённое описание товара</p>',
         ]);
 
         $this->putJson("/api/products/{$createdProductId}", [

@@ -58,6 +58,9 @@ Route::middleware([
         Route::delete('/products/bulk', [ShopItemController::class, 'bulkDestroy']);
         Route::get('/products/{product}', [ShopItemController::class, 'show']);
         Route::put('/products/{product}', [ShopItemController::class, 'update']);
+        Route::post('/products/{product}/media', [ShopItemController::class, 'storeMedia']);
+        Route::put('/products/{product}/media/order', [ShopItemController::class, 'reorderMedia']);
+        Route::delete('/products/{product}/media/{media}', [ShopItemController::class, 'destroyMedia']);
         Route::delete('/products/{product}', [ShopItemController::class, 'destroy']);
     });
 

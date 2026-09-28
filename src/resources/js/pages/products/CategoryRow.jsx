@@ -1,4 +1,5 @@
 import ActionsMenu from '../../components/admin/ActionsMenu';
+import GripIcon from '../../components/icons/GripIcon';
 import PencilIcon from '../../components/icons/PencilIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
 import { useTranslation } from 'react-i18next';
@@ -52,6 +53,5 @@ export default function CategoryRow({ category, depth = 0, isExpanded, isLoading
 }
 
 const Svg = ({ children, size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>;
-const GripIcon = () => <Svg size={15}><circle cx="9" cy="6" r="1" /><circle cx="15" cy="6" r="1" /><circle cx="9" cy="12" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="9" cy="18" r="1" /><circle cx="15" cy="18" r="1" /></Svg>;
 const ChevronIcon = () => <Svg size={15}><path d="m9 18 6-6-6-6" /></Svg>;
 const FolderIcon = () => <Svg size={14}><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" /></Svg>;
