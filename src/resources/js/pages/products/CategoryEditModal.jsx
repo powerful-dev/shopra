@@ -18,9 +18,9 @@ import PhotoIcon from '../../components/icons/PhotoIcon';
 import SectionBoxIcon from '../../components/icons/SectionBoxIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
 import UploadIcon from '../../components/icons/UploadIcon';
+import SearchableSelect from '../../components/admin/SearchableSelect';
 import Field from '../../components/form/Field';
 import Input from '../../components/form/Input';
-import Select from '../../components/form/Select';
 import Textarea from '../../components/form/Textarea';
 import useSectionScroll from '../../hooks/useSectionScroll';
 import usePageScrollLock from '../../hooks/usePageScrollLock';
@@ -72,6 +72,7 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
     const [isPhotoLightboxOpen, setIsPhotoLightboxOpen] = useState(false);
     const [photoLightboxIndex, setPhotoLightboxIndex] = useState(0);
     const [isPhotoDragActive, setIsPhotoDragActive] = useState(false);
+    const [isPhotoUploading, setIsPhotoUploading] = useState(false);
     const [isDeletingPhoto, setIsDeletingPhoto] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [showSaveSuccess, setShowSaveSuccess] = useState(false);
@@ -110,6 +111,7 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
         setIsPhotoLightboxOpen(false);
         setPhotoLightboxIndex(0);
         setIsPhotoDragActive(false);
+        setIsPhotoUploading(false);
         setIsDeletingPhoto(false);
         activeCategoryIdRef.current = category?.id ?? null;
         photoDragDepthRef.current = 0;
@@ -148,6 +150,7 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
         const categoryId = category.id;
         photoUploadInProgressRef.current = true;
         setSelectedPhoto(file);
+        setIsPhotoUploading(true);
 
         try {
             const uploadedImage = await uploadShopGroupImage(categoryId, file);
@@ -168,6 +171,7 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
         } finally {
             if (activeCategoryIdRef.current === categoryId) {
                 setSelectedPhoto(null);
+                setIsPhotoUploading(false);
             }
 
             photoUploadInProgressRef.current = false;
@@ -290,17 +294,30 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
                     </div>
                     <div className="mt-[15px]">
                         <Field label={t('categoryEditModal.main.parent')} className={fieldWrapperClass}>
-                            <Select
+                            <SearchableSelect
+                                options={[
+                                    {
+                                        value: '',
+                                        label: isLoadingParents
+                                            ? t('categoriesModal.form.loadingCategories')
+                                            : t('categoryEditModal.main.noParent'),
+                                    },
+                                    ...parentOptions
+                                        .filter((option) => option.id !== category.id)
+                                        .map((option) => ({
+                                            value: String(option.id),
+                                            label: option.label,
+                                        })),
+                                ]}
                                 value={parentId}
-                                onChange={(event) => setParentId(event.target.value)}
+                                onChange={setParentId}
+                                placeholder={t('categoryEditModal.main.noParent')}
+                                searchPlaceholder={t('categoriesModal.searchPlaceholder')}
+                                emptyMessage={t('categoriesModal.noResults')}
+                                ariaLabel={t('categoryEditModal.main.parent')}
                                 disabled={isSaving || isLoadingParents || Boolean(parentsError)}
-                                aria-busy={isLoadingParents}
-                            >
-                                <option value="">{isLoadingParents ? t('categoriesModal.form.loadingCategories') : t('categoryEditModal.main.noParent')}</option>
-                                {parentOptions.filter((option) => option.id !== category.id).map((option) => (
-                                    <option key={option.id} value={option.id}>{option.label}</option>
-                                ))}
-                            </Select>
+                                ariaBusy={isLoadingParents}
+                            />
                             {parentsError && <span className="text-xs text-[#8d857e]" role="alert">{parentsError}</span>}
                         </Field>
                     </div>
@@ -350,31 +367,44 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
                             ) : (
                                 <i className="absolute inset-[24%] rounded-[36%_36%_18%_18%] border border-white/40 bg-[#314555]/55" />
                             )}
-                            {savedPhotoUrl && (
+                            {savedPhotoUrl && !isPhotoUploading && (
                                 <button
                                     type="button"
                                     className="absolute right-2 top-2 z-10 grid h-8 w-8 place-items-center rounded-lg border border-white/70 bg-white/90 text-[#b5443c] shadow-sm backdrop-blur hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
                                     aria-label={t('categoryEditModal.photo.delete')}
                                     title={t('categoryEditModal.photo.delete')}
-                                    disabled={isDeletingPhoto || photoUploadInProgressRef.current}
+                                    disabled={isDeletingPhoto}
                                     onClick={() => void deletePhoto()}
                                 >
                                     <TrashIcon />
                                 </button>
                             )}
+                            {isPhotoUploading && (
+                                <div
+                                    className="absolute inset-0 z-20 grid place-items-center bg-black/35"
+                                    role="status"
+                                    aria-label={t('categoriesModal.form.loading')}
+                                >
+                                    <span className="h-7 w-7 animate-spin rounded-full border-[3px] border-white/40 border-t-white" aria-hidden="true" />
+                                </div>
+                            )}
                         </div>
                         <button
                             type="button"
-                            className={`flex h-[178px] min-w-0 flex-1 cursor-pointer flex-col items-center justify-center rounded-[10px] border border-dashed px-4 text-center text-[color:var(--color-accent)] transition-colors max-sm:h-[153px] ${isPhotoDragActive ? 'border-[color:var(--color-accent)] bg-[#fff4ec]' : 'border-[#d0b09d] bg-[#f8f5f2]'}`}
+                            className={`flex h-[178px] min-w-0 flex-1 cursor-pointer flex-col items-center justify-center rounded-[10px] border border-dashed px-4 text-center text-[color:var(--color-accent)] transition-colors max-sm:h-[153px] disabled:cursor-not-allowed disabled:opacity-60 ${isPhotoDragActive ? 'border-[color:var(--color-accent)] bg-[#fff4ec]' : 'border-[#d0b09d] bg-[#f8f5f2]'}`}
+                            disabled={isPhotoUploading || isDeletingPhoto}
                             onClick={() => photoInputRef.current?.click()}
                             onDragEnter={(event) => {
                                 event.preventDefault();
+
+                                if (isPhotoUploading || isDeletingPhoto) return;
+
                                 photoDragDepthRef.current += 1;
                                 setIsPhotoDragActive(true);
                             }}
                             onDragOver={(event) => {
                                 event.preventDefault();
-                                event.dataTransfer.dropEffect = 'copy';
+                                event.dataTransfer.dropEffect = isPhotoUploading || isDeletingPhoto ? 'none' : 'copy';
                             }}
                             onDragLeave={(event) => {
                                 event.preventDefault();
@@ -384,7 +414,15 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
                                     setIsPhotoDragActive(false);
                                 }
                             }}
-                            onDrop={dropPhoto}
+                            onDrop={(event) => {
+                                if (isPhotoUploading || isDeletingPhoto) {
+                                    event.preventDefault();
+
+                                    return;
+                                }
+
+                                dropPhoto(event);
+                            }}
                         >
                             <UploadIcon />
                             <strong className="mt-2 text-[13px] text-[#5d554f]">{t('categoryEditModal.photo.add')}</strong>
@@ -396,6 +434,7 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
                             type="file"
                             accept="image/jpeg,image/png,image/webp"
                             tabIndex={-1}
+                            disabled={isPhotoUploading || isDeletingPhoto}
                             onChange={(event) => {
                                 void selectPhoto(event.target.files[0]);
                                 event.target.value = '';

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ConfirmModal from '../../components/admin/ConfirmModal';
+import SearchableSelect from '../../components/admin/SearchableSelect';
 import CategoryEditModal from './CategoryEditModal';
 import CategoryRow from './CategoryRow';
 import CategorySlugField from './CategorySlugField';
@@ -570,16 +571,32 @@ function CategoryCreateForm({ parentOptions, isLoadingParents, parentsError, onC
                     />
                 )}
             </div>
-            <label className="flex min-w-0 flex-col gap-[5px]">
+            <div className="flex min-w-0 flex-col gap-[5px]">
                 <span className="text-xs font-bold text-[#554e48]">{t('categoriesModal.form.parent')}</span>
-                <select className="h-[38px] w-full rounded-lg border border-[#d8d0ca] bg-white px-[9px] text-xs text-[#312d29] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]" value={parentId} onChange={(event) => setParentId(event.target.value)} disabled={isSaving || isLoadingParents || Boolean(parentsError)} aria-busy={isLoadingParents}>
-                    <option value="">{isLoadingParents ? t('categoriesModal.form.loadingCategories') : t('categoriesModal.form.noParent')}</option>
-                    {parentOptions.map((category) => (
-                        <option key={category.id} value={category.id}>{category.label}</option>
-                    ))}
-                </select>
+                <SearchableSelect
+                    options={[
+                        {
+                            value: '',
+                            label: isLoadingParents
+                                ? t('categoriesModal.form.loadingCategories')
+                                : t('categoriesModal.form.noParent'),
+                        },
+                        ...parentOptions.map((category) => ({
+                            value: String(category.id),
+                            label: category.label,
+                        })),
+                    ]}
+                    value={parentId}
+                    onChange={setParentId}
+                    placeholder={t('categoriesModal.form.noParent')}
+                    searchPlaceholder={t('categoriesModal.searchPlaceholder')}
+                    emptyMessage={t('categoriesModal.noResults')}
+                    ariaLabel={t('categoriesModal.form.parent')}
+                    disabled={isSaving || isLoadingParents || Boolean(parentsError)}
+                    ariaBusy={isLoadingParents}
+                />
                 {parentsError && <span className="text-xs text-[#8d857e]" role="alert">{parentsError}</span>}
-            </label>
+            </div>
             {saveError && <p role="alert" className="col-span-2 m-0 text-xs text-[#8d857e] max-[620px]:col-span-1">{saveError}</p>}
             <div className="col-span-2 flex justify-end gap-2 max-[620px]:col-span-1">
                 <button type="button" className="button button--secondary min-h-[36px]" onClick={onCancel} disabled={isSaving}>{t('categoriesModal.form.cancel')}</button>

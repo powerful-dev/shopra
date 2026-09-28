@@ -35,6 +35,11 @@
         &[aria-expanded="true"] .searchable-select__chevron {
             transform: rotate(180deg);
         }
+
+        &:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
     }
 
     &__value,

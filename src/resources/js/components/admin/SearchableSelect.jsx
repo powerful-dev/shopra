@@ -16,6 +16,8 @@ export default function SearchableSelect({
     emptyMessage = 'Нічого не знайдено',
     ariaLabel = placeholder,
     className = '',
+    disabled = false,
+    ariaBusy = false,
 }) {
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState('');
@@ -59,6 +61,14 @@ export default function SearchableSelect({
             document.removeEventListener('keydown', handleEscape);
         };
     }, [isOpen]);
+
+    useEffect(() => {
+        if (!disabled || !isOpen) return;
+
+        setIsOpen(false);
+        setQuery('');
+        setDropdownStyle(null);
+    }, [disabled, isOpen]);
 
     useLayoutEffect(() => {
         if (!isOpen) return undefined;
@@ -110,6 +120,8 @@ export default function SearchableSelect({
                 aria-haspopup="listbox"
                 aria-expanded={isOpen}
                 aria-controls={isOpen ? listboxId : undefined}
+                aria-busy={ariaBusy}
+                disabled={disabled}
                 onClick={() => isOpen ? close() : setIsOpen(true)}
             >
                 <span className={selectedOption ? 'searchable-select__value' : 'searchable-select__placeholder'}>
