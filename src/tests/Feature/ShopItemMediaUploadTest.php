@@ -23,6 +23,30 @@ class ShopItemMediaUploadTest extends TestCase
     // Source: https://www.sampleyogi.com/samples/heic/heic-icon-32x32.heic
     private const HEIC_FIXTURE_BASE64 = 'AAAAJGZ0eXBoZWljAAAAAG1pZjFNaVBybWlhZk1pSEJoZWljAAABw21ldGEAAAAAAAAAIWhkbHIAAAAAAAAAAHBpY3QAAAAAAAAAAAAAAAAAAAAAJGRpbmYAAAAcZHJlZgAAAAAAAAABAAAADHVybCAAAAABAAAADnBpdG0AAAAAAAEAAAA4aWluZgAAAAAAAgAAABVpbmZlAgAAAAABAABodmMxAAAAABVpbmZlAgAAAQACAABFeGlmAAAAABppcmVmAAAAAAAAAA5jZHNjAAIAAQABAAAA5mlwcnAAAADFaXBjbwAAABNjb2xybmNseAACAAIABoAAAAAMY2xsaQDLAEAAAAAUaXNwZQAAAAAAAAAgAAAAIAAAAAlpcm90AAAAABBwaXhpAAAAAAMICAgAAABxaHZjQwEDcAAAALAAAAAAAB7wAPz9+PgAAAsDoAABABdAAQwB//8DcAAAAwCwAAADAAADAB5wJKEAAQAjQgEBA3AAAAMAsAAAAwAAAwAeoBQgQcCDCOIe5FlU3AgIGAKiAAEACUQBwGFyyERTZAAAABlpcG1hAAAAAAAAAAEAAQaBAgOEBYYAAAAsaWxvYwAAAABEAAACAAEAAAABAAACQwAAASUAAgAAAAEAAAH3AAAATAAAAAFtZGF0AAAAAAAAAYEAAAAGRXhpZgAATU0AKgAAAAgAAwEaAAUAAAABAAAAMgEbAAUAAAABAAAAOgEoAAMAAAABAAIAAAAAAAAAAABIAAAAAQAAAEgAAAABAAABISgBr6EweBpevf2B6w/1nOwiONX+GL1La38RmevzWUzT9D3r7jA0VRtjL4XO8t/RWfdSXs1Y8qGo9zOew8U21mU4VppsYqv7u7Pyz1zyoc0MYzcg3DAd+yEhUz03NAi9tIff8iVKuN/L5XoLNlDPGG9CRGr4uR/uaNPfkF8E7KNRqb4Pub6swSBh7qqL18uiysXUnvkir/4ZbqYEHsNZH8XuMWSnT/fWqV50CKvZLU6QbzID/liEFognBSF790OBXGnPnQhzlUEM/Lj14jITusV/fUkQvf//9yhSv/90eImpFAEZQ3EL/cn/jaSQHcJD9FBRHe3/f50F7IU7hw1BGZHr/EI//olcDRU1DsjwgDRa5kXv+f+OuhZtu28zyz6KUmg=';
 
+    public function test_media_config_is_exposed_from_the_application_configuration(): void
+    {
+        $this->authenticateWithProductsAccess();
+
+        $this->getJson('/api/products/media-config')
+            ->assertOk()
+            ->assertExactJson([
+                'data' => [
+                    'image' => [
+                        'extensions' => config('media.products.image_extensions'),
+                        'mime_types' => config('media.products.image_mime_types'),
+                        'max_kilobytes' => config('media.image_max_kilobytes'),
+                        'max_count' => config('media.products.max_images'),
+                    ],
+                    'video' => [
+                        'extensions' => config('media.products.video_extensions'),
+                        'mime_types' => config('media.products.video_mime_types'),
+                        'max_kilobytes' => config('media.video_max_kilobytes'),
+                        'max_count' => config('media.products.max_videos'),
+                    ],
+                ],
+            ]);
+    }
+
     public function test_images_are_processed_and_the_first_image_is_main(): void
     {
         Storage::fake('public');

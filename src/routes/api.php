@@ -54,6 +54,7 @@ Route::middleware([
         Route::delete('/product-categories/{group}/image', [ShopGroupController::class, 'destroyImage']);
         Route::get('/product-categories/slug', [ShopGroupController::class, 'slug']);
         Route::get('/products', [ShopItemController::class, 'index']);
+        Route::get('/products/media-config', [ShopItemController::class, 'mediaConfig']);
         Route::post('/products', [ShopItemController::class, 'store']);
         Route::delete('/products/bulk', [ShopItemController::class, 'bulkDestroy']);
         Route::get('/products/{product}', [ShopItemController::class, 'show']);

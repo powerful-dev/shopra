@@ -33,6 +33,26 @@ class ShopItemController extends Controller
         ]);
     }
 
+    public function mediaConfig(): JsonResponse
+    {
+        return response()->json([
+            'data' => [
+                'image' => [
+                    'extensions' => array_values(config('media.products.image_extensions')),
+                    'mime_types' => array_values(config('media.products.image_mime_types')),
+                    'max_kilobytes' => (int) config('media.image_max_kilobytes'),
+                    'max_count' => (int) config('media.products.max_images'),
+                ],
+                'video' => [
+                    'extensions' => array_values(config('media.products.video_extensions')),
+                    'mime_types' => array_values(config('media.products.video_mime_types')),
+                    'max_kilobytes' => (int) config('media.video_max_kilobytes'),
+                    'max_count' => (int) config('media.products.max_videos'),
+                ],
+            ],
+        ]);
+    }
+
     public function show(ShopItem $product): ShopItemResource
     {
         return new ShopItemResource($product->load([

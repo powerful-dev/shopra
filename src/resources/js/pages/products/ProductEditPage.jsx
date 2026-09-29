@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ActionsMenu from '../../components/admin/ActionsMenu';
 import Alert from '../../components/admin/Alert';
@@ -18,15 +19,20 @@ import RocketIcon from '../../components/icons/RocketIcon';
 import ChevronIcon from '../../components/icons/ChevronIcon';
 import SaveIcon from '../../components/icons/SaveIcon';
 import { csrf, request } from '../../services/api';
-import { deleteShopItemMedia, reorderShopItemMedia, uploadShopItemMedia } from '../../services/shopItems';
+import { deleteShopItemMedia, getShopItemMediaConfig, reorderShopItemMedia, uploadShopItemMedia } from '../../services/shopItems';
 import useFileDropZone from '../../hooks/useFileDropZone';
 import useSectionScroll from '../../hooks/useSectionScroll';
 
 
 const fieldClass = 'h-[43px] w-full rounded-[9px] border border-[#ddd5cf] bg-white px-[11px] text-[13px] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]';
-const productImageExtensions = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
-const browserPreviewImageExtensions = ['jpg', 'jpeg', 'png', 'webp'];
-const heicMimeTypes = ['image/heic', 'image/heif', 'image/x-heic', 'image/x-heif'];
+
+function formatMediaExtensions(extensions) {
+    const normalized = extensions.map((extension) => extension.toLowerCase() === 'jpeg' ? 'jpg' : extension.toLowerCase());
+
+    return [...new Set(normalized)]
+        .map((extension) => ({ webp: 'WebP', webm: 'WebM' })[extension] ?? extension.toUpperCase())
+        .join(', ');
+}
 
 const sectionLinks = [
     ['main', 'Основное', 'box'],
@@ -381,7 +387,9 @@ function MainSection({ sectionRef, form, onChange }) {
 }
 
 function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductId, onMediaUploaded, onMediaOrderChanged }) {
+    const { t, i18n } = useTranslation();
     const inputRef = useRef(null);
+    const mediaGridRef = useRef(null);
     const uploadInProgressRef = useRef(false);
     const draggedMediaIdRef = useRef(null);
     const deletedMediaIdsRef = useRef(new Set());
@@ -396,11 +404,79 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
     const [draggedMediaId, setDraggedMediaId] = useState(null);
     const [mediaDropTarget, setMediaDropTarget] = useState(null);
     const [isSortingMedia, setIsSortingMedia] = useState(false);
+    const [mediaConfig, setMediaConfig] = useState(null);
+    const [mediaConfigError, setMediaConfigError] = useState('');
     const isUploading = pendingMedia.length > 0;
     const isDeletingMedia = deletingMediaIds.length > 0;
     const images = media.filter((item) => item.type === 'image');
     const lightboxImages = images.map((item) => ({ src: item.large_url, alt: '' }));
-    const isAddDisabled = isLoading || isUploading || isSortingMedia || isDeletingMedia;
+    const imageCount = images.length + pendingMedia.filter((item) => item.type === 'image').length;
+    const videoCount = media.filter((item) => item.type === 'video').length
+        + pendingMedia.filter((item) => item.type === 'video').length;
+    const occupiedMediaSlots = media.length + pendingMedia.length + (isLoading ? 1 : 0);
+    const remainingImages = mediaConfig ? Math.max(0, mediaConfig.image.max_count - imageCount) : 0;
+    const remainingVideos = mediaConfig ? Math.max(0, mediaConfig.video.max_count - videoCount) : 0;
+    const isAddDisabled = isLoading
+        || isUploading
+        || isSortingMedia
+        || isDeletingMedia
+        || !mediaConfig
+        || (remainingImages === 0 && remainingVideos === 0);
+    const acceptedMediaTypes = mediaConfig
+        ? [
+            ...(remainingImages > 0 ? [...mediaConfig.image.mime_types, ...mediaConfig.image.extensions.map((extension) => `.${extension}`)] : []),
+            ...(remainingVideos > 0 ? [...mediaConfig.video.mime_types, ...mediaConfig.video.extensions.map((extension) => `.${extension}`)] : []),
+        ].join(',')
+        : '';
+
+    useEffect(() => {
+        let isActive = true;
+
+        getShopItemMediaConfig()
+            .then((config) => {
+                if (!isActive) return;
+
+                setMediaConfig(config);
+                setMediaConfigError('');
+            })
+            .catch((error) => {
+                console.error(error);
+
+                if (isActive) setMediaConfigError(t('productEditPage.media.configLoadError'));
+            });
+
+        return () => {
+            isActive = false;
+        };
+    }, [t]);
+
+    useLayoutEffect(() => {
+        const grid = mediaGridRef.current;
+
+        if (!grid) return undefined;
+
+        const updateUploadSpan = () => {
+            const styles = window.getComputedStyle(grid);
+            const cardWidth = Number.parseFloat(styles.getPropertyValue('--media-card-width'));
+            const columnGap = Number.parseFloat(styles.columnGap);
+
+            if (!cardWidth || Number.isNaN(columnGap)) return;
+
+            const columnCount = Math.max(1, Math.floor((grid.clientWidth + columnGap) / (cardWidth + columnGap)));
+            const occupiedLastRow = occupiedMediaSlots % columnCount;
+            const freeColumns = occupiedLastRow === 0 ? columnCount : columnCount - occupiedLastRow;
+            const uploadSpan = freeColumns >= 3 ? freeColumns : columnCount;
+
+            grid.style.setProperty('--media-upload-column-span', String(uploadSpan));
+        };
+
+        updateUploadSpan();
+
+        const observer = new ResizeObserver(updateUploadSpan);
+        observer.observe(grid);
+
+        return () => observer.disconnect();
+    }, [occupiedMediaSlots]);
 
     const endMediaDrag = () => {
         draggedMediaIdRef.current = null;
@@ -461,24 +537,22 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
     const uploadFiles = async (fileList) => {
         const files = Array.from(fileList ?? []);
 
-        if (uploadInProgressRef.current || files.length === 0) return;
+        if (uploadInProgressRef.current || files.length === 0 || !mediaConfig) return;
 
         const pending = files.map((file, index) => {
             const extension = file.name.split('.').pop()?.toLowerCase();
             const mimeType = file.type.toLowerCase();
-            const type = file.type.startsWith('video/') || ['mp4', 'mov', 'webm'].includes(extension)
+            const type = mediaConfig.video.mime_types.includes(mimeType) || mediaConfig.video.extensions.includes(extension)
                 ? 'video'
-                : productImageExtensions.includes(extension) || ['image/jpeg', 'image/png', 'image/webp', ...heicMimeTypes].includes(mimeType)
+                : mediaConfig.image.extensions.includes(extension) || mediaConfig.image.mime_types.includes(mimeType)
                     ? 'image'
                     : null;
-            const hasLocalPreview = type === 'video'
-                || (type === 'image' && browserPreviewImageExtensions.includes(extension) && !heicMimeTypes.includes(mimeType));
 
             return {
                 id: `${Date.now()}-${index}-${file.name}`,
                 file,
                 type,
-                previewUrl: hasLocalPreview ? URL.createObjectURL(file) : null,
+                previewUrl: type ? URL.createObjectURL(file) : null,
             };
         });
         const errors = [];
@@ -572,7 +646,26 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
         disabled: isAddDisabled,
         onDrop: (files) => void uploadFiles(files),
     });
-    const otherMediaErrors = [...new Set([loadError, sortError, deleteError].filter(Boolean))];
+    const otherMediaErrors = [...new Set([loadError, mediaConfigError, sortError, deleteError].filter(Boolean))];
+    let remainingMediaHint = '';
+
+    if (mediaConfig) {
+        const imageRemaining = t('productEditPage.media.imageRemaining', { count: remainingImages });
+        const videoRemaining = t('productEditPage.media.videoRemaining', { count: remainingVideos });
+
+        if (remainingImages === 0 && remainingVideos === 0) {
+            remainingMediaHint = t('productEditPage.media.noMediaRemaining');
+        } else if (remainingImages === 0) {
+            remainingMediaHint = t('productEditPage.media.noImagesRemaining', { videos: videoRemaining });
+        } else if (remainingVideos === 0) {
+            remainingMediaHint = t('productEditPage.media.noVideosRemaining', { images: imageRemaining });
+        } else {
+            remainingMediaHint = t('productEditPage.media.mediaRemaining', {
+                images: imageRemaining,
+                videos: videoRemaining,
+            });
+        }
+    }
 
     return (
         <Card
@@ -583,7 +676,7 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
             className={`transition-[border-color,box-shadow] ${isDragActive ? 'border-[color:var(--color-accent)] ring-[3px] ring-[rgba(184,79,24,.09)]' : ''}`}
             sectionProps={dropZoneProps}
         >
-            <div className="flex flex-wrap gap-2">
+            <div ref={mediaGridRef} className="product-media-grid">
                 {media.map((item) => {
                     const isDeleting = deletingMediaIds.includes(item.id);
 
@@ -676,12 +769,12 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
                         <span className="h-7 w-7 animate-spin rounded-full border-[3px] border-[#d8cbc2] border-t-[color:var(--color-accent)]" aria-hidden="true" />
                     </div>
                 )}
-                <label className={`flex h-[178px] min-w-[139px] basis-[139px] grow flex-col items-center justify-center rounded-[10px] border border-[color:var(--color-border)] bg-[#f8f5f2] text-[color:var(--color-accent)] max-sm:h-[153px] max-sm:min-w-[119px] max-sm:basis-[119px] ${isAddDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+                <label className={`product-media-upload flex h-[178px] min-w-0 flex-col items-center justify-center rounded-[10px] border border-[color:var(--color-border)] bg-[#f8f5f2] px-4 text-[color:var(--color-accent)] max-sm:h-[153px] ${isAddDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
                     <input
                         ref={inputRef}
                         className="sr-only"
                         type="file"
-                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/x-heic,image/x-heif,.heic,.heif,video/mp4,video/quicktime,video/webm"
+                        accept={acceptedMediaTypes}
                         multiple
                         disabled={isAddDisabled}
                         onChange={(event) => {
@@ -691,10 +784,21 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
                     />
                     <UploadIcon />
                     <strong className="mt-1.5 text-[11px] text-[#5d554f]">Добавить</strong>
-                    <small className="text-[11px] text-[#98918a]">фото или видео</small>
+                    {mediaConfig && (
+                        <span className="mt-2 space-y-0.5 text-center text-[11px] leading-[1.4] text-[#98918a]">
+                            <small className="block">{t('productEditPage.media.imageRequirements', {
+                                formats: formatMediaExtensions(mediaConfig.image.extensions),
+                                size: new Intl.NumberFormat(i18n.resolvedLanguage).format(mediaConfig.image.max_kilobytes / 1024),
+                            })}</small>
+                            <small className="block">{t('productEditPage.media.videoRequirements', {
+                                formats: formatMediaExtensions(mediaConfig.video.extensions),
+                                size: new Intl.NumberFormat(i18n.resolvedLanguage).format(mediaConfig.video.max_kilobytes / 1024),
+                            })}</small>
+                        </span>
+                    )}
                 </label>
             </div>
-            <p className="mt-2 text-[12px] text-[#9c948e]">Можно выбрать несколько фото и видео.</p>
+            {mediaConfig && <p className="mt-2 text-[12px] leading-[1.45] text-[#9c948e]">{remainingMediaHint}</p>}
             {(uploadErrors.length > 0 || otherMediaErrors.length > 0) && (
                 <div className="mt-3 space-y-2">
                     {uploadErrors.map(({ message, filenames }) => (

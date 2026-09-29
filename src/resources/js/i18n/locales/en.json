@@ -288,6 +288,21 @@
         "confirmDeleteTitle": "Confirm deletion",
         "confirmDeleteMessage": "Are you sure you want to delete the “{{name}}” group and all its contents?"
     },
+    "productEditPage": {
+        "media": {
+            "imageRequirements": "Photos: {{formats}} · up to {{size}} MB",
+            "videoRequirements": "Videos: {{formats}} · up to {{size}} MB",
+            "imageRemaining_one": "{{count}} photo",
+            "imageRemaining_other": "{{count}} photos",
+            "videoRemaining_one": "{{count}} video",
+            "videoRemaining_other": "{{count}} videos",
+            "mediaRemaining": "You can add {{images}} and {{videos}} more",
+            "noImagesRemaining": "No more photos can be added · you can still add {{videos}}",
+            "noVideosRemaining": "No more videos can be added · you can still add {{images}}",
+            "noMediaRemaining": "No more photos or videos can be added",
+            "configLoadError": "Unable to load media file limits."
+        }
+    },
     "imageLightbox": {
         "previous": "Previous image",
         "next": "Next image",

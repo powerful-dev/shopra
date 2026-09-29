@@ -1,5 +1,11 @@
 import { csrf, request } from './api';
 
+export async function getShopItemMediaConfig() {
+    const response = await request('/api/products/media-config');
+
+    return response.data;
+}
+
 export async function uploadShopItemMedia(id, type, file) {
     const formData = new FormData();
     formData.append('type', type);

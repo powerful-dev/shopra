@@ -288,6 +288,25 @@
         "confirmDeleteTitle": "Підтвердьте видалення",
         "confirmDeleteMessage": "Ви дійсно хочете видалити групу «{{name}}» з усім її вмістом?"
     },
+    "productEditPage": {
+        "media": {
+            "imageRequirements": "Фото: {{formats}} · до {{size}} МБ",
+            "videoRequirements": "Відео: {{formats}} · до {{size}} МБ",
+            "imageRemaining_one": "{{count}} фотографію",
+            "imageRemaining_few": "{{count}} фотографії",
+            "imageRemaining_many": "{{count}} фотографій",
+            "imageRemaining_other": "{{count}} фотографії",
+            "videoRemaining_one": "{{count}} відео",
+            "videoRemaining_few": "{{count}} відео",
+            "videoRemaining_many": "{{count}} відео",
+            "videoRemaining_other": "{{count}} відео",
+            "mediaRemaining": "Можна додати ще {{images}} і {{videos}}",
+            "noImagesRemaining": "Більше фото додати не можна · можна додати ще {{videos}}",
+            "noVideosRemaining": "Більше відео додати не можна · можна додати ще {{images}}",
+            "noMediaRemaining": "Більше фото та відео додати не можна",
+            "configLoadError": "Не вдалося завантажити обмеження для медіафайлів."
+        }
+    },
     "imageLightbox": {
         "previous": "Попереднє зображення",
         "next": "Наступне зображення",

@@ -288,6 +288,25 @@
         "confirmDeleteTitle": "Подтвердите удаление",
         "confirmDeleteMessage": "Вы действительно хотите удалить группу «{{name}}» со всем её содержимым?"
     },
+    "productEditPage": {
+        "media": {
+            "imageRequirements": "Фото: {{formats}} · до {{size}} МБ",
+            "videoRequirements": "Видео: {{formats}} · до {{size}} МБ",
+            "imageRemaining_one": "{{count}} фотографию",
+            "imageRemaining_few": "{{count}} фотографии",
+            "imageRemaining_many": "{{count}} фотографий",
+            "imageRemaining_other": "{{count}} фотографии",
+            "videoRemaining_one": "{{count}} видео",
+            "videoRemaining_few": "{{count}} видео",
+            "videoRemaining_many": "{{count}} видео",
+            "videoRemaining_other": "{{count}} видео",
+            "mediaRemaining": "Можно добавить ещё {{images}} и {{videos}}",
+            "noImagesRemaining": "Больше фото добавить нельзя · можно добавить ещё {{videos}}",
+            "noVideosRemaining": "Больше видео добавить нельзя · можно добавить ещё {{images}}",
+            "noMediaRemaining": "Больше фото и видео добавить нельзя",
+            "configLoadError": "Не удалось загрузить ограничения для медиафайлов."
+        }
+    },
     "imageLightbox": {
         "previous": "Предыдущее изображение",
         "next": "Следующее изображение",
