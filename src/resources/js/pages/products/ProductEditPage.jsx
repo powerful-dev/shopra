@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ActionsMenu from '../../components/admin/ActionsMenu';
+import Alert from '../../components/admin/Alert';
 import Breadcrumbs from '../../components/admin/Breadcrumbs';
 import ConfirmModal from '../../components/admin/ConfirmModal';
 import ImageLightbox from '../../components/admin/ImageLightbox';
@@ -23,6 +24,9 @@ import useSectionScroll from '../../hooks/useSectionScroll';
 
 
 const fieldClass = 'h-[43px] w-full rounded-[9px] border border-[#ddd5cf] bg-white px-[11px] text-[13px] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]';
+const productImageExtensions = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
+const browserPreviewImageExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+const heicMimeTypes = ['image/heic', 'image/heif', 'image/x-heic', 'image/x-heif'];
 
 const sectionLinks = [
     ['main', 'Основное', 'box'],
@@ -383,7 +387,7 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
     const deletedMediaIdsRef = useRef(new Set());
     const deletingMediaIdsRef = useRef(new Set());
     const [pendingMedia, setPendingMedia] = useState([]);
-    const [uploadError, setUploadError] = useState('');
+    const [uploadErrors, setUploadErrors] = useState([]);
     const [sortError, setSortError] = useState('');
     const [deleteError, setDeleteError] = useState('');
     const [deletingMediaIds, setDeletingMediaIds] = useState([]);
@@ -461,23 +465,26 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
 
         const pending = files.map((file, index) => {
             const extension = file.name.split('.').pop()?.toLowerCase();
+            const mimeType = file.type.toLowerCase();
             const type = file.type.startsWith('video/') || ['mp4', 'mov', 'webm'].includes(extension)
                 ? 'video'
-                : file.type.startsWith('image/') || ['jpg', 'jpeg', 'png', 'webp'].includes(extension)
+                : productImageExtensions.includes(extension) || ['image/jpeg', 'image/png', 'image/webp', ...heicMimeTypes].includes(mimeType)
                     ? 'image'
                     : null;
+            const hasLocalPreview = type === 'video'
+                || (type === 'image' && browserPreviewImageExtensions.includes(extension) && !heicMimeTypes.includes(mimeType));
 
             return {
                 id: `${Date.now()}-${index}-${file.name}`,
                 file,
                 type,
-                previewUrl: URL.createObjectURL(file),
+                previewUrl: hasLocalPreview ? URL.createObjectURL(file) : null,
             };
         });
         const errors = [];
 
         uploadInProgressRef.current = true;
-        setUploadError('');
+        setUploadErrors([]);
         setPendingMedia(pending);
 
         let productId;
@@ -488,9 +495,14 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
             const validationMessage = Object.values(error.errors ?? {}).flat().join(' ');
             const message = validationMessage || error.message || 'Не удалось создать черновик товара.';
 
-            pending.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+            pending.forEach((item) => {
+                if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+            });
             setPendingMedia([]);
-            setUploadError(message);
+            setUploadErrors([{
+                message,
+                filenames: pending.map((item) => item.file.name),
+            }]);
             uploadInProgressRef.current = false;
 
             return;
@@ -503,15 +515,30 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
                 const uploadedMedia = await uploadShopItemMedia(productId, item.type, item.file);
                 onMediaUploaded(uploadedMedia);
             } catch (error) {
-                const validationMessage = Object.values(error.errors ?? {}).flat().join(' ');
-                const message = error.status === 413
-                    ? 'Файл слишком большой для загрузки.'
-                    : validationMessage || error.message || 'Не удалось загрузить файл.';
+                const validationMessages = Object.values(error.errors ?? {}).flat().filter(Boolean);
+                const messages = error.status === 413
+                    ? ['Файл слишком большой для загрузки.']
+                    : validationMessages.length > 0
+                        ? validationMessages
+                        : [error.message || 'Не удалось загрузить файл.'];
 
-                errors.push(`${item.file.name}: ${message}`);
-                setUploadError(errors.join(' '));
+                messages.forEach((message) => {
+                    const existingError = errors.find((uploadError) => uploadError.message === message);
+
+                    if (existingError) {
+                        if (!existingError.filenames.includes(item.file.name)) {
+                            existingError.filenames.push(item.file.name);
+                        }
+                    } else {
+                        errors.push({ message, filenames: [item.file.name] });
+                    }
+                });
+                setUploadErrors(errors.map((uploadError) => ({
+                    ...uploadError,
+                    filenames: [...uploadError.filenames],
+                })));
             } finally {
-                URL.revokeObjectURL(item.previewUrl);
+                if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
                 setPendingMedia((current) => current.filter((pendingItem) => pendingItem.id !== item.id));
             }
         }
@@ -545,6 +572,7 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
         disabled: isAddDisabled,
         onDrop: (files) => void uploadFiles(files),
     });
+    const otherMediaErrors = [...new Set([loadError, sortError, deleteError].filter(Boolean))];
 
     return (
         <Card
@@ -635,7 +663,7 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
                     <div key={item.id} className="relative h-[178px] w-[139px] overflow-hidden rounded-[10px] border border-[color:var(--color-border)] bg-[#f5f1ee] max-sm:h-[153px] max-sm:w-[119px]">
                         {item.type === 'video' ? (
                             <video className="h-full w-full bg-black object-cover" src={item.previewUrl} muted preload="metadata" draggable={false} />
-                        ) : item.type === 'image' ? (
+                        ) : item.type === 'image' && item.previewUrl ? (
                             <img className="h-full w-full object-cover" src={item.previewUrl} alt="" draggable={false} />
                         ) : null}
                         <div className="absolute inset-0 z-20 grid place-items-center bg-black/35" role="status" aria-label={`Загрузка ${item.file.name}`}>
@@ -653,7 +681,7 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
                         ref={inputRef}
                         className="sr-only"
                         type="file"
-                        accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm"
+                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/x-heic,image/x-heif,.heic,.heif,video/mp4,video/quicktime,video/webm"
                         multiple
                         disabled={isAddDisabled}
                         onChange={(event) => {
@@ -667,7 +695,23 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
                 </label>
             </div>
             <p className="mt-2 text-[12px] text-[#9c948e]">Можно выбрать несколько фото и видео.</p>
-            {(loadError || uploadError || sortError || deleteError) && <p className="mb-0 mt-2 text-xs text-red-600" role="alert">{deleteError || sortError || uploadError || loadError}</p>}
+            {(uploadErrors.length > 0 || otherMediaErrors.length > 0) && (
+                <div className="mt-3 space-y-2">
+                    {uploadErrors.map(({ message, filenames }) => (
+                        <Alert key={`upload-${message}`} variant="error" className="items-start">
+                            <span className="min-w-0">
+                                <strong className="block">{message}</strong>
+                                <span className="mt-0.5 block break-words font-medium text-[#766d66]">
+                                    {filenames.length === 1 ? 'Файл' : 'Файлы'}: {filenames.join(', ')}
+                                </span>
+                            </span>
+                        </Alert>
+                    ))}
+                    {otherMediaErrors.map((message) => (
+                        <Alert key={`media-${message}`} variant="error">{message}</Alert>
+                    ))}
+                </div>
+            )}
             <ImageLightbox
                 images={lightboxImages}
                 index={lightboxIndex}

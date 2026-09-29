@@ -19,6 +19,10 @@ class ShopItemMediaUploadTest extends TestCase
 {
     use RefreshDatabase;
 
+    // Real 32x32 HEIC/HEVC fixture kept inline so the API test has no filesystem or network dependency.
+    // Source: https://www.sampleyogi.com/samples/heic/heic-icon-32x32.heic
+    private const HEIC_FIXTURE_BASE64 = 'AAAAJGZ0eXBoZWljAAAAAG1pZjFNaVBybWlhZk1pSEJoZWljAAABw21ldGEAAAAAAAAAIWhkbHIAAAAAAAAAAHBpY3QAAAAAAAAAAAAAAAAAAAAAJGRpbmYAAAAcZHJlZgAAAAAAAAABAAAADHVybCAAAAABAAAADnBpdG0AAAAAAAEAAAA4aWluZgAAAAAAAgAAABVpbmZlAgAAAAABAABodmMxAAAAABVpbmZlAgAAAQACAABFeGlmAAAAABppcmVmAAAAAAAAAA5jZHNjAAIAAQABAAAA5mlwcnAAAADFaXBjbwAAABNjb2xybmNseAACAAIABoAAAAAMY2xsaQDLAEAAAAAUaXNwZQAAAAAAAAAgAAAAIAAAAAlpcm90AAAAABBwaXhpAAAAAAMICAgAAABxaHZjQwEDcAAAALAAAAAAAB7wAPz9+PgAAAsDoAABABdAAQwB//8DcAAAAwCwAAADAAADAB5wJKEAAQAjQgEBA3AAAAMAsAAAAwAAAwAeoBQgQcCDCOIe5FlU3AgIGAKiAAEACUQBwGFyyERTZAAAABlpcG1hAAAAAAAAAAEAAQaBAgOEBYYAAAAsaWxvYwAAAABEAAACAAEAAAABAAACQwAAASUAAgAAAAEAAAH3AAAATAAAAAFtZGF0AAAAAAAAAYEAAAAGRXhpZgAATU0AKgAAAAgAAwEaAAUAAAABAAAAMgEbAAUAAAABAAAAOgEoAAMAAAABAAIAAAAAAAAAAABIAAAAAQAAAEgAAAABAAABISgBr6EweBpevf2B6w/1nOwiONX+GL1La38RmevzWUzT9D3r7jA0VRtjL4XO8t/RWfdSXs1Y8qGo9zOew8U21mU4VppsYqv7u7Pyz1zyoc0MYzcg3DAd+yEhUz03NAi9tIff8iVKuN/L5XoLNlDPGG9CRGr4uR/uaNPfkF8E7KNRqb4Pub6swSBh7qqL18uiysXUnvkir/4ZbqYEHsNZH8XuMWSnT/fWqV50CKvZLU6QbzID/liEFognBSF790OBXGnPnQhzlUEM/Lj14jITusV/fUkQvf//9yhSv/90eImpFAEZQ3EL/cn/jaSQHcJD9FBRHe3/f50F7IU7hw1BGZHr/EI//olcDRU1DsjwgDRa5kXv+f+OuhZtu28zyz6KUmg=';
+
     public function test_images_are_processed_and_the_first_image_is_main(): void
     {
         Storage::fake('public');
@@ -61,6 +65,35 @@ class ShopItemMediaUploadTest extends TestCase
         Storage::disk('public')->assertExists("shop/products/{$item->id}/small/{$secondFilename}");
         Storage::disk('public')->assertExists("shop/products/{$item->id}/large/{$secondFilename}");
         $this->assertSame(1, $item->media()->where('type', ShopItemMedia::TYPE_IMAGE)->where('is_main', true)->count());
+    }
+
+    public function test_heic_and_heif_images_are_accepted_case_insensitively_and_stored_as_webp_variants(): void
+    {
+        Storage::fake('public');
+        $this->createShopWithImageSettings();
+        $this->authenticateWithProductsAccess();
+
+        foreach (['photo.HEIC', 'photo.HeIf'] as $filename) {
+            $item = $this->createItem();
+            $response = $this->post('/api/products/'.$item->id.'/media', [
+                'type' => ShopItemMedia::TYPE_IMAGE,
+                'file' => UploadedFile::fake()->createWithContent(
+                    $filename,
+                    base64_decode(self::HEIC_FIXTURE_BASE64, true),
+                ),
+            ], ['Accept' => 'application/json'])
+                ->assertCreated()
+                ->assertJsonPath('data.type', ShopItemMedia::TYPE_IMAGE)
+                ->assertJsonPath('data.is_main', true)
+                ->assertJsonPath('data.small_url', fn (string $url): bool => str_contains($url, "/shop/products/{$item->id}/small/"))
+                ->assertJsonPath('data.large_url', fn (string $url): bool => str_contains($url, "/shop/products/{$item->id}/large/"));
+
+            $storedFilename = $response->json('data.filename');
+
+            $this->assertStringEndsWith('.webp', $storedFilename);
+            $this->assertStoredImage("shop/products/{$item->id}/small/{$storedFilename}", 32, 32);
+            $this->assertStoredImage("shop/products/{$item->id}/large/{$storedFilename}", 50, 50);
+        }
     }
 
     public function test_video_is_stored_directly_and_is_never_main(): void
@@ -326,6 +359,13 @@ class ShopItemMediaUploadTest extends TestCase
         $this->postJson('/api/products/'.$item->id.'/media', [
             'type' => 'document',
         ])->assertUnprocessable()->assertJsonValidationErrors(['type', 'file']);
+
+        $this->post('/api/products/'.$item->id.'/media', [
+            'type' => ShopItemMedia::TYPE_IMAGE,
+            'file' => UploadedFile::fake()->create('document.pdf', 100, 'application/pdf'),
+        ], ['Accept' => 'application/json'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('file');
 
         $this->post('/api/products/'.$item->id.'/media', [
             'type' => ShopItemMedia::TYPE_VIDEO,

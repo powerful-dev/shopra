@@ -1,10 +1,13 @@
 FROM php:8.4-fpm
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     unzip \
     zip \
     curl \
+    libheif-dev \
+    libheif-plugin-libde265 \
+    libmagickwand-dev \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
     libpng-dev \
@@ -12,7 +15,10 @@ RUN apt-get update && apt-get install -y \
     libwebp-dev \
     libzip-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install gd pdo_pgsql zip
+    && docker-php-ext-install gd pdo_pgsql zip \
+    && pecl install imagick \
+    && docker-php-ext-enable imagick \
+    && rm -rf /var/lib/apt/lists/*
 
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
