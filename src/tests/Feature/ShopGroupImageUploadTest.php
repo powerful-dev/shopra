@@ -101,7 +101,7 @@ class ShopGroupImageUploadTest extends TestCase
             ->assertUnprocessable()
             ->assertJsonValidationErrors('image');
         $this->post('/api/product-categories/'.$group->id.'/image', [
-            'image' => UploadedFile::fake()->image('large.jpg')->size(config('images.category_upload_max_kilobytes') + 1),
+            'image' => UploadedFile::fake()->image('large.jpg')->size(config('media.image_max_kilobytes') + 1),
         ], ['Accept' => 'application/json'])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('image');
@@ -112,7 +112,7 @@ class ShopGroupImageUploadTest extends TestCase
         $this->get('/admin/products')
             ->assertOk()
             ->assertSee(
-                '<meta name="category-image-upload-max-bytes" content="'.(config('images.category_upload_max_kilobytes') * 1024).'">',
+                '<meta name="category-image-upload-max-bytes" content="'.(config('media.image_max_kilobytes') * 1024).'">',
                 false,
             );
     }

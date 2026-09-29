@@ -378,7 +378,7 @@ class ShopItemMediaUploadTest extends TestCase
             'type' => ShopItemMedia::TYPE_VIDEO,
             'file' => UploadedFile::fake()->create(
                 'large.mp4',
-                config('media.products.video_max_kilobytes') + 1,
+                config('media.video_max_kilobytes') + 1,
                 'video/mp4',
             ),
         ], ['Accept' => 'application/json'])

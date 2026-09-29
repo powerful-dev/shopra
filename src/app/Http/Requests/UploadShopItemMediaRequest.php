@@ -24,7 +24,7 @@ class UploadShopItemMediaRequest extends FormRequest
                 'file',
                 'extensions:'.implode(',', config('media.products.image_extensions')),
                 'mimetypes:'.implode(',', config('media.products.image_mime_types')),
-                'max:'.config('media.products.image_max_kilobytes'),
+                'max:'.config('media.image_max_kilobytes'),
             ];
         } elseif ($this->input('type') === ShopItemMedia::TYPE_VIDEO) {
             $fileRules = [
@@ -32,7 +32,7 @@ class UploadShopItemMediaRequest extends FormRequest
                 'file',
                 'mimes:'.implode(',', config('media.products.video_extensions')),
                 'mimetypes:'.implode(',', config('media.products.video_mime_types')),
-                'max:'.config('media.products.video_max_kilobytes'),
+                'max:'.config('media.video_max_kilobytes'),
             ];
         }
 

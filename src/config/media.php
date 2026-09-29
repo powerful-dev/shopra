@@ -1,11 +1,13 @@
 <?php
 
 return [
+    'image_max_kilobytes' => 5120,
+    'video_max_kilobytes' => 15360,
+    'webp_quality' => 80,
+
     'products' => [
         'max_images' => 20,
         'max_videos' => 2,
-        'image_max_kilobytes' => 5120,
-        'video_max_kilobytes' => 15360,
         'image_extensions' => ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'],
         'image_mime_types' => [
             'image/jpeg',

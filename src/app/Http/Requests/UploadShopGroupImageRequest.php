@@ -15,7 +15,7 @@ class UploadShopGroupImageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.config('images.category_upload_max_kilobytes')],
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.config('media.image_max_kilobytes')],
         ];
     }
 }

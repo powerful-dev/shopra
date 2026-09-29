@@ -26,7 +26,7 @@ class ImageProcessingService
 
         $image = $this->images->decode($source);
 
-        $quality = config('images.webp_quality');
+        $quality = config('media.webp_quality');
 
         if ($maxWidth !== null || $maxHeight !== null) {
             $image = $this->resize($image, $maxWidth, $maxHeight, $fit);
