@@ -234,7 +234,7 @@ export default function ProductEditPage() {
                 </div>
             </header>
 
-            <nav ref={sectionNavigationRef} className="sticky top-[var(--header-height)] z-20 mb-[13px] flex items-center gap-0.5 overflow-x-auto border-b border-[color:var(--color-border)] bg-[rgba(247,246,243,.95)] py-1 backdrop-blur max-lg:top-[62px] max-sm:-mx-[13px] max-sm:px-[13px]" aria-label="Разделы товара">
+            <nav ref={sectionNavigationRef} className="sticky top-[var(--header-height)] z-30 mb-[13px] flex items-center gap-0.5 overflow-x-auto border-b border-[color:var(--color-border)] bg-[rgba(247,246,243,.95)] py-1 backdrop-blur max-lg:top-[62px] max-sm:-mx-[13px] max-sm:px-[13px]" aria-label="Разделы товара">
                 {sectionLinks.map(([id, label, icon], index) => (
                     <button key={id} type="button" className={`flex min-h-[45px] shrink-0 cursor-pointer items-center gap-1.5 border-0 bg-transparent px-2.5 text-[12px] font-[680] ${index === 0 ? 'relative text-[color:var(--color-accent)] after:absolute after:inset-x-2.5 after:-bottom-1 after:h-0.5 after:rounded-full after:bg-[color:var(--color-accent)]' : 'text-[#756e67]'}`} onClick={() => scrollToSection(sectionRefs.current[id])}>
                         <span className={`grid h-[25px] w-[25px] place-items-center rounded-lg ${index === 0 ? 'bg-[#f9eee7]' : 'bg-[#f0ebe7]'}`}><SectionIcon type={icon} /></span>{label}
@@ -785,7 +785,7 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
                     <UploadIcon />
                     <strong className="mt-1.5 text-[11px] text-[#5d554f]">Добавить</strong>
                     {mediaConfig && (
-                        <span className="mt-2 space-y-0.5 text-center text-[11px] leading-[1.4] text-[#98918a]">
+                        <span className="mt-2 space-y-0.5 text-center text-[12px] leading-[1.4] text-[#98918a]">
                             <small className="block">{t('productEditPage.media.imageRequirements', {
                                 formats: formatMediaExtensions(mediaConfig.image.extensions),
                                 size: new Intl.NumberFormat(i18n.resolvedLanguage).format(mediaConfig.image.max_kilobytes / 1024),

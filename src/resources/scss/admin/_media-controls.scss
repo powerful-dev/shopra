@@ -2,9 +2,12 @@
     --media-card-width: 139px;
     --media-upload-column-span: 3;
 
+    position: relative;
+    z-index: 0;
     display: grid;
     grid-template-columns: repeat(auto-fill, var(--media-card-width));
     gap: 8px;
+    isolation: isolate;
 }
 
 .product-media-upload {
