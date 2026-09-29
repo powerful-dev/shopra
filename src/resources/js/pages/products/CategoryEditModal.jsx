@@ -20,6 +20,8 @@ import CategorySlugField from './CategorySlugField';
 import AdminCard from '../../components/admin/AdminCard';
 import ImageLightbox from '../../components/admin/ImageLightbox';
 import { deleteShopGroupImage, updateShopGroup, uploadShopGroupImage } from '../../services/shopGroups';
+import { getShopItemMediaConfig } from '../../services/shopItems';
+import { formatMediaExtensions } from '../../utils/media';
 
 const fieldWrapperClass = '[&.form-field]:gap-[7px] [&>.form-label]:text-[12px] [&>.form-label]:leading-normal [&>.form-label]:text-[#554e48]';
 const categoryImageUploadMaxBytes = Number(document.querySelector('meta[name="category-image-upload-max-bytes"]')?.content);
@@ -52,6 +54,7 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
     const [showSaveSuccess, setShowSaveSuccess] = useState(false);
     const [photoError, setPhotoError] = useState('');
     const [saveError, setSaveError] = useState('');
+    const [mediaConfig, setMediaConfig] = useState(null);
     usePageScrollLock(Boolean(category));
     const scrollToSection = useSectionScroll({
         stickyRef: sectionNavigationRef,
@@ -104,6 +107,20 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
     }, [category, resetPhotoDropZone]);
 
     useEffect(() => () => window.clearTimeout(saveFeedbackTimerRef.current), []);
+
+    useEffect(() => {
+        let isActive = true;
+
+        getShopItemMediaConfig()
+            .then((config) => {
+                if (isActive) setMediaConfig(config);
+            })
+            .catch((error) => console.error(error));
+
+        return () => {
+            isActive = false;
+        };
+    }, []);
 
     useEffect(() => {
         if (!selectedPhoto) {
@@ -371,7 +388,14 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
                             >
                                 <UploadIcon />
                                 <strong className="mt-2 text-[13px] text-[#5d554f]">{t('categoryEditModal.photo.add')}</strong>
-                                <small className="mt-1 text-[11px] leading-[1.4] text-[#98918a]">{t('categoryEditModal.photo.dropHint')}</small>
+                                {mediaConfig && (
+                                    <small className="mt-1 text-[11px] leading-[1.4] text-[#98918a]">
+                                        {t('categoryEditModal.photo.requirements', {
+                                            formats: formatMediaExtensions(mediaConfig.image.extensions),
+                                            size: new Intl.NumberFormat(i18n.resolvedLanguage).format(mediaConfig.image.max_kilobytes / 1024),
+                                        })}
+                                    </small>
+                                )}
                             </button>
                         )}
                         <Input

@@ -22,17 +22,10 @@ import { csrf, request } from '../../services/api';
 import { deleteShopItemMedia, getShopItemMediaConfig, reorderShopItemMedia, uploadShopItemMedia } from '../../services/shopItems';
 import useFileDropZone from '../../hooks/useFileDropZone';
 import useSectionScroll from '../../hooks/useSectionScroll';
+import { formatMediaExtensions } from '../../utils/media';
 
 
 const fieldClass = 'h-[43px] w-full rounded-[9px] border border-[#ddd5cf] bg-white px-[11px] text-[13px] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]';
-
-function formatMediaExtensions(extensions) {
-    const normalized = extensions.map((extension) => extension.toLowerCase() === 'jpeg' ? 'jpg' : extension.toLowerCase());
-
-    return [...new Set(normalized)]
-        .map((extension) => ({ webp: 'WebP', webm: 'WebM' })[extension] ?? extension.toUpperCase())
-        .join(', ');
-}
 
 const sectionLinks = [
     ['main', 'Основное', 'box'],
