@@ -27,6 +27,8 @@ class SaveShopItemRequest extends FormRequest
             'old_price' => ['nullable', 'numeric', 'min:0'],
             'quantity' => ['required', 'integer', 'min:0'],
             'description' => ['nullable', 'string'],
+            'seo_title' => ['nullable', 'string', 'max:255'],
+            'seo_description' => ['nullable', 'string'],
             'shop_group_id' => [
                 'nullable',
                 'integer',

@@ -12,13 +12,13 @@ import RichTextEditor from '../../components/admin/RichTextEditor';
 import SearchableSelect from '../../components/admin/SearchableSelect';
 import Field from '../../components/form/Field';
 import Input from '../../components/form/Input';
-import Textarea from '../../components/form/Textarea';
 import useSectionScroll from '../../hooks/useSectionScroll';
 import useFileDropZone from '../../hooks/useFileDropZone';
 import usePageScrollLock from '../../hooks/usePageScrollLock';
 import CategorySlugField from './CategorySlugField';
 import AdminCard from '../../components/admin/AdminCard';
 import ImageLightbox from '../../components/admin/ImageLightbox';
+import SeoFields from '../../components/admin/SeoFields';
 import { deleteShopGroupImage, updateShopGroup, uploadShopGroupImage } from '../../services/shopGroups';
 import { getShopItemMediaConfig } from '../../services/shopItems';
 import { formatMediaExtensions } from '../../utils/media';
@@ -422,19 +422,16 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
                         <ChevronIcon />
                     </summary>
                     <div className="accordion__body">
-                        <Field label={t('categoryEditModal.seo.title')} className={fieldWrapperClass}>
-                            <Input type="text" value={seoTitle} onChange={(event) => setSeoTitle(event.target.value)} disabled={isSaving} />
-                        </Field>
-                        <div className="mt-[13px]">
-                            <Field label={t('categoryEditModal.seo.description')} className={fieldWrapperClass}>
-                                <Textarea value={seoDescription} onChange={(event) => setSeoDescription(event.target.value)} disabled={isSaving} />
-                            </Field>
-                        </div>
-                        <div className="mt-[13px] rounded-[10px] border border-[color:var(--color-border)] bg-[#faf9f7] p-3">
-                            <small className="text-[11px] text-[color:var(--color-success)]">{category.url}</small>
-                            <strong className="mt-[3px] block text-[12px] text-[#375b8b]">{seoTitle}</strong>
-                            <p className="mb-0 mt-[3px] text-[11px] text-[#7c746e]">{seoDescription}</p>
-                        </div>
+                        <SeoFields
+                            title={seoTitle}
+                            description={seoDescription}
+                            url={category.url}
+                            titleLabel={t('categoryEditModal.seo.title')}
+                            descriptionLabel={t('categoryEditModal.seo.description')}
+                            disabled={isSaving}
+                            onTitleChange={setSeoTitle}
+                            onDescriptionChange={setSeoDescription}
+                        />
                     </div>
                     </details>
                     {saveError && <p className="m-0 text-xs text-[#8d857e]" role="alert">{saveError}</p>}

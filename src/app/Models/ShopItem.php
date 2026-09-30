@@ -21,6 +21,8 @@ class ShopItem extends Model
         'old_price',
         'quantity',
         'description',
+        'seo_title',
+        'seo_description',
         'shop_group_id',
         'shop_unit_id',
         'show_stock',

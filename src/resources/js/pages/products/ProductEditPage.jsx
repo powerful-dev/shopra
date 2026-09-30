@@ -10,6 +10,7 @@ import ImageLightbox from '../../components/admin/ImageLightbox';
 import { MediaDeleteButton, MediaDragHandle } from '../../components/admin/MediaCardControls';
 import RichTextEditor from '../../components/admin/RichTextEditor';
 import SearchableSelect from '../../components/admin/SearchableSelect';
+import SeoFields from '../../components/admin/SeoFields';
 import BackIcon from '../../components/icons/BackIcon';
 import BoxIcon from '../../components/icons/BoxIcon';
 import CategoriesIcon from '../../components/icons/CategoriesIcon';
@@ -48,7 +49,7 @@ export default function ProductEditPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const isNew = id === 'new' || !id;
-    const [form, setForm] = useState({ name: '', price: '', old_price: '', quantity: '', description: '', shop_group_id: null, status: isNew ? 'draft' : null });
+    const [form, setForm] = useState({ name: '', price: '', old_price: '', quantity: '', description: '', seo_title: '', seo_description: '', shop_group_id: null, status: isNew ? 'draft' : null });
     const [shopGroupOptions, setShopGroupOptions] = useState([]);
     const [isShopGroupsLoading, setIsShopGroupsLoading] = useState(true);
     const [shopGroupsLoadError, setShopGroupsLoadError] = useState('');
@@ -186,6 +187,8 @@ export default function ProductEditPage() {
                     old_price: product.old_price ?? '',
                     quantity: product.quantity ?? '',
                     description: product.description ?? '',
+                    seo_title: product.seo_title ?? '',
+                    seo_description: product.seo_description ?? '',
                     shop_group_id: product.shop_group_id ?? null,
                     status: product.status,
                 });
@@ -223,6 +226,8 @@ export default function ProductEditPage() {
             price: useDraftDefaults && form.price === '' ? 0 : form.price,
             old_price: form.old_price || null,
             quantity: useDraftDefaults && form.quantity === '' ? 0 : form.quantity,
+            seo_title: form.seo_title || null,
+            seo_description: form.seo_description || null,
             status,
         };
         let creationPromise;
@@ -279,7 +284,14 @@ export default function ProductEditPage() {
                 ({ data: product } = await request(`/api/products/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...form, name: form.name.trim() || null, old_price: form.old_price || null, status }),
+                    body: JSON.stringify({
+                        ...form,
+                        name: form.name.trim() || null,
+                        old_price: form.old_price || null,
+                        seo_title: form.seo_title || null,
+                        seo_description: form.seo_description || null,
+                        status,
+                    }),
                 }));
 
                 setForm((current) => ({ ...current, status: product.status }));
@@ -463,8 +475,18 @@ export default function ProductEditPage() {
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title="Характеристики" icon="sliders"><Field label="Характеристики товара"><input className={fieldClass} type="text" placeholder="Например: материал — натуральная кожа" /></Field></AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.delivery = element; }} id="delivery" title="Доставка" icon="truck"><Field label="Группа доставки"><select className={fieldClass} defaultValue="standard"><option value="standard">Стандартная доставка</option><option>Крупногабаритный товар</option><option>Самовывоз</option></select></Field></AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.seo = element; }} id="seo" title="SEO" icon="link">
-                        <Field label="Заголовок для поиска"><input className={fieldClass} type="text" defaultValue="Кожаный рюкзак CITY — купить в Shopra" /></Field>
-                        <div className="mt-[13px] rounded-[10px] border border-[color:var(--color-border)] bg-[#faf9f7] p-3"><small className="text-[11px] text-[color:var(--color-success)]">shopra.store/products/kozhanyy-ryukzak-city</small><strong className="mt-[3px] block text-[12px] text-[#375b8b]">Кожаный рюкзак CITY — купить в Shopra</strong><p className="mt-[3px] text-[11px] text-[#7c746e]">Городской кожаный рюкзак CITY. Доставка по Украине, удобная оплата и гарантия качества.</p></div>
+                        <SeoFields
+                            title={form.seo_title}
+                            description={form.seo_description}
+                            url="shopra.store/products/kozhanyy-ryukzak-city"
+                            titleLabel="Заголовок для поиска"
+                            descriptionLabel="Описание для поиска"
+                            titleName="seo_title"
+                            descriptionName="seo_description"
+                            disabled={isSubmitting}
+                            onTitleChange={(seoTitle) => setForm((current) => ({ ...current, seo_title: seoTitle }))}
+                            onDescriptionChange={(seoDescription) => setForm((current) => ({ ...current, seo_description: seoDescription }))}
+                        />
                     </AccordionSection>
                 </form>
                 <ProductAside />

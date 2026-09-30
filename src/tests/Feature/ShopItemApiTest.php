@@ -62,12 +62,16 @@ class ShopItemApiTest extends TestCase
             'old_price' => null,
             'quantity' => 3,
             'description' => '<p>Описание нового товара</p>',
+            'seo_title' => 'Новый товар — купить',
+            'seo_description' => 'SEO-описание нового товара',
             'shop_group_id' => $groups->first()->id,
             'status' => 'draft',
         ])
             ->assertCreated()
             ->assertJsonPath('data.status', 'draft')
             ->assertJsonPath('data.description', '<p>Описание нового товара</p>')
+            ->assertJsonPath('data.seo_title', 'Новый товар — купить')
+            ->assertJsonPath('data.seo_description', 'SEO-описание нового товара')
             ->assertJsonPath('data.shop_group_id', $groups->first()->id)
             ->json('data.id');
 
@@ -109,12 +113,16 @@ class ShopItemApiTest extends TestCase
             'old_price' => 1500,
             'quantity' => 4,
             'description' => '<p>Обновлённое описание товара</p>',
+            'seo_title' => 'Опубликованный товар — купить',
+            'seo_description' => 'Обновлённое SEO-описание товара',
             'shop_group_id' => $groups->last()->id,
             'status' => 'active',
         ])
             ->assertOk()
             ->assertJsonPath('data.name', 'Опубликованный товар')
             ->assertJsonPath('data.description', '<p>Обновлённое описание товара</p>')
+            ->assertJsonPath('data.seo_title', 'Опубликованный товар — купить')
+            ->assertJsonPath('data.seo_description', 'Обновлённое SEO-описание товара')
             ->assertJsonPath('data.shop_group_id', $groups->last()->id)
             ->assertJsonPath('data.status', 'active');
 
@@ -123,6 +131,8 @@ class ShopItemApiTest extends TestCase
             'status' => 'active',
             'quantity' => 4,
             'description' => '<p>Обновлённое описание товара</p>',
+            'seo_title' => 'Опубликованный товар — купить',
+            'seo_description' => 'Обновлённое SEO-описание товара',
             'shop_group_id' => $groups->last()->id,
         ]);
 
