@@ -27,7 +27,7 @@ export default function Header({ onMenuClick }) {
 
     return (
         <>
-            <header className="sticky top-0 z-40 h-[var(--header-height)] bg-[var(--color-page-bg)] max-lg:hidden">
+            <header className="sticky top-0 z-900 h-[var(--header-height)] bg-[var(--color-page-bg)] max-lg:hidden">
                 <div className="mx-8 flex h-full items-center justify-between border-b border-[color:var(--color-header-border)]">
                     <label className="flex items-center gap-2 rounded-2xl border border-[color:var(--color-border)] bg-[color:var(--color-surface-muted)] px-3 py-2 text-sm text-[color:var(--color-secondary)]">
                         <SearchIcon />

@@ -91,10 +91,8 @@ export default function SearchableSelect({
             const preferredTop = spaceBelow >= dropdownHeight || spaceBelow >= spaceAbove
                 ? triggerRect.bottom + DROPDOWN_GAP
                 : triggerRect.top - dropdownHeight - DROPDOWN_GAP;
-            const maxTop = Math.max(VIEWPORT_MARGIN, window.innerHeight - dropdownHeight - VIEWPORT_MARGIN);
-            const top = Math.min(Math.max(preferredTop, VIEWPORT_MARGIN), maxTop);
 
-            setDropdownStyle({ top, left, width });
+            setDropdownStyle({ top: preferredTop, left, width });
         };
 
         updatePosition();
