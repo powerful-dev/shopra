@@ -1,6 +1,7 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { appName } from '../../adminConfig';
 import ActionsMenu from '../../components/admin/ActionsMenu';
 import Alert from '../../components/admin/Alert';
 import Breadcrumbs from '../../components/admin/Breadcrumbs';
@@ -61,13 +62,18 @@ export default function ProductEditPage() {
     const [mediaLoadError, setMediaLoadError] = useState('');
     const sectionNavigationRef = useRef(null);
     const sectionRefs = useRef({});
+    const shopGroupsRequestRef = useRef(null);
     const productCreationPromiseRef = useRef(null);
     const createdProductIdRef = useRef(isNew ? null : id);
     const skipProductLoadIdRef = useRef(null);
     const scrollToSection = useSectionScroll({ stickyRef: sectionNavigationRef });
 
-    useEffect(() => {
+    const refreshShopGroupOptions = useCallback(() => {
+        shopGroupsRequestRef.current?.abort();
         const controller = new AbortController();
+        shopGroupsRequestRef.current = controller;
+        setIsShopGroupsLoading(true);
+        setShopGroupsLoadError('');
 
         getShopGroups({ signal: controller.signal })
             .then((groups) => {
@@ -76,6 +82,9 @@ export default function ProductEditPage() {
                         { value: null, label: 'Без категории' },
                         ...buildShopGroupOptions(groups),
                     ]);
+                    setForm((current) => current.shop_group_id === null || groups.some((group) => group.id === current.shop_group_id)
+                        ? current
+                        : { ...current, shop_group_id: null });
                 }
             })
             .catch((error) => {
@@ -85,11 +94,18 @@ export default function ProductEditPage() {
                 }
             })
             .finally(() => {
-                if (!controller.signal.aborted) setIsShopGroupsLoading(false);
+                if (!controller.signal.aborted) {
+                    setIsShopGroupsLoading(false);
+                    if (shopGroupsRequestRef.current === controller) shopGroupsRequestRef.current = null;
+                }
             });
-
-        return () => controller.abort();
     }, []);
+
+    useEffect(() => {
+        refreshShopGroupOptions();
+
+        return () => shopGroupsRequestRef.current?.abort();
+    }, [refreshShopGroupOptions]);
 
     useEffect(() => {
         if (isNew) {
@@ -372,7 +388,11 @@ export default function ProductEditPage() {
                 onConfirm={deleteProduct}
                 onClose={() => setIsDeleteConfirmOpen(false)}
             />
-            <CategoriesModal isOpen={isCategoriesOpen} onClose={() => setIsCategoriesOpen(false)} />
+            <CategoriesModal
+                isOpen={isCategoriesOpen}
+                onClose={() => setIsCategoriesOpen(false)}
+                onCategoriesChanged={refreshShopGroupOptions}
+            />
 
         </div>
     );
@@ -393,13 +413,15 @@ function StatusActions({ status, isNew, isSubmitting, onSave }) {
 }
 
 function MainSection({ sectionRef, form, shopGroupOptions, isShopGroupsLoading, shopGroupsLoadError, onChange, onShopGroupChange, onOpenCategories }) {
+    const appCategoryLabel = `Категория ${appName}`;
+
     return (
         <Card sectionRef={sectionRef} id="main" title="Основное" required>
             <Field label={<>Название товара <b className="text-[color:var(--color-accent)]">*</b></>}>
                 <input className={fieldClass} name="name" value={form.name} onChange={onChange} />
             </Field>
             <div className="relative mt-[15px]">
-                <div className="mb-[7px] text-[12px] font-bold text-[#554e48]">Категория Shopra</div>
+                <div className="mb-[7px] text-[12px] font-bold text-[#554e48]">{appCategoryLabel}</div>
                 <SearchableSelect
                     name="group_id"
                     className="searchable-select--product-category w-full"
@@ -409,7 +431,7 @@ function MainSection({ sectionRef, form, shopGroupOptions, isShopGroupsLoading, 
                     placeholder={isShopGroupsLoading ? 'Загрузка категорий…' : 'Без категории'}
                     searchPlaceholder="Поиск категории"
                     emptyMessage="Категории не найдены"
-                    ariaLabel="Категория Shopra"
+                    ariaLabel={appCategoryLabel}
                     disabled={isShopGroupsLoading || Boolean(shopGroupsLoadError)}
                     ariaBusy={isShopGroupsLoading}
                 />

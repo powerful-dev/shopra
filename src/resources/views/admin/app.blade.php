@@ -11,6 +11,7 @@
 <body>
     <div 
         id="admin-app"
+        data-app-name="{{ config('app.name') }}"
         data-store-url="{{ route('home') }}">
     </div>
 </body>

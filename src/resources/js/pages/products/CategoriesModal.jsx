@@ -14,7 +14,7 @@ import Skeleton from '../../components/admin/Skeleton';
 import { createShopGroup, deleteShopGroup, getRootShopGroups, getShopGroupChildren, getShopGroups, getUniqueShopGroupSlug, moveShopGroup, searchShopGroups } from '../../services/shopGroups';
 import { buildShopGroupOptions } from '../../utils/shopGroups';
 
-export default function CategoriesModal({ isOpen, onClose }) {
+export default function CategoriesModal({ isOpen, onClose, onCategoriesChanged }) {
     const { t } = useTranslation();
     const [openActionsId, setOpenActionsId] = useState(null);
     const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
@@ -81,6 +81,7 @@ export default function CategoriesModal({ isOpen, onClose }) {
             setCategoryToDelete(null);
             setOpenActionsId(null);
             setReloadKey((key) => key + 1);
+            onCategoriesChanged?.();
         } catch {
             setCategoryToDelete(null);
             setMoveError(t('categoriesModal.errors.delete'));
@@ -125,6 +126,7 @@ export default function CategoriesModal({ isOpen, onClose }) {
         try {
             await moveShopGroup(id, zone.targetId, zone.position);
             saved = true;
+            onCategoriesChanged?.();
             for (const controller of pendingBranches.current.values()) controller.abort();
             pendingBranches.current.clear();
             const branchIds = Object.keys(branches).filter((key) => branches[key].children || branches[key].expanded);
@@ -329,9 +331,9 @@ export default function CategoriesModal({ isOpen, onClose }) {
                         isLoadingParents={isLoadingParents}
                         parentsError={parentsError}
                         onCancel={() => setIsCreateFormOpen(false)}
-                        onCreated={(category) => {
-                            setGroups((current) => [...current, category]);
+                        onCreated={() => {
                             setReloadKey((key) => key + 1);
+                            onCategoriesChanged?.();
                         }}
                     />
                 )}
@@ -422,8 +424,12 @@ export default function CategoriesModal({ isOpen, onClose }) {
                 onClose={() => setCategoryToEdit(null)}
                 onUpdated={() => {
                     setReloadKey((key) => key + 1);
+                    onCategoriesChanged?.();
                 }}
-                onImageChanged={() => setReloadKey((key) => key + 1)}
+                onImageChanged={() => {
+                    setReloadKey((key) => key + 1);
+                    onCategoriesChanged?.();
+                }}
             />
         </div>
     );
