@@ -8,6 +8,7 @@ const DROPDOWN_MIN_WIDTH = 260;
 const VIEWPORT_MARGIN = 14;
 
 export default function SearchableSelect({
+    name,
     options,
     value,
     onChange,
@@ -112,6 +113,7 @@ export default function SearchableSelect({
 
     return (
         <div ref={rootRef} className={`searchable-select ${className}`.trim()}>
+            {name && <input type="hidden" name={name} value={value ?? ''} disabled={disabled} />}
             <button
                 ref={triggerRef}
                 className="searchable-select__trigger"

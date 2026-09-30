@@ -12,6 +12,7 @@ import PlusIcon from '../../components/icons/PlusIcon';
 import SparklesIcon from '../../components/icons/SparklesIcon';
 import Skeleton from '../../components/admin/Skeleton';
 import { createShopGroup, deleteShopGroup, getRootShopGroups, getShopGroupChildren, getShopGroups, getUniqueShopGroupSlug, moveShopGroup, searchShopGroups } from '../../services/shopGroups';
+import { buildShopGroupOptions } from '../../utils/shopGroups';
 
 export default function CategoriesModal({ isOpen, onClose }) {
     const { t } = useTranslation();
@@ -22,7 +23,7 @@ export default function CategoriesModal({ isOpen, onClose }) {
     const [isDeleting, setIsDeleting] = useState(false);
     const [groups, setGroups] = useState([]);
     const [reloadKey, setReloadKey] = useState(0);
-    const parentOptions = buildParentOptions(groups);
+    const parentOptions = buildShopGroupOptions(groups);
     const [categories, setCategories] = useState([]);
     const [isLoadingCategories, setIsLoadingCategories] = useState(true);
     const [categoriesError, setCategoriesError] = useState('');
@@ -604,32 +605,4 @@ function CategoryCreateForm({ parentOptions, isLoadingParents, parentsError, onC
             </div>
         </form>
     );
-}
-
-function buildParentOptions(groups) {
-    const ids = new Set(groups.map((group) => group.id));
-    const children = new Map();
-
-    for (const group of groups) {
-        const parentId = ids.has(group.parent_id) ? group.parent_id : null;
-        if (!children.has(parentId)) children.set(parentId, []);
-        children.get(parentId).push(group);
-    }
-
-    const options = [];
-    const visited = new Set();
-    const visit = (group, path = []) => {
-        if (visited.has(group.id)) return;
-        visited.add(group.id);
-
-        const names = [...path, group.name];
-        options.push({ ...group, label: names.join(' → '), depth: path.length, type: children.has(group.id) ? 'parent' : 'leaf', expanded: true });
-        for (const child of children.get(group.id) ?? []) visit(child, names);
-    };
-
-    for (const group of children.get(null) ?? []) visit(group);
-    // Keep every category selectable even if existing data contains a cycle.
-    for (const group of groups) visit(group);
-
-    return options;
 }

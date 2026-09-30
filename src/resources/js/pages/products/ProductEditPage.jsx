@@ -8,6 +8,7 @@ import ConfirmModal from '../../components/admin/ConfirmModal';
 import ImageLightbox from '../../components/admin/ImageLightbox';
 import { MediaDeleteButton, MediaDragHandle } from '../../components/admin/MediaCardControls';
 import RichTextEditor from '../../components/admin/RichTextEditor';
+import SearchableSelect from '../../components/admin/SearchableSelect';
 import BackIcon from '../../components/icons/BackIcon';
 import BoxIcon from '../../components/icons/BoxIcon';
 import PlusIcon from '../../components/icons/PlusIcon';
@@ -19,10 +20,12 @@ import RocketIcon from '../../components/icons/RocketIcon';
 import ChevronIcon from '../../components/icons/ChevronIcon';
 import SaveIcon from '../../components/icons/SaveIcon';
 import { csrf, request } from '../../services/api';
+import { getShopGroups } from '../../services/shopGroups';
 import { deleteShopItemMedia, getShopItemMediaConfig, reorderShopItemMedia, uploadShopItemMedia } from '../../services/shopItems';
 import useFileDropZone from '../../hooks/useFileDropZone';
 import useSectionScroll from '../../hooks/useSectionScroll';
 import { formatMediaExtensions } from '../../utils/media';
+import { buildShopGroupOptions } from '../../utils/shopGroups';
 
 
 const fieldClass = 'h-[43px] w-full rounded-[9px] border border-[#ddd5cf] bg-white px-[11px] text-[13px] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]';
@@ -42,7 +45,10 @@ export default function ProductEditPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const isNew = id === 'new' || !id;
-    const [form, setForm] = useState({ name: '', price: '', old_price: '', quantity: '', description: '', status: isNew ? 'draft' : null });
+    const [form, setForm] = useState({ name: '', price: '', old_price: '', quantity: '', description: '', shop_group_id: null, status: isNew ? 'draft' : null });
+    const [shopGroupOptions, setShopGroupOptions] = useState([]);
+    const [isShopGroupsLoading, setIsShopGroupsLoading] = useState(true);
+    const [shopGroupsLoadError, setShopGroupsLoadError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isActionsOpen, setIsActionsOpen] = useState(false);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -56,6 +62,31 @@ export default function ProductEditPage() {
     const createdProductIdRef = useRef(isNew ? null : id);
     const skipProductLoadIdRef = useRef(null);
     const scrollToSection = useSectionScroll({ stickyRef: sectionNavigationRef });
+
+    useEffect(() => {
+        const controller = new AbortController();
+
+        getShopGroups({ signal: controller.signal })
+            .then((groups) => {
+                if (!controller.signal.aborted) {
+                    setShopGroupOptions([
+                        { value: null, label: 'Без категории' },
+                        ...buildShopGroupOptions(groups),
+                    ]);
+                }
+            })
+            .catch((error) => {
+                if (!controller.signal.aborted) {
+                    console.error('Unable to load Shopra categories.', error);
+                    setShopGroupsLoadError('Не удалось загрузить категории Shopra.');
+                }
+            })
+            .finally(() => {
+                if (!controller.signal.aborted) setIsShopGroupsLoading(false);
+            });
+
+        return () => controller.abort();
+    }, []);
 
     useEffect(() => {
         if (isNew) {
@@ -92,6 +123,7 @@ export default function ProductEditPage() {
                     old_price: product.old_price ?? '',
                     quantity: product.quantity ?? '',
                     description: product.description ?? '',
+                    shop_group_id: product.shop_group_id ?? null,
                     status: product.status,
                 });
                 setMedia(product.media ?? []);
@@ -273,7 +305,15 @@ export default function ProductEditPage() {
 
             <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
                 <form className="space-y-3" aria-label="Данные товара" onSubmit={(event) => event.preventDefault()}>
-                    <MainSection sectionRef={(element) => { sectionRefs.current.main = element; }} form={form} onChange={updateField} />
+                    <MainSection
+                        sectionRef={(element) => { sectionRefs.current.main = element; }}
+                        form={form}
+                        shopGroupOptions={shopGroupOptions}
+                        isShopGroupsLoading={isShopGroupsLoading}
+                        shopGroupsLoadError={shopGroupsLoadError}
+                        onChange={updateField}
+                        onShopGroupChange={(shopGroupId) => setForm((current) => ({ ...current, shop_group_id: shopGroupId }))}
+                    />
                     <MediaSection
                         sectionRef={(element) => { sectionRefs.current.photo = element; }}
                         productId={id}
@@ -347,28 +387,28 @@ function StatusActions({ status, isNew, isSubmitting, onSave }) {
         </>;
 }
 
-function MainSection({ sectionRef, form, onChange }) {
+function MainSection({ sectionRef, form, shopGroupOptions, isShopGroupsLoading, shopGroupsLoadError, onChange, onShopGroupChange }) {
     return (
         <Card sectionRef={sectionRef} id="main" title="Основное" required>
             <Field label={<>Название товара <b className="text-[color:var(--color-accent)]">*</b></>}>
                 <input className={fieldClass} name="name" value={form.name} onChange={onChange} />
             </Field>
             <div className="relative mt-[15px]">
-                <div className="mb-[7px] flex items-center justify-between gap-2 text-[12px] font-bold text-[#554e48]">
-                    <span>Категория Shopra</span>
-                    <em className="rounded-full bg-[#f9eee7] px-[7px] py-1 text-[11px] not-italic text-[color:var(--color-accent)]">Подобрана автоматически</em>
-                </div>
-                <details className="group">
-                    <summary className="grid min-h-[58px] cursor-pointer list-none grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-[9px] rounded-[10px] border border-[#dfc4b3] bg-[linear-gradient(100deg,#fff9f5,#fff)] p-[9px_11px]">
-                        <span className="grid h-[31px] w-[31px] place-items-center rounded-[9px] bg-[#f9eee7] text-[color:var(--color-accent)]">◇</span>
-                        <span className="flex min-w-0 flex-col">
-                            <strong className="text-[12px]">Городские рюкзаки</strong>
-                            <small className="mt-0.5 truncate text-[12px] text-[#938a83]">Рюкзаки и сумки → Рюкзаки → Городские рюкзаки</small>
-                        </span>
-                        <b className="text-[12px] text-[color:var(--color-accent)]">Изменить</b>
-                    </summary>
-                </details>
-                <div className="mt-2 flex items-start gap-2 text-[color:var(--color-accent)]"><span className="shrink-0">◇</span><p><strong className="block text-[11px] text-[#6c635d]">Shopra выбрала категорию по названию товара</strong><small className="mt-0.5 block text-[11px] text-[#99918a]">Никакого опроса: принять вариант можно одним кликом.</small></p></div>
+                <div className="mb-[7px] text-[12px] font-bold text-[#554e48]">Категория Shopra</div>
+                <SearchableSelect
+                    name="group_id"
+                    className="searchable-select--product-category w-full"
+                    options={shopGroupOptions}
+                    value={form.shop_group_id}
+                    onChange={onShopGroupChange}
+                    placeholder={isShopGroupsLoading ? 'Загрузка категорий…' : 'Без категории'}
+                    searchPlaceholder="Поиск категории"
+                    emptyMessage="Категории не найдены"
+                    ariaLabel="Категория Shopra"
+                    disabled={isShopGroupsLoading || Boolean(shopGroupsLoadError)}
+                    ariaBusy={isShopGroupsLoading}
+                />
+                {shopGroupsLoadError && <p className="mt-1.5 text-[12px] text-[#8d857e]" role="alert">{shopGroupsLoadError}</p>}
             </div>
             <div className="mt-[17px] border-t border-[#f0ece8] pt-[15px]">
                 <div className="mb-[7px] flex items-center justify-between gap-2 text-[12px] font-bold text-[#554e48]"><span>Категории магазина</span><button type="button" className="inline-flex min-h-[36px] items-center gap-[6px] rounded-[9px] border border-[#dfc0ac] bg-[#fff8f3] px-[11px] text-[12px] font-[700] text-[color:var(--color-accent)]"><SectionIcon type="folder" />Управление категориями</button></div>

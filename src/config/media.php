@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'image_max_kilobytes' => 5120,
+    'image_max_kilobytes' => 10240,
     'video_max_kilobytes' => 15360,
     'webp_quality' => 80,
 

@@ -23,6 +23,7 @@ import ActiveProductsIcon from '../../components/icons/ActiveProductsIcon';
 import DraftProductsIcon from '../../components/icons/DraftProductsIcon';
 import LowStockProductsIcon from '../../components/icons/LowStockProductsIcon';
 import CategoriesModal from './CategoriesModal';
+import { buildShopGroupOptions } from '../../utils/shopGroups';
 
 const productThumbs = [
     { gradient: 'linear-gradient(145deg,#abb093,#586048)', detailed: true },
@@ -83,7 +84,7 @@ export default function ProductsPage() {
         getShopGroups({ signal: controller.signal })
             .then((groups) => {
                 if (!controller.signal.aborted) {
-                    setCategoryOptions(buildCategoryOptions(groups));
+                    setCategoryOptions(buildShopGroupOptions(groups));
                 }
             })
             .catch((error) => {
@@ -416,34 +417,6 @@ export default function ProductsPage() {
             <CategoriesModal isOpen={isCategoriesOpen} onClose={() => setIsCategoriesOpen(false)} />
         </>
     );
-}
-
-function buildCategoryOptions(groups) {
-    const ids = new Set(groups.map((group) => group.id));
-    const children = new Map();
-
-    for (const group of groups) {
-        const parentId = ids.has(group.parent_id) ? group.parent_id : null;
-        if (!children.has(parentId)) children.set(parentId, []);
-        children.get(parentId).push(group);
-    }
-
-    const options = [];
-    const visited = new Set();
-    const visit = (group, path = []) => {
-        if (visited.has(group.id)) return;
-        visited.add(group.id);
-
-        const names = [...path, group.name];
-        options.push({ value: group.id, label: names.join(' → ') });
-        for (const child of children.get(group.id) ?? []) visit(child, names);
-    };
-
-    for (const group of children.get(null) ?? []) visit(group);
-    // Preserve categories even if legacy data contains a missing parent or cycle.
-    for (const group of groups) visit(group);
-
-    return options;
 }
 
 function ProductsListSkeleton({ rowCount, label }) {

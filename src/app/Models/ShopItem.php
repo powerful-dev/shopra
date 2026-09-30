@@ -21,6 +21,7 @@ class ShopItem extends Model
         'old_price',
         'quantity',
         'description',
+        'shop_group_id',
         'shop_unit_id',
         'show_stock',
         'status',
@@ -40,6 +41,11 @@ class ShopItem extends Model
     public function groups(): BelongsToMany
     {
         return $this->belongsToMany(ShopGroup::class);
+    }
+
+    public function shopGroup(): BelongsTo
+    {
+        return $this->belongsTo(ShopGroup::class);
     }
 
     public function unit(): BelongsTo

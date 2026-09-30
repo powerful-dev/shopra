@@ -62,12 +62,19 @@ class ShopItemApiTest extends TestCase
             'old_price' => null,
             'quantity' => 3,
             'description' => '<p>Описание нового товара</p>',
+            'shop_group_id' => $groups->first()->id,
             'status' => 'draft',
         ])
             ->assertCreated()
             ->assertJsonPath('data.status', 'draft')
             ->assertJsonPath('data.description', '<p>Описание нового товара</p>')
+            ->assertJsonPath('data.shop_group_id', $groups->first()->id)
             ->json('data.id');
+
+        $this->assertDatabaseMissing('shop_group_shop_item', [
+            'shop_item_id' => $createdProductId,
+            'shop_group_id' => $groups->first()->id,
+        ]);
 
         $emptyDraftId = $this->postJson('/api/products', [
             'name' => null,
@@ -102,11 +109,13 @@ class ShopItemApiTest extends TestCase
             'old_price' => 1500,
             'quantity' => 4,
             'description' => '<p>Обновлённое описание товара</p>',
+            'shop_group_id' => $groups->last()->id,
             'status' => 'active',
         ])
             ->assertOk()
             ->assertJsonPath('data.name', 'Опубликованный товар')
             ->assertJsonPath('data.description', '<p>Обновлённое описание товара</p>')
+            ->assertJsonPath('data.shop_group_id', $groups->last()->id)
             ->assertJsonPath('data.status', 'active');
 
         $this->assertDatabaseHas('shop_items', [
@@ -114,6 +123,7 @@ class ShopItemApiTest extends TestCase
             'status' => 'active',
             'quantity' => 4,
             'description' => '<p>Обновлённое описание товара</p>',
+            'shop_group_id' => $groups->last()->id,
         ]);
 
         $this->putJson("/api/products/{$createdProductId}", [
@@ -121,8 +131,12 @@ class ShopItemApiTest extends TestCase
             'price' => 1300,
             'old_price' => 1500,
             'quantity' => 4,
+            'shop_group_id' => null,
             'status' => 'archived',
-        ])->assertOk()->assertJsonPath('data.status', 'archived');
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.shop_group_id', null)
+            ->assertJsonPath('data.status', 'archived');
 
         $this->putJson("/api/products/{$createdProductId}", [
             'name' => 'Опубликованный товар',

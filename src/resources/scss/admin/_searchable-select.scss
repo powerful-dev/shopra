@@ -144,3 +144,18 @@
         text-align: center;
     }
 }
+
+.searchable-select--product-category {
+    .searchable-select__trigger {
+        height: 58px;
+        padding-right: 13px;
+        border-color: #dfc4b3;
+        background: linear-gradient(100deg, #fff9f5, #fff);
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .searchable-select__chevron {
+        color: var(--color-accent);
+    }
+}

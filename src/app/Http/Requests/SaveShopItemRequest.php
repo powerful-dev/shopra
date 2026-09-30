@@ -27,6 +27,11 @@ class SaveShopItemRequest extends FormRequest
             'old_price' => ['nullable', 'numeric', 'min:0'],
             'quantity' => ['required', 'integer', 'min:0'],
             'description' => ['nullable', 'string'],
+            'shop_group_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('shop_groups', 'id')->whereNull('deleted_at'),
+            ],
             'status' => ['required', Rule::enum(ShopItemStatus::class)],
         ];
     }

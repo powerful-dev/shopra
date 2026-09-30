@@ -23,6 +23,7 @@ class ShopItemResource extends JsonResource
             'old_price' => $this->old_price,
             'quantity' => $this->quantity,
             'description' => $this->description,
+            'shop_group_id' => $this->shop_group_id,
             'show_stock' => $this->show_stock,
             'status' => $this->status->value,
             'unit' => $this->whenLoaded('unit', fn () => $this->unit === null ? null : [
