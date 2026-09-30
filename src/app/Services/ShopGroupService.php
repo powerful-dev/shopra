@@ -101,6 +101,7 @@ class ShopGroupService
             $ids = array_keys($branchIds);
 
             DB::table('shop_group_shop_item')->whereIn('shop_group_id', $ids)->delete();
+            DB::table('shop_items')->whereIn('shop_group_id', $ids)->update(['shop_group_id' => null]);
             ShopGroup::query()->whereIn('id', $ids)->delete();
 
             $groups->where('parent_id', $deleting->parent_id)

@@ -39,3 +39,19 @@ export async function deleteShopItemMedia(productId, mediaId) {
 
     return response.data;
 }
+
+export async function deleteShopItemCategory(productId, categoryId) {
+    await csrf();
+    await request(`/api/products/${productId}/categories/${categoryId}`, {
+        method: 'DELETE',
+    });
+}
+
+export async function addShopItemCategory(productId, categoryId) {
+    await csrf();
+    const response = await request(`/api/products/${productId}/categories/${categoryId}`, {
+        method: 'POST',
+    });
+
+    return response.data;
+}

@@ -10,6 +10,7 @@ use App\Http\Requests\SaveShopItemRequest;
 use App\Http\Requests\UploadShopItemMediaRequest;
 use App\Http\Resources\ShopItemMediaResource;
 use App\Http\Resources\ShopItemResource;
+use App\Models\ShopGroup;
 use App\Models\ShopItem;
 use App\Models\ShopItemMedia;
 use App\Services\ShopItemMediaService;
@@ -70,6 +71,20 @@ class ShopItemController extends Controller
     public function update(SaveShopItemRequest $request, ShopItem $product): ShopItemResource
     {
         return new ShopItemResource($this->shopItemService->update($product, $request->validated()));
+    }
+
+    public function storeGroup(ShopItem $product, ShopGroup $group): ShopItemResource
+    {
+        $this->shopItemService->attachGroup($product, $group);
+
+        return new ShopItemResource($product->load('groups'));
+    }
+
+    public function destroyGroup(ShopItem $product, ShopGroup $group): JsonResponse
+    {
+        $this->shopItemService->detachGroup($product, $group);
+
+        return response()->json(null, 204);
     }
 
     public function storeMedia(UploadShopItemMediaRequest $request, ShopItem $product): ShopItemMediaResource

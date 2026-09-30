@@ -127,12 +127,17 @@
             color: var(--color-accent);
         }
 
-        &:hover,
-        &:focus-visible,
+        &:hover:not(:disabled),
+        &:focus-visible:not(:disabled),
         &[aria-selected="true"] {
             background: var(--sidebar-item-hover);
             color: var(--sidebar-active-text);
             outline: none;
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
         }
     }
 

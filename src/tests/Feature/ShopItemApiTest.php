@@ -279,4 +279,54 @@ class ShopItemApiTest extends TestCase
             'ids' => [$products[2]->id, $products[2]->id],
         ])->assertUnprocessable()->assertJsonValidationErrors('ids.1');
     }
+
+    public function test_product_can_be_attached_to_and_detached_from_store_category_without_changing_its_primary_group(): void
+    {
+        $admin = User::factory()->create(['is_active' => true]);
+        $productsModule = Module::query()->create([
+            'code' => 'products',
+            'show_in_menu' => true,
+            'is_required' => false,
+        ]);
+        $admin->modules()->attach($productsModule);
+
+        $group = ShopGroup::query()->create(['name' => 'Сумки', 'slug' => 'sumki']);
+        $item = ShopItem::query()->create([
+            'name' => 'Сумка',
+            'url' => 'sumka',
+            'price' => 1000,
+            'shop_group_id' => $group->id,
+        ]);
+
+        $this->actingAs($admin, 'sanctum')
+            ->postJson("/api/products/{$item->id}/categories/{$group->id}")
+            ->assertOk()
+            ->assertJsonPath('data.categories.0.id', $group->id)
+            ->assertJsonPath('data.categories.0.name', 'Сумки');
+
+        $this->assertDatabaseHas('shop_group_shop_item', [
+            'shop_item_id' => $item->id,
+            'shop_group_id' => $group->id,
+        ]);
+
+        $this->postJson("/api/products/{$item->id}/categories/{$group->id}")
+            ->assertOk();
+        $this->assertDatabaseCount('shop_group_shop_item', 1);
+
+        $this->deleteJson("/api/products/{$item->id}/categories/{$group->id}")
+            ->assertNoContent();
+
+        $this->assertDatabaseMissing('shop_group_shop_item', [
+            'shop_item_id' => $item->id,
+            'shop_group_id' => $group->id,
+        ]);
+        $this->assertDatabaseHas('shop_groups', [
+            'id' => $group->id,
+            'deleted_at' => null,
+        ]);
+        $this->assertDatabaseHas('shop_items', [
+            'id' => $item->id,
+            'shop_group_id' => $group->id,
+        ]);
+    }
 }

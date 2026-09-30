@@ -19,6 +19,7 @@ export default function SearchableSelect({
     className = '',
     disabled = false,
     ariaBusy = false,
+    closeOnSelect = true,
 }) {
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState('');
@@ -107,8 +108,16 @@ export default function SearchableSelect({
     }, [filteredOptions.length, isOpen, query]);
 
     const selectOption = (option) => {
+        if (option.disabled) return;
+
         onChange(option.value);
-        close(true);
+
+        if (closeOnSelect) {
+            close(true);
+        } else {
+            setQuery('');
+            searchRef.current?.focus();
+        }
     };
 
     return (
@@ -159,11 +168,13 @@ export default function SearchableSelect({
                                     type="button"
                                     role="option"
                                     aria-selected={isSelected}
+                                    aria-disabled={Boolean(option.disabled)}
+                                    disabled={option.disabled}
                                     onClick={() => selectOption(option)}
                                     key={option.value}
                                 >
                                     <span>{option.label}</span>
-                                    {isSelected && <CheckIcon />}
+                                    {(isSelected || option.showCheck) && <CheckIcon />}
                                 </button>
                             );
                         }) : <p className="searchable-select__empty">{emptyMessage}</p>}

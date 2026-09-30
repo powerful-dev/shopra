@@ -22,7 +22,12 @@ class ShopGroupDeleteTest extends TestCase
         $after = ShopGroup::create(['name' => 'After', 'slug' => 'after', 'sorting' => 2]);
         $child = $root->children()->create(['name' => 'Child', 'slug' => 'child']);
         $leaf = $child->children()->create(['name' => 'Leaf', 'slug' => 'leaf']);
-        $item = ShopItem::create(['name' => 'Item', 'url' => 'item', 'price' => 100]);
+        $item = ShopItem::create([
+            'name' => 'Item',
+            'url' => 'item',
+            'price' => 100,
+            'shop_group_id' => $child->id,
+        ]);
         $item->groups()->attach([$root->id, $child->id, $leaf->id, $after->id]);
 
         $this->deleteJson("/api/product-categories/{$root->id}")->assertNoContent();
@@ -32,7 +37,11 @@ class ShopGroupDeleteTest extends TestCase
             $this->assertDatabaseMissing('shop_group_shop_item', ['shop_group_id' => $deleted->id]);
         }
 
-        $this->assertDatabaseHas('shop_items', ['id' => $item->id, 'deleted_at' => null]);
+        $this->assertDatabaseHas('shop_items', [
+            'id' => $item->id,
+            'shop_group_id' => null,
+            'deleted_at' => null,
+        ]);
         $this->assertDatabaseHas('shop_group_shop_item', ['shop_group_id' => $after->id, 'shop_item_id' => $item->id]);
         $this->assertSame([$before->id, $after->id], ShopGroup::orderBy('sorting')->pluck('id')->all());
         $this->assertSame([0, 1], ShopGroup::orderBy('sorting')->pluck('sorting')->all());

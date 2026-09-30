@@ -23,7 +23,7 @@ import ChevronIcon from '../../components/icons/ChevronIcon';
 import SaveIcon from '../../components/icons/SaveIcon';
 import { csrf, request } from '../../services/api';
 import { getShopGroups } from '../../services/shopGroups';
-import { deleteShopItemMedia, getShopItemMediaConfig, reorderShopItemMedia, uploadShopItemMedia } from '../../services/shopItems';
+import { addShopItemCategory, deleteShopItemCategory, deleteShopItemMedia, getShopItemMediaConfig, reorderShopItemMedia, uploadShopItemMedia } from '../../services/shopItems';
 import useFileDropZone from '../../hooks/useFileDropZone';
 import useSectionScroll from '../../hooks/useSectionScroll';
 import { formatMediaExtensions } from '../../utils/media';
@@ -58,11 +58,19 @@ export default function ProductEditPage() {
     const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [media, setMedia] = useState([]);
+    const [productCategories, setProductCategories] = useState([]);
+    const [isCategorySelectOpen, setIsCategorySelectOpen] = useState(false);
+    const [categoryToAddId, setCategoryToAddId] = useState(null);
+    const [isAddingCategory, setIsAddingCategory] = useState(false);
+    const [categoryAddError, setCategoryAddError] = useState('');
+    const [deletingCategoryIds, setDeletingCategoryIds] = useState([]);
+    const [categoryDeleteError, setCategoryDeleteError] = useState('');
     const [isMediaLoading, setIsMediaLoading] = useState(!isNew);
     const [mediaLoadError, setMediaLoadError] = useState('');
     const sectionNavigationRef = useRef(null);
     const sectionRefs = useRef({});
     const shopGroupsRequestRef = useRef(null);
+    const productCategoriesRequestRef = useRef(null);
     const productCreationPromiseRef = useRef(null);
     const createdProductIdRef = useRef(isNew ? null : id);
     const skipProductLoadIdRef = useRef(null);
@@ -75,7 +83,7 @@ export default function ProductEditPage() {
         setIsShopGroupsLoading(true);
         setShopGroupsLoadError('');
 
-        getShopGroups({ signal: controller.signal })
+        return getShopGroups({ signal: controller.signal })
             .then((groups) => {
                 if (!controller.signal.aborted) {
                     setShopGroupOptions([
@@ -107,10 +115,43 @@ export default function ProductEditPage() {
         return () => shopGroupsRequestRef.current?.abort();
     }, [refreshShopGroupOptions]);
 
+    const refreshProductCategories = useCallback(() => {
+        const productId = createdProductIdRef.current;
+
+        if (!productId) return Promise.resolve();
+
+        productCategoriesRequestRef.current?.abort();
+        const controller = new AbortController();
+        productCategoriesRequestRef.current = controller;
+
+        return request(`/api/products/${productId}`, { signal: controller.signal })
+            .then(({ data: product }) => {
+                if (!controller.signal.aborted) setProductCategories(product.categories ?? []);
+            })
+            .catch((error) => {
+                if (!controller.signal.aborted) console.error('Unable to refresh product categories.', error);
+            })
+            .finally(() => {
+                if (productCategoriesRequestRef.current === controller) {
+                    productCategoriesRequestRef.current = null;
+                }
+            });
+    }, []);
+
+    const handleCategoriesChanged = useCallback(() => {
+        refreshShopGroupOptions();
+        refreshProductCategories();
+    }, [refreshProductCategories, refreshShopGroupOptions]);
+
+    useEffect(() => () => productCategoriesRequestRef.current?.abort(), []);
+
     useEffect(() => {
         if (isNew) {
             createdProductIdRef.current = null;
             setMedia([]);
+            setProductCategories([]);
+            setDeletingCategoryIds([]);
+            setCategoryDeleteError('');
             setIsMediaLoading(false);
             setMediaLoadError('');
 
@@ -131,6 +172,9 @@ export default function ProductEditPage() {
         setIsMediaLoading(true);
         setMediaLoadError('');
         setMedia([]);
+        setProductCategories([]);
+        setDeletingCategoryIds([]);
+        setCategoryDeleteError('');
 
         request(`/api/products/${id}`)
             .then(({ data: product }) => {
@@ -146,6 +190,7 @@ export default function ProductEditPage() {
                     status: product.status,
                 });
                 setMedia(product.media ?? []);
+                setProductCategories(product.categories ?? []);
             })
             .catch((error) => {
                 console.error(error);
@@ -260,6 +305,44 @@ export default function ProductEditPage() {
         }
     };
 
+    const detachProductCategory = async (categoryId) => {
+        const productId = createdProductIdRef.current;
+        if (!productId || deletingCategoryIds.includes(categoryId)) return;
+
+        setDeletingCategoryIds((current) => [...current, categoryId]);
+        setCategoryDeleteError('');
+
+        try {
+            await deleteShopItemCategory(productId, categoryId);
+            setProductCategories((current) => current.filter((category) => category.id !== categoryId));
+        } catch (error) {
+            console.error(error);
+            setCategoryDeleteError('Не удалось убрать товар из категории.');
+        } finally {
+            setDeletingCategoryIds((current) => current.filter((id) => id !== categoryId));
+        }
+    };
+
+    const attachProductCategory = async (categoryId) => {
+        if (categoryId === null || isAddingCategory) return;
+
+        setCategoryToAddId(categoryId);
+        setIsAddingCategory(true);
+        setCategoryAddError('');
+
+        try {
+            const productId = await ensureProductForMedia();
+            const product = await addShopItemCategory(productId, categoryId);
+            setProductCategories(product.categories ?? []);
+        } catch (error) {
+            console.error(error);
+            setCategoryAddError('Не удалось добавить товар в категорию.');
+        } finally {
+            setCategoryToAddId(null);
+            setIsAddingCategory(false);
+        }
+    };
+
     return (
         <div>
             <Breadcrumbs
@@ -327,11 +410,21 @@ export default function ProductEditPage() {
                     <MainSection
                         sectionRef={(element) => { sectionRefs.current.main = element; }}
                         form={form}
+                        productCategories={productCategories}
+                        isCategorySelectOpen={isCategorySelectOpen}
+                        categoryToAddId={categoryToAddId}
+                        isAddingCategory={isAddingCategory}
+                        categoryAddError={categoryAddError}
+                        deletingCategoryIds={deletingCategoryIds}
+                        categoryDeleteError={categoryDeleteError}
                         shopGroupOptions={shopGroupOptions}
                         isShopGroupsLoading={isShopGroupsLoading}
                         shopGroupsLoadError={shopGroupsLoadError}
                         onChange={updateField}
                         onShopGroupChange={(shopGroupId) => setForm((current) => ({ ...current, shop_group_id: shopGroupId }))}
+                        onDeleteCategory={detachProductCategory}
+                        onAddCategory={attachProductCategory}
+                        onToggleCategorySelect={() => setIsCategorySelectOpen((isOpen) => !isOpen)}
                         onOpenCategories={() => setIsCategoriesOpen(true)}
                     />
                     <MediaSection
@@ -391,7 +484,7 @@ export default function ProductEditPage() {
             <CategoriesModal
                 isOpen={isCategoriesOpen}
                 onClose={() => setIsCategoriesOpen(false)}
-                onCategoriesChanged={refreshShopGroupOptions}
+                onCategoriesChanged={handleCategoriesChanged}
             />
 
         </div>
@@ -412,8 +505,30 @@ function StatusActions({ status, isNew, isSubmitting, onSave }) {
         </>;
 }
 
-function MainSection({ sectionRef, form, shopGroupOptions, isShopGroupsLoading, shopGroupsLoadError, onChange, onShopGroupChange, onOpenCategories }) {
+function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen, categoryToAddId, isAddingCategory, categoryAddError, deletingCategoryIds, categoryDeleteError, shopGroupOptions, isShopGroupsLoading, shopGroupsLoadError, onChange, onShopGroupChange, onAddCategory, onDeleteCategory, onToggleCategorySelect, onOpenCategories }) {
     const appCategoryLabel = `Категория ${appName}`;
+    const productCategoryIds = new Set(productCategories.map((category) => category.id));
+    const primaryCategoryOption = shopGroupOptions.find((option) => option.value === form.shop_group_id);
+    const primaryCategory = primaryCategoryOption
+        ? { id: primaryCategoryOption.value, name: primaryCategoryOption.name ?? primaryCategoryOption.label }
+        : null;
+    const visibleProductCategories = primaryCategory
+        ? [primaryCategory, ...productCategories.filter((category) => category.id !== primaryCategory.id)]
+        : productCategories;
+
+    if (primaryCategory) productCategoryIds.add(primaryCategory.id);
+
+    const productCategoryOptions = shopGroupOptions
+        .filter((option) => option.value !== null)
+        .map((option) => {
+            const isAlreadyAdded = productCategoryIds.has(option.value);
+
+            return {
+                ...option,
+                disabled: isAddingCategory || isAlreadyAdded,
+                showCheck: isAlreadyAdded,
+            };
+        });
 
     return (
         <Card sectionRef={sectionRef} id="main" title="Основное" required>
@@ -439,8 +554,42 @@ function MainSection({ sectionRef, form, shopGroupOptions, isShopGroupsLoading, 
             </div>
             <div className="mt-[17px] border-t border-[#f0ece8] pt-[15px]">
                 <div className="mb-[7px] flex items-center justify-between gap-2 text-[12px] font-bold text-[#554e48]"><span>Категории магазина</span><button type="button" className="inline-flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[9px] border border-[#dfc0ac] bg-[#fff8f3] px-[11px] text-[12px] font-[700] text-[color:var(--color-accent)]" onClick={onOpenCategories}><CategoriesIcon />Управление категориями</button></div>
-                <p className="mb-[9px] text-[12px] text-[#958d86]">Эти разделы покупатель увидит в каталоге вашего магазина.</p>
-                <div className="flex flex-wrap gap-1.5">{['Городские', 'Новинки', 'Распродажа'].map((label) => <button key={label} type="button" className="flex min-h-[29px] items-center gap-1 rounded-lg border border-[#dfd6d0] bg-[#faf8f6] px-[9px] text-[12px] font-[650] text-[#5d554f]">{label}<CloseIcon /></button>)}<button type="button" className="flex min-h-[29px] items-center gap-1 rounded-lg border border-dashed border-[#dfd6d0] bg-white px-[9px] text-[12px] font-[650] text-[color:var(--color-accent)]"><PlusIcon />Добавить</button></div>
+                <p className="mb-[9px] text-[12px] text-[#958d86]">Товар отображается в этих категориях вашего магазина.</p>
+                <div className="flex flex-wrap gap-1.5">
+                    {visibleProductCategories.length > 0
+                        ? visibleProductCategories.map((category) => {
+                            const isPrimary = category.id === primaryCategory?.id;
+                            const isDeleting = deletingCategoryIds.includes(category.id);
+
+                            return (
+                                <span key={category.id} className={`inline-flex min-h-[29px] items-center rounded-lg border border-[#dfd6d0] bg-[#faf8f6] text-[12px] font-[650] text-[#5d554f] ${isPrimary ? 'px-[9px]' : 'gap-1 pl-[9px] pr-1.5'}`}>
+                                    {category.name}
+                                    {!isPrimary && <button type="button" className="grid h-5 w-5 cursor-pointer place-items-center rounded border-0 bg-transparent p-0 text-[#817870] hover:bg-[#f0ebe7] hover:text-[color:var(--color-accent)] disabled:cursor-wait disabled:opacity-50" aria-label={`Убрать из категории ${category.name}`} disabled={isDeleting} onClick={() => onDeleteCategory(category.id)}><CloseIcon /></button>}
+                                </span>
+                            );
+                        })
+                        : <span className="text-[12px] text-[#958d86]">Категории не назначены.</span>}
+                    <button type="button" className="flex min-h-[29px] cursor-pointer items-center gap-1 rounded-lg border border-dashed border-[#dfd6d0] bg-white px-[9px] text-[12px] font-[650] text-[color:var(--color-accent)]" aria-expanded={isCategorySelectOpen} onClick={onToggleCategorySelect}><PlusIcon />Добавить</button>
+                </div>
+                {categoryDeleteError && <p className="mb-0 mt-1.5 text-[12px] text-[#8d857e]" role="alert">{categoryDeleteError}</p>}
+                {isCategorySelectOpen && (
+                    <div className="mt-2 w-full">
+                        <SearchableSelect
+                            className="w-full"
+                            options={productCategoryOptions}
+                            value={categoryToAddId}
+                            onChange={onAddCategory}
+                            placeholder="Выберите категорию"
+                            searchPlaceholder="Поиск категории"
+                            emptyMessage="Категории не найдены"
+                            ariaLabel="Добавить категорию магазина"
+                            ariaBusy={isAddingCategory}
+                            disabled={isShopGroupsLoading || Boolean(shopGroupsLoadError)}
+                            closeOnSelect={false}
+                        />
+                        {categoryAddError && <p className="mb-0 mt-1.5 text-[12px] text-[#8d857e]" role="alert">{categoryAddError}</p>}
+                    </div>
+                )}
             </div>
         </Card>
     );

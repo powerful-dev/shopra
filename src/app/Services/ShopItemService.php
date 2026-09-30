@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\ShopItemStatus;
 use App\Models\Shop;
+use App\Models\ShopGroup;
 use App\Models\ShopItem;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -33,6 +34,16 @@ class ShopItemService
     public function delete(ShopItem $shopItem): void
     {
         $shopItem->delete();
+    }
+
+    public function attachGroup(ShopItem $shopItem, ShopGroup $shopGroup): void
+    {
+        $shopItem->groups()->syncWithoutDetaching([$shopGroup->getKey()]);
+    }
+
+    public function detachGroup(ShopItem $shopItem, ShopGroup $shopGroup): void
+    {
+        $shopItem->groups()->detach($shopGroup->getKey());
     }
 
     /** @param array<int, int> $ids */
