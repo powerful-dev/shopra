@@ -508,7 +508,9 @@ function StatusActions({ status, isNew, isSubmitting, onSave }) {
 function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen, categoryToAddId, isAddingCategory, categoryAddError, deletingCategoryIds, categoryDeleteError, shopGroupOptions, isShopGroupsLoading, shopGroupsLoadError, onChange, onShopGroupChange, onAddCategory, onDeleteCategory, onToggleCategorySelect, onOpenCategories }) {
     const appCategoryLabel = `Категория ${appName}`;
     const productCategoryIds = new Set(productCategories.map((category) => category.id));
-    const primaryCategoryOption = shopGroupOptions.find((option) => option.value === form.shop_group_id);
+    const primaryCategoryOption = form.shop_group_id === null
+        ? null
+        : shopGroupOptions.find((option) => option.value === form.shop_group_id);
     const primaryCategory = primaryCategoryOption
         ? { id: primaryCategoryOption.value, name: primaryCategoryOption.name ?? primaryCategoryOption.label }
         : null;
