@@ -11,6 +11,7 @@ import RichTextEditor from '../../components/admin/RichTextEditor';
 import SearchableSelect from '../../components/admin/SearchableSelect';
 import BackIcon from '../../components/icons/BackIcon';
 import BoxIcon from '../../components/icons/BoxIcon';
+import CategoriesIcon from '../../components/icons/CategoriesIcon';
 import PlusIcon from '../../components/icons/PlusIcon';
 import EyeIcon from '../../components/icons/EyeIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
@@ -26,6 +27,7 @@ import useFileDropZone from '../../hooks/useFileDropZone';
 import useSectionScroll from '../../hooks/useSectionScroll';
 import { formatMediaExtensions } from '../../utils/media';
 import { buildShopGroupOptions } from '../../utils/shopGroups';
+import CategoriesModal from './CategoriesModal';
 
 
 const fieldClass = 'h-[43px] w-full rounded-[9px] border border-[#ddd5cf] bg-white px-[11px] text-[13px] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]';
@@ -52,6 +54,7 @@ export default function ProductEditPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isActionsOpen, setIsActionsOpen] = useState(false);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+    const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [media, setMedia] = useState([]);
     const [isMediaLoading, setIsMediaLoading] = useState(!isNew);
@@ -313,6 +316,7 @@ export default function ProductEditPage() {
                         shopGroupsLoadError={shopGroupsLoadError}
                         onChange={updateField}
                         onShopGroupChange={(shopGroupId) => setForm((current) => ({ ...current, shop_group_id: shopGroupId }))}
+                        onOpenCategories={() => setIsCategoriesOpen(true)}
                     />
                     <MediaSection
                         sectionRef={(element) => { sectionRefs.current.photo = element; }}
@@ -368,6 +372,7 @@ export default function ProductEditPage() {
                 onConfirm={deleteProduct}
                 onClose={() => setIsDeleteConfirmOpen(false)}
             />
+            <CategoriesModal isOpen={isCategoriesOpen} onClose={() => setIsCategoriesOpen(false)} />
 
         </div>
     );
@@ -387,7 +392,7 @@ function StatusActions({ status, isNew, isSubmitting, onSave }) {
         </>;
 }
 
-function MainSection({ sectionRef, form, shopGroupOptions, isShopGroupsLoading, shopGroupsLoadError, onChange, onShopGroupChange }) {
+function MainSection({ sectionRef, form, shopGroupOptions, isShopGroupsLoading, shopGroupsLoadError, onChange, onShopGroupChange, onOpenCategories }) {
     return (
         <Card sectionRef={sectionRef} id="main" title="Основное" required>
             <Field label={<>Название товара <b className="text-[color:var(--color-accent)]">*</b></>}>
@@ -411,7 +416,7 @@ function MainSection({ sectionRef, form, shopGroupOptions, isShopGroupsLoading, 
                 {shopGroupsLoadError && <p className="mt-1.5 text-[12px] text-[#8d857e]" role="alert">{shopGroupsLoadError}</p>}
             </div>
             <div className="mt-[17px] border-t border-[#f0ece8] pt-[15px]">
-                <div className="mb-[7px] flex items-center justify-between gap-2 text-[12px] font-bold text-[#554e48]"><span>Категории магазина</span><button type="button" className="inline-flex min-h-[36px] items-center gap-[6px] rounded-[9px] border border-[#dfc0ac] bg-[#fff8f3] px-[11px] text-[12px] font-[700] text-[color:var(--color-accent)]"><SectionIcon type="folder" />Управление категориями</button></div>
+                <div className="mb-[7px] flex items-center justify-between gap-2 text-[12px] font-bold text-[#554e48]"><span>Категории магазина</span><button type="button" className="inline-flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[9px] border border-[#dfc0ac] bg-[#fff8f3] px-[11px] text-[12px] font-[700] text-[color:var(--color-accent)]" onClick={onOpenCategories}><CategoriesIcon />Управление категориями</button></div>
                 <p className="mb-[9px] text-[12px] text-[#958d86]">Эти разделы покупатель увидит в каталоге вашего магазина.</p>
                 <div className="flex flex-wrap gap-1.5">{['Городские', 'Новинки', 'Распродажа'].map((label) => <button key={label} type="button" className="flex min-h-[29px] items-center gap-1 rounded-lg border border-[#dfd6d0] bg-[#faf8f6] px-[9px] text-[12px] font-[650] text-[#5d554f]">{label}<CloseIcon /></button>)}<button type="button" className="flex min-h-[29px] items-center gap-1 rounded-lg border border-dashed border-[#dfd6d0] bg-white px-[9px] text-[12px] font-[650] text-[color:var(--color-accent)]"><PlusIcon />Добавить</button></div>
             </div>
@@ -917,6 +922,6 @@ function Field({ label, children }) { return <label className="flex flex-col gap
 function PriceField({ label, name, value, onChange, suffix, required }) { return <Field label={<>{label} {required && <b className="text-[color:var(--color-accent)]">*</b>}</>}><span className="relative"><input className={`${fieldClass} pr-11 font-bold`} name={name} value={value} onChange={onChange} /><b className="absolute right-[11px] top-1/2 -translate-y-1/2 text-[11px] text-[#8d857f]">{suffix}</b></span></Field>; }
 
 function SectionIcon({ type, size = 14 }) {
-    const paths = { box: 'm16 16 2 2 4-4M21 10V8l-9-6-9 6v8l9 6 3-1', photo: 'M16 5h6M19 2v6M21 12v7H3V3h10M3 17l6-6 4 4 3-3 5 5', price: 'M16 8h-6a2 2 0 100 4h4a2 2 0 110 4H8M12 18V6', layers: 'm2 7 10-5 10 5-10 5L2 7m0 5 10 5 10-5M2 17l10 5 10-5', file: 'M15 2H6v20h14V7l-5-5zm-1 0v6h6M8 13h8M8 17h8', sliders: 'M20 7h-9M14 17H5M17 14v6M7 4v6', truck: 'M14 18V4H2v14h3m10 0H9m10 0h3v-5l-4-5h-4m3 12a2 2 0 100-4 2 2 0 000 4zM7 20a2 2 0 100-4 2 2 0 000 4z', link: 'M9 17H7A5 5 0 017 7h2m6 0h2a5 5 0 010 10h-2M8 12h8', folder: 'M3 5v14h18V8h-9l-2-3H3' };
+    const paths = { box: 'm16 16 2 2 4-4M21 10V8l-9-6-9 6v8l9 6 3-1', photo: 'M16 5h6M19 2v6M21 12v7H3V3h10M3 17l6-6 4 4 3-3 5 5', price: 'M16 8h-6a2 2 0 100 4h4a2 2 0 110 4H8M12 18V6', layers: 'm2 7 10-5 10 5-10 5L2 7m0 5 10 5 10-5M2 17l10 5 10-5', file: 'M15 2H6v20h14V7l-5-5zm-1 0v6h6M8 13h8M8 17h8', sliders: 'M20 7h-9M14 17H5M17 14v6M7 4v6', truck: 'M14 18V4H2v14h3m10 0H9m10 0h3v-5l-4-5h-4m3 12a2 2 0 100-4 2 2 0 000 4zM7 20a2 2 0 100-4 2 2 0 000 4z', link: 'M9 17H7A5 5 0 017 7h2m6 0h2a5 5 0 010 10h-2M8 12h8' };
     return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[type]} /></svg>;
 }
