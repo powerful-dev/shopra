@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
-import Breadcrumbs from '../../components/admin/Breadcrumbs';
 import Field from '../../components/form/Field';
 import Input from '../../components/form/Input';
 import Select from '../../components/form/Select';
 import SaveIcon from '../../components/icons/SaveIcon';
-import BackIcon from '../../components/icons/BackIcon';
 import CheckIcon from '../../components/icons/CheckIcon';
+import ControlsIcon from '../../components/icons/ControlsIcon';
+import ProductsIcon from '../../components/icons/ProductsIcon';
+import ImageIcon from '../../components/icons/ImageIcon';
+import LanguageIcon from '../../components/icons/LanguageIcon';
+import ChevronRightIcon from '../../components/icons/ChevronRightIcon';
 import { csrf, request } from '../../services/api';
+import imageFitPlaceholder from '../../../images/settings/image-fit-placeholder.svg';
 
 const IMAGE_SIZE_FIELDS = [
     'group_small_image_max_width',
@@ -48,63 +51,175 @@ const formForRequest = (form) => ({
     ...Object.fromEntries(IMAGE_SIZE_FIELDS.map((field) => [field, form[field] === '' ? null : form[field]])),
 });
 
-function ImageSizeSettings({ title, namePrefix, form, formErrors, isLoading, onChange, t }) {
+function SettingsCard({ icon, title, description, children }) {
+    return (
+        <section className="rounded-[15px] border border-[color:var(--color-border)] bg-white px-7 py-[26px] shadow-[var(--shadow-sm)] max-sm:px-4 max-sm:py-5">
+            <header className="mb-[26px] flex items-start gap-3">
+                <span className="grid h-[40px] w-[40px] shrink-0 place-items-center rounded-[10px] border border-[#eee1d8] bg-[#fffaf6] text-[color:var(--color-accent)]">
+                    {icon}
+                </span>
+                <span className="min-w-0 pt-px">
+                    <h2 className="m-0 text-[18px] font-[760] leading-[1.35] tracking-[-0.02em] text-[color:var(--color-primary)]">{title}</h2>
+                    <p className="mt-1 text-[13px] leading-[1.4] text-[color:var(--color-secondary)]">{description}</p>
+                </span>
+            </header>
+            {children}
+        </section>
+    );
+}
+
+function ImageFitOption({ fitField, value, selectedValue, disabled, onChange, t }) {
+    const isSelected = selectedValue === value;
+
+    return (
+        <label className={`flex min-h-[98px] cursor-pointer flex-col items-center justify-center gap-2 rounded-[10px] border bg-white px-3 py-[10px] transition ${isSelected ? 'border-[color:var(--color-accent)] bg-[#fff7f1] shadow-[inset_0_0_0_1px_var(--color-accent)]' : 'border-[color:var(--color-border)] hover:border-[#d8c7bc]'} ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}>
+            <input
+                className="sr-only"
+                type="radio"
+                name={fitField}
+                value={value}
+                checked={isSelected}
+                onChange={onChange}
+                disabled={disabled}
+            />
+            <span className="grid h-[52px] w-[54px] place-items-center overflow-hidden rounded-[3px] bg-[#f2efec]" aria-hidden="true">
+                <img
+                    className={`h-full w-full ${value === 'contain' ? 'object-contain' : 'object-cover'}`}
+                    src={imageFitPlaceholder}
+                    alt=""
+                />
+            </span>
+            <span className={`text-[12px] font-[700] ${isSelected ? 'text-[#9a3b12]' : 'text-[color:var(--color-secondary)]'}`}>
+                {t(`commonSettingsPage.imageFitOptions.${value}`)}
+            </span>
+        </label>
+    );
+}
+
+function ImageDimensionInput({ field, value, error, isLoading, onChange, label, t }) {
+    return (
+        <label className="block min-w-0">
+            <span className="sr-only">{label}</span>
+            <span className="mb-1.5 hidden text-[11px] font-[700] text-[color:var(--color-secondary)] max-xl:block" aria-hidden="true">{label}</span>
+            <span className={`form-control-group flex h-[44px] items-center overflow-hidden rounded-[9px] bg-white ${error ? '!border-red-500' : ''}`}>
+                <input
+                    className="h-full min-w-0 flex-1 border-0 bg-transparent px-3 text-[13px] text-[color:var(--color-primary)] outline-none placeholder:text-[#a69c94]"
+                    type="number"
+                    name={field}
+                    min="1"
+                    step="1"
+                    placeholder={t('commonSettingsPage.imageSizeAuto')}
+                    value={value}
+                    onChange={onChange}
+                    disabled={isLoading}
+                />
+                <span className="shrink-0 pr-3 text-[11px] text-[#8e847c]">px</span>
+            </span>
+            {error && <span className="mt-1 block text-[11px] text-red-600">{error[0]}</span>}
+        </label>
+    );
+}
+
+function ImageSizeSettings({ title, description, namePrefix, form, formErrors, isLoading, onChange, t }) {
     const widthField = `${namePrefix}_image_max_width`;
     const heightField = `${namePrefix}_image_max_height`;
     const fitField = `${namePrefix}_image_fit`;
 
     return (
-        <div>
-            <h4 className="mb-3 text-[13px] font-[700] text-[color:var(--color-primary)]">
-                {title}
-            </h4>
+        <div className="grid grid-cols-[minmax(155px,1.2fr)_minmax(130px,.85fr)_minmax(130px,.85fr)_minmax(250px,1.35fr)] items-center gap-3 border-t border-[color:var(--color-border)] py-4 max-xl:grid-cols-2 max-sm:grid-cols-1">
+            <div className="min-w-0 max-xl:col-span-2 max-sm:col-span-1">
+                <h4 className="m-0 text-[13px] font-[760] text-[color:var(--color-primary)]">{title}</h4>
+                <p className="mt-1 text-[11px] leading-[1.4] text-[color:var(--color-secondary)]">{description}</p>
+            </div>
 
-            <div className="grid grid-cols-3 gap-x-4 gap-y-[18px] max-md:grid-cols-1">
-                <Field label={t('commonSettingsPage.imageMaxWidth')} error={formErrors[widthField]}>
-                    <Input
-                        className={formErrors[widthField] ? '!border-red-500' : ''}
-                        type="number"
-                        name={widthField}
-                        min="1"
-                        step="1"
-                        value={form[widthField]}
-                        onChange={onChange}
-                        disabled={isLoading}
-                    />
-                </Field>
+            <ImageDimensionInput
+                field={widthField}
+                value={form[widthField]}
+                error={formErrors[widthField]}
+                isLoading={isLoading}
+                onChange={onChange}
+                label={t('commonSettingsPage.imageMaxWidth')}
+                t={t}
+            />
 
-                <Field label={t('commonSettingsPage.imageMaxHeight')} error={formErrors[heightField]}>
-                    <Input
-                        className={formErrors[heightField] ? '!border-red-500' : ''}
-                        type="number"
-                        name={heightField}
-                        min="1"
-                        step="1"
-                        value={form[heightField]}
-                        onChange={onChange}
-                        disabled={isLoading}
-                    />
-                </Field>
+            <ImageDimensionInput
+                field={heightField}
+                value={form[heightField]}
+                error={formErrors[heightField]}
+                isLoading={isLoading}
+                onChange={onChange}
+                label={t('commonSettingsPage.imageMaxHeight')}
+                t={t}
+            />
 
-                <Field label={t('commonSettingsPage.imageFit')} error={formErrors[fitField]}>
+            <fieldset className="min-w-0 max-xl:col-span-2 max-sm:col-span-1">
+                <legend className="sr-only">{t('commonSettingsPage.imageFit')}</legend>
+                <div className="grid grid-cols-2 gap-2">
+                    <ImageFitOption fitField={fitField} value="contain" selectedValue={form[fitField]} disabled={isLoading} onChange={onChange} t={t} />
+                    <ImageFitOption fitField={fitField} value="cover" selectedValue={form[fitField]} disabled={isLoading} onChange={onChange} t={t} />
+                </div>
+                {formErrors[fitField] && <span className="mt-1 block text-[11px] text-red-600">{formErrors[fitField][0]}</span>}
+            </fieldset>
+        </div>
+    );
+}
+
+function ImageSettingsCard({ title, description, namePrefix, formatField, form, formErrors, isLoading, onChange, t }) {
+    return (
+        <SettingsCard icon={<ImageIcon />} title={title} description={description}>
+            <div className="grid grid-cols-[minmax(155px,1.2fr)_minmax(130px,.85fr)_minmax(130px,.85fr)_minmax(250px,1.35fr)] gap-3 pb-3 text-[11px] font-[700] text-[color:var(--color-secondary)] max-xl:hidden">
+                <span>{t('commonSettingsPage.imageSize')}</span>
+                <span>{t('commonSettingsPage.imageMaxWidth')}</span>
+                <span>{t('commonSettingsPage.imageMaxHeight')}</span>
+                <span>{t('commonSettingsPage.imageFit')}</span>
+            </div>
+
+            <ImageSizeSettings
+                title={t('commonSettingsPage.smallImagesTitle')}
+                description={t('commonSettingsPage.smallImagesDescription')}
+                namePrefix={`${namePrefix}_small`}
+                form={form}
+                formErrors={formErrors}
+                isLoading={isLoading}
+                onChange={onChange}
+                t={t}
+            />
+
+            <ImageSizeSettings
+                title={t('commonSettingsPage.largeImagesTitle')}
+                description={t('commonSettingsPage.largeImagesDescription')}
+                namePrefix={`${namePrefix}_large`}
+                form={form}
+                formErrors={formErrors}
+                isLoading={isLoading}
+                onChange={onChange}
+                t={t}
+            />
+
+            <div className="flex flex-wrap items-end gap-6 border-t border-[color:var(--color-border)] pt-4">
+                <Field className="w-[190px] [&_.form-label]:text-[12px]" label={t('commonSettingsPage.imageFormat')} error={formErrors[formatField]}>
                     <Select
-                        className={formErrors[fitField] ? '!border-red-500' : ''}
-                        name={fitField}
-                        value={form[fitField]}
+                        className={formErrors[formatField] ? '!border-red-500' : ''}
+                        name={formatField}
+                        value={form[formatField]}
                         onChange={onChange}
                         disabled={isLoading}
                     >
-                        <option value="contain">{t('commonSettingsPage.imageFitOptions.contain')}</option>
-                        <option value="cover">{t('commonSettingsPage.imageFitOptions.cover')}</option>
+                        <option value="original">{t('commonSettingsPage.imageFormatOptions.original')}</option>
+                        <option value="webp">{t('commonSettingsPage.imageFormatOptions.webp')}</option>
                     </Select>
                 </Field>
+                <p className="flex min-h-[42px] max-w-[310px] items-center text-[11px] leading-[1.55] text-[color:var(--color-secondary)]">
+                    {t('commonSettingsPage.imageFormatHint')}
+                </p>
             </div>
-        </div>
+        </SettingsCard>
     );
 }
 
 export default function CommonSettingsPage() {
     const { t, i18n } = useTranslation();
+    const [activeTab, setActiveTab] = useState('general');
     const [form, setForm] = useState(() => formFromData({}));
     const [adminLanguages, setAdminLanguages] = useState([]);
     const [siteLanguages, setSiteLanguages] = useState([]);
@@ -114,8 +229,6 @@ export default function CommonSettingsPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState('success');
-
-    const navigate = useNavigate();
 
     useEffect(() => {
         (async () => {
@@ -187,25 +300,19 @@ export default function CommonSettingsPage() {
 
     return (
         <>
-            <Breadcrumbs className="mb-5 max-lg:hidden" />
-
-            <section className="mb-5 flex w-full flex-wrap items-center gap-x-6 gap-y-3">
-            
-                <div className="flex min-w-0 flex-1 items-center gap-3 max-lg:gap-2">
-                    <button
-                        type="button"
-                        className="grid h-[40px] w-[40px] shrink-0 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-white p-0 text-[#615950]"
-    
-                        onClick={() => navigate('/admin/settings')}
-                    >
-                        <BackIcon />
-                    </button>
-    
-                    <h1 className="m-0 min-w-0 text-[32px] font-[760] leading-none tracking-[-0.05em] text-[color:var(--color-primary)] max-lg:text-[19px]">
-                        {t('commonSettingsPage.title')}
+            <section className="mb-7 flex w-full flex-wrap items-end gap-x-6 gap-y-4">
+                <div className="min-w-0 flex-1">
+                    <p className="mb-3 text-[11px] font-[760] uppercase tracking-[0.09em] text-[color:var(--color-accent)] max-lg:hidden">
+                        {t('commonSettingsPage.storeLabel')}
+                    </p>
+                    <h1 className="m-0 text-[32px] font-[760] leading-none tracking-[-0.05em] text-[color:var(--color-primary)] max-lg:text-[24px]">
+                        {t('commonSettingsPage.pageTitle')}
                     </h1>
+                    <p className="mt-2 text-[14px] text-[color:var(--color-secondary)]">
+                        {t('commonSettingsPage.pageDescription')}
+                    </p>
                 </div>
-    
+
                 <div className="ml-auto flex shrink-0 items-center justify-end">
                     <button
                         className="button button--primary h-[40px] shrink-0 whitespace-nowrap px-[18px]"
@@ -217,7 +324,6 @@ export default function CommonSettingsPage() {
                         {isSubmitting ? t('commonSettingsPage.saving') : t('common.save')}
                     </button>
                 </div>
-    
             </section>
 
             {message && (
@@ -228,156 +334,173 @@ export default function CommonSettingsPage() {
             )}
 
             <form id="common-settings-form" noValidate onSubmit={(event) => { event.preventDefault(); saveData(); }}>
-                <section className="rounded-[16px] border border-[color:var(--color-border)] bg-[rgba(255,255,255,.95)] shadow-[var(--shadow-sm)]">
-                    <div className="p-5 max-sm:p-4">
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-[18px] max-md:grid-cols-1">
-                            <h2 className="m-0 text-[16px] font-[760] text-[color:var(--color-primary)] md:col-span-2">
-                                {t('commonSettingsPage.title')}
-                            </h2>
+                <div className="grid grid-cols-[225px_minmax(0,1fr)] items-start gap-9 pb-8 max-lg:grid-cols-1 max-lg:gap-5">
+                    <nav className="flex min-w-0 flex-col gap-1 max-lg:flex-row max-lg:overflow-x-auto max-lg:pb-1" role="tablist" aria-label={t('commonSettingsPage.tabsLabel')}>
+                        {[
+                            ['general', t('commonSettingsPage.tabs.general'), <ControlsIcon size="18" key="general" />],
+                            ['catalog', t('commonSettingsPage.tabs.catalog'), <ProductsIcon key="catalog" />],
+                            ['images', t('commonSettingsPage.tabs.images'), <ImageIcon size="18" key="images" />],
+                        ].map(([id, label, icon]) => {
+                            const isActive = activeTab === id;
 
-                            <Field className="md:col-span-2" label={t('commonSettingsPage.siteName')} error={formErrors.site_name}>
-                                <input
-                                    className={`form-input ${formErrors.site_name ? '!border-red-500' : ''}`}
-                                    type="text"
-                                    name="site_name"
-                                    value={form.site_name}
-                                    onChange={updateField}
-                                    disabled={isLoading}
-                                    required
-                                />
-                            </Field>
-
-                            <Field label={t('commonSettingsPage.adminLanguage')} error={formErrors.admin_language_id}>
-                                <select
-                                    className={`form-select ${formErrors.admin_language_id ? '!border-red-500' : ''}`}
-                                    name="admin_language_id"
-                                    value={form.admin_language_id}
-                                    onChange={updateField}
-                                    disabled={isLoading}
-                                    required
+                            return (
+                                <button
+                                    key={id}
+                                    type="button"
+                                    role="tab"
+                                    id={`common-settings-tab-${id}`}
+                                    aria-controls={`common-settings-panel-${id}`}
+                                    aria-selected={isActive}
+                                    className={`flex min-h-[46px] w-full items-center gap-3 rounded-[11px] border px-[14px] text-left text-[13px] transition-colors max-lg:w-auto max-lg:min-w-max ${isActive ? 'border-[#f0cdb9] bg-[#fff1e7] font-[720] text-[#8c3510]' : 'border-transparent bg-transparent font-[520] text-[color:var(--color-secondary)] hover:bg-white'}`}
+                                    onClick={() => setActiveTab(id)}
                                 >
-                                    <option value="">{t('commonSettingsPage.selectLanguage')}</option>
-                                    {adminLanguages.map((language) => (
-                                        <option key={language.id} value={language.id}>{language.name}</option>
-                                    ))}
-                                </select>
-                            </Field>
+                                    <span className="grid h-5 w-5 shrink-0 place-items-center">{icon}</span>
+                                    <span>{label}</span>
+                                    {isActive && <span className="ml-auto max-lg:hidden"><ChevronRightIcon /></span>}
+                                </button>
+                            );
+                        })}
+                    </nav>
 
-                            <Field label={t('commonSettingsPage.siteLanguage')} error={formErrors.site_language_id}>
-                                <select
-                                    className={`form-select ${formErrors.site_language_id ? '!border-red-500' : ''}`}
-                                    name="site_language_id"
-                                    value={form.site_language_id}
-                                    onChange={updateField}
-                                    disabled={isLoading}
-                                    required
+                    <div className="min-w-0">
+                        {activeTab === 'general' && (
+                            <div id="common-settings-panel-general" role="tabpanel" aria-labelledby="common-settings-tab-general" className="space-y-[18px]">
+                                <SettingsCard
+                                    icon={<ControlsIcon size={18} />}
+                                    title={t('commonSettingsPage.generalSettingsTitle')}
+                                    description={t('commonSettingsPage.generalSettingsDescription')}
                                 >
-                                    <option value="">{t('commonSettingsPage.selectLanguage')}</option>
-                                    {siteLanguages.map((language) => (
-                                        <option key={language.id} value={language.id}>{language.name}</option>
-                                    ))}
-                                </select>
-                            </Field>
-                        </div>
-                    </div>
-                </section>
+                                    <Field className="[&_.form-label]:text-[13px]" label={t('commonSettingsPage.siteName')} error={formErrors.site_name}>
+                                        <Input
+                                            className={formErrors.site_name ? '!border-red-500' : ''}
+                                            type="text"
+                                            name="site_name"
+                                            value={form.site_name}
+                                            onChange={updateField}
+                                            disabled={isLoading}
+                                            required
+                                        />
+                                    </Field>
+                                </SettingsCard>
 
-                <section className="mt-5 rounded-[16px] border border-[color:var(--color-border)] bg-[rgba(255,255,255,.95)] shadow-[var(--shadow-sm)]">
-                    <div className="p-5 max-sm:p-4">
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-[18px] max-md:grid-cols-1">
-                        <h2 className="m-0 text-[16px] font-[760] text-[color:var(--color-primary)] md:col-span-2">
-                                {t('commonSettingsPage.shopSettingsTitle')}
-                        </h2>
+                                <SettingsCard
+                                    icon={<LanguageIcon />}
+                                    title={t('commonSettingsPage.languageSettingsTitle')}
+                                    description={t('commonSettingsPage.languageSettingsDescription')}
+                                >
+                                    <div className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
+                                        <div>
+                                            <Field className="[&_.form-label]:text-[13px]" label={t('commonSettingsPage.adminLanguage')} error={formErrors.admin_language_id}>
+                                                <Select
+                                                    className={formErrors.admin_language_id ? '!border-red-500' : ''}
+                                                    name="admin_language_id"
+                                                    value={form.admin_language_id}
+                                                    onChange={updateField}
+                                                    disabled={isLoading}
+                                                    required
+                                                >
+                                                    <option value="">{t('commonSettingsPage.selectLanguage')}</option>
+                                                    {adminLanguages.map((language) => (
+                                                        <option key={language.id} value={language.id}>{language.name}</option>
+                                                    ))}
+                                                </Select>
+                                            </Field>
+                                            <p className="mt-2 text-[12px] text-[color:var(--color-secondary)]">{t('commonSettingsPage.adminLanguageHint')}</p>
+                                        </div>
 
-                            <Field label={t('commonSettingsPage.lowStockThreshold')} error={formErrors.low_stock_threshold}>
-                            <input
-                                    className={`form-input ${formErrors.low_stock_threshold ? '!border-red-500' : ''}`}
-                                    type="number"
-                                    name="low_stock_threshold"
-                                    min="1"
-                                    step="1"
-                                    value={form.low_stock_threshold}
-                                onChange={updateField}
-                                disabled={isLoading}
-                                required
-                            />
-                        </Field>
-
-                            <Field label={t('commonSettingsPage.defaultShopUnit')} error={formErrors.default_shop_unit_id}>
-                            <select
-                                    className={`form-select ${formErrors.default_shop_unit_id ? '!border-red-500' : ''}`}
-                                    name="default_shop_unit_id"
-                                    value={form.default_shop_unit_id}
-                                onChange={updateField}
-                                disabled={isLoading}
-                            >
-                                    <option value="">{t('commonSettingsPage.selectShopUnit')}</option>
-                                    {shopUnits.map((unit) => (
-                                        <option key={unit.id} value={unit.id}>
-                                            {unit.is_system && unit.code ? t(`shopUnits.${unit.code}.name`) : unit.name || unit.short_name || unit.code}
-                                        </option>
-                                ))}
-                            </select>
-                        </Field>
-
-                            <div className="mt-1 border-t border-[color:var(--color-border)] pt-5 md:col-span-2">
-                                <h2 className="m-0 text-[16px] font-[760] text-[color:var(--color-primary)]">
-                                    {t('commonSettingsPage.imageSettingsTitle')}
-                                </h2>
+                                        <div>
+                                            <Field className="[&_.form-label]:text-[13px]" label={t('commonSettingsPage.siteLanguage')} error={formErrors.site_language_id}>
+                                                <Select
+                                                    className={formErrors.site_language_id ? '!border-red-500' : ''}
+                                                    name="site_language_id"
+                                                    value={form.site_language_id}
+                                                    onChange={updateField}
+                                                    disabled={isLoading}
+                                                    required
+                                                >
+                                                    <option value="">{t('commonSettingsPage.selectLanguage')}</option>
+                                                    {siteLanguages.map((language) => (
+                                                        <option key={language.id} value={language.id}>{language.name}</option>
+                                                    ))}
+                                                </Select>
+                                            </Field>
+                                            <p className="mt-2 text-[12px] text-[color:var(--color-secondary)]">{t('commonSettingsPage.siteLanguageHint')}</p>
+                                        </div>
+                                    </div>
+                                </SettingsCard>
                             </div>
+                        )}
 
-                            <div className="md:col-span-2">
-                                <h3 className="mb-3 text-[14px] font-[700] text-[color:var(--color-primary)]">
-                                    {t('commonSettingsPage.categoryImagesTitle')}
-                                </h3>
+                        {activeTab === 'catalog' && (
+                            <section id="common-settings-panel-catalog" role="tabpanel" aria-labelledby="common-settings-tab-catalog" className="rounded-[16px] border border-[color:var(--color-border)] bg-[rgba(255,255,255,.95)] shadow-[var(--shadow-sm)]">
+                                <div className="p-5 max-sm:p-4">
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-[18px] max-md:grid-cols-1">
+                                        <h2 className="m-0 text-[16px] font-[760] text-[color:var(--color-primary)] md:col-span-2">
+                                            {t('commonSettingsPage.shopSettingsTitle')}
+                                        </h2>
 
-                                <div className="space-y-[18px]">
-                                    <ImageSizeSettings
-                                        title={t('commonSettingsPage.smallImagesTitle')}
-                                        namePrefix="group_small"
-                                        form={form}
-                                        formErrors={formErrors}
-                                        isLoading={isLoading}
-                                        onChange={updateField}
-                                        t={t}
-                                    />
+                                        <div>
+                                            <Field label={t('commonSettingsPage.lowStockThreshold')} error={formErrors.low_stock_threshold}>
+                                                <input
+                                                    className={`form-input ${formErrors.low_stock_threshold ? '!border-red-500' : ''}`}
+                                                    type="number"
+                                                    name="low_stock_threshold"
+                                                    min="1"
+                                                    step="1"
+                                                    value={form.low_stock_threshold}
+                                                    onChange={updateField}
+                                                    disabled={isLoading}
+                                                    required
+                                                />
+                                            </Field>
+                                            <p className="mt-2 text-[12px] leading-[1.45] text-[color:var(--color-secondary)]">
+                                                {t('commonSettingsPage.lowStockThresholdHint')}
+                                            </p>
+                                        </div>
 
-                                    <ImageSizeSettings
-                                        title={t('commonSettingsPage.largeImagesTitle')}
-                                        namePrefix="group_large"
-                                        form={form}
-                                        formErrors={formErrors}
-                                        isLoading={isLoading}
-                                        onChange={updateField}
-                                        t={t}
-                                    />
-
-                                    <div className="grid grid-cols-2 gap-x-4 max-md:grid-cols-1">
-                                        <Field label={t('commonSettingsPage.imageFormat')} error={formErrors.group_image_format}>
-                                            <Select
-                                                className={formErrors.group_image_format ? '!border-red-500' : ''}
-                                                name="group_image_format"
-                                                value={form.group_image_format}
-                                                onChange={updateField}
-                                                disabled={isLoading}
-                                            >
-                                                <option value="original">{t('commonSettingsPage.imageFormatOptions.original')}</option>
-                                                <option value="webp">{t('commonSettingsPage.imageFormatOptions.webp')}</option>
-                                            </Select>
-                                        </Field>
+                                        <div>
+                                            <Field label={t('commonSettingsPage.defaultShopUnit')} error={formErrors.default_shop_unit_id}>
+                                                <select
+                                                    className={`form-select ${formErrors.default_shop_unit_id ? '!border-red-500' : ''}`}
+                                                    name="default_shop_unit_id"
+                                                    value={form.default_shop_unit_id}
+                                                    onChange={updateField}
+                                                    disabled={isLoading}
+                                                >
+                                                    <option value="">{t('commonSettingsPage.selectShopUnit')}</option>
+                                                    {shopUnits.map((unit) => (
+                                                        <option key={unit.id} value={unit.id}>
+                                                            {unit.is_system && unit.code ? t(`shopUnits.${unit.code}.name`) : unit.name || unit.short_name || unit.code}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </Field>
+                                            <p className="mt-2 text-[12px] leading-[1.45] text-[color:var(--color-secondary)]">
+                                                {t('commonSettingsPage.defaultShopUnitHint')}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            </section>
+                        )}
 
-                            <div className="md:col-span-2">
-                                <h3 className="mb-3 text-[14px] font-[700] text-[color:var(--color-primary)]">
-                                    {t('commonSettingsPage.productImagesTitle')}
-                                </h3>
+                        {activeTab === 'images' && (
+                            <div id="common-settings-panel-images" role="tabpanel" aria-labelledby="common-settings-tab-images">
+                                <header className="mb-[18px]">
+                                    <h2 className="m-0 text-[18px] font-[760] tracking-[-0.02em] text-[color:var(--color-primary)]">
+                                        {t('commonSettingsPage.imageSettingsTitle')}
+                                    </h2>
+                                    <p className="mt-1 text-[13px] text-[color:var(--color-secondary)]">
+                                        {t('commonSettingsPage.imageSettingsDescription')}
+                                    </p>
+                                </header>
 
                                 <div className="space-y-[18px]">
-                                    <ImageSizeSettings
-                                        title={t('commonSettingsPage.smallImagesTitle')}
-                                        namePrefix="product_small"
+                                    <ImageSettingsCard
+                                        title={t('commonSettingsPage.categoryImagesTitle')}
+                                        description={t('commonSettingsPage.categoryImagesDescription')}
+                                        namePrefix="group"
+                                        formatField="group_image_format"
                                         form={form}
                                         formErrors={formErrors}
                                         isLoading={isLoading}
@@ -385,9 +508,11 @@ export default function CommonSettingsPage() {
                                         t={t}
                                     />
 
-                                    <ImageSizeSettings
-                                        title={t('commonSettingsPage.largeImagesTitle')}
-                                        namePrefix="product_large"
+                                    <ImageSettingsCard
+                                        title={t('commonSettingsPage.productImagesTitle')}
+                                        description={t('commonSettingsPage.productImagesDescription')}
+                                        namePrefix="product"
+                                        formatField="product_image_format"
                                         form={form}
                                         formErrors={formErrors}
                                         isLoading={isLoading}
@@ -395,25 +520,17 @@ export default function CommonSettingsPage() {
                                         t={t}
                                     />
 
-                                    <div className="grid grid-cols-2 gap-x-4 max-md:grid-cols-1">
-                                        <Field label={t('commonSettingsPage.imageFormat')} error={formErrors.product_image_format}>
-                                            <Select
-                                                className={formErrors.product_image_format ? '!border-red-500' : ''}
-                                                name="product_image_format"
-                                                value={form.product_image_format}
-                                                onChange={updateField}
-                                                disabled={isLoading}
-                                            >
-                                                <option value="original">{t('commonSettingsPage.imageFormatOptions.original')}</option>
-                                                <option value="webp">{t('commonSettingsPage.imageFormatOptions.webp')}</option>
-                                            </Select>
-                                        </Field>
-                                    </div>
+                                    <aside className="rounded-[12px] bg-[#f1eeea] px-5 py-4 text-[12px] leading-[1.65] text-[color:var(--color-secondary)]">
+                                        <h3 className="m-0 text-[13px] font-[760] text-[color:var(--color-primary)]">
+                                            {t('commonSettingsPage.imageFitHelpTitle')}
+                                        </h3>
+                                        <p className="mt-1">{t('commonSettingsPage.imageFitHelpText')}</p>
+                                    </aside>
                                 </div>
                             </div>
+                        )}
                     </div>
-                    </div>
-                </section>
+                </div>
             </form>
         </>
     );

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 120" role="img" aria-labelledby="title desc">
+  <title id="title">Temporary product image</title>
+  <desc id="desc">An orange handbag in front of a green landscape.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dce8df"/>
+      <stop offset="1" stop-color="#f2d5b6"/>
+    </linearGradient>
+    <linearGradient id="bag" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d8792d"/>
+      <stop offset="1" stop-color="#9d4318"/>
+    </linearGradient>
+  </defs>
+  <rect width="180" height="120" fill="url(#sky)"/>
+  <path d="M0 50 34 30l27 18 27-27 35 31 24-18 33 19v67H0Z" fill="#627453"/>
+  <path d="M0 67c35-13 65-2 91-8 34-8 54-3 89 4v57H0Z" fill="#344b32"/>
+  <path d="M0 83c37-9 70 4 105-2 28-5 48 0 75 4v35H0Z" fill="#798258"/>
+  <path d="M19 79h142v8H19z" fill="#c6b39c"/>
+  <path d="M29 71h122v7H29z" fill="#e4d4c0"/>
+  <path d="M35 86h110v34H35z" fill="#b9a186" opacity=".85"/>
+  <path d="M65 61h53l9 55H55z" fill="url(#bag)"/>
+  <path d="M72 64c2-21 9-31 20-31s19 10 20 31" fill="none" stroke="#743314" stroke-width="7"/>
+  <path d="M63 77h57" stroke="#efaa64" stroke-width="3"/>
+  <circle cx="91" cy="88" r="7" fill="#f0a35c"/>
+</svg>
