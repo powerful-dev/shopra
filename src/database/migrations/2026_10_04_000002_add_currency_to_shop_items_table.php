@@ -8,14 +8,14 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('shops', function (Blueprint $table): void {
-            $table->string('currency', 3)->nullable();
+        Schema::table('shop_items', function (Blueprint $table): void {
+            $table->string('currency', 3)->nullable()->after('old_price');
         });
     }
 
     public function down(): void
     {
-        Schema::table('shops', function (Blueprint $table): void {
+        Schema::table('shop_items', function (Blueprint $table): void {
             $table->dropColumn('currency');
         });
     }

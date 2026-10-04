@@ -103,6 +103,7 @@ class SettingsApiTest extends TestCase
 
     public function test_currency_settings_are_loaded_and_synchronized_independently(): void
     {
+        $this->shop->update(['currency' => 'UAH']);
         ShopCurrency::query()->create(['currency_code' => 'USD', 'rate' => '40.00']);
         ShopCurrency::query()->create(['currency_code' => 'EUR', 'rate' => '44.00']);
 
@@ -132,6 +133,42 @@ class SettingsApiTest extends TestCase
         $this->assertDatabaseCount('shop_currencies', 2);
     }
 
+    public function test_product_editor_can_manage_shop_currencies_without_other_settings_access(): void
+    {
+        $this->user->modules()->detach();
+        $productsModule = Module::query()->create([
+            'code' => 'products',
+            'name' => 'Товары',
+            'admin_path' => '/admin/products',
+            'icon' => 'products',
+            'sorting' => 10,
+            'show_in_menu' => true,
+            'is_required' => false,
+        ]);
+        $this->user->modules()->attach($productsModule);
+        $this->shop->update(['currency' => 'USD']);
+        ShopCurrency::query()->create(['currency_code' => 'EUR', 'rate' => '1.08']);
+        ShopCurrency::query()->create(['currency_code' => 'USD', 'rate' => '1.00']);
+
+        $this->getJson('/api/settings/currencies')
+            ->assertOk()
+            ->assertJsonPath('data.currency', 'USD')
+            ->assertJsonPath('data.currency_rates.0.code', 'EUR')
+            ->assertJsonPath('data.currency_rates.0.rate', '1.08')
+            ->assertJsonPath('data.currency_rates.1.code', 'USD');
+
+        $this->putJson('/api/settings/currencies', [
+            'currency' => 'USD',
+            'currency_rates' => [
+                ['code' => 'EUR', 'rate' => '1.10'],
+            ],
+        ])->assertOk()
+            ->assertJsonPath('data.currency', 'USD')
+            ->assertJsonPath('data.currency_rates.0.rate', '1.10');
+
+        $this->getJson('/api/settings/general')->assertForbidden();
+    }
+
     public function test_currency_settings_are_validated_against_supported_currencies(): void
     {
         $this->putJson('/api/settings/currencies', [
@@ -150,6 +187,23 @@ class SettingsApiTest extends TestCase
             'currency' => 'BTC',
             'currency_rates' => [],
         ])->assertUnprocessable()->assertJsonValidationErrors('currency');
+    }
+
+    public function test_store_currency_can_remain_unselected(): void
+    {
+        $this->shop->update(['currency' => null]);
+
+        $this->getJson('/api/settings/currencies')
+            ->assertOk()
+            ->assertJsonPath('data.currency', null);
+
+        $this->putJson('/api/settings/currencies', [
+            'currency' => null,
+            'currency_rates' => [],
+        ])->assertOk()
+            ->assertJsonPath('data.currency', null);
+
+        $this->assertNull($this->shop->fresh()->currency);
     }
 
     public function test_catalog_settings_are_loaded_and_updated_independently(): void

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ShopItemStatus;
+use App\Enums\SupportedCurrency;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -19,6 +20,7 @@ class ShopItem extends Model
         'url',
         'price',
         'old_price',
+        'currency',
         'quantity',
         'description',
         'seo_title',
@@ -34,6 +36,7 @@ class ShopItem extends Model
         return [
             'price' => 'decimal:2',
             'old_price' => 'decimal:2',
+            'currency' => SupportedCurrency::class,
             'quantity' => 'integer',
             'show_stock' => 'boolean',
             'status' => ShopItemStatus::class,

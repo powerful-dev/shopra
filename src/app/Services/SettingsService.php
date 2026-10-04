@@ -12,6 +12,22 @@ use Illuminate\Support\Facades\DB;
 
 class SettingsService
 {
+    /** @return list<string> */
+    public function getAvailableCurrencyCodes(): array
+    {
+        $baseCurrency = Shop::query()->first()?->currency;
+        $additionalCurrencies = ShopCurrency::query()
+            ->orderBy('id')
+            ->get(['currency_code'])
+            ->map(fn (ShopCurrency $currency): string => $currency->currency_code->value)
+            ->all();
+
+        return array_values(array_unique(array_filter([
+            $baseCurrency?->value,
+            ...$additionalCurrencies,
+        ])));
+    }
+
     /** @return array<string, mixed> */
     public function getGeneral(User $user): array
     {
@@ -47,7 +63,7 @@ class SettingsService
         $shop = Shop::query()->firstOrFail();
 
         return [
-            'currency' => $shop->currency->value,
+            'currency' => $shop->currency?->value,
             'currency_rates' => ShopCurrency::query()
                 ->orderBy('id')
                 ->get(['currency_code', 'rate'])
@@ -140,7 +156,7 @@ class SettingsService
     }
 
     /** @param list<array{code: string, rate: string}> $rates */
-    private function syncCurrencyRates(string $baseCurrency, array $rates): void
+    private function syncCurrencyRates(?string $baseCurrency, array $rates): void
     {
         $rates = array_values(array_filter(
             $rates,

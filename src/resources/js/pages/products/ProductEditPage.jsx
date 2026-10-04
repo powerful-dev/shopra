@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { appName } from '../../adminConfig';
+import { appName, supportedCurrencies } from '../../adminConfig';
 import ActionsMenu from '../../components/admin/ActionsMenu';
 import Alert from '../../components/admin/Alert';
 import Breadcrumbs from '../../components/admin/Breadcrumbs';
@@ -25,11 +25,13 @@ import SaveIcon from '../../components/icons/SaveIcon';
 import { csrf, request } from '../../services/api';
 import { getShopGroups } from '../../services/shopGroups';
 import { addShopItemCategory, deleteShopItemCategory, deleteShopItemMedia, getShopItemMediaConfig, reorderShopItemMedia, uploadShopItemMedia } from '../../services/shopItems';
+import { getCurrencySettings } from '../../services/settings';
 import useFileDropZone from '../../hooks/useFileDropZone';
 import useSectionScroll from '../../hooks/useSectionScroll';
 import { formatMediaExtensions } from '../../utils/media';
 import { buildShopGroupOptions } from '../../utils/shopGroups';
 import CategoriesModal from './CategoriesModal';
+import CurrencySettingsModal from './CurrencySettingsModal';
 
 
 const fieldClass = 'h-[43px] w-full rounded-[9px] border border-[#ddd5cf] bg-white px-[11px] text-[13px] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]';
@@ -49,7 +51,7 @@ export default function ProductEditPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const isNew = id === 'new' || !id;
-    const [form, setForm] = useState({ name: '', price: '', old_price: '', quantity: '', description: '', seo_title: '', seo_description: '', shop_group_id: null, status: isNew ? 'draft' : null });
+    const [form, setForm] = useState({ name: '', price: '', old_price: '', currency: '', quantity: '', description: '', seo_title: '', seo_description: '', shop_group_id: null, status: isNew ? 'draft' : null });
     const [shopGroupOptions, setShopGroupOptions] = useState([]);
     const [isShopGroupsLoading, setIsShopGroupsLoading] = useState(true);
     const [shopGroupsLoadError, setShopGroupsLoadError] = useState('');
@@ -57,6 +59,9 @@ export default function ProductEditPage() {
     const [isActionsOpen, setIsActionsOpen] = useState(false);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+    const [isCurrencySettingsOpen, setIsCurrencySettingsOpen] = useState(false);
+    const [currencySettings, setCurrencySettings] = useState({ currency: null, currency_rates: [] });
+    const [currencyStatus, setCurrencyStatus] = useState('loading');
     const [isDeleting, setIsDeleting] = useState(false);
     const [media, setMedia] = useState([]);
     const [productCategories, setProductCategories] = useState([]);
@@ -147,6 +152,27 @@ export default function ProductEditPage() {
     useEffect(() => () => productCategoriesRequestRef.current?.abort(), []);
 
     useEffect(() => {
+        const controller = new AbortController();
+
+        getCurrencySettings({ signal: controller.signal })
+            .then((settings) => {
+                setCurrencySettings({
+                    currency: settings.currency,
+                    currency_rates: Array.isArray(settings.currency_rates) ? settings.currency_rates : [],
+                });
+                setCurrencyStatus('loaded');
+            })
+            .catch((error) => {
+                if (error.name !== 'AbortError') {
+                    console.error('Unable to load shop currencies.', error);
+                    setCurrencyStatus('error');
+                }
+            });
+
+        return () => controller.abort();
+    }, []);
+
+    useEffect(() => {
         if (isNew) {
             createdProductIdRef.current = null;
             setMedia([]);
@@ -185,6 +211,7 @@ export default function ProductEditPage() {
                     name: product.name ?? '',
                     price: product.price ?? '',
                     old_price: product.old_price ?? '',
+                    currency: product.currency ?? '',
                     quantity: product.quantity ?? '',
                     description: product.description ?? '',
                     seo_title: product.seo_title ?? '',
@@ -242,7 +269,11 @@ export default function ProductEditPage() {
 
             createdProductIdRef.current = product.id;
             skipProductLoadIdRef.current = String(product.id);
-            setForm((current) => ({ ...current, status: product.status }));
+            setForm((current) => ({
+                ...current,
+                currency: product.currency ?? current.currency,
+                status: product.status,
+            }));
             navigate(`/admin/products/${product.id}`, { replace: true });
 
             return product;
@@ -294,7 +325,11 @@ export default function ProductEditPage() {
                     }),
                 }));
 
-                setForm((current) => ({ ...current, status: product.status }));
+                setForm((current) => ({
+                    ...current,
+                    currency: product.currency ?? current.currency,
+                    status: product.status,
+                }));
             }
         } catch (error) {
             console.error(error);
@@ -453,7 +488,14 @@ export default function ProductEditPage() {
                         }}
                         onMediaOrderChanged={setMedia}
                     />
-                    <PriceSection sectionRef={(element) => { sectionRefs.current.price = element; }} form={form} onChange={updateField} />
+                    <PriceSection
+                        sectionRef={(element) => { sectionRefs.current.price = element; }}
+                        form={form}
+                        currencySettings={currencySettings}
+                        currencyStatus={currencyStatus}
+                        onChange={updateField}
+                        onOpenCurrencySettings={() => setIsCurrencySettingsOpen(true)}
+                    />
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.variants = element; }} id="variants" title="Модификации товара" icon="layers" open>
                         <article className="grid min-h-[82px] grid-cols-[42px_minmax(0,1fr)_auto] items-center gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[12px_13px] max-md:grid-cols-[38px_minmax(0,1fr)]">
                             <span className="grid h-[42px] w-[42px] place-items-center rounded-[11px] bg-[#f1ece8] text-[#81766e]"><SectionIcon type="layers" size={18} /></span>
@@ -507,6 +549,15 @@ export default function ProductEditPage() {
                 isOpen={isCategoriesOpen}
                 onClose={() => setIsCategoriesOpen(false)}
                 onCategoriesChanged={handleCategoriesChanged}
+            />
+            <CurrencySettingsModal
+                isOpen={isCurrencySettingsOpen}
+                initialData={currencySettings}
+                onClose={() => setIsCurrencySettingsOpen(false)}
+                onSaved={(settings) => {
+                    setCurrencySettings(settings);
+                    setCurrencyStatus('loaded');
+                }}
             />
 
         </div>
@@ -1060,8 +1111,175 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
     );
 }
 
-function PriceSection({ sectionRef, form, onChange }) {
-    return <Card sectionRef={sectionRef} id="price" title="Цена и наличие" required bodyClassName="grid grid-cols-3 gap-3 p-[15px_17px_17px] max-md:grid-cols-1 max-sm:p-[13px]"><PriceField label="Цена" name="price" value={form.price} onChange={onChange} suffix="грн" required /><PriceField label="Старая цена" name="old_price" value={form.old_price} onChange={onChange} suffix="грн" /><PriceField label="Количество" name="quantity" value={form.quantity} onChange={onChange} suffix="шт" required /><label className="col-span-full flex items-center gap-[7px] text-[12px] text-[#6d655e]"><input className="h-[14px] w-[14px] accent-[color:var(--color-accent)]" type="checkbox" defaultChecked />Показывать остаток на витрине</label></Card>;
+function PriceSection({ sectionRef, form, currencySettings, currencyStatus, onChange, onOpenCurrencySettings }) {
+    const { t, i18n } = useTranslation();
+    const storeCurrency = currencySettings.currency;
+    const currencyRates = currencySettings.currency_rates;
+    const priceCurrencies = [...new Set([
+        storeCurrency,
+        ...currencyRates.map(({ code }) => code),
+    ].filter(Boolean))];
+    const priceCurrency = form.currency;
+
+    useEffect(() => {
+        if (
+            currencyStatus === 'loaded'
+            && priceCurrencies.length > 0
+            && !priceCurrencies.includes(priceCurrency)
+        ) {
+            onChange({ target: { name: 'currency', value: priceCurrencies[0] } });
+        }
+    }, [currencyStatus, onChange, priceCurrencies, priceCurrency]);
+
+    const selectedCurrencyRate = currencyRates.find(({ code }) => code === priceCurrency)?.rate;
+    const numericRate = Number(selectedCurrencyRate);
+    const hasRate = Number.isFinite(numericRate) && numericRate > 0;
+    const shouldShowPricePreview = Boolean(
+        storeCurrency && priceCurrency && priceCurrency !== storeCurrency
+    );
+    const storeCurrencySymbol = supportedCurrencies.find(({ code }) => code === storeCurrency)?.symbol
+        ?? storeCurrency;
+    const parsePrice = (value) => {
+        if (value === '' || value === null || value === undefined) {
+            return null;
+        }
+
+        const parsedValue = Number(String(value).replace(/\s/g, '').replace(',', '.'));
+
+        return Number.isFinite(parsedValue) ? parsedValue : null;
+    };
+    const convertPrice = (value) => {
+        const parsedValue = parsePrice(value);
+
+        return parsedValue === null || !hasRate ? null : parsedValue * numericRate;
+    };
+    const formatPrice = (value) => value === null
+        ? '—'
+        : `${new Intl.NumberFormat(i18n.resolvedLanguage, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(value)} ${storeCurrencySymbol}`;
+    const storefrontPrice = convertPrice(form.price);
+    const storefrontOldPrice = convertPrice(form.old_price);
+
+    return (
+        <Card sectionRef={sectionRef} id="price" title="Цена и наличие" required bodyClassName="">
+            <div className="flex min-h-[47px] flex-wrap items-center gap-x-1.5 gap-y-1 border-b border-[#f1e5dc] bg-[#fff8ed] px-[24px] py-3 text-[12px] text-[#92512f] max-sm:px-[13px]">
+                {currencyStatus === 'loading' && <span>Загрузка валюты магазина…</span>}
+                {currencyStatus === 'error' && <span>Не удалось загрузить валюты магазина.</span>}
+                {currencyStatus === 'loaded' && (storeCurrency !== null ? (
+                    <span>Валюта магазина: <strong className="font-[650]">{storeCurrency}</strong>.</span>
+                ) : (
+                    <button
+                        className="cursor-pointer border-0 bg-transparent p-0 text-[12px] text-[#a94416] underline decoration-[#d59a78] underline-offset-2"
+                        type="button"
+                        data-currency-modal-trigger
+                        onClick={onOpenCurrencySettings}
+                    >
+                        Выбрать валюту перед добавлением товаров
+                    </button>
+                ))}
+            </div>
+
+            <div className="p-[17px] max-sm:p-[13px]">
+                <div className="flex items-end justify-between gap-6 max-sm:flex-col max-sm:items-stretch max-sm:gap-4">
+                    <Field label="Валюта цены">
+                        <select
+                            className={`${fieldClass} w-[182px] cursor-pointer pr-9 font-[700] max-sm:w-full`}
+                            name="currency"
+                            value={priceCurrency}
+                            disabled={currencyStatus !== 'loaded' || priceCurrencies.length === 0}
+                            onChange={onChange}
+                            aria-label="Валюта цены"
+                        >
+                            {priceCurrencies.length === 0 && (
+                                <option value="">
+                                    {currencyStatus === 'error' ? 'Валюты недоступны' : 'Загрузка…'}
+                                </option>
+                            )}
+                            {priceCurrencies.map((currency) => (
+                                <option key={currency} value={currency}>
+                                    {currency} — {t(`currencies.${currency}`)}
+                                </option>
+                            ))}
+                        </select>
+                    </Field>
+
+                    <button
+                        className="mb-[10px] inline-flex cursor-pointer items-center gap-1.5 self-end border-0 bg-transparent p-0 text-[13px] font-[500] text-[color:var(--color-accent)] max-sm:mb-0 max-sm:self-start"
+                        type="button"
+                        data-currency-modal-trigger
+                        onClick={onOpenCurrencySettings}
+                    >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+                            <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
+                            <circle cx="16" cy="7" r="2" />
+                            <circle cx="8" cy="17" r="2" />
+                        </svg>
+                        Курсы валют
+                    </button>
+                </div>
+
+                <div className="mt-[18px] grid grid-cols-2 gap-x-5 gap-y-3 max-md:grid-cols-1">
+                    <PriceField label="Цена" name="price" value={form.price} onChange={onChange} required />
+                    <PriceField label="Старая цена" name="old_price" value={form.old_price} onChange={onChange} />
+                </div>
+
+                {shouldShowPricePreview && (
+                    <>
+                        <div className={`mt-[18px] flex min-h-[124px] items-center justify-between gap-8 rounded-[11px] border px-5 py-4 max-sm:flex-col max-sm:items-start max-sm:gap-4 ${hasRate ? 'border-[#efcfbb] bg-[#fff9f4]' : 'border-[#e8c7a8] bg-[#fff8ed]'}`}>
+                            <div>
+                                <p className="m-0 text-[12px] text-[#a06d50]">Цена на витрине · {storeCurrency}</p>
+                                {hasRate ? (
+                                    <>
+                                        <strong className="mt-2 block text-[24px] font-[760] leading-none tracking-[-0.025em] text-[#713010]">
+                                            {formatPrice(storefrontPrice)}
+                                        </strong>
+                                        {storefrontOldPrice !== null && (
+                                            <s className="mt-3 block text-[12px] text-[#b18268] decoration-[#b18268]">
+                                                {formatPrice(storefrontOldPrice)}
+                                            </s>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
+                                        <strong className="mt-2 block text-[16px] font-[720] text-[#8f461e]">
+                                            Курс для {priceCurrency} не задан
+                                        </strong>
+                                        <p className="mt-2 text-[12px] leading-[1.45] text-[#9c6b50]">
+                                            Пересчёт цены на витрине недоступен.
+                                        </p>
+                                    </>
+                                )}
+                            </div>
+                            <div className="max-w-[235px] text-left max-sm:max-w-none">
+                                <p className="m-0 text-[12px] font-[600] text-[#96522e]">
+                                    1 {priceCurrency} = {hasRate ? selectedCurrencyRate : '—'} {storeCurrency}
+                                </p>
+                                <p className="mt-2 text-[11px] leading-[1.45] text-[#b07a5d]">
+                                    {hasRate ? 'Используется курс магазина.' : 'Добавьте курс в настройках валют.'}
+                                </p>
+                            </div>
+                        </div>
+
+                        <p className="mt-[18px] text-[12px] leading-[1.5] text-[#887e76]">
+                            При смене валюты сумма в поле сохраняется. Проверьте её перед сохранением товара.
+                        </p>
+                    </>
+                )}
+
+                <div className="mt-6 border-t border-[#eee8e3] pt-[18px]">
+                    <div className="max-w-[420px]">
+                        <PriceField label="Количество" name="quantity" value={form.quantity} onChange={onChange} suffix="шт" required />
+                    </div>
+                    <label className="mt-3 flex items-center gap-[7px] text-[12px] text-[#6d655e]">
+                        <input className="h-[14px] w-[14px] accent-[color:var(--color-accent)]" type="checkbox" defaultChecked />
+                        Показывать остаток на витрине
+                    </label>
+                </div>
+            </div>
+        </Card>
+    );
 }
 
 function ProductAside() {
@@ -1114,7 +1332,7 @@ function AccordionSection({ sectionRef, id, title, icon, children, open = false 
 }
 
 function Field({ label, children }) { return <label className="flex flex-col gap-[7px]"><span className="text-[12px] font-bold text-[#554e48]">{label}</span>{children}</label>; }
-function PriceField({ label, name, value, onChange, suffix, required }) { return <Field label={<>{label} {required && <b className="text-[color:var(--color-accent)]">*</b>}</>}><span className="relative"><input className={`${fieldClass} pr-11 font-bold`} name={name} value={value} onChange={onChange} /><b className="absolute right-[11px] top-1/2 -translate-y-1/2 text-[11px] text-[#8d857f]">{suffix}</b></span></Field>; }
+function PriceField({ label, name, value, onChange, suffix, required }) { return <Field label={<>{label} {required && <b className="text-[color:var(--color-accent)]">*</b>}</>}><span className="relative"><input className={`${fieldClass} ${suffix ? 'pr-11' : ''} font-bold`} name={name} value={value} onChange={onChange} />{suffix && <b className="absolute right-[11px] top-1/2 -translate-y-1/2 text-[11px] text-[#8d857f]">{suffix}</b>}</span></Field>; }
 
 function SectionIcon({ type, size = 14 }) {
     const paths = { box: 'm16 16 2 2 4-4M21 10V8l-9-6-9 6v8l9 6 3-1', photo: 'M16 5h6M19 2v6M21 12v7H3V3h10M3 17l6-6 4 4 3-3 5 5', price: 'M16 8h-6a2 2 0 100 4h4a2 2 0 110 4H8M12 18V6', layers: 'm2 7 10-5 10 5-10 5L2 7m0 5 10 5 10-5M2 17l10 5 10-5', file: 'M15 2H6v20h14V7l-5-5zm-1 0v6h6M8 13h8M8 17h8', sliders: 'M20 7h-9M14 17H5M17 14v6M7 4v6', truck: 'M14 18V4H2v14h3m10 0H9m10 0h3v-5l-4-5h-4m3 12a2 2 0 100-4 2 2 0 000 4zM7 20a2 2 0 100-4 2 2 0 000 4z', link: 'M9 17H7A5 5 0 017 7h2m6 0h2a5 5 0 010 10h-2M8 12h8' };

@@ -12,7 +12,7 @@ class EnsureModuleAccess
     public function handle(
         Request $request,
         Closure $next,
-        string $moduleCode
+        string ...$moduleCodes
     ): Response {
         $user = $request->user();
 
@@ -21,7 +21,7 @@ class EnsureModuleAccess
         }
 
         $hasAccess = $user->modules()
-            ->where('code', $moduleCode)
+            ->whereIn('code', $moduleCodes)
             ->exists();
 
         abort_unless($hasAccess, 403, 'Access denied.');

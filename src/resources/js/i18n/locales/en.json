@@ -111,6 +111,9 @@
             "selectCurrency": "Select a currency",
             "noCurrenciesAvailable": "No currencies available",
             "addCurrency": "Add currency",
+            "removeCurrency": "Remove {{currency}} currency",
+            "closeModal": "Close currency settings",
+            "cancel": "Cancel",
             "rateInfo": "One rate applies to all linked products, old prices, and variants. When it changes, source prices remain unchanged. Conversion is unavailable without a rate."
         },
         "generalSettingsTitle": "General settings",

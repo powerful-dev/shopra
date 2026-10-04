@@ -1,5 +1,4 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { supportedCurrencies } from '../../adminConfig';
 import { csrf, request } from '../../services/api';
 
 const IMAGE_SIZE_FIELDS = [
@@ -32,7 +31,7 @@ const sectionConfigs = {
     currencies: {
         endpoint: '/api/settings/currencies',
         emptyData: {
-            currency: supportedCurrencies[0]?.code ?? '',
+            currency: null,
             currency_rates: [],
         },
         payload: ({ currency, currency_rates }) => ({ currency, currency_rates }),

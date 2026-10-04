@@ -17,7 +17,7 @@ class UpdateCurrencySettingsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'currency' => ['required', Rule::enum(SupportedCurrency::class)],
+            'currency' => ['nullable', Rule::enum(SupportedCurrency::class)],
             'currency_rates' => ['present', 'array'],
             'currency_rates.*.code' => [
                 'required',
