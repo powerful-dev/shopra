@@ -3,12 +3,12 @@
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AdminModuleController;
 use App\Http\Controllers\Api\AuthenticationController;
-use App\Http\Controllers\Api\CommonSettingsController;
 use App\Http\Controllers\Api\EditorImageController;
 use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\ShopGroupController;
 use App\Http\Controllers\Api\ShopItemController;
 use App\Http\Controllers\Api\SiteModuleController;
+use App\Http\Controllers\Api\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('web')->post('/login', [AuthenticationController::class, 'login']);
@@ -37,8 +37,14 @@ Route::middleware([
     Route::get('/me/modules', [SiteModuleController::class, 'currentUser']);
 
     Route::middleware('module:settings')->group(function (): void {
-        Route::get('/settings/common', [CommonSettingsController::class, 'show']);
-        Route::put('/settings/common', [CommonSettingsController::class, 'update']);
+        Route::get('/settings/general', [SettingsController::class, 'general']);
+        Route::put('/settings/general', [SettingsController::class, 'updateGeneral']);
+        Route::get('/settings/currencies', [SettingsController::class, 'currencies']);
+        Route::put('/settings/currencies', [SettingsController::class, 'updateCurrencies']);
+        Route::get('/settings/catalog', [SettingsController::class, 'catalog']);
+        Route::put('/settings/catalog', [SettingsController::class, 'updateCatalog']);
+        Route::get('/settings/images', [SettingsController::class, 'images']);
+        Route::put('/settings/images', [SettingsController::class, 'updateImages']);
     });
 
     Route::middleware('module:products')->group(function (): void {

@@ -12,6 +12,7 @@
     <div 
         id="admin-app"
         data-app-name="{{ config('app.name') }}"
+        data-supported-currencies='@json(\App\Enums\SupportedCurrency::options())'
         data-store-url="{{ route('home') }}">
     </div>
 </body>

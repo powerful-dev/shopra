@@ -9,8 +9,9 @@ import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
 import PlaceholderPage from './pages/PlaceholderPage';
 import { placeholders } from './data/adminNavigation';
-import { adminRoutes } from './data/adminRoutes';
+import { adminRoutes, settingsRoutes } from './data/adminRoutes';
 import RequireModule from './components/admin/RequireModule';
+import SettingsLayout from './pages/settings/SettingsLayout';
 
 import '../css/tailwind.css';
 import '../scss/admin.scss';
@@ -30,6 +31,14 @@ function AdminApp() {
                         element={<RequireModule code={module}><Component /></RequireModule>}
                     />
                 ))}
+
+                <Route element={<RequireModule code="settings"><SettingsLayout /></RequireModule>}>
+                    {settingsRoutes.map(({ path, component: Component }) => (
+                        <Route key={path} path={path} element={<Component />} />
+                    ))}
+                </Route>
+
+                <Route path="/admin/settings/common" element={<Navigate to="/admin/settings/general" replace />} />
 
                 {Object.entries(placeholders).map(([slug, [title, description]]) => <Route key={slug} path={`/admin/${slug}`} element={<PlaceholderPage title={title} description={description} />} />)}
             </Route>

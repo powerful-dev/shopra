@@ -46,8 +46,23 @@ export const breadcrumbRoutes = [
         labelKey: 'breadcrumbs.settings',
     },
     {
-        path: '/admin/settings/common',
-        labelKey: 'breadcrumbs.settings_common',
+        path: '/admin/settings/general',
+        labelKey: 'breadcrumbs.settings_general',
+        parent: '/admin/settings',
+    },
+    {
+        path: '/admin/settings/currencies',
+        labelKey: 'breadcrumbs.settings_currencies',
+        parent: '/admin/settings',
+    },
+    {
+        path: '/admin/settings/catalog',
+        labelKey: 'breadcrumbs.settings_catalog',
+        parent: '/admin/settings',
+    },
+    {
+        path: '/admin/settings/images',
+        labelKey: 'breadcrumbs.settings_images',
         parent: '/admin/settings',
     },
     {

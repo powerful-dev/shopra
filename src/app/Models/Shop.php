@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ImageFit;
 use App\Enums\ImageFormat;
+use App\Enums\SupportedCurrency;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'name',
     'logo',
     'theme',
+    'currency',
     'low_stock_threshold',
     'default_shop_unit_id',
     'group_small_image_max_width',
@@ -34,6 +36,7 @@ class Shop extends Model
     protected function casts(): array
     {
         return [
+            'currency' => SupportedCurrency::class,
             'low_stock_threshold' => 'integer',
             'group_small_image_max_width' => 'integer',
             'group_small_image_max_height' => 'integer',

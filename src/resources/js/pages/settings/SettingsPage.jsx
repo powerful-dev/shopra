@@ -13,7 +13,7 @@ export default function SettingsPage() {
             title: t('settingsPage.commonSettingsTitle'),
             description: t('settingsPage.commonSettingsDescription'),
             icon: <SettingsIcon />,
-            href: '/admin/settings/common',
+            href: '/admin/settings/general',
         },
         {
             title: t('settingsPage.staffAccessTitle'),

@@ -9,7 +9,10 @@ import PaymentPage from '../pages/PaymentPage';
 import DiscountsPage from '../pages/DiscountsPage';
 import AnalyticsPage from '../pages/AnalyticsPage';
 import SettingsPage from '../pages/settings/SettingsPage';
-import CommonSettingsPage from '../pages/settings/CommonSettingsPage';
+import GeneralSettingsPage from '../pages/settings/GeneralSettingsPage';
+import CurrencySettingsPage from '../pages/settings/CurrencySettingsPage';
+import CatalogSettingsPage from '../pages/settings/CatalogSettingsPage';
+import ImageSettingsPage from '../pages/settings/ImageSettingsPage';
 
 export const adminRoutes = [
     { path: '/admin/products', module: 'products', component: ProductsPage },
@@ -25,5 +28,11 @@ export const adminRoutes = [
     { path: '/admin/discounts', module: 'discounts', component: DiscountsPage },
     { path: '/admin/analytics', module: 'analytics', component: AnalyticsPage },
     { path: '/admin/settings', module: 'settings', component: SettingsPage },
-    { path: '/admin/settings/common', module: 'settings', component: CommonSettingsPage },
+];
+
+export const settingsRoutes = [
+    { path: '/admin/settings/general', component: GeneralSettingsPage },
+    { path: '/admin/settings/currencies', component: CurrencySettingsPage },
+    { path: '/admin/settings/catalog', component: CatalogSettingsPage },
+    { path: '/admin/settings/images', component: ImageSettingsPage },
 ];

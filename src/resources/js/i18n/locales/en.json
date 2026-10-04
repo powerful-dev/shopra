@@ -7,6 +7,18 @@
         "price": "Price",
         "status": "Status"
     },
+    "currencies": {
+        "UAH": "Ukrainian hryvnia",
+        "EUR": "Euro",
+        "USD": "US dollar",
+        "MDL": "Moldovan leu",
+        "GEL": "Georgian lari",
+        "PLN": "Polish złoty",
+        "RON": "Romanian leu",
+        "CZK": "Czech koruna",
+        "HUF": "Hungarian forint",
+        "GBP": "Pound sterling"
+    },
     "userMenu": {
         "owner": "Owner",
         "administrator": "Administrator",
@@ -81,8 +93,25 @@
         "tabsLabel": "Settings sections",
         "tabs": {
             "general": "General",
+            "currency": "Currency and rates",
             "catalog": "Catalog",
             "images": "Images"
+        },
+        "currency": {
+            "title": "Store currency",
+            "description": "Customers see prices and place orders in this currency.",
+            "baseCurrency": "Base currency",
+            "baseCurrencyHint": "Choose it before adding the first product. The source price currency may be different.",
+            "ratesTitle": "Rates for product prices",
+            "manualRate": "Manual store rate",
+            "ratesDescription": "Specify how many {{currency}} one unit of another currency is worth. For example, at a rate of 40, a price of 100 USD will equal 4,000 {{currency}}. This is an example, not the current rate.",
+            "ratePlaceholder": "Enter a rate",
+            "rateLabel": "Rate for {{currency}}",
+            "currencyToAdd": "Currency to add",
+            "selectCurrency": "Select a currency",
+            "noCurrenciesAvailable": "No currencies available",
+            "addCurrency": "Add currency",
+            "rateInfo": "One rate applies to all linked products, old prices, and variants. When it changes, source prices remain unchanged. Conversion is unavailable without a rate."
         },
         "generalSettingsTitle": "General settings",
         "generalSettingsDescription": "What your store is called.",
@@ -93,9 +122,9 @@
         "siteName": "Site name",
         "adminLanguage": "Admin language",
         "siteLanguage": "Site language",
-        "loadError": "Failed to load general settings.",
-        "saved": "General settings saved.",
-        "saveError": "Failed to save general settings.",
+        "loadError": "Failed to load settings.",
+        "saved": "Settings saved.",
+        "saveError": "Failed to save settings.",
         "saving": "Saving…",
         "selectLanguage": "Select a language",
         "shopSettingsTitle": "Online store settings",
@@ -185,6 +214,10 @@
         "analytics": "Analytics",
         "domain": "Domain",
         "settings_common": "Common settings",
+        "settings_general": "General",
+        "settings_currencies": "Currency and rates",
+        "settings_catalog": "Catalog",
+        "settings_images": "Images",
         "administrators": "Administrators",
         "administrator_new": "New administrator",
         "administrator": "Administrator"
