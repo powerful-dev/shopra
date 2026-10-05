@@ -32,6 +32,7 @@ import { formatMediaExtensions } from '../../utils/media';
 import { buildShopGroupOptions } from '../../utils/shopGroups';
 import CategoriesModal from './CategoriesModal';
 import CurrencySettingsModal from './CurrencySettingsModal';
+import ProductAttributesSection from './ProductAttributesSection';
 
 
 const fieldClass = 'h-[43px] w-full rounded-[9px] border border-[#ddd5cf] bg-white px-[11px] text-[13px] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]';
@@ -514,7 +515,9 @@ export default function ProductEditPage() {
                             />
                         </label>
                     </AccordionSection>
-                    <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title="Характеристики" icon="sliders"><Field label="Характеристики товара"><input className={fieldClass} type="text" placeholder="Например: материал — натуральная кожа" /></Field></AccordionSection>
+                    <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title="Характеристики" icon="sliders">
+                        <ProductAttributesSection />
+                    </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.delivery = element; }} id="delivery" title="Доставка" icon="truck"><Field label="Группа доставки"><select className={fieldClass} defaultValue="standard"><option value="standard">Стандартная доставка</option><option>Крупногабаритный товар</option><option>Самовывоз</option></select></Field></AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.seo = element; }} id="seo" title="SEO" icon="link">
                         <SeoFields

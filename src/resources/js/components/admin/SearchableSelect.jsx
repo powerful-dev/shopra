@@ -20,6 +20,9 @@ export default function SearchableSelect({
     disabled = false,
     ariaBusy = false,
     closeOnSelect = true,
+    multiple = false,
+    actionLabel = '',
+    onAction,
 }) {
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState('');
@@ -29,7 +32,14 @@ export default function SearchableSelect({
     const dropdownRef = useRef(null);
     const searchRef = useRef(null);
     const listboxId = useId();
-    const selectedOption = options.find((option) => option.value === value);
+    const selectedValues = multiple && Array.isArray(value) ? value : [];
+    const selectedOptions = multiple
+        ? options.filter((option) => selectedValues.includes(option.value))
+        : [];
+    const selectedOption = multiple ? null : options.find((option) => option.value === value);
+    const selectedLabel = multiple
+        ? selectedOptions.map((option) => option.label).join(', ')
+        : selectedOption?.label;
     const normalizedQuery = query.trim().toLocaleLowerCase();
     const filteredOptions = useMemo(() => {
         if (!normalizedQuery) return options;
@@ -108,7 +118,13 @@ export default function SearchableSelect({
     const selectOption = (option) => {
         if (option.disabled) return;
 
-        onChange(option.value);
+        if (multiple) {
+            onChange(selectedValues.includes(option.value)
+                ? selectedValues.filter((selectedValue) => selectedValue !== option.value)
+                : [...selectedValues, option.value]);
+        } else {
+            onChange(option.value);
+        }
 
         if (closeOnSelect) {
             close(true);
@@ -118,9 +134,16 @@ export default function SearchableSelect({
         }
     };
 
+    const runAction = () => {
+        onAction(query.trim());
+        close();
+    };
+
     return (
         <div ref={rootRef} className={`searchable-select ${className}`.trim()}>
-            {name && <input type="hidden" name={name} value={value ?? ''} disabled={disabled} />}
+            {name && (multiple
+                ? selectedValues.map((selectedValue) => <input key={selectedValue} type="hidden" name={`${name}[]`} value={selectedValue} disabled={disabled} />)
+                : <input type="hidden" name={name} value={value ?? ''} disabled={disabled} />)}
             <button
                 ref={triggerRef}
                 className="searchable-select__trigger"
@@ -133,8 +156,8 @@ export default function SearchableSelect({
                 disabled={disabled}
                 onClick={() => isOpen ? close() : setIsOpen(true)}
             >
-                <span className={selectedOption ? 'searchable-select__value' : 'searchable-select__placeholder'}>
-                    {selectedOption?.label ?? placeholder}
+                <span className={selectedLabel ? 'searchable-select__value' : 'searchable-select__placeholder'}>
+                    {selectedLabel || placeholder}
                 </span>
                 <ChevronIcon />
             </button>
@@ -156,9 +179,11 @@ export default function SearchableSelect({
                             onChange={(event) => setQuery(event.target.value)}
                         />
                     </label>
-                    <div id={listboxId} className="searchable-select__options" role="listbox">
+                    <div id={listboxId} className="searchable-select__options" role="listbox" aria-multiselectable={multiple || undefined}>
                         {filteredOptions.length > 0 ? filteredOptions.map((option) => {
-                            const isSelected = option.value === value;
+                            const isSelected = multiple
+                                ? selectedValues.includes(option.value)
+                                : option.value === value;
 
                             return (
                                 <button
@@ -177,6 +202,11 @@ export default function SearchableSelect({
                             );
                         }) : <p className="searchable-select__empty">{emptyMessage}</p>}
                     </div>
+                    {actionLabel && onAction && (
+                        <button className="searchable-select__action" type="button" onClick={runAction}>
+                            <span aria-hidden="true">+</span>{actionLabel}
+                        </button>
+                    )}
                 </div>,
                 document.body,
             )}

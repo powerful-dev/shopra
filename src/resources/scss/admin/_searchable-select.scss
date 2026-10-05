@@ -148,6 +148,35 @@
         font-size: 12px;
         text-align: center;
     }
+
+    &__action {
+        width: 100%;
+        min-height: 41px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 13px;
+        border: 0;
+        border-top: 1px solid #eee9e5;
+        background: #fffaf7;
+        color: var(--color-accent);
+        font-size: 12px;
+        font-weight: 700;
+        text-align: left;
+        cursor: pointer;
+
+        span {
+            font-size: 17px;
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        &:hover,
+        &:focus-visible {
+            background: var(--sidebar-item-hover);
+            outline: none;
+        }
+    }
 }
 
 .searchable-select--product-category {
