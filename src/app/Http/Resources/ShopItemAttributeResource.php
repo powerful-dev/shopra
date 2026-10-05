@@ -15,6 +15,7 @@ class ShopItemAttributeResource extends JsonResource
         return [
             'id' => $this->id,
             'attribute_id' => $this->attribute_id,
+            'sort_order' => $this->sort_order,
             'value' => match ($this->attribute->type) {
                 ShopAttributeType::Select => $this->options->first()?->id,
                 ShopAttributeType::Multiselect => $this->options->pluck('id')->values()->all(),

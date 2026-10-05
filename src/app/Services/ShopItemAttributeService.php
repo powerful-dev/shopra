@@ -19,16 +19,13 @@ class ShopItemAttributeService
                 'attribute.options' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
                 'options' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
             ])
-            ->get()
-            ->sortBy(fn (ShopItemAttribute $itemAttribute): array => [
-                $itemAttribute->attribute->sort_order,
-                $itemAttribute->attribute_id,
-            ])
-            ->values();
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
     }
 
     /**
-     * @param  array<int, array{attribute_id: int, value: mixed}>  $rows
+     * @param  array<int, array{attribute_id: int, value: mixed, sort_order: int}>  $rows
      * @return Collection<int, ShopItemAttribute>
      */
     public function sync(ShopItem $item, array $rows): Collection
@@ -54,6 +51,7 @@ class ShopItemAttributeService
                     'text_value' => $attribute->type === ShopAttributeType::Text ? $value : null,
                     'number_value' => $attribute->type === ShopAttributeType::Number ? $value : null,
                     'boolean_value' => $attribute->type === ShopAttributeType::Boolean ? $value : null,
+                    'sort_order' => $row['sort_order'],
                 ])->save();
 
                 $optionIds = match ($attribute->type) {

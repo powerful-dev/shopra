@@ -26,6 +26,7 @@ class SyncShopItemAttributesRequest extends FormRequest
                 Rule::exists('shop_attributes', 'id'),
             ],
             'attributes.*.value' => ['nullable'],
+            'attributes.*.sort_order' => ['required', 'integer', 'min:0', 'distinct'],
         ];
     }
 

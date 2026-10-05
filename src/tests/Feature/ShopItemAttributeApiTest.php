@@ -8,6 +8,8 @@ use App\Models\ShopAttribute;
 use App\Models\ShopItem;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class ShopItemAttributeApiTest extends TestCase
@@ -29,17 +31,18 @@ class ShopItemAttributeApiTest extends TestCase
         $available = $this->createAttribute('Available', ShopAttributeType::Boolean, 5);
 
         $payload = ['attributes' => [
-            ['attribute_id' => $color->id, 'value' => $red->id],
-            ['attribute_id' => $features->id, 'value' => [$lightweight->id, $waterproof->id]],
-            ['attribute_id' => $material->id, 'value' => 'Leather'],
-            ['attribute_id' => $weight->id, 'value' => '1.25'],
-            ['attribute_id' => $available->id, 'value' => true],
+            ['attribute_id' => $color->id, 'value' => $red->id, 'sort_order' => 0],
+            ['attribute_id' => $features->id, 'value' => [$lightweight->id, $waterproof->id], 'sort_order' => 1],
+            ['attribute_id' => $material->id, 'value' => 'Leather', 'sort_order' => 2],
+            ['attribute_id' => $weight->id, 'value' => '1.25', 'sort_order' => 3],
+            ['attribute_id' => $available->id, 'value' => true, 'sort_order' => 4],
         ]];
 
         $this->putJson("/api/products/{$item->id}/attributes", $payload)
             ->assertOk()
             ->assertJsonCount(5, 'data')
             ->assertJsonPath('data.0.attribute_id', $color->id)
+            ->assertJsonPath('data.0.sort_order', 0)
             ->assertJsonPath('data.0.value', $red->id)
             ->assertJsonPath('data.0.attribute.options.0.value', 'Red')
             ->assertJsonPath('data.1.value', [$waterproof->id, $lightweight->id])
@@ -53,9 +56,14 @@ class ShopItemAttributeApiTest extends TestCase
             ->assertJsonPath('data.1.value', [$waterproof->id, $lightweight->id]);
 
         $this->putJson("/api/products/{$item->id}/attributes", ['attributes' => [
-            ['attribute_id' => $color->id, 'value' => $blue->id],
-            ['attribute_id' => $material->id, 'value' => 'Cotton'],
-        ]])->assertOk()->assertJsonCount(2, 'data');
+            ['attribute_id' => $color->id, 'value' => $blue->id, 'sort_order' => 1],
+            ['attribute_id' => $material->id, 'value' => 'Cotton', 'sort_order' => 0],
+        ]])->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.attribute_id', $material->id)
+            ->assertJsonPath('data.0.sort_order', 0)
+            ->assertJsonPath('data.1.attribute_id', $color->id)
+            ->assertJsonPath('data.1.sort_order', 1);
 
         $this->assertDatabaseCount('shop_item_attributes', 2);
         $this->assertDatabaseHas('shop_item_attributes', [
@@ -102,11 +110,11 @@ class ShopItemAttributeApiTest extends TestCase
         $boolean = $this->createAttribute('Available', ShopAttributeType::Boolean);
 
         $this->putJson("/api/products/{$item->id}/attributes", ['attributes' => [
-            ['attribute_id' => $color->id, 'value' => $large->id],
-            ['attribute_id' => $features->id, 'value' => [$waterproof->id, $red->id]],
-            ['attribute_id' => $text->id, 'value' => ['not text']],
-            ['attribute_id' => $number->id, 'value' => 'heavy'],
-            ['attribute_id' => $boolean->id, 'value' => 1],
+            ['attribute_id' => $color->id, 'value' => $large->id, 'sort_order' => 0],
+            ['attribute_id' => $features->id, 'value' => [$waterproof->id, $red->id], 'sort_order' => 1],
+            ['attribute_id' => $text->id, 'value' => ['not text'], 'sort_order' => 2],
+            ['attribute_id' => $number->id, 'value' => 'heavy', 'sort_order' => 3],
+            ['attribute_id' => $boolean->id, 'value' => 1, 'sort_order' => 4],
         ]])->assertUnprocessable()->assertJsonValidationErrors([
             'attributes.0.value',
             'attributes.1.value',
@@ -116,8 +124,8 @@ class ShopItemAttributeApiTest extends TestCase
         ]);
 
         $this->putJson("/api/products/{$item->id}/attributes", ['attributes' => [
-            ['attribute_id' => $color->id, 'value' => $red->id],
-            ['attribute_id' => $color->id, 'value' => $red->id],
+            ['attribute_id' => $color->id, 'value' => $red->id, 'sort_order' => 0],
+            ['attribute_id' => $color->id, 'value' => $red->id, 'sort_order' => 1],
         ]])->assertUnprocessable()->assertJsonValidationErrors('attributes.1.attribute_id');
 
         $this->assertDatabaseCount('shop_item_attributes', 0);
@@ -133,6 +141,55 @@ class ShopItemAttributeApiTest extends TestCase
         $this->actingAs(User::factory()->create(['is_active' => true]), 'sanctum')
             ->getJson("/api/products/{$item->id}/attributes")
             ->assertForbidden();
+    }
+
+    public function test_sort_order_migration_backfills_each_product_without_losing_values(): void
+    {
+        $firstItem = $this->createItem();
+        $secondItem = ShopItem::query()->create([
+            'name' => 'Second backpack',
+            'url' => 'second-backpack',
+            'price' => 120,
+        ]);
+        $firstAttribute = $this->createAttribute('Material', ShopAttributeType::Text);
+        $secondAttribute = $this->createAttribute('Weight', ShopAttributeType::Number);
+        $firstValue = $firstItem->itemAttributes()->create([
+            'attribute_id' => $firstAttribute->id,
+            'text_value' => 'Leather',
+            'sort_order' => 8,
+        ]);
+        $secondValue = $firstItem->itemAttributes()->create([
+            'attribute_id' => $secondAttribute->id,
+            'number_value' => 2,
+            'sort_order' => 3,
+        ]);
+        $otherItemValue = $secondItem->itemAttributes()->create([
+            'attribute_id' => $firstAttribute->id,
+            'text_value' => 'Canvas',
+            'sort_order' => 5,
+        ]);
+
+        $migration = require database_path('migrations/2026_10_06_000000_add_sort_order_to_shop_item_attributes_table.php');
+        $migration->down();
+        $migration->up();
+
+        $this->assertTrue(Schema::hasColumn('shop_item_attributes', 'sort_order'));
+        $this->assertDatabaseHas('shop_item_attributes', [
+            'id' => $firstValue->id,
+            'text_value' => 'Leather',
+            'sort_order' => 0,
+        ]);
+        $this->assertDatabaseHas('shop_item_attributes', [
+            'id' => $secondValue->id,
+            'number_value' => 2,
+            'sort_order' => 1,
+        ]);
+        $this->assertDatabaseHas('shop_item_attributes', [
+            'id' => $otherItemValue->id,
+            'text_value' => 'Canvas',
+            'sort_order' => 0,
+        ]);
+        $this->assertSame(3, DB::table('shop_item_attributes')->count());
     }
 
     private function authenticateProductAdmin(): void

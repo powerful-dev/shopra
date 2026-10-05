@@ -14,6 +14,7 @@ class ShopItemAttribute extends Model
         'text_value',
         'number_value',
         'boolean_value',
+        'sort_order',
     ];
 
     protected function casts(): array
@@ -21,6 +22,7 @@ class ShopItemAttribute extends Model
         return [
             'number_value' => 'decimal:6',
             'boolean_value' => 'boolean',
+            'sort_order' => 'integer',
         ];
     }
 

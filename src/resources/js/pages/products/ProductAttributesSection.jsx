@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { MediaDragHandle } from '../../components/admin/MediaCardControls';
 import SearchableSelect from '../../components/admin/SearchableSelect';
 import PlusIcon from '../../components/icons/PlusIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
@@ -18,11 +19,17 @@ const emptyValueFor = (attribute) => {
     return '';
 };
 
-const rowsFromSavedAttributes = (savedAttributes) => savedAttributes.map((item) => ({
-    id: `saved-${item.id}`,
-    attributeId: item.attribute_id,
-    value: item.value ?? '',
-}));
+const normalizeRowOrder = (rows) => rows.map((row, sortOrder) => ({ ...row, sortOrder }));
+
+const rowsFromSavedAttributes = (savedAttributes) => normalizeRowOrder(
+    [...savedAttributes]
+        .sort((left, right) => left.sort_order - right.sort_order || left.id - right.id)
+        .map((item) => ({
+            id: `saved-${item.id}`,
+            attributeId: item.attribute_id,
+            value: item.value ?? '',
+        })),
+);
 
 const mergeAttributes = (current, savedAttributes) => sortAttributes([
     ...current,
@@ -40,16 +47,19 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
     const [valuesError, setValuesError] = useState('');
     const [saveError, setSaveError] = useState('');
     const [creatingForRow, setCreatingForRow] = useState(null);
+    const [draggedRowId, setDraggedRowId] = useState(null);
+    const [rowDropTarget, setRowDropTarget] = useState(null);
     const nextRowIdRef = useRef(1);
     const lastSavedProductIdRef = useRef(null);
     const productIdRef = useRef(productId);
     const rowsRef = useRef([]);
+    const draggedRowIdRef = useRef(null);
     const valuesLoadPromiseRef = useRef(null);
     productIdRef.current = productId;
 
     const updateRows = (value) => {
         setRows((current) => {
-            const next = typeof value === 'function' ? value(current) : value;
+            const next = normalizeRowOrder(typeof value === 'function' ? value(current) : value);
             rowsRef.current = next;
 
             return next;
@@ -139,7 +149,11 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
 
                 const savedAttributes = await syncShopItemAttributes(savedProductId, rowsRef.current
                     .filter((row) => row.attributeId !== null)
-                    .map((row) => ({ attribute_id: row.attributeId, value: row.value })));
+                    .map((row) => ({
+                        attribute_id: row.attributeId,
+                        value: row.value,
+                        sort_order: row.sortOrder,
+                    })));
 
                 lastSavedProductIdRef.current = productIdRef.current ? null : String(savedProductId);
                 setAttributes((current) => mergeAttributes(current, savedAttributes));
@@ -187,6 +201,36 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
         setCreatingForRow(null);
     };
 
+    const endRowDrag = () => {
+        draggedRowIdRef.current = null;
+        setDraggedRowId(null);
+        setRowDropTarget(null);
+    };
+
+    const moveRow = (event, targetRow) => {
+        const draggedId = draggedRowIdRef.current;
+
+        if (draggedId === null || draggedId === targetRow.id || isValuesLoading) return;
+
+        event.preventDefault();
+        const currentRows = rowsRef.current;
+        const draggedRow = currentRows.find((row) => row.id === draggedId);
+        const reorderedRows = currentRows.filter((row) => row.id !== draggedId);
+        const targetIndex = reorderedRows.findIndex((row) => row.id === targetRow.id);
+        const targetRect = event.currentTarget.getBoundingClientRect();
+        const position = event.clientY < targetRect.top + targetRect.height / 2 ? 'before' : 'after';
+
+        if (!draggedRow || targetIndex < 0) {
+            endRowDrag();
+
+            return;
+        }
+
+        reorderedRows.splice(targetIndex + (position === 'after' ? 1 : 0), 0, draggedRow);
+        endRowDrag();
+        updateRows(reorderedRows);
+    };
+
     const isBusy = isLoading || isValuesLoading;
 
     return (
@@ -223,8 +267,42 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                         }));
 
                         return (
-                            <article className="grid grid-cols-[minmax(180px,.9fr)_minmax(220px,1.1fr)_38px] items-start gap-2.5 rounded-[12px] border border-[#e3dcd6] bg-[#fcfbfa] p-3 max-md:grid-cols-[minmax(0,1fr)_38px]" key={row.id}>
-                                <div className="max-md:col-span-2">
+                            <article
+                                className={`relative grid grid-cols-[30px_minmax(180px,.9fr)_minmax(220px,1.1fr)_38px] items-start gap-2.5 rounded-[12px] border bg-[#fcfbfa] p-3 transition-[border-color,box-shadow,opacity,transform] max-md:grid-cols-[30px_minmax(0,1fr)_38px] ${draggedRowId === row.id ? 'scale-[.99] border-[color:var(--color-accent)] opacity-45' : 'border-[#e3dcd6]'} ${rowDropTarget?.id === row.id ? 'border-[color:var(--color-accent)] ring-2 ring-[rgba(184,79,24,.12)]' : ''}`}
+                                key={row.id}
+                                data-attribute-row
+                                onDragOver={(event) => {
+                                    if (draggedRowIdRef.current === null || isValuesLoading) return;
+
+                                    event.preventDefault();
+                                    const rect = event.currentTarget.getBoundingClientRect();
+                                    const position = event.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
+                                    event.dataTransfer.dropEffect = draggedRowIdRef.current === row.id ? 'none' : 'move';
+                                    setRowDropTarget(draggedRowIdRef.current === row.id ? null : { id: row.id, position });
+                                }}
+                                onDrop={(event) => moveRow(event, row)}
+                            >
+                                <MediaDragHandle
+                                    className={`mt-[24px] !grid h-[41px] w-[30px] shrink-0 place-items-center rounded-[8px] border border-transparent text-[#9a918a] hover:border-[#ddd3cc] hover:bg-white hover:text-[color:var(--color-accent)] ${isValuesLoading ? '!cursor-not-allowed opacity-50' : '!cursor-grab'} ${draggedRowId === row.id ? '!cursor-grabbing' : ''} max-md:col-start-1 max-md:row-start-1`}
+                                    aria-label="Изменить порядок характеристики"
+                                    title="Перетащить"
+                                    draggable={!isValuesLoading}
+                                    onDragStart={(event) => {
+                                        if (isValuesLoading) {
+                                            event.preventDefault();
+
+                                            return;
+                                        }
+
+                                        draggedRowIdRef.current = row.id;
+                                        setDraggedRowId(row.id);
+                                        event.dataTransfer.effectAllowed = 'move';
+                                        event.dataTransfer.setData('application/x-shopra-attribute-row-id', String(row.id));
+                                        event.dataTransfer.setDragImage(event.currentTarget.closest('[data-attribute-row]'), 20, 20);
+                                    }}
+                                    onDragEnd={endRowDrag}
+                                />
+                                <div className="max-md:col-span-2 max-md:col-start-2 max-md:row-start-1">
                                     <span className="mb-1.5 block text-[11px] font-bold text-[#756d66]">Характеристика</span>
                                     <SearchableSelect
                                         options={attributeOptions}
@@ -240,13 +318,16 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                                         onAction={(query) => setCreatingForRow({ rowId: row.id, initialName: query })}
                                     />
                                 </div>
-                                <div>
+                                <div className="max-md:col-span-2 max-md:col-start-1 max-md:row-start-2">
                                     <span className="mb-1.5 block text-[11px] font-bold text-[#756d66]">Значение</span>
                                     <AttributeValueControl attribute={attribute} value={row.value} disabled={isValuesLoading} onChange={(value) => updateRowValue(row.id, value)} />
                                 </div>
-                                <button type="button" className="mt-[24px] grid h-[41px] w-[38px] cursor-pointer place-items-center rounded-[9px] border border-[#e2d9d3] bg-white text-[#8b8179] hover:border-[#e1b9ad] hover:text-[#b7483f] disabled:cursor-wait disabled:opacity-50 max-md:mt-[22px]" disabled={isValuesLoading} onClick={() => updateRows((current) => current.filter((item) => item.id !== row.id))} aria-label="Удалить характеристику">
+                                <button type="button" className="mt-[24px] grid h-[41px] w-[38px] cursor-pointer place-items-center rounded-[9px] border border-[#e2d9d3] bg-white text-[#8b8179] hover:border-[#e1b9ad] hover:text-[#b7483f] disabled:cursor-wait disabled:opacity-50 max-md:col-start-3 max-md:row-start-2 max-md:mt-[22px]" disabled={isValuesLoading} onClick={() => updateRows((current) => current.filter((item) => item.id !== row.id))} aria-label="Удалить характеристику">
                                     <TrashIcon />
                                 </button>
+                                {rowDropTarget?.id === row.id && (
+                                    <span className={`pointer-events-none absolute inset-x-2 z-10 h-0.5 rounded-full bg-[color:var(--color-accent)] ${rowDropTarget.position === 'before' ? 'top-0' : 'bottom-0'}`} aria-hidden="true" />
+                                )}
                             </article>
                         );
                     })}
