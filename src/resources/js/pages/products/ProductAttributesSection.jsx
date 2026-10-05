@@ -3,7 +3,7 @@ import { MediaDragHandle } from '../../components/admin/MediaCardControls';
 import SearchableSelect from '../../components/admin/SearchableSelect';
 import PlusIcon from '../../components/icons/PlusIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
-import { getShopAttributes, getShopItemAttributes, syncShopItemAttributes } from '../../services/shopAttributes';
+import { createShopAttributeOption, getShopAttributes, getShopItemAttributes, syncShopItemAttributes } from '../../services/shopAttributes';
 import CreateAttributeModal from './CreateAttributeModal';
 
 const fieldClass = 'h-[41px] w-full rounded-[9px] border border-[#ddd5cf] bg-white px-[11px] text-[13px] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]';
@@ -46,7 +46,9 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
     const [loadError, setLoadError] = useState('');
     const [valuesError, setValuesError] = useState('');
     const [saveError, setSaveError] = useState('');
+    const [optionError, setOptionError] = useState('');
     const [creatingForRow, setCreatingForRow] = useState(null);
+    const [creatingOptionRowIds, setCreatingOptionRowIds] = useState(() => new Set());
     const [draggedRowId, setDraggedRowId] = useState(null);
     const [rowDropTarget, setRowDropTarget] = useState(null);
     const nextRowIdRef = useRef(1);
@@ -55,6 +57,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
     const rowsRef = useRef([]);
     const draggedRowIdRef = useRef(null);
     const valuesLoadPromiseRef = useRef(null);
+    const creatingOptionRowIdsRef = useRef(new Set());
     productIdRef.current = productId;
 
     const updateRows = (value) => {
@@ -92,6 +95,9 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
             updateRows([]);
             setValuesError('');
             setSaveError('');
+            setOptionError('');
+            creatingOptionRowIdsRef.current.clear();
+            setCreatingOptionRowIds(new Set());
             setIsValuesLoading(false);
             valuesLoadPromiseRef.current = null;
 
@@ -201,6 +207,58 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
         setCreatingForRow(null);
     };
 
+    const createOptionForRow = async (rowId, attribute, value) => {
+        const options = attribute.options ?? [];
+        const normalizedValue = value.trim().toLocaleLowerCase();
+
+        if (options.some((option) => option.value.trim().toLocaleLowerCase() === normalizedValue)) {
+            setOptionError(`Значение «${value.trim()}» уже существует.`);
+
+            return false;
+        }
+
+        if (creatingOptionRowIdsRef.current.has(rowId)) return false;
+
+        const sortOrder = options.reduce((highest, option) => Math.max(highest, option.sort_order), -1) + 1;
+
+        creatingOptionRowIdsRef.current.add(rowId);
+        setCreatingOptionRowIds(new Set(creatingOptionRowIdsRef.current));
+        setOptionError('');
+
+        try {
+            const option = await createShopAttributeOption(attribute.id, {
+                value,
+                sort_order: sortOrder,
+            });
+
+            setAttributes((current) => current.map((item) => item.id === attribute.id
+                ? { ...item, options: [...(item.options ?? []), option] }
+                : item));
+            updateRows((current) => current.map((row) => {
+                if (row.id !== rowId) return row;
+
+                return {
+                    ...row,
+                    value: attribute.type === 'multiselect'
+                        ? [...new Set([...(Array.isArray(row.value) ? row.value : []), option.id])]
+                        : option.id,
+                };
+            }));
+
+            return true;
+        } catch (error) {
+            console.error('Unable to create product attribute option.', error);
+            setOptionError(Object.values(error.errors ?? {}).flat()[0]
+                || error.message
+                || 'Не удалось создать значение характеристики.');
+
+            return false;
+        } finally {
+            creatingOptionRowIdsRef.current.delete(rowId);
+            setCreatingOptionRowIds(new Set(creatingOptionRowIdsRef.current));
+        }
+    };
+
     const endRowDrag = () => {
         draggedRowIdRef.current = null;
         setDraggedRowId(null);
@@ -248,6 +306,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
             {loadError && <p className="mb-3 mt-0 rounded-lg bg-[#fff5ef] px-3 py-2 text-[12px] text-[#9a3b12]" role="alert">{loadError}</p>}
             {valuesError && <p className="mb-3 mt-0 rounded-lg bg-[#fff5ef] px-3 py-2 text-[12px] text-[#9a3b12]" role="alert">{valuesError}</p>}
             {saveError && <p className="mb-3 mt-0 rounded-lg bg-[#fff5ef] px-3 py-2 text-[12px] text-[#9a3b12]" role="alert">{saveError}</p>}
+            {optionError && <p className="mb-3 mt-0 rounded-lg bg-[#fff5ef] px-3 py-2 text-[12px] text-[#9a3b12]" role="alert">{optionError}</p>}
 
             {rows.length === 0 ? (
                 <div className="rounded-[11px] border border-dashed border-[#ded6d0] bg-[#fcfbfa] px-4 py-5 text-center text-[12px] text-[#918880]">
@@ -320,7 +379,14 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                                 </div>
                                 <div className="max-md:col-span-2 max-md:col-start-1 max-md:row-start-2">
                                     <span className="mb-1.5 block text-[11px] font-bold text-[#756d66]">Значение</span>
-                                    <AttributeValueControl attribute={attribute} value={row.value} disabled={isValuesLoading} onChange={(value) => updateRowValue(row.id, value)} />
+                                    <AttributeValueControl
+                                        attribute={attribute}
+                                        value={row.value}
+                                        disabled={isValuesLoading}
+                                        isCreatingOption={creatingOptionRowIds.has(row.id)}
+                                        onChange={(value) => updateRowValue(row.id, value)}
+                                        onCreateOption={(value) => createOptionForRow(row.id, attribute, value)}
+                                    />
                                 </div>
                                 <button type="button" className="mt-[24px] grid h-[41px] w-[38px] cursor-pointer place-items-center rounded-[9px] border border-[#e2d9d3] bg-white text-[#8b8179] hover:border-[#e1b9ad] hover:text-[#b7483f] disabled:cursor-wait disabled:opacity-50 max-md:col-start-3 max-md:row-start-2 max-md:mt-[22px]" disabled={isValuesLoading} onClick={() => updateRows((current) => current.filter((item) => item.id !== row.id))} aria-label="Удалить характеристику">
                                     <TrashIcon />
@@ -346,7 +412,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
 
 export default ProductAttributesSection;
 
-function AttributeValueControl({ attribute, value, disabled, onChange }) {
+function AttributeValueControl({ attribute, value, disabled, isCreatingOption, onChange, onCreateOption }) {
     if (!attribute) {
         return <div className="flex h-[41px] items-center rounded-[9px] border border-dashed border-[#ddd5cf] bg-white px-[11px] text-[12px] text-[#aaa19a]">Сначала выберите характеристику</div>;
     }
@@ -362,11 +428,22 @@ function AttributeValueControl({ attribute, value, disabled, onChange }) {
                 options={options}
                 value={value || null}
                 onChange={onChange}
-                placeholder={options.length > 0 ? 'Выберите значение' : 'Нет вариантов'}
+                placeholder={isCreatingOption ? 'Создание…' : (options.length > 0 ? 'Выберите значение' : 'Введите новое значение')}
                 searchPlaceholder="Поиск значения"
                 emptyMessage="Значения не найдены"
                 ariaLabel={`Значение ${attribute.name}`}
-                disabled={disabled || options.length === 0}
+                ariaBusy={isCreatingOption}
+                disabled={disabled}
+                actionLabel={(query) => `Создать «${query}»`}
+                actionRequiresQuery
+                actionWhenNoResults
+                onAction={onCreateOption}
+                createActionLabel="Добавить новое значение"
+                createInputPlaceholder="Новое значение"
+                createSubmitLabel="Добавить"
+                createCancelLabel="Отмена"
+                createPending={isCreatingOption}
+                onCreate={onCreateOption}
             />
         );
     }
@@ -377,13 +454,24 @@ function AttributeValueControl({ attribute, value, disabled, onChange }) {
                 options={options}
                 value={Array.isArray(value) ? value : []}
                 onChange={onChange}
-                placeholder={options.length > 0 ? 'Выберите значения' : 'Нет вариантов'}
+                placeholder={isCreatingOption ? 'Создание…' : (options.length > 0 ? 'Выберите значения' : 'Введите новое значение')}
                 searchPlaceholder="Поиск значений"
                 emptyMessage="Значения не найдены"
                 ariaLabel={`Значения ${attribute.name}`}
-                disabled={disabled || options.length === 0}
+                ariaBusy={isCreatingOption}
+                disabled={disabled}
                 multiple
                 closeOnSelect={false}
+                actionLabel={(query) => `Создать «${query}»`}
+                actionRequiresQuery
+                actionWhenNoResults
+                onAction={onCreateOption}
+                createActionLabel="Добавить новое значение"
+                createInputPlaceholder="Новое значение"
+                createSubmitLabel="Добавить"
+                createCancelLabel="Отмена"
+                createPending={isCreatingOption}
+                onCreate={onCreateOption}
             />
         );
     }

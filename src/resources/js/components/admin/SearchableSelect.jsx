@@ -23,14 +23,27 @@ export default function SearchableSelect({
     multiple = false,
     actionLabel = '',
     onAction,
+    actionRequiresQuery = false,
+    actionWhenNoResults = false,
+    createActionLabel = '',
+    createInputPlaceholder = '',
+    createSubmitLabel = 'Добавить',
+    createCancelLabel = 'Отмена',
+    onCreate,
+    createPending = false,
 }) {
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState('');
+    const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+    const [createValue, setCreateValue] = useState('');
+    const [isSubmittingCreate, setIsSubmittingCreate] = useState(false);
     const [dropdownStyle, setDropdownStyle] = useState(null);
     const rootRef = useRef(null);
     const triggerRef = useRef(null);
     const dropdownRef = useRef(null);
     const searchRef = useRef(null);
+    const createInputRef = useRef(null);
+    const createRequestRef = useRef(false);
     const listboxId = useId();
     const selectedValues = multiple && Array.isArray(value) ? value : [];
     const selectedOptions = multiple
@@ -41,17 +54,37 @@ export default function SearchableSelect({
         ? selectedOptions.map((option) => option.label).join(', ')
         : selectedOption?.label;
     const normalizedQuery = query.trim().toLocaleLowerCase();
+    const trimmedQuery = query.trim();
     const filteredOptions = useMemo(() => {
         if (!normalizedQuery) return options;
 
         return options.filter((option) => String(option.label).toLocaleLowerCase().includes(normalizedQuery));
     }, [normalizedQuery, options]);
+    const resolvedActionLabel = typeof actionLabel === 'function'
+        ? actionLabel(trimmedQuery)
+        : actionLabel;
+    const showAction = resolvedActionLabel
+        && onAction
+        && !isCreateFormOpen
+        && (!actionRequiresQuery || trimmedQuery.length > 0)
+        && (!actionWhenNoResults || filteredOptions.length === 0);
+    const isCreateBusy = createPending || isSubmittingCreate;
 
     const close = (restoreFocus = false) => {
         setIsOpen(false);
         setQuery('');
+        setIsCreateFormOpen(false);
+        setCreateValue('');
         setDropdownStyle(null);
         if (restoreFocus) triggerRef.current?.focus();
+    };
+
+    const cancelCreate = () => {
+        if (isCreateBusy) return;
+
+        setIsCreateFormOpen(false);
+        setCreateValue('');
+        window.requestAnimationFrame(() => searchRef.current?.focus());
     };
 
     useEffect(() => {
@@ -61,24 +94,32 @@ export default function SearchableSelect({
             if (!rootRef.current?.contains(event.target) && !dropdownRef.current?.contains(event.target)) close();
         };
         const handleEscape = (event) => {
-            if (event.key === 'Escape') close(true);
+            if (event.key !== 'Escape') return;
+
+            if (isCreateFormOpen) {
+                cancelCreate();
+            } else {
+                close(true);
+            }
         };
 
         document.addEventListener('mousedown', handleOutsideClick);
         document.addEventListener('keydown', handleEscape);
-        searchRef.current?.focus();
+        if (!isCreateFormOpen) searchRef.current?.focus();
 
         return () => {
             document.removeEventListener('mousedown', handleOutsideClick);
             document.removeEventListener('keydown', handleEscape);
         };
-    }, [isOpen]);
+    }, [isCreateBusy, isCreateFormOpen, isOpen]);
 
     useEffect(() => {
         if (!disabled || !isOpen) return;
 
         setIsOpen(false);
         setQuery('');
+        setIsCreateFormOpen(false);
+        setCreateValue('');
         setDropdownStyle(null);
     }, [disabled, isOpen]);
 
@@ -113,7 +154,7 @@ export default function SearchableSelect({
             window.removeEventListener('resize', updatePosition);
             window.removeEventListener('scroll', updatePosition, true);
         };
-    }, [filteredOptions.length, isOpen, query]);
+    }, [filteredOptions.length, isCreateFormOpen, isOpen, query]);
 
     const selectOption = (option) => {
         if (option.disabled) return;
@@ -135,8 +176,45 @@ export default function SearchableSelect({
     };
 
     const runAction = () => {
-        onAction(query.trim());
+        onAction(trimmedQuery);
         close();
+    };
+
+    const openCreateForm = () => {
+        setCreateValue(trimmedQuery);
+        setIsCreateFormOpen(true);
+        window.requestAnimationFrame(() => createInputRef.current?.focus());
+    };
+
+    const submitCreate = async (event) => {
+        event.preventDefault();
+        const valueToCreate = createValue.trim();
+
+        if (!valueToCreate || createRequestRef.current || isCreateBusy) return;
+
+        createRequestRef.current = true;
+        setIsSubmittingCreate(true);
+
+        try {
+            const wasCreated = await onCreate(valueToCreate);
+
+            if (wasCreated === false) return;
+
+            setCreateValue('');
+            setIsCreateFormOpen(false);
+
+            if (closeOnSelect) {
+                close(true);
+            } else {
+                setQuery('');
+                window.requestAnimationFrame(() => searchRef.current?.focus());
+            }
+        } catch {
+            // The consumer owns error presentation; keep the inline form open for correction or retry.
+        } finally {
+            createRequestRef.current = false;
+            setIsSubmittingCreate(false);
+        }
     };
 
     return (
@@ -153,7 +231,7 @@ export default function SearchableSelect({
                 aria-expanded={isOpen}
                 aria-controls={isOpen ? listboxId : undefined}
                 aria-busy={ariaBusy}
-                disabled={disabled}
+                disabled={disabled || isCreateBusy}
                 onClick={() => isOpen ? close() : setIsOpen(true)}
             >
                 <span className={selectedLabel ? 'searchable-select__value' : 'searchable-select__placeholder'}>
@@ -176,6 +254,7 @@ export default function SearchableSelect({
                             value={query}
                             placeholder={searchPlaceholder}
                             aria-label={searchPlaceholder}
+                            disabled={isCreateBusy}
                             onChange={(event) => setQuery(event.target.value)}
                         />
                     </label>
@@ -192,7 +271,7 @@ export default function SearchableSelect({
                                     role="option"
                                     aria-selected={isSelected}
                                     aria-disabled={Boolean(option.disabled)}
-                                    disabled={option.disabled}
+                                    disabled={option.disabled || isCreateBusy}
                                     onClick={() => selectOption(option)}
                                     key={option.value}
                                 >
@@ -202,11 +281,30 @@ export default function SearchableSelect({
                             );
                         }) : <p className="searchable-select__empty">{emptyMessage}</p>}
                     </div>
-                    {actionLabel && onAction && (
-                        <button className="searchable-select__action" type="button" onClick={runAction}>
-                            <span aria-hidden="true">+</span>{actionLabel}
+                    {showAction && (
+                        <button className="searchable-select__action" type="button" disabled={isCreateBusy} onClick={runAction}>
+                            <span aria-hidden="true">+</span>{resolvedActionLabel}
                         </button>
                     )}
+                    {createActionLabel && onCreate && (isCreateFormOpen ? (
+                        <form className="searchable-select__create-form" onSubmit={submitCreate}>
+                            <input
+                                ref={createInputRef}
+                                type="text"
+                                value={createValue}
+                                placeholder={createInputPlaceholder}
+                                aria-label={createInputPlaceholder || createActionLabel}
+                                disabled={isCreateBusy}
+                                onChange={(event) => setCreateValue(event.target.value)}
+                            />
+                            <button type="submit" disabled={isCreateBusy || !createValue.trim()}>{isCreateBusy ? '…' : createSubmitLabel}</button>
+                            <button type="button" disabled={isCreateBusy} onClick={cancelCreate}>{createCancelLabel}</button>
+                        </form>
+                    ) : (
+                        <button className="searchable-select__action" type="button" disabled={isCreateBusy} onClick={openCreateForm}>
+                            <span aria-hidden="true">+</span>{createActionLabel}
+                        </button>
+                    ))}
                 </div>,
                 document.body,
             )}

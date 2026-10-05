@@ -23,6 +23,18 @@ export async function syncShopItemAttributes(productId, attributes) {
     return response.data;
 }
 
+export async function createShopAttributeOption(attributeId, optionData) {
+    await csrf();
+
+    const response = await request(`/api/product-attributes/${attributeId}/options`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(optionData),
+    });
+
+    return response.data;
+}
+
 export async function createShopAttributeWithOptions(attributeData, optionValues = []) {
     await csrf();
 
