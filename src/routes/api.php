@@ -5,6 +5,8 @@ use App\Http\Controllers\Api\AdminModuleController;
 use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\EditorImageController;
 use App\Http\Controllers\Api\SettingsController;
+use App\Http\Controllers\Api\ShopAttributeController;
+use App\Http\Controllers\Api\ShopAttributeOptionController;
 use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\ShopGroupController;
 use App\Http\Controllers\Api\ShopItemController;
@@ -51,6 +53,18 @@ Route::middleware([
     });
 
     Route::middleware('module:products')->group(function (): void {
+        Route::get('/product-attributes', [ShopAttributeController::class, 'index']);
+        Route::post('/product-attributes', [ShopAttributeController::class, 'store']);
+        Route::put('/product-attributes/{attribute}', [ShopAttributeController::class, 'update']);
+        Route::patch('/product-attributes/{attribute}', [ShopAttributeController::class, 'update']);
+        Route::delete('/product-attributes/{attribute}', [ShopAttributeController::class, 'destroy']);
+        Route::post('/product-attributes/{attribute}/options', [ShopAttributeOptionController::class, 'store']);
+        Route::put('/product-attributes/{attribute}/options/{option}', [ShopAttributeOptionController::class, 'update'])
+            ->scopeBindings();
+        Route::patch('/product-attributes/{attribute}/options/{option}', [ShopAttributeOptionController::class, 'update'])
+            ->scopeBindings();
+        Route::delete('/product-attributes/{attribute}/options/{option}', [ShopAttributeOptionController::class, 'destroy'])
+            ->scopeBindings();
         Route::get('/product-categories', [ShopGroupController::class, 'index']);
         Route::get('/product-categories/roots', [ShopGroupController::class, 'roots']);
         Route::get('/product-categories/search', [ShopGroupController::class, 'search']);
