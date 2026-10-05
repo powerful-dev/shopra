@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\ShopAttributeController;
 use App\Http\Controllers\Api\ShopAttributeOptionController;
 use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\ShopGroupController;
+use App\Http\Controllers\Api\ShopItemAttributeController;
 use App\Http\Controllers\Api\ShopItemController;
 use App\Http\Controllers\Api\SiteModuleController;
 use Illuminate\Support\Facades\Route;
@@ -80,6 +81,8 @@ Route::middleware([
         Route::get('/products/media-config', [ShopItemController::class, 'mediaConfig']);
         Route::post('/products', [ShopItemController::class, 'store']);
         Route::delete('/products/bulk', [ShopItemController::class, 'bulkDestroy']);
+        Route::get('/products/{product}/attributes', [ShopItemAttributeController::class, 'index']);
+        Route::put('/products/{product}/attributes', [ShopItemAttributeController::class, 'update']);
         Route::get('/products/{product}', [ShopItemController::class, 'show']);
         Route::put('/products/{product}', [ShopItemController::class, 'update']);
         Route::post('/products/{product}/categories/{group}', [ShopItemController::class, 'storeGroup']);

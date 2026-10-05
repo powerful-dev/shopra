@@ -81,6 +81,7 @@ export default function ProductEditPage() {
     const productCreationPromiseRef = useRef(null);
     const createdProductIdRef = useRef(isNew ? null : id);
     const skipProductLoadIdRef = useRef(null);
+    const attributesSectionRef = useRef(null);
     const scrollToSection = useSectionScroll({ stickyRef: sectionNavigationRef });
 
     const refreshShopGroupOptions = useCallback(() => {
@@ -241,7 +242,7 @@ export default function ProductEditPage() {
         setForm((current) => ({ ...current, [target.name]: target.value }));
     };
 
-    const createProduct = (status, useDraftDefaults = false) => {
+    const createProduct = (status, useDraftDefaults = false, navigateAfterCreate = true) => {
         if (createdProductIdRef.current) {
             return Promise.resolve({ id: createdProductIdRef.current, status: form.status ?? status });
         }
@@ -270,12 +271,15 @@ export default function ProductEditPage() {
 
             createdProductIdRef.current = product.id;
             skipProductLoadIdRef.current = String(product.id);
+            attributesSectionRef.current?.preserveForProduct(product.id);
             setForm((current) => ({
                 ...current,
                 currency: product.currency ?? current.currency,
                 status: product.status,
             }));
-            navigate(`/admin/products/${product.id}`, { replace: true });
+            if (navigateAfterCreate) {
+                navigate(`/admin/products/${product.id}`, { replace: true });
+            }
 
             return product;
         })().finally(() => {
@@ -310,7 +314,7 @@ export default function ProductEditPage() {
             let product;
 
             if (isNew) {
-                product = await createProduct(status);
+                product = await createProduct(status, false, false);
             } else {
                 await csrf();
                 ({ data: product } = await request(`/api/products/${id}`, {
@@ -331,6 +335,12 @@ export default function ProductEditPage() {
                     currency: product.currency ?? current.currency,
                     status: product.status,
                 }));
+            }
+
+            await attributesSectionRef.current?.save(product.id);
+
+            if (isNew) {
+                navigate(`/admin/products/${product.id}`, { replace: true });
             }
         } catch (error) {
             console.error(error);
@@ -516,7 +526,7 @@ export default function ProductEditPage() {
                         </label>
                     </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title="Характеристики" icon="sliders">
-                        <ProductAttributesSection />
+                        <ProductAttributesSection ref={attributesSectionRef} productId={isNew ? null : id} />
                     </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.delivery = element; }} id="delivery" title="Доставка" icon="truck"><Field label="Группа доставки"><select className={fieldClass} defaultValue="standard"><option value="standard">Стандартная доставка</option><option>Крупногабаритный товар</option><option>Самовывоз</option></select></Field></AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.seo = element; }} id="seo" title="SEO" icon="link">

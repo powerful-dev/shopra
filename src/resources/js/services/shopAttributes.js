@@ -6,6 +6,23 @@ export async function getShopAttributes({ signal } = {}) {
     return response.data;
 }
 
+export async function getShopItemAttributes(productId, { signal } = {}) {
+    const response = await request(`/api/products/${productId}/attributes`, { signal });
+
+    return response.data;
+}
+
+export async function syncShopItemAttributes(productId, attributes) {
+    await csrf();
+    const response = await request(`/api/products/${productId}/attributes`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ attributes }),
+    });
+
+    return response.data;
+}
+
 export async function createShopAttributeWithOptions(attributeData, optionValues = []) {
     await csrf();
 
