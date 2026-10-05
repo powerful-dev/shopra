@@ -62,4 +62,16 @@ class ShopItem extends Model
     {
         return $this->hasMany(ShopItemMedia::class);
     }
+
+    public function itemAttributes(): HasMany
+    {
+        return $this->hasMany(ShopItemAttribute::class);
+    }
+
+    public function attributes(): BelongsToMany
+    {
+        return $this->belongsToMany(ShopAttribute::class, 'shop_item_attributes', 'shop_item_id', 'attribute_id')
+            ->withPivot(['id', 'text_value', 'number_value', 'boolean_value'])
+            ->withTimestamps();
+    }
 }
