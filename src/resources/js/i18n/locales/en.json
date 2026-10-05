@@ -352,6 +352,10 @@
         "confirmDeleteMessage": "Are you sure you want to delete the “{{name}}” group and all its contents?"
     },
     "productEditPage": {
+        "createAttribute": {
+            "isVisible": "Show on the product page",
+            "isFilterable": "Use in filters"
+        },
         "media": {
             "imageRequirements": "Photos: {{formats}} · up to {{size}} MB",
             "videoRequirements": "Videos: {{formats}} · up to {{size}} MB",

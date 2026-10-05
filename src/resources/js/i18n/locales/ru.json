@@ -352,6 +352,10 @@
         "confirmDeleteMessage": "Вы действительно хотите удалить группу «{{name}}» со всем её содержимым?"
     },
     "productEditPage": {
+        "createAttribute": {
+            "isVisible": "Показывать в карточке товара",
+            "isFilterable": "Использовать в фильтрах"
+        },
         "media": {
             "imageRequirements": "Фото: {{formats}} · до {{size}} МБ",
             "videoRequirements": "Видео: {{formats}} · до {{size}} МБ",

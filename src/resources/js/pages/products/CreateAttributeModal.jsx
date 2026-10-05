@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import Field from '../../components/form/Field';
 import Input from '../../components/form/Input';
 import Select from '../../components/form/Select';
@@ -22,9 +23,12 @@ const emptyForm = (name = '') => ({
     type: 'text',
     unit: '',
     options: [],
+    isVisible: true,
+    isFilterable: false,
 });
 
 export default function CreateAttributeModal({ isOpen, initialName = '', onClose, onCreated }) {
+    const { t } = useTranslation();
     const [form, setForm] = useState(() => emptyForm());
     const [errors, setErrors] = useState({});
     const [message, setMessage] = useState('');
@@ -93,6 +97,8 @@ export default function CreateAttributeModal({ isOpen, initialName = '', onClose
                 name,
                 type: form.type,
                 unit: form.type === 'number' && form.unit.trim() ? form.unit.trim() : null,
+                is_visible: form.isVisible,
+                is_filterable: form.isFilterable,
             }, isListType ? form.options.map((value) => value.trim()).filter(Boolean) : []);
 
             onCreated(attribute);
@@ -146,6 +152,21 @@ export default function CreateAttributeModal({ isOpen, initialName = '', onClose
                         )}
                     </div>
 
+                    <div className="divide-y divide-[color:var(--color-border)] overflow-hidden rounded-[10px] border border-[color:var(--color-border)] bg-white">
+                        <SwitchField
+                            label={t('productEditPage.createAttribute.isVisible')}
+                            checked={form.isVisible}
+                            disabled={isSaving}
+                            onChange={(isVisible) => setForm((current) => ({ ...current, isVisible }))}
+                        />
+                        <SwitchField
+                            label={t('productEditPage.createAttribute.isFilterable')}
+                            checked={form.isFilterable}
+                            disabled={isSaving}
+                            onChange={(isFilterable) => setForm((current) => ({ ...current, isFilterable }))}
+                        />
+                    </div>
+
                     {isListType && (
                         <div>
                             <div className="mb-2 flex items-center justify-between gap-3">
@@ -176,5 +197,23 @@ export default function CreateAttributeModal({ isOpen, initialName = '', onClose
             </section>
         </div>,
         document.body,
+    );
+}
+
+function SwitchField({ label, checked, disabled, onChange }) {
+    return (
+        <div className="flex min-h-[48px] items-center justify-between gap-4 px-3 py-2.5">
+            <span className="text-[12px] font-bold text-[#554e48]">{label}</span>
+            <label className="switch shrink-0" aria-label={label}>
+                <input
+                    className="switch__input"
+                    type="checkbox"
+                    checked={checked}
+                    disabled={disabled}
+                    onChange={(event) => onChange(event.target.checked)}
+                />
+                <span className="switch__track" />
+            </label>
+        </div>
     );
 }
