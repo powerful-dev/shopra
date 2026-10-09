@@ -33,6 +33,7 @@ import { buildShopGroupOptions } from '../../utils/shopGroups';
 import CategoriesModal from './CategoriesModal';
 import CurrencySettingsModal from './CurrencySettingsModal';
 import ProductAttributesSection from './ProductAttributesSection';
+import ProductVariantsModal from './ProductVariantsModal';
 
 
 const fieldClass = 'h-[43px] w-full rounded-[9px] border border-[#ddd5cf] bg-white px-[11px] text-[13px] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]';
@@ -48,7 +49,7 @@ const sectionLinks = [
     ['seo', 'SEO', 'link'],
 ];
 
-export default function ProductEditPage() {
+export default function ProductEditPage({ hasModifications = false }) {
     const { id } = useParams();
     const navigate = useNavigate();
     const isNew = id === 'new' || !id;
@@ -61,6 +62,7 @@ export default function ProductEditPage() {
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
     const [isCurrencySettingsOpen, setIsCurrencySettingsOpen] = useState(false);
+    const [isVariantsOpen, setIsVariantsOpen] = useState(false);
     const [currencySettings, setCurrencySettings] = useState({ currency: null, currency_rates: [] });
     const [currencyStatus, setCurrencyStatus] = useState('loading');
     const [isDeleting, setIsDeleting] = useState(false);
@@ -510,8 +512,8 @@ export default function ProductEditPage() {
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.variants = element; }} id="variants" title="Модификации товара" icon="layers" open>
                         <article className="grid min-h-[82px] grid-cols-[42px_minmax(0,1fr)_auto] items-center gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[12px_13px] max-md:grid-cols-[38px_minmax(0,1fr)]">
                             <span className="grid h-[42px] w-[42px] place-items-center rounded-[11px] bg-[#f1ece8] text-[#81766e]"><SectionIcon type="layers" size={18} /></span>
-                            <div><strong className="block text-[13px]">Модификации отключены</strong><small className="mt-0.5 block text-[12px] leading-[1.4] text-[#8c837c]">Обычный товар с одной ценой и общим остатком. Цвета, размеры и другие опции добавляются только при необходимости.</small></div>
-                            <button type="button" className="button button--primary min-h-9 max-md:col-span-full max-md:w-full"><PlusIcon />Добавить модификации</button>
+                            <div><strong className="block text-[13px]">{hasModifications ? 'Модификации настроены' : 'Модификации отключены'}</strong><small className="mt-0.5 block text-[12px] leading-[1.4] text-[#8c837c]">{hasModifications ? 'Опции, фотографии, цены и остатки вариантов можно изменить отдельно.' : 'Обычный товар с одной ценой и общим остатком. Цвета, размеры и другие опции добавляются только при необходимости.'}</small></div>
+                            <button type="button" className="button button--primary min-h-9 max-md:col-span-full max-md:w-full" onClick={() => setIsVariantsOpen(true)}><PlusIcon />{hasModifications ? 'Модификации' : 'Добавить модификации'}</button>
                         </article>
                     </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.description = element; }} id="description" title="Описание" icon="file">
@@ -571,6 +573,10 @@ export default function ProductEditPage() {
                     setCurrencySettings(settings);
                     setCurrencyStatus('loaded');
                 }}
+            />
+            <ProductVariantsModal
+                isOpen={isVariantsOpen}
+                onClose={() => setIsVariantsOpen(false)}
             />
 
         </div>
