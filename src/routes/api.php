@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\EditorImageController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\ShopAttributeController;
 use App\Http\Controllers\Api\ShopAttributeOptionController;
+use App\Http\Controllers\Api\ShopAttributeUnitController;
 use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\ShopGroupController;
 use App\Http\Controllers\Api\ShopItemAttributeController;
@@ -54,6 +55,7 @@ Route::middleware([
     });
 
     Route::middleware('module:products')->group(function (): void {
+        Route::get('/product-attribute-units', [ShopAttributeUnitController::class, 'index']);
         Route::get('/product-attributes', [ShopAttributeController::class, 'index']);
         Route::post('/product-attributes', [ShopAttributeController::class, 'store']);
         Route::put('/product-attributes/{attribute}', [ShopAttributeController::class, 'update']);

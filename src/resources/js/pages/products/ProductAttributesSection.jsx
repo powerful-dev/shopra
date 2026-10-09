@@ -5,6 +5,7 @@ import PlusIcon from '../../components/icons/PlusIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
 import { createShopAttributeOption, getShopAttributes, getShopItemAttributes, syncShopItemAttributes } from '../../services/shopAttributes';
 import CreateAttributeModal from './CreateAttributeModal';
+import ProductAttributesModal from './ProductAttributesModal';
 
 const fieldClass = 'h-[41px] w-full rounded-[9px] border border-[#ddd5cf] bg-white px-[11px] text-[13px] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]';
 
@@ -48,6 +49,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
     const [saveError, setSaveError] = useState('');
     const [optionError, setOptionError] = useState('');
     const [creatingForRow, setCreatingForRow] = useState(null);
+    const [isManagerOpen, setIsManagerOpen] = useState(false);
     const [creatingOptionRowIds, setCreatingOptionRowIds] = useState(() => new Set());
     const [draggedRowId, setDraggedRowId] = useState(null);
     const [rowDropTarget, setRowDropTarget] = useState(null);
@@ -207,6 +209,27 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
         setCreatingForRow(null);
     };
 
+    const handleAttributesChanged = (nextAttributes) => {
+        const sortedAttributes = sortAttributes(nextAttributes);
+        const nextById = new Map(sortedAttributes.map((attribute) => [attribute.id, attribute]));
+
+        setAttributes(sortedAttributes);
+        updateRows((current) => current.map((row) => {
+            const attribute = nextById.get(row.attributeId);
+
+            if (!attribute || !['select', 'multiselect'].includes(attribute.type)) return row;
+
+            const availableOptionIds = new Set((attribute.options ?? []).map((option) => option.id));
+
+            return {
+                ...row,
+                value: attribute.type === 'multiselect'
+                    ? (Array.isArray(row.value) ? row.value.filter((optionId) => availableOptionIds.has(optionId)) : [])
+                    : (availableOptionIds.has(row.value) ? row.value : ''),
+            };
+        }));
+    };
+
     const createOptionForRow = async (rowId, attribute, value) => {
         const options = attribute.options ?? [];
         const normalizedValue = value.trim().toLocaleLowerCase();
@@ -298,9 +321,14 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                     <strong className="block text-[12px] text-[#554e48]">Характеристики товара</strong>
                     <p className="mb-0 mt-1 text-[12px] leading-[1.45] text-[#918880]">Добавьте параметры, по которым покупатели смогут сравнивать товары.</p>
                 </div>
-                <button type="button" className="button button--outline min-h-9 shrink-0 max-sm:w-full" disabled={isValuesLoading} onClick={addRow}>
-                    <PlusIcon width="15" height="15" />Добавить характеристику
-                </button>
+                <div className="flex shrink-0 items-center gap-3 max-sm:w-full max-sm:flex-col-reverse max-sm:items-stretch">
+                    <button type="button" className="cursor-pointer border-0 bg-transparent p-0 text-[12px] font-bold text-[color:var(--color-accent)] hover:underline" onClick={() => setIsManagerOpen(true)}>
+                        Управление характеристиками
+                    </button>
+                    <button type="button" className="button button--outline min-h-9 shrink-0 max-sm:w-full" disabled={isValuesLoading} onClick={addRow}>
+                        <PlusIcon width="15" height="15" />Добавить характеристику
+                    </button>
+                </div>
             </div>
 
             {loadError && <p className="mb-3 mt-0 rounded-lg bg-[#fff5ef] px-3 py-2 text-[12px] text-[#9a3b12]" role="alert">{loadError}</p>}
@@ -405,6 +433,12 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                 initialName={creatingForRow?.initialName}
                 onClose={() => setCreatingForRow(null)}
                 onCreated={handleCreated}
+            />
+            <ProductAttributesModal
+                isOpen={isManagerOpen}
+                initialAttributes={attributes}
+                onClose={() => setIsManagerOpen(false)}
+                onAttributesChanged={handleAttributesChanged}
             />
         </div>
     );

@@ -57,7 +57,8 @@ class ShopAttributeApiTest extends TestCase
             ->assertOk()
             ->assertJsonCount(2, 'data')
             ->assertJsonPath('data.0.id', $textId)
-            ->assertJsonPath('data.1.id', $numberId);
+            ->assertJsonPath('data.1.id', $numberId)
+            ->assertJsonPath('data.1.unit', 'kg');
 
         $this->patchJson("/api/product-attributes/{$numberId}", [
             'name' => 'Package weight',
@@ -67,11 +68,15 @@ class ShopAttributeApiTest extends TestCase
             ->assertJsonPath('data.unit', 'kg')
             ->assertJsonPath('data.sort_order', -1);
 
+        $this->patchJson("/api/product-attributes/{$textId}", ['unit' => 'kg'])
+            ->assertOk()
+            ->assertJsonPath('data.unit', null);
+
         $this->deleteJson("/api/product-attributes/{$textId}")->assertNoContent();
         $this->assertDatabaseMissing('shop_attributes', ['id' => $textId]);
     }
 
-    public function test_attribute_validation_enforces_enum_and_number_units(): void
+    public function test_attribute_validation_enforces_type_and_unit_enums(): void
     {
         $this->authenticateProductAdmin();
 
@@ -84,7 +89,34 @@ class ShopAttributeApiTest extends TestCase
             'name' => 'Material',
             'type' => 'text',
             'unit' => 'kg',
+        ])->assertCreated()
+            ->assertJsonPath('data.unit', null);
+
+        $this->postJson('/api/product-attributes', [
+            'name' => 'Invalid unit',
+            'type' => 'number',
+            'unit' => 'stone',
         ])->assertUnprocessable()->assertJsonValidationErrors('unit');
+
+        $numberWithoutUnitId = $this->postJson('/api/product-attributes', [
+            'name' => 'Quantity',
+            'type' => 'number',
+            'unit' => null,
+        ])->assertCreated()
+            ->assertJsonPath('data.unit', null)
+            ->json('data.id');
+
+        $this->patchJson("/api/product-attributes/{$numberWithoutUnitId}", ['unit' => 'invalid'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('unit');
+
+        $this->patchJson("/api/product-attributes/{$numberWithoutUnitId}", ['unit' => 'g'])
+            ->assertOk()
+            ->assertJsonPath('data.unit', 'g');
+
+        $this->patchJson("/api/product-attributes/{$numberWithoutUnitId}", ['unit' => null])
+            ->assertOk()
+            ->assertJsonPath('data.unit', null);
 
         $attribute = ShopAttribute::query()->create([
             'name' => 'Weight',

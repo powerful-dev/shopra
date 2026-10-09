@@ -354,7 +354,10 @@
     "productEditPage": {
         "createAttribute": {
             "isVisible": "Показывать в карточке товара",
-            "isFilterable": "Использовать в фильтрах"
+            "isFilterable": "Использовать в фильтрах",
+            "measurementUnit": "Единица измерения",
+            "withoutMeasurementUnit": "Без единицы измерения",
+            "unitsLoadError": "Не удалось загрузить единицы измерения."
         },
         "media": {
             "imageRequirements": "Фото: {{formats}} · до {{size}} МБ",

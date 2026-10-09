@@ -24,6 +24,10 @@ class ShopAttributeService
     /** @param array<string, mixed> $data */
     public function create(array $data): ShopAttribute
     {
+        if (ShopAttributeType::from($data['type']) !== ShopAttributeType::Number) {
+            $data['unit'] = null;
+        }
+
         return $this->loadOptions(ShopAttribute::query()->create($data)->refresh());
     }
 

@@ -354,7 +354,10 @@
     "productEditPage": {
         "createAttribute": {
             "isVisible": "Show on the product page",
-            "isFilterable": "Use in filters"
+            "isFilterable": "Use in filters",
+            "measurementUnit": "Measurement unit",
+            "withoutMeasurementUnit": "No measurement unit",
+            "unitsLoadError": "Unable to load measurement units."
         },
         "media": {
             "imageRequirements": "Photos: {{formats}} · up to {{size}} MB",

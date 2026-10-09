@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\ShopAttributeType;
+use App\Enums\ShopAttributeUnit;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -20,9 +21,7 @@ class StoreShopAttributeRequest extends FormRequest
             'type' => ['required', Rule::enum(ShopAttributeType::class)],
             'unit' => [
                 'nullable',
-                'string',
-                'max:255',
-                Rule::prohibitedIf($this->input('type') !== ShopAttributeType::Number->value),
+                Rule::enum(ShopAttributeUnit::class),
             ],
             'is_visible' => ['sometimes', 'boolean'],
             'is_filterable' => ['sometimes', 'boolean'],
