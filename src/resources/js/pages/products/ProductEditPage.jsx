@@ -13,6 +13,13 @@ import SearchableSelect from '../../components/admin/SearchableSelect';
 import SeoFields from '../../components/admin/SeoFields';
 import BackIcon from '../../components/icons/BackIcon';
 import BoxIcon from '../../components/icons/BoxIcon';
+import PhotoIcon from '../../components/icons/PhotoIcon';
+import CurrencyIcon from '../../components/icons/CurrencyIcon';
+import LayersIcon from '../../components/icons/LayersIcon';
+import DraftProductsIcon from '../../components/icons/DraftProductsIcon';
+import ControlsIcon from '../../components/icons/ControlsIcon';
+import LinkIcon from '../../components/icons/LinkIcon';
+import ShippingIcon from '../../components/icons/ShippingIcon';
 import CategoriesIcon from '../../components/icons/CategoriesIcon';
 import PlusIcon from '../../components/icons/PlusIcon';
 import EyeIcon from '../../components/icons/EyeIcon';
@@ -39,14 +46,14 @@ import ProductVariantsModal from './ProductVariantsModal';
 const fieldClass = 'h-[43px] w-full rounded-[9px] border border-[#ddd5cf] bg-white px-[11px] text-[13px] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]';
 
 const sectionLinks = [
-    ['main', 'Основное', 'box'],
-    ['photo', 'Фото', 'photo'],
-    ['price', 'Цена и наличие', 'price'],
-    ['variants', 'Варианты', 'layers'],
-    ['description', 'Описание', 'file'],
-    ['features', 'Характеристики', 'sliders'],
-    ['delivery', 'Доставка', 'truck'],
-    ['seo', 'SEO', 'link'],
+    ['main', 'Основное', BoxIcon],
+    ['photo', 'Фото', PhotoIcon],
+    ['price', 'Цена и наличие', CurrencyIcon],
+    ['variants', 'Варианты', LayersIcon],
+    ['description', 'Описание', DraftProductsIcon],
+    ['features', 'Характеристики', ControlsIcon],
+    ['delivery', 'Доставка', ShippingIcon],
+    ['seo', 'SEO', LinkIcon],
 ];
 
 export default function ProductEditPage({ hasModifications = false }) {
@@ -421,10 +428,22 @@ export default function ProductEditPage({ hasModifications = false }) {
                 </div>
             </header>
 
-            <nav ref={sectionNavigationRef} className="sticky top-[var(--header-height)] z-30 mb-[13px] flex items-center gap-0.5 overflow-x-auto border-b border-[color:var(--color-border)] bg-[rgba(247,246,243,.95)] py-1 backdrop-blur max-lg:top-[62px] max-sm:-mx-[13px] max-sm:px-[13px]" aria-label="Разделы товара">
-                {sectionLinks.map(([id, label, icon], index) => (
-                    <button key={id} type="button" className={`flex min-h-[45px] shrink-0 cursor-pointer items-center gap-1.5 border-0 bg-transparent px-2.5 text-[12px] font-[680] ${index === 0 ? 'relative text-[color:var(--color-accent)] after:absolute after:inset-x-2.5 after:-bottom-1 after:h-0.5 after:rounded-full after:bg-[color:var(--color-accent)]' : 'text-[#756e67]'}`} onClick={() => scrollToSection(sectionRefs.current[id])}>
-                        <span className={`grid h-[25px] w-[25px] place-items-center rounded-lg ${index === 0 ? 'bg-[#f9eee7]' : 'bg-[#f0ebe7]'}`}><SectionIcon type={icon} /></span>{label}
+            <nav
+                ref={sectionNavigationRef}
+                className="sticky top-[var(--header-height)] z-30 mb-[13px] flex items-center gap-0.5 overflow-x-auto border-b border-[color:var(--color-border)] bg-[rgba(247,246,243,.95)] py-1 backdrop-blur max-lg:top-[62px] max-sm:-mx-[13px] max-sm:px-[13px]"
+                aria-label="Разделы товара"
+            >
+                {sectionLinks.map(([id, label, Icon], index) => (
+                    <button
+                        key={id}
+                        type="button"
+                        className={`flex min-h-[45px] shrink-0 cursor-pointer items-center gap-1.5 border-0 bg-transparent px-2.5 text-[12px] font-[680] ${index === 0 ? 'relative text-[color:var(--color-accent)] after:absolute after:inset-x-2.5 after:-bottom-1 after:h-0.5 after:rounded-full after:bg-[color:var(--color-accent)]' : 'text-[#756e67]'}`}
+                        onClick={() => scrollToSection(sectionRefs.current[id])}
+                    >
+                        <span className={`grid h-[25px] w-[25px] place-items-center rounded-lg ${index === 0 ? 'bg-[#f9eee7]' : 'bg-[#f0ebe7]'}`}>
+                            <Icon />
+                        </span>
+                        {label}
                     </button>
                 ))}
             </nav>
@@ -509,14 +528,16 @@ export default function ProductEditPage({ hasModifications = false }) {
                         onChange={updateField}
                         onOpenCurrencySettings={() => setIsCurrencySettingsOpen(true)}
                     />
-                    <AccordionSection sectionRef={(element) => { sectionRefs.current.variants = element; }} id="variants" title="Модификации товара" icon="layers" open>
+                    <AccordionSection sectionRef={(element) => { sectionRefs.current.variants = element; }} id="variants" title="Модификации товара" icon={LayersIcon} open>
                         <article className="grid min-h-[82px] grid-cols-[42px_minmax(0,1fr)_auto] items-center gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[12px_13px] max-md:grid-cols-[38px_minmax(0,1fr)]">
-                            <span className="grid h-[42px] w-[42px] place-items-center rounded-[11px] bg-[#f1ece8] text-[#81766e]"><SectionIcon type="layers" size={18} /></span>
+                            <span className="grid h-[42px] w-[42px] place-items-center rounded-[11px] bg-[#f1ece8] text-[#81766e]">
+                                <LayersIcon />
+                            </span>
                             <div><strong className="block text-[13px]">{hasModifications ? 'Модификации настроены' : 'Модификации отключены'}</strong><small className="mt-0.5 block text-[12px] leading-[1.4] text-[#8c837c]">{hasModifications ? 'Опции, фотографии, цены и остатки вариантов можно изменить отдельно.' : 'Обычный товар с одной ценой и общим остатком. Цвета, размеры и другие опции добавляются только при необходимости.'}</small></div>
                             <button type="button" className="button button--primary min-h-9 max-md:col-span-full max-md:w-full" onClick={() => setIsVariantsOpen(true)}><PlusIcon />{hasModifications ? 'Модификации' : 'Добавить модификации'}</button>
                         </article>
                     </AccordionSection>
-                    <AccordionSection sectionRef={(element) => { sectionRefs.current.description = element; }} id="description" title="Описание" icon="file">
+                    <AccordionSection sectionRef={(element) => { sectionRefs.current.description = element; }} id="description" title="Описание" icon={DraftProductsIcon}>
                         <label className="flex flex-col gap-[7px]">
                             <span className="flex items-center justify-between text-[12px] font-bold text-[#554e48]">Описание товара</span>
                             <RichTextEditor
@@ -527,11 +548,11 @@ export default function ProductEditPage({ hasModifications = false }) {
                             />
                         </label>
                     </AccordionSection>
-                    <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title="Характеристики" icon="sliders">
+                    <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title="Характеристики" icon={ControlsIcon}>
                         <ProductAttributesSection ref={attributesSectionRef} productId={isNew ? null : id} />
                     </AccordionSection>
-                    <AccordionSection sectionRef={(element) => { sectionRefs.current.delivery = element; }} id="delivery" title="Доставка" icon="truck"><Field label="Группа доставки"><select className={fieldClass} defaultValue="standard"><option value="standard">Стандартная доставка</option><option>Крупногабаритный товар</option><option>Самовывоз</option></select></Field></AccordionSection>
-                    <AccordionSection sectionRef={(element) => { sectionRefs.current.seo = element; }} id="seo" title="SEO" icon="link">
+                    <AccordionSection sectionRef={(element) => { sectionRefs.current.delivery = element; }} id="delivery" title="Доставка" icon={ShippingIcon}><Field label="Группа доставки"><select className={fieldClass} defaultValue="standard"><option value="standard">Стандартная доставка</option><option>Крупногабаритный товар</option><option>Самовывоз</option></select></Field></AccordionSection>
+                    <AccordionSection sectionRef={(element) => { sectionRefs.current.seo = element; }} id="seo" title="SEO" icon={LinkIcon}>
                         <SeoFields
                             title={form.seo_title}
                             description={form.seo_description}
@@ -628,7 +649,7 @@ function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen
         });
 
     return (
-        <Card sectionRef={sectionRef} id="main" title="Основное" required>
+        <Card sectionRef={sectionRef} id="main" title="Основное" icon={BoxIcon} required>
             <Field label={<>Название товара <b className="text-[color:var(--color-accent)]">*</b></>}>
                 <input className={fieldClass} name="name" value={form.name} onChange={onChange} />
             </Field>
@@ -978,6 +999,7 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
             sectionRef={sectionRef}
             id="photo"
             title="Фото и видео"
+            icon={PhotoIcon}
             required
             className={`transition-[border-color,box-shadow] ${isDragActive ? 'border-[color:var(--color-accent)] ring-[3px] ring-[rgba(184,79,24,.09)]' : ''}`}
             sectionProps={dropZoneProps}
@@ -1185,7 +1207,7 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, onCh
     const storefrontOldPrice = convertPrice(form.old_price);
 
     return (
-        <Card sectionRef={sectionRef} id="price" title="Цена и наличие" required bodyClassName="">
+        <Card sectionRef={sectionRef} id="price" title="Цена и наличие" icon={CurrencyIcon} required bodyClassName="">
             <div className="flex min-h-[47px] flex-wrap items-center gap-x-1.5 gap-y-1 border-b border-[#f1e5dc] bg-[#fff8ed] px-[24px] py-3 text-[12px] text-[#92512f] max-sm:px-[13px]">
                 {currencyStatus === 'loading' && <span>Загрузка валюты магазина…</span>}
                 {currencyStatus === 'error' && <span>Не удалось загрузить валюты магазина.</span>}
@@ -1345,18 +1367,13 @@ function ProductAside() {
         </aside>);
 }
 
-function Card({ sectionRef, id, title, required, children, bodyClassName = 'p-[15px_17px_17px] max-sm:p-[13px]', className = '', sectionProps = {} }) {
-    return <section ref={sectionRef} id={id} className={`rounded-[14px] border border-[color:var(--color-border)] bg-white shadow-[0_7px_24px_rgba(70,47,31,.03)] ${className}`} {...sectionProps}><header className="flex min-h-[48px] items-center gap-[9px] border-b border-[#f0ece8] px-[17px]"><h2 className="text-[15px] font-[740]">{title}</h2>{required && <em className="rounded-full bg-[color:var(--color-success-soft)] px-[7px] py-1 text-[11px] font-[720] not-italic text-[color:var(--color-success)]">Обязательно</em>}</header><div className={bodyClassName}>{children}</div></section>;
+function Card({ sectionRef, id, title, icon: Icon, required, children, bodyClassName = 'p-[15px_17px_17px] max-sm:p-[13px]', className = '', sectionProps = {} }) {
+    return <section ref={sectionRef} id={id} className={`rounded-[14px] border border-[color:var(--color-border)] bg-white shadow-[0_7px_24px_rgba(70,47,31,.03)] ${className}`} {...sectionProps}><header className="flex min-h-[48px] items-center gap-[9px] border-b border-[#f0ece8] px-[17px]">{Icon && <span className="accordion__icon [&_svg]:h-[14px] [&_svg]:w-[14px]"><Icon /></span>}<h2 className="text-[15px] font-[740]">{title}</h2>{required && <em className="rounded-full bg-[color:var(--color-success-soft)] px-[7px] py-1 text-[11px] font-[720] not-italic text-[color:var(--color-success)]">Обязательно</em>}</header><div className={bodyClassName}>{children}</div></section>;
 }
 
-function AccordionSection({ sectionRef, id, title, icon, children, open = false }) {
-    return <details ref={sectionRef} id={id} className="accordion" open={open}><summary className="accordion__summary"><span className="accordion__icon"><SectionIcon type={icon} /></span><strong className="accordion__title">{title}</strong><em className="accordion__badge">Необязательно</em><ChevronIcon /></summary><div className="accordion__body">{children}</div></details>;
+function AccordionSection({ sectionRef, id, title, icon: Icon, children, open = false }) {
+    return <details ref={sectionRef} id={id} className="accordion" open={open}><summary className="accordion__summary"><span className="accordion__icon [&_svg]:h-[14px] [&_svg]:w-[14px]"><Icon /></span><strong className="accordion__title">{title}</strong><em className="accordion__badge">Необязательно</em><ChevronIcon /></summary><div className="accordion__body">{children}</div></details>;
 }
 
 function Field({ label, children }) { return <label className="flex flex-col gap-[7px]"><span className="text-[12px] font-bold text-[#554e48]">{label}</span>{children}</label>; }
 function PriceField({ label, name, value, onChange, suffix, required }) { return <Field label={<>{label} {required && <b className="text-[color:var(--color-accent)]">*</b>}</>}><span className="relative"><input className={`${fieldClass} ${suffix ? 'pr-11' : ''} font-bold`} name={name} value={value} onChange={onChange} />{suffix && <b className="absolute right-[11px] top-1/2 -translate-y-1/2 text-[11px] text-[#8d857f]">{suffix}</b>}</span></Field>; }
-
-function SectionIcon({ type, size = 14 }) {
-    const paths = { box: 'm16 16 2 2 4-4M21 10V8l-9-6-9 6v8l9 6 3-1', photo: 'M16 5h6M19 2v6M21 12v7H3V3h10M3 17l6-6 4 4 3-3 5 5', price: 'M16 8h-6a2 2 0 100 4h4a2 2 0 110 4H8M12 18V6', layers: 'm2 7 10-5 10 5-10 5L2 7m0 5 10 5 10-5M2 17l10 5 10-5', file: 'M15 2H6v20h14V7l-5-5zm-1 0v6h6M8 13h8M8 17h8', sliders: 'M20 7h-9M14 17H5M17 14v6M7 4v6', truck: 'M14 18V4H2v14h3m10 0H9m10 0h3v-5l-4-5h-4m3 12a2 2 0 100-4 2 2 0 000 4zM7 20a2 2 0 100-4 2 2 0 000 4z', link: 'M9 17H7A5 5 0 017 7h2m6 0h2a5 5 0 010 10h-2M8 12h8' };
-    return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[type]} /></svg>;
-}
