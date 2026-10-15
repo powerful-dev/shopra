@@ -13,6 +13,82 @@ import { getShopAttributes } from '../../services/shopAttributes';
 import { getProductVariants } from '../../services/shopItems';
 
 const combinationLimit = 100;
+let temporaryIdSequence = 0;
+
+function temporaryId(type) {
+    temporaryIdSequence += 1;
+    return `new-${type}-${temporaryIdSequence}`;
+}
+
+function sameId(left, right) {
+    return left !== null && left !== undefined && right !== null && right !== undefined && String(left) === String(right);
+}
+
+function sortedByOrder(items = []) {
+    return items
+        .map((item, index) => ({ item, index }))
+        .sort((left, right) => (Number(left.item.sort_order ?? 0) - Number(right.item.sort_order ?? 0)) || left.index - right.index)
+        .map(({ item }) => item);
+}
+
+function attributeValues(attribute) {
+    return sortedByOrder(attribute?.options).map((option, sortOrder) => ({
+        shopAttributeOptionId: option.id,
+        label: option.value,
+        sortOrder: option.sort_order ?? sortOrder,
+    }));
+}
+
+function restoreVariantOptions(savedOptions = [], attributes = []) {
+    return sortedByOrder(savedOptions).map((savedOption, optionIndex) => {
+        const attribute = attributes.find((item) => sameId(item.id, savedOption.shop_attribute_id));
+        const availableValues = attributeValues(attribute);
+
+        return {
+            id: savedOption.id,
+            shopAttributeId: savedOption.shop_attribute_id,
+            localName: savedOption.name,
+            name: savedOption.name ?? attribute?.name ?? `Опция #${savedOption.id}`,
+            type: attribute?.type ?? 'select',
+            sortOrder: savedOption.sort_order ?? optionIndex,
+            availableValues,
+            values: sortedByOrder(savedOption.values).map((savedValue, valueIndex) => {
+                const attributeValue = availableValues.find((item) => sameId(item.shopAttributeOptionId, savedValue.shop_attribute_option_id));
+
+                return {
+                    id: savedValue.id,
+                    shopAttributeOptionId: savedValue.shop_attribute_option_id,
+                    localValue: savedValue.value,
+                    label: savedValue.value ?? attributeValue?.label ?? `Значение #${savedValue.id}`,
+                    sortOrder: savedValue.sort_order ?? valueIndex,
+                };
+            }),
+        };
+    });
+}
+
+function applyAttributeDetails(options, attributes) {
+    return options.map((option) => {
+        if (option.shopAttributeId === null || option.shopAttributeId === undefined) return option;
+
+        const attribute = attributes.find((item) => sameId(item.id, option.shopAttributeId));
+        if (!attribute) return option;
+
+        const availableValues = attributeValues(attribute);
+        return {
+            ...option,
+            name: attribute.name,
+            type: attribute.type,
+            availableValues,
+            values: option.values.map((value) => {
+                if (value.shopAttributeOptionId === null || value.shopAttributeOptionId === undefined) return value;
+
+                const attributeValue = availableValues.find((item) => sameId(item.shopAttributeOptionId, value.shopAttributeOptionId));
+                return attributeValue ? { ...value, label: attributeValue.label } : value;
+            }),
+        };
+    });
+}
 
 function combinationKey(selections) {
     return JSON.stringify(selections
@@ -395,6 +471,7 @@ export default function ProductVariantsModal({ isOpen, onClose, productId = null
     const [showOptionPicker, setShowOptionPicker] = useState(false);
     const [deleteWarning, setDeleteWarning] = useState(null);
     const [attributes, setAttributes] = useState([]);
+    const attributesRef = useRef([]);
     const [addedOptions, setAddedOptions] = useState([]);
     const [isAttributesLoading, setIsAttributesLoading] = useState(false);
     const [attributesError, setAttributesError] = useState('');
@@ -426,6 +503,11 @@ export default function ProductVariantsModal({ isOpen, onClose, productId = null
         setVariantsError('');
 
         getProductVariants(productId)
+            .then((loadedVariants) => {
+                if (!isCurrentRequest) return;
+
+                setAddedOptions(restoreVariantOptions(loadedVariants.options, attributesRef.current));
+            })
             .catch((error) => {
                 if (!isCurrentRequest) return;
 
@@ -448,6 +530,7 @@ export default function ProductVariantsModal({ isOpen, onClose, productId = null
         setShowOptionPicker(false);
         setDeleteWarning(null);
         setAttributes([]);
+        attributesRef.current = [];
         setAttributesError('');
         setIsAttributesLoading(true);
 
@@ -455,7 +538,10 @@ export default function ProductVariantsModal({ isOpen, onClose, productId = null
             .then((loadedAttributes) => {
                 if (controller.signal.aborted) return;
 
-                setAttributes(loadedAttributes.filter((attribute) => ['select', 'multiselect'].includes(attribute.type)));
+                const supportedAttributes = loadedAttributes.filter((attribute) => ['select', 'multiselect'].includes(attribute.type));
+                attributesRef.current = supportedAttributes;
+                setAttributes(supportedAttributes);
+                setAddedOptions((current) => applyAttributeDetails(current, supportedAttributes));
             })
             .catch((error) => {
                 if (error.name === 'AbortError') return;
@@ -503,19 +589,30 @@ export default function ProductVariantsModal({ isOpen, onClose, productId = null
 
     if (!isOpen) return null;
 
-    const addedAttributeIds = new Set(addedOptions.map((option) => option.id));
+    const addedAttributeIds = new Set(addedOptions
+        .map((option) => option.shopAttributeId)
+        .filter((attributeId) => attributeId !== null && attributeId !== undefined));
     const selectedValuesCount = addedOptions.reduce((count, option) => count + option.values.length, 0);
     const addAttribute = (attributeId) => {
         const attribute = attributes.find((item) => item.id === attributeId);
         if (!attribute || addedAttributeIds.has(attribute.id)) return;
 
-        const attributeValues = (attribute.options ?? []).map((option) => ({ id: option.id, label: option.value }));
+        const availableValues = attributeValues(attribute);
         setAddedOptions((current) => [...current, {
-            id: attribute.id,
+            id: temporaryId('option'),
+            shopAttributeId: attribute.id,
+            localName: null,
             name: attribute.name,
             type: attribute.type,
-            availableValues: attributeValues,
-            values: attributeValues,
+            sortOrder: current.length,
+            availableValues,
+            values: availableValues.map((value, sortOrder) => ({
+                id: temporaryId('value'),
+                shopAttributeOptionId: value.shopAttributeOptionId,
+                localValue: null,
+                label: value.label,
+                sortOrder,
+            })),
         }]);
     };
     const removeAttribute = (attributeId) => {
@@ -533,7 +630,13 @@ export default function ProductVariantsModal({ isOpen, onClose, productId = null
             const sourceValue = option.availableValues.find((value) => value.label.trim().toLocaleLowerCase() === normalizedValue);
             return {
                 ...option,
-                values: [...option.values, sourceValue ?? { id: `local-${option.id}-${normalizedValue}`, label: trimmedValue }],
+                values: [...option.values, {
+                    id: temporaryId('value'),
+                    shopAttributeOptionId: sourceValue?.shopAttributeOptionId ?? null,
+                    localValue: sourceValue ? null : trimmedValue,
+                    label: sourceValue?.label ?? trimmedValue,
+                    sortOrder: option.values.length,
+                }],
             };
         }));
     };
