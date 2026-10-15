@@ -36,7 +36,7 @@ class SaveShopItemRequest extends FormRequest
                 Rule::enum(SupportedCurrency::class),
                 Rule::in($this->availableCurrencyCodes()),
             ],
-            'quantity' => ['required', 'integer', 'min:0'],
+            'quantity' => ['nullable', 'integer', 'min:0'],
             'description' => ['nullable', 'string'],
             'seo_title' => ['nullable', 'string', 'max:255'],
             'seo_description' => ['nullable', 'string'],

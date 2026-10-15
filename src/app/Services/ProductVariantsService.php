@@ -30,6 +30,7 @@ class ProductVariantsService
     {
         $syncedItem = DB::transaction(function () use ($item, $data): ShopItem {
             $lockedItem = ShopItem::query()->lockForUpdate()->findOrFail($item->getKey());
+            $hadVariants = $lockedItem->variants()->exists();
             $optionIds = collect($data['options'])
                 ->pluck('id')
                 ->filter(fn (mixed $id): bool => $this->isPersistentReference($id))
@@ -116,6 +117,10 @@ class ProductVariantsService
                 $variant->values()->sync(collect($variantData['selections'])
                     ->map(fn (array $selection): int => $valueMap[$this->referenceKey($selection['value_id'])]->id)
                     ->all());
+            }
+
+            if ($hadVariants && $data['variants'] === []) {
+                $lockedItem->update(['quantity' => null]);
             }
 
             $photoIds = collect($data['photos'])->pluck('id')->filter()->map(fn (int $id): int => $id)->all();

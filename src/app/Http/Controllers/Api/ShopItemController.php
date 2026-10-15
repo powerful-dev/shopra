@@ -59,6 +59,7 @@ class ShopItemController extends Controller
         return new ShopItemResource($product->load([
             'groups',
             'unit',
+            'variants',
             'media' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
         ]));
     }

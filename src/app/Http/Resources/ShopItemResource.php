@@ -22,7 +22,7 @@ class ShopItemResource extends JsonResource
             'price' => $this->price,
             'old_price' => $this->old_price,
             'currency' => $this->currency?->value,
-            'quantity' => $this->quantity,
+            'quantity' => $this->availableQuantity(),
             'description' => $this->description,
             'seo_title' => $this->seo_title,
             'seo_description' => $this->seo_description,

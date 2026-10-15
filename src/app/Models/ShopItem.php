@@ -86,6 +86,32 @@ class ShopItem extends Model
         return $this->hasMany(ShopItemVariant::class)->orderBy('sort_order');
     }
 
+    public function activeVariants(): HasMany
+    {
+        return $this->hasMany(ShopItemVariant::class)->where('is_active', true);
+    }
+
+    public function availableQuantity(): ?int
+    {
+        if (array_key_exists('variants_exists', $this->attributes)) {
+            return $this->getAttribute('variants_exists')
+                ? (int) ($this->getAttribute('active_variants_sum_quantity') ?? 0)
+                : $this->quantity;
+        }
+
+        if ($this->relationLoaded('variants')) {
+            return $this->variants->isNotEmpty()
+                ? (int) $this->variants->where('is_active', true)->sum('quantity')
+                : $this->quantity;
+        }
+
+        if (! $this->variants()->exists()) {
+            return $this->quantity;
+        }
+
+        return (int) $this->activeVariants()->sum('quantity');
+    }
+
     public function variantSetting(): HasOne
     {
         return $this->hasOne(ShopItemVariantSetting::class);

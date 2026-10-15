@@ -60,6 +60,8 @@ const sectionLinks = [
 
 const emptyVariantsSummary = () => ({
     hasModifications: false,
+    hasVariants: false,
+    activeQuantity: 0,
     optionCount: 0,
     valueCount: 0,
     optionNames: [],
@@ -72,6 +74,7 @@ const idsMatch = (left, right) => left !== null && left !== undefined
 
 function buildVariantsSummary(variants, attributes = []) {
     const options = Array.isArray(variants?.options) ? variants.options : [];
+    const combinations = Array.isArray(variants?.variants) ? variants.variants : [];
     const attributeForOption = (option) => attributes.find((attribute) => idsMatch(attribute.id, option.shop_attribute_id));
     const defaultPhotoValueId = variants?.settings?.default_photo_value_id;
     let mainPhotoValue = null;
@@ -89,6 +92,10 @@ function buildVariantsSummary(variants, attributes = []) {
 
     return {
         hasModifications: options.length > 0,
+        hasVariants: combinations.length > 0,
+        activeQuantity: combinations.reduce((quantity, variant) => variant.is_active
+            ? quantity + Number(variant.quantity ?? 0)
+            : quantity, 0),
         optionCount: options.length,
         valueCount: options.reduce((count, option) => count + (option.values?.length ?? 0), 0),
         optionNames: options.map((option) => option.name ?? attributeForOption(option)?.name ?? `Опция #${option.id}`),
@@ -105,6 +112,10 @@ function formatRussianCount(count, one, few, many) {
     if (remainder10 >= 2 && remainder10 <= 4) return `${count} ${few}`;
 
     return `${count} ${many}`;
+}
+
+function normalizeNullableQuantity(quantity) {
+    return quantity === '' || quantity === null || quantity === undefined ? null : quantity;
 }
 
 export default function ProductEditPage() {
@@ -354,7 +365,7 @@ export default function ProductEditPage() {
             name: form.name.trim() || null,
             price: useDraftDefaults && form.price === '' ? 0 : form.price,
             old_price: form.old_price || null,
-            quantity: useDraftDefaults && form.quantity === '' ? 0 : form.quantity,
+            quantity: useDraftDefaults && form.quantity === '' ? 0 : normalizeNullableQuantity(form.quantity),
             seo_title: form.seo_title || null,
             seo_description: form.seo_description || null,
             status,
@@ -424,6 +435,7 @@ export default function ProductEditPage() {
                         ...form,
                         name: form.name.trim() || null,
                         old_price: form.old_price || null,
+                        quantity: normalizeNullableQuantity(form.quantity),
                         seo_title: form.seo_title || null,
                         seo_description: form.seo_description || null,
                         status,
@@ -616,6 +628,9 @@ export default function ProductEditPage() {
                         form={form}
                         currencySettings={currencySettings}
                         currencyStatus={currencyStatus}
+                        hasVariants={variantsSummary.hasVariants}
+                        variantsQuantity={variantsSummary.activeQuantity}
+                        isVariantsLoading={variantsSummaryStatus !== 'loaded'}
                         onChange={updateField}
                         onOpenCurrencySettings={() => setIsCurrencySettingsOpen(true)}
                     />
@@ -707,7 +722,12 @@ export default function ProductEditPage() {
                 media={media}
                 onClose={() => setIsVariantsOpen(false)}
                 onSaved={(variants) => {
-                    setVariantsSummary(buildVariantsSummary(variants, variantAttributesRef.current));
+                    const updatedSummary = buildVariantsSummary(variants, variantAttributesRef.current);
+
+                    if (variantsSummary.hasVariants && !updatedSummary.hasVariants) {
+                        setForm((current) => ({ ...current, quantity: '' }));
+                    }
+                    setVariantsSummary(updatedSummary);
                     setVariantsSummaryStatus('loaded');
                 }}
             />
@@ -1264,7 +1284,7 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
     );
 }
 
-function PriceSection({ sectionRef, form, currencySettings, currencyStatus, onChange, onOpenCurrencySettings }) {
+function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasVariants, variantsQuantity, isVariantsLoading, onChange, onOpenCurrencySettings }) {
     const { t, i18n } = useTranslation();
     const storeCurrency = currencySettings.currency;
     const currencyRates = currencySettings.currency_rates;
@@ -1423,7 +1443,17 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, onCh
 
                 <div className="mt-6 border-t border-[#eee8e3] pt-[18px]">
                     <div className="max-w-[420px]">
-                        <PriceField label="Количество" name="quantity" value={form.quantity} onChange={onChange} suffix="шт" required />
+                        <PriceField
+                            label="Количество"
+                            name="quantity"
+                            value={hasVariants ? variantsQuantity : form.quantity}
+                            onChange={onChange}
+                            suffix="шт"
+                            disabled={hasVariants || isVariantsLoading}
+                            required
+                        />
+                        {hasVariants && <small className="mt-1.5 block text-[11px] leading-[1.4] text-[#8c837c]">Количество рассчитывается по остаткам активных модификаций</small>}
+                        {!hasVariants && !isVariantsLoading && form.quantity === '' && <small className="mt-1.5 block text-[11px] leading-[1.4] text-[#8c837c]">Укажите актуальный остаток товара</small>}
                     </div>
                     <label className="mt-3 flex items-center gap-[7px] text-[12px] text-[#6d655e]">
                         <input className="h-[14px] w-[14px] accent-[color:var(--color-accent)]" type="checkbox" defaultChecked />
@@ -1485,4 +1515,4 @@ function AccordionSection({ sectionRef, id, title, icon: Icon, children, open = 
 }
 
 function Field({ label, children }) { return <label className="flex flex-col gap-[7px]"><span className="text-[12px] font-bold text-[#554e48]">{label}</span>{children}</label>; }
-function PriceField({ label, name, value, onChange, suffix, required }) { return <Field label={<>{label} {required && <b className="text-[color:var(--color-accent)]">*</b>}</>}><span className="relative"><input className={`${fieldClass} ${suffix ? 'pr-11' : ''} font-bold`} name={name} value={value} onChange={onChange} />{suffix && <b className="absolute right-[11px] top-1/2 -translate-y-1/2 text-[11px] text-[#8d857f]">{suffix}</b>}</span></Field>; }
+function PriceField({ label, name, value, onChange, suffix, required, disabled = false }) { return <Field label={<>{label} {required && <b className="text-[color:var(--color-accent)]">*</b>}</>}><span className="relative"><input className={`${fieldClass} ${suffix ? 'pr-11' : ''} font-bold disabled:cursor-not-allowed disabled:bg-[#f2efec] disabled:text-[#817870]`} name={name} value={value} onChange={onChange} disabled={disabled} />{suffix && <b className="absolute right-[11px] top-1/2 -translate-y-1/2 text-[11px] text-[#8d857f]">{suffix}</b>}</span></Field>; }

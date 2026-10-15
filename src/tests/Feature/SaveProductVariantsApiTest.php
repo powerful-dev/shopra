@@ -22,6 +22,7 @@ class SaveProductVariantsApiTest extends TestCase
     {
         $this->authenticateProductAdmin();
         [$item, $color, $red, $blue, $firstMedia, $secondMedia] = $this->createCatalogData();
+        $item->update(['quantity' => 14]);
 
         $response = $this->putJson(
             "/api/products/{$item->id}/variants",
@@ -55,6 +56,10 @@ class SaveProductVariantsApiTest extends TestCase
         $this->assertDatabaseCount('shop_item_variants', 2);
         $this->assertDatabaseCount('shop_item_variant_selections', 4);
         $this->assertDatabaseCount('shop_item_variant_photos', 2);
+        $this->assertDatabaseHas('shop_items', [
+            'id' => $item->id,
+            'quantity' => 14,
+        ]);
     }
 
     public function test_repeated_save_preserves_ids_updates_values_and_deletes_missing_records(): void
@@ -175,6 +180,10 @@ class SaveProductVariantsApiTest extends TestCase
         $this->assertDatabaseCount('shop_item_variant_selections', 0);
         $this->assertDatabaseCount('shop_item_variant_photos', 0);
         $this->assertDatabaseHas('shop_item_variant_settings', ['id' => $settingId]);
+        $this->assertDatabaseHas('shop_items', [
+            'id' => $item->id,
+            'quantity' => null,
+        ]);
     }
 
     public function test_invalid_references_combinations_prices_stock_and_skus_are_rejected(): void
