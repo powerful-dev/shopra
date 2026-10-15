@@ -576,6 +576,7 @@ export default function ProductEditPage({ hasModifications = false }) {
             />
             <ProductVariantsModal
                 isOpen={isVariantsOpen}
+                basePrice={form.price}
                 onClose={() => setIsVariantsOpen(false)}
             />
 
