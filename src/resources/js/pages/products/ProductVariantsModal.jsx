@@ -640,7 +640,7 @@ function VariantsSection({ combinations, totalCount, variantData, basePrice, sep
     );
 }
 
-export default function ProductVariantsModal({ isOpen, onClose, productId = null, basePrice = '', media = [] }) {
+export default function ProductVariantsModal({ isOpen, onClose, onSaved, productId = null, basePrice = '', media = [] }) {
     const [separatePrices, setSeparatePrices] = useState(false);
     const [areSeparatePricesInitialized, setAreSeparatePricesInitialized] = useState(false);
     const [showOptionPicker, setShowOptionPicker] = useState(false);
@@ -894,6 +894,7 @@ export default function ProductVariantsModal({ isOpen, onClose, productId = null
             setSeparatePrices(restoredState.separatePrices);
             setAreSeparatePricesInitialized(restoredState.separatePricesInitialized);
             setPhotoState(restoredState.photos);
+            onSaved?.(savedVariants);
             onClose();
         } catch (error) {
             console.error('Unable to save product variants.', error);

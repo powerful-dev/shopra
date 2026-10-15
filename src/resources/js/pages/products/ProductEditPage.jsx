@@ -29,9 +29,11 @@ import CloseIcon from '../../components/icons/CloseIcon';
 import RocketIcon from '../../components/icons/RocketIcon';
 import ChevronIcon from '../../components/icons/ChevronIcon';
 import SaveIcon from '../../components/icons/SaveIcon';
+import PencilIcon from '../../components/icons/PencilIcon';
 import { csrf, request } from '../../services/api';
+import { getShopAttributes } from '../../services/shopAttributes';
 import { getShopGroups } from '../../services/shopGroups';
-import { addShopItemCategory, deleteShopItemCategory, deleteShopItemMedia, getShopItemMediaConfig, reorderShopItemMedia, uploadShopItemMedia } from '../../services/shopItems';
+import { addShopItemCategory, deleteShopItemCategory, deleteShopItemMedia, getProductVariants, getShopItemMediaConfig, reorderShopItemMedia, uploadShopItemMedia } from '../../services/shopItems';
 import { getCurrencySettings } from '../../services/settings';
 import useFileDropZone from '../../hooks/useFileDropZone';
 import useSectionScroll from '../../hooks/useSectionScroll';
@@ -56,7 +58,56 @@ const sectionLinks = [
     ['seo', 'SEO', LinkIcon],
 ];
 
-export default function ProductEditPage({ hasModifications = false }) {
+const emptyVariantsSummary = () => ({
+    hasModifications: false,
+    optionCount: 0,
+    valueCount: 0,
+    optionNames: [],
+    mainPhotoValue: null,
+});
+
+const idsMatch = (left, right) => left !== null && left !== undefined
+    && right !== null && right !== undefined
+    && String(left) === String(right);
+
+function buildVariantsSummary(variants, attributes = []) {
+    const options = Array.isArray(variants?.options) ? variants.options : [];
+    const attributeForOption = (option) => attributes.find((attribute) => idsMatch(attribute.id, option.shop_attribute_id));
+    const defaultPhotoValueId = variants?.settings?.default_photo_value_id;
+    let mainPhotoValue = null;
+
+    if (variants?.settings?.photos_enabled && defaultPhotoValueId !== null && defaultPhotoValueId !== undefined) {
+        for (const option of options) {
+            const value = (option.values ?? []).find((item) => idsMatch(item.id, defaultPhotoValueId));
+            if (!value) continue;
+
+            const attributeOption = attributeForOption(option)?.options?.find((item) => idsMatch(item.id, value.shop_attribute_option_id));
+            mainPhotoValue = value.value ?? attributeOption?.value ?? null;
+            break;
+        }
+    }
+
+    return {
+        hasModifications: options.length > 0,
+        optionCount: options.length,
+        valueCount: options.reduce((count, option) => count + (option.values?.length ?? 0), 0),
+        optionNames: options.map((option) => option.name ?? attributeForOption(option)?.name ?? `Опция #${option.id}`),
+        mainPhotoValue,
+    };
+}
+
+function formatRussianCount(count, one, few, many) {
+    const remainder100 = count % 100;
+    const remainder10 = count % 10;
+
+    if (remainder100 >= 11 && remainder100 <= 14) return `${count} ${many}`;
+    if (remainder10 === 1) return `${count} ${one}`;
+    if (remainder10 >= 2 && remainder10 <= 4) return `${count} ${few}`;
+
+    return `${count} ${many}`;
+}
+
+export default function ProductEditPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const isNew = id === 'new' || !id;
@@ -70,6 +121,8 @@ export default function ProductEditPage({ hasModifications = false }) {
     const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
     const [isCurrencySettingsOpen, setIsCurrencySettingsOpen] = useState(false);
     const [isVariantsOpen, setIsVariantsOpen] = useState(false);
+    const [variantsSummary, setVariantsSummary] = useState(emptyVariantsSummary);
+    const [variantsSummaryStatus, setVariantsSummaryStatus] = useState(isNew ? 'loaded' : 'loading');
     const [currencySettings, setCurrencySettings] = useState({ currency: null, currency_rates: [] });
     const [currencyStatus, setCurrencyStatus] = useState('loading');
     const [isDeleting, setIsDeleting] = useState(false);
@@ -91,6 +144,7 @@ export default function ProductEditPage({ hasModifications = false }) {
     const createdProductIdRef = useRef(isNew ? null : id);
     const skipProductLoadIdRef = useRef(null);
     const attributesSectionRef = useRef(null);
+    const variantAttributesRef = useRef([]);
     const scrollToSection = useSectionScroll({ stickyRef: sectionNavigationRef });
 
     const refreshShopGroupOptions = useCallback(() => {
@@ -182,6 +236,43 @@ export default function ProductEditPage({ hasModifications = false }) {
 
         return () => controller.abort();
     }, []);
+
+    useEffect(() => {
+        if (isNew) {
+            variantAttributesRef.current = [];
+            setVariantsSummary(emptyVariantsSummary());
+            setVariantsSummaryStatus('loaded');
+
+            return undefined;
+        }
+
+        const controller = new AbortController();
+        let isActive = true;
+        setVariantsSummaryStatus('loading');
+
+        Promise.all([
+            getProductVariants(id),
+            getShopAttributes({ signal: controller.signal }),
+        ])
+            .then(([variants, attributes]) => {
+                if (!isActive) return;
+
+                variantAttributesRef.current = attributes;
+                setVariantsSummary(buildVariantsSummary(variants, attributes));
+                setVariantsSummaryStatus('loaded');
+            })
+            .catch((error) => {
+                if (!isActive || error.name === 'AbortError') return;
+
+                console.error('Unable to load product variants summary.', error);
+                setVariantsSummaryStatus('error');
+            });
+
+        return () => {
+            isActive = false;
+            controller.abort();
+        };
+    }, [id, isNew]);
 
     useEffect(() => {
         if (isNew) {
@@ -531,10 +622,24 @@ export default function ProductEditPage({ hasModifications = false }) {
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.variants = element; }} id="variants" title="Модификации товара" icon={LayersIcon} open>
                         <article className="grid min-h-[82px] grid-cols-[42px_minmax(0,1fr)_auto] items-center gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[12px_13px] max-md:grid-cols-[38px_minmax(0,1fr)]">
                             <span className="grid h-[42px] w-[42px] place-items-center rounded-[11px] bg-[#f1ece8] text-[#81766e]">
-                                <LayersIcon />
+                                {variantsSummaryStatus === 'loading'
+                                    ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#cfc5be] border-t-[color:var(--color-accent)]" aria-label="Загрузка модификаций" />
+                                    : <LayersIcon />}
                             </span>
-                            <div><strong className="block text-[13px]">{hasModifications ? 'Модификации настроены' : 'Модификации отключены'}</strong><small className="mt-0.5 block text-[12px] leading-[1.4] text-[#8c837c]">{hasModifications ? 'Опции, фотографии, цены и остатки вариантов можно изменить отдельно.' : 'Обычный товар с одной ценой и общим остатком. Цвета, размеры и другие опции добавляются только при необходимости.'}</small></div>
-                            <button type="button" className="button button--primary min-h-9 max-md:col-span-full max-md:w-full" onClick={() => setIsVariantsOpen(true)}><PlusIcon />{hasModifications ? 'Модификации' : 'Добавить модификации'}</button>
+                            <div className="min-w-0">
+                                {variantsSummaryStatus === 'loading' && <><strong className="block text-[13px]">Загрузка модификаций…</strong><small className="mt-0.5 block text-[12px] leading-[1.4] text-[#8c837c]">Получаем сохранённые настройки товара.</small></>}
+                                {variantsSummaryStatus === 'error' && <><strong className="block text-[13px]">Не удалось загрузить модификации</strong><small className="mt-0.5 block text-[12px] leading-[1.4] text-[#8c837c]">Откройте настройки, чтобы повторить загрузку сохранённых данных.</small></>}
+                                {variantsSummaryStatus === 'loaded' && !variantsSummary.hasModifications && <><strong className="block text-[13px]">Модификации не добавлены</strong><small className="mt-0.5 block text-[12px] leading-[1.4] text-[#8c837c]">Добавьте варианты товара по цвету, размеру или другим характеристикам</small></>}
+                                {variantsSummaryStatus === 'loaded' && variantsSummary.hasModifications && <>
+                                    <strong className="block text-[13px]">{formatRussianCount(variantsSummary.optionCount, 'опция', 'опции', 'опций')} · {formatRussianCount(variantsSummary.valueCount, 'значение', 'значения', 'значений')}</strong>
+                                    <small className="mt-0.5 block break-words text-[12px] leading-[1.4] text-[#8c837c]">{variantsSummary.optionNames.join(', ')}</small>
+                                    {variantsSummary.mainPhotoValue && <small className="mt-1.5 inline-flex items-center gap-1.5 rounded-md bg-white px-2 py-1 text-[11px] font-semibold text-[#756b64]"><i className="h-2 w-2 rounded-full bg-[#a9683e]" />Основное значение: {variantsSummary.mainPhotoValue}</small>}
+                                </>}
+                            </div>
+                            <button type="button" className="button button--primary min-h-9 max-md:col-span-full max-md:w-full" onClick={() => setIsVariantsOpen(true)}>
+                                {variantsSummary.hasModifications || variantsSummaryStatus === 'error' ? <PencilIcon /> : <PlusIcon />}
+                                {variantsSummary.hasModifications || variantsSummaryStatus === 'error' ? 'Настроить' : 'Добавить модификации'}
+                            </button>
                         </article>
                     </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.description = element; }} id="description" title="Описание" icon={DraftProductsIcon}>
@@ -601,6 +706,10 @@ export default function ProductEditPage({ hasModifications = false }) {
                 basePrice={form.price}
                 media={media}
                 onClose={() => setIsVariantsOpen(false)}
+                onSaved={(variants) => {
+                    setVariantsSummary(buildVariantsSummary(variants, variantAttributesRef.current));
+                    setVariantsSummaryStatus('loaded');
+                }}
             />
 
         </div>
