@@ -10,7 +10,7 @@ import SaveIcon from '../../components/icons/SaveIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
 import usePageScrollLock from '../../hooks/usePageScrollLock';
 import { getShopAttributes } from '../../services/shopAttributes';
-import { getProductVariants } from '../../services/shopItems';
+import { getProductVariants, updateProductVariants } from '../../services/shopItems';
 
 const combinationLimit = 100;
 let temporaryIdSequence = 0;
@@ -123,10 +123,12 @@ function restoreVariantData(savedVariants = [], options = []) {
 
 function emptyPhotoState() {
     return {
+        settingsId: null,
         enabled: false,
         selectedOptionId: '',
         mainValueIds: {},
         assignments: {},
+        records: {},
     };
 }
 
@@ -135,6 +137,7 @@ function restorePhotoState(settings = {}, savedPhotos = [], options = []) {
     const selectedOptionId = selectedOption ? String(selectedOption.id) : '';
     const defaultValue = selectedOption?.values.find((value) => sameId(value.id, settings.default_photo_value_id));
     const assignments = {};
+    const records = {};
 
     for (const photo of sortedByOrder(savedPhotos)) {
         const option = options.find((item) => item.values.some((value) => sameId(value.id, photo.shop_item_variant_value_id)));
@@ -145,14 +148,38 @@ function restorePhotoState(settings = {}, savedPhotos = [], options = []) {
         assignments[optionId] ??= {};
         assignments[optionId][valueId] ??= [];
         assignments[optionId][valueId].push(String(photo.shop_item_media_id));
+        records[valueId] ??= {};
+        records[valueId][String(photo.shop_item_media_id)] = {
+            id: photo.id,
+            sortOrder: photo.sort_order,
+        };
     }
 
     return {
+        settingsId: settings.id ?? null,
         enabled: Boolean(settings.photos_enabled),
         selectedOptionId,
         mainValueIds: defaultValue ? { [selectedOptionId]: String(defaultValue.id) } : {},
         assignments,
+        records,
     };
+}
+
+function restoreProductVariantsState(data, attributes = []) {
+    const options = restoreVariantOptions(data.options, attributes);
+
+    return {
+        options,
+        variants: restoreVariantData(data.variants, options),
+        separatePrices: Boolean(data.settings?.individual_prices_enabled),
+        separatePricesInitialized: (data.variants ?? []).length > 0 || Boolean(data.settings?.individual_prices_enabled),
+        photos: restorePhotoState(data.settings, data.photos, options),
+    };
+}
+
+function validationMessages(error) {
+    const messages = Object.values(error?.errors ?? {}).flat().filter(Boolean);
+    return [...new Set(messages.length > 0 ? messages : [error?.message || 'Не удалось сохранить модификации товара.'])];
 }
 
 function combinationKey(selections) {
@@ -187,7 +214,77 @@ function buildCombinations(options) {
         combinations: selectionsList.map((selections) => ({
             key: combinationKey(selections),
             label: selections.map(({ value }) => value.label).join(' / '),
+            selections,
         })),
+    };
+}
+
+function buildProductVariantsPayload({ options, combinations, variantData, separatePrices, photoState, basePrice }) {
+    const photoOption = options.find((option) => String(option.id) === photoState.selectedOptionId) ?? options[0] ?? null;
+    const configuredMainValueId = photoOption ? photoState.mainValueIds[String(photoOption.id)] : null;
+    const defaultPhotoValue = photoOption?.values.find((value) => String(value.id) === configuredMainValueId)
+        ?? photoOption?.values[0]
+        ?? null;
+    const photos = [];
+
+    for (const option of options) {
+        for (const value of option.values) {
+            const valueId = String(value.id);
+            const assignedImageIds = photoState.assignments[String(option.id)]?.[valueId] ?? [];
+
+            assignedImageIds.forEach((imageId, sortOrder) => {
+                photos.push({
+                    id: photoState.records[valueId]?.[String(imageId)]?.id ?? null,
+                    shop_item_variant_value_id: value.id,
+                    shop_item_media_id: Number(imageId),
+                    sort_order: sortOrder,
+                });
+            });
+        }
+    }
+
+    return {
+        settings: {
+            id: photoState.settingsId,
+            individual_prices_enabled: separatePrices,
+            photos_enabled: photoState.enabled,
+            photo_option_id: photoOption?.id ?? null,
+            default_photo_value_id: defaultPhotoValue?.id ?? null,
+        },
+        options: options.map((option, sortOrder) => ({
+            id: option.id,
+            shop_attribute_id: option.shopAttributeId ?? null,
+            name: option.shopAttributeId === null || option.shopAttributeId === undefined ? (option.localName ?? option.name) : null,
+            sort_order: sortOrder,
+            values: option.values.map((value, valueSortOrder) => ({
+                id: value.id,
+                shop_attribute_option_id: value.shopAttributeOptionId ?? null,
+                value: value.shopAttributeOptionId === null || value.shopAttributeOptionId === undefined ? (value.localValue ?? value.label) : null,
+                sort_order: valueSortOrder,
+            })),
+        })),
+        variants: combinations.map((combination, sortOrder) => {
+            const data = variantData[combination.key] ?? {};
+
+            return {
+                id: data.id ?? null,
+                selections: combination.selections.map(({ option, value }) => {
+                    const savedSelection = data.selections?.find((selection) => sameId(selection.optionId, option.id) && sameId(selection.valueId, value.id));
+
+                    return {
+                        id: savedSelection?.id ?? null,
+                        option_id: option.id,
+                        value_id: value.id,
+                    };
+                }),
+                price: Object.hasOwn(data, 'price') ? data.price : basePrice,
+                quantity: data.stock ?? '0',
+                sku: data.sku?.trim() || null,
+                is_active: data.active ?? true,
+                sort_order: data.sortOrder ?? sortOrder,
+            };
+        }),
+        photos,
     };
 }
 
@@ -309,14 +406,14 @@ function PhotoPicker({ valueLabel, images, selectedImageIds, onToggle, onCancel,
     );
 }
 
-function PhotosSection({ options, images, restoredState, onOpenImage }) {
+function PhotosSection({ options, images, photoState, setPhotoState, onOpenImage }) {
     const { t } = useTranslation();
-    const [areVariantPhotosEnabled, setAreVariantPhotosEnabled] = useState(false);
-    const [selectedOptionId, setSelectedOptionId] = useState('');
-    const [mainValueIds, setMainValueIds] = useState({});
-    const [photoAssignments, setPhotoAssignments] = useState({});
     const [openPicker, setOpenPicker] = useState(null);
     const [draftImageIds, setDraftImageIds] = useState([]);
+    const areVariantPhotosEnabled = photoState.enabled;
+    const selectedOptionId = photoState.selectedOptionId;
+    const mainValueIds = photoState.mainValueIds;
+    const photoAssignments = photoState.assignments;
     const selectedOption = options.find((option) => String(option.id) === selectedOptionId) ?? options[0] ?? null;
     const selectedOptionValue = selectedOption ? String(selectedOption.id) : '';
     const selectedValues = selectedOption?.values ?? [];
@@ -329,26 +426,21 @@ function PhotosSection({ options, images, restoredState, onOpenImage }) {
         : String(selectedValues[0]?.id ?? '');
 
     useEffect(() => {
-        setAreVariantPhotosEnabled(restoredState.enabled);
-        setSelectedOptionId(restoredState.selectedOptionId);
-        setMainValueIds(restoredState.mainValueIds);
-        setPhotoAssignments(restoredState.assignments);
-        setOpenPicker(null);
-        setDraftImageIds([]);
-    }, [restoredState]);
+        setPhotoState((current) => {
+            const selectedId = options.length === 0 || options.some((option) => String(option.id) === current.selectedOptionId)
+                ? current.selectedOptionId
+                : String(options[0].id);
 
-    useEffect(() => {
-        setSelectedOptionId((current) => options.length === 0 || options.some((option) => String(option.id) === current)
-            ? current
-            : String(options[0].id));
-    }, [options]);
+            return selectedId === current.selectedOptionId ? current : { ...current, selectedOptionId: selectedId };
+        });
+    }, [options, setPhotoState]);
 
     useEffect(() => {
         const orderedImageIds = images.map((image) => String(image.id));
 
-        setPhotoAssignments((current) => {
+        setPhotoState((current) => {
             let hasChanges = false;
-            const next = Object.fromEntries(Object.entries(current).map(([optionId, valueAssignments]) => [
+            const assignments = Object.fromEntries(Object.entries(current.assignments).map(([optionId, valueAssignments]) => [
                 optionId,
                 Object.fromEntries(Object.entries(valueAssignments).map(([valueId, assignedIds]) => {
                     const assignedIdSet = new Set(assignedIds);
@@ -358,21 +450,24 @@ function PhotosSection({ options, images, restoredState, onOpenImage }) {
                 })),
             ]));
 
-            return hasChanges ? next : current;
+            return hasChanges ? { ...current, assignments } : current;
         });
         setDraftImageIds((current) => {
             const selectedIdSet = new Set(current);
             const next = orderedImageIds.filter((imageId) => selectedIdSet.has(imageId));
             return next.length !== current.length || next.some((imageId, index) => imageId !== current[index]) ? next : current;
         });
-    }, [images]);
+    }, [images, setPhotoState]);
 
     const setMainValue = (valueId) => {
         if (!selectedOption) return;
 
-        setMainValueIds((current) => ({
+        setPhotoState((current) => ({
             ...current,
-            [selectedOptionValue]: String(valueId),
+            mainValueIds: {
+                ...current.mainValueIds,
+                [selectedOptionValue]: String(valueId),
+            },
         }));
     };
     const openPhotoPicker = (valueId) => {
@@ -394,11 +489,14 @@ function PhotosSection({ options, images, restoredState, onOpenImage }) {
 
         const selectedImageIdSet = new Set(draftImageIds);
         const orderedImageIds = images.map((image) => String(image.id)).filter((imageId) => selectedImageIdSet.has(imageId));
-        setPhotoAssignments((current) => ({
+        setPhotoState((current) => ({
             ...current,
-            [openPicker.optionId]: {
-                ...current[openPicker.optionId],
-                [openPicker.valueId]: orderedImageIds,
+            assignments: {
+                ...current.assignments,
+                [openPicker.optionId]: {
+                    ...current.assignments[openPicker.optionId],
+                    [openPicker.valueId]: orderedImageIds,
+                },
             },
         }));
         closePhotoPicker();
@@ -406,11 +504,14 @@ function PhotosSection({ options, images, restoredState, onOpenImage }) {
     const removeAssignedPhoto = (valueId, imageId) => {
         const normalizedValueId = String(valueId);
         const normalizedImageId = String(imageId);
-        setPhotoAssignments((current) => ({
+        setPhotoState((current) => ({
             ...current,
-            [selectedOptionValue]: {
-                ...current[selectedOptionValue],
-                [normalizedValueId]: (current[selectedOptionValue]?.[normalizedValueId] ?? []).filter((assignedId) => assignedId !== normalizedImageId),
+            assignments: {
+                ...current.assignments,
+                [selectedOptionValue]: {
+                    ...current.assignments[selectedOptionValue],
+                    [normalizedValueId]: (current.assignments[selectedOptionValue]?.[normalizedValueId] ?? []).filter((assignedId) => assignedId !== normalizedImageId),
+                },
             },
         }));
         if (openPicker?.optionId === selectedOptionValue && openPicker.valueId === normalizedValueId) {
@@ -423,9 +524,9 @@ function PhotosSection({ options, images, restoredState, onOpenImage }) {
     return (
         <section className="overflow-hidden rounded-[13px] border border-[color:var(--color-border)] bg-white">
             <header className={`grid min-h-[76px] items-center gap-4 bg-[linear-gradient(100deg,#fff8f3,#fff)] px-[16px] py-3 ${areVariantPhotosEnabled ? 'grid-cols-[48px_minmax(0,1fr)_220px] border-b border-[color:var(--color-border)] max-sm:grid-cols-[48px_minmax(0,1fr)]' : 'grid-cols-[48px_minmax(0,1fr)]'}`}>
-                <button type="button" className="switch-control switch-control--strong" role="switch" aria-checked={areVariantPhotosEnabled} onClick={() => setAreVariantPhotosEnabled((current) => !current)} aria-label={t('productEditPage.variantPhotos.toggleAria')}><i aria-hidden="true"><Icon size={14}><path d="m20 6-11 11-5-5" /></Icon></i></button>
+                <button type="button" className="switch-control switch-control--strong" role="switch" aria-checked={areVariantPhotosEnabled} onClick={() => setPhotoState((current) => ({ ...current, enabled: !current.enabled }))} aria-label={t('productEditPage.variantPhotos.toggleAria')}><i aria-hidden="true"><Icon size={14}><path d="m20 6-11 11-5-5" /></Icon></i></button>
                 <p className="m-0"><strong className="block text-[13px]">{t('productEditPage.variantPhotos.title')}</strong><small className="mt-[3px] block max-w-[620px] text-[12px] leading-[1.45] text-[#8d847d]">{t('productEditPage.variantPhotos.description')}</small></p>
-                {areVariantPhotosEnabled && <label className="flex flex-col gap-1 max-sm:col-span-full"><span className="text-[11px] font-bold text-[#716861]">{t('productEditPage.variantPhotos.dependsOn')}</span><Select className="!h-[40px] !px-[10px] !text-[12px] !font-bold" value={selectedOptionValue} onChange={(event) => setSelectedOptionId(event.target.value)}>{options.map((option) => <option key={option.id} value={String(option.id)}>{option.name}</option>)}</Select></label>}
+                {areVariantPhotosEnabled && <label className="flex flex-col gap-1 max-sm:col-span-full"><span className="text-[11px] font-bold text-[#716861]">{t('productEditPage.variantPhotos.dependsOn')}</span><Select className="!h-[40px] !px-[10px] !text-[12px] !font-bold" value={selectedOptionValue} onChange={(event) => setPhotoState((current) => ({ ...current, selectedOptionId: event.target.value }))}>{options.map((option) => <option key={option.id} value={String(option.id)}>{option.name}</option>)}</Select></label>}
             </header>
             {areVariantPhotosEnabled && <>
                 <div className="grid grid-cols-[minmax(190px,.7fr)_minmax(0,1.3fr)_auto] items-center gap-3 border-b border-[color:var(--color-border)] bg-[#faf8f6] px-[16px] py-3 max-md:grid-cols-1"><div><strong className="block text-[12px]">{t('productEditPage.variantPhotos.galleryTitle')}</strong><small className="mt-[3px] block text-[11px] text-[#8f867f]">{t('productEditPage.variantPhotos.galleryDescription')}</small></div>{images.length > 0 ? <><div className="flex gap-[7px] overflow-x-auto">{images.map((image, index) => <PhotoTile key={image.id} image={image} onOpen={() => onOpenImage(index)} ariaLabel={t('productEditPage.variantPhotos.openPhoto', { number: index + 1 })} />)}</div><div className="flex gap-2 text-[11px]"><span className="rounded-full bg-[#eaf4ec] px-2 py-1 font-bold text-[#3c8354]">{t('productEditPage.variantPhotos.assignedCount', { count: assignedImageCount })}</span><span className="rounded-full bg-[#fff0e7] px-2 py-1 font-bold text-[color:var(--color-accent)]">{t('productEditPage.variantPhotos.unassignedCount', { count: images.length - assignedImageCount })}</span></div></> : <p className="col-span-2 m-0 rounded-[8px] border border-dashed border-[#d9d0c9] bg-white px-3 py-4 text-center text-[11px] text-[#958b83] max-md:col-span-1">{t('productEditPage.variantPhotos.noProductPhotos')}</p>}</div>
@@ -553,7 +654,9 @@ export default function ProductVariantsModal({ isOpen, onClose, productId = null
     const [variantsError, setVariantsError] = useState('');
     const [variantsRequestVersion, setVariantsRequestVersion] = useState(0);
     const [variantData, setVariantData] = useState({});
-    const [restoredPhotoState, setRestoredPhotoState] = useState(emptyPhotoState);
+    const [photoState, setPhotoState] = useState(emptyPhotoState);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveErrors, setSaveErrors] = useState([]);
     const [lightboxIndex, setLightboxIndex] = useState(0);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
     const images = useMemo(() => media.filter((item) => item.type === 'image'), [media]);
@@ -581,15 +684,14 @@ export default function ProductVariantsModal({ isOpen, onClose, productId = null
             .then((loadedVariants) => {
                 if (!isCurrentRequest) return;
 
-                const restoredOptions = restoreVariantOptions(loadedVariants.options, attributesRef.current);
-                const restoredVariants = restoreVariantData(loadedVariants.variants, restoredOptions);
-                const settings = loadedVariants.settings ?? {};
+                const restoredState = restoreProductVariantsState(loadedVariants, attributesRef.current);
 
-                setAddedOptions(restoredOptions);
-                setVariantData(restoredVariants);
-                setSeparatePrices(Boolean(settings.individual_prices_enabled));
-                setAreSeparatePricesInitialized((loadedVariants.variants ?? []).length > 0 || Boolean(settings.individual_prices_enabled));
-                setRestoredPhotoState(restorePhotoState(settings, loadedVariants.photos, restoredOptions));
+                setAddedOptions(restoredState.options);
+                setVariantData(restoredState.variants);
+                setSeparatePrices(restoredState.separatePrices);
+                setAreSeparatePricesInitialized(restoredState.separatePricesInitialized);
+                setPhotoState(restoredState.photos);
+                setSaveErrors([]);
             })
             .catch((error) => {
                 if (!isCurrentRequest) return;
@@ -615,6 +717,7 @@ export default function ProductVariantsModal({ isOpen, onClose, productId = null
         setAttributes([]);
         attributesRef.current = [];
         setAttributesError('');
+        setSaveErrors([]);
         setIsAttributesLoading(true);
 
         getShopAttributes({ signal: controller.signal })
@@ -647,12 +750,13 @@ export default function ProductVariantsModal({ isOpen, onClose, productId = null
                 setIsLightboxOpen(false);
                 return;
             }
+            if (isSaving) return;
 
             onClose();
         };
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [isLightboxOpen, isOpen, onClose]);
+    }, [isLightboxOpen, isOpen, isSaving, onClose]);
 
     useEffect(() => {
         if (isVariantsLoading || combinations.length === 0) return;
@@ -764,24 +868,59 @@ export default function ProductVariantsModal({ isOpen, onClose, productId = null
 
         setSeparatePrices((current) => !current);
     };
+    const saveVariants = async () => {
+        if (isSaving) return;
+        if (!productId) {
+            setSaveErrors(['Сначала сохраните товар, затем настройте модификации.']);
+            return;
+        }
+
+        setIsSaving(true);
+        setSaveErrors([]);
+
+        try {
+            const savedVariants = await updateProductVariants(productId, buildProductVariantsPayload({
+                options: addedOptions,
+                combinations,
+                variantData,
+                separatePrices,
+                photoState,
+                basePrice: normalizedBasePrice,
+            }));
+            const restoredState = restoreProductVariantsState(savedVariants, attributesRef.current);
+
+            setAddedOptions(restoredState.options);
+            setVariantData(restoredState.variants);
+            setSeparatePrices(restoredState.separatePrices);
+            setAreSeparatePricesInitialized(restoredState.separatePricesInitialized);
+            setPhotoState(restoredState.photos);
+            onClose();
+        } catch (error) {
+            console.error('Unable to save product variants.', error);
+            setSaveErrors(validationMessages(error));
+        } finally {
+            setIsSaving(false);
+        }
+    };
     return (
         <>
-            <div className="modal-overlay" role="presentation" onMouseDown={onClose}>
+            <div className="modal-overlay" role="presentation" onMouseDown={isSaving ? undefined : onClose}>
                 <section className="modal-dialog flex h-[min(900px,calc(100vh-40px))] !w-[min(1380px,100%)] flex-col bg-[#fbfaf8] max-sm:h-full max-sm:!w-full" role="dialog" aria-modal="true" aria-labelledby="variant-manager-title" onMouseDown={(event) => event.stopPropagation()}>
-                <header className="flex shrink-0 items-start justify-between gap-[18px] border-b border-[color:var(--color-border)] bg-white px-7 pb-[18px] pt-5 max-sm:px-4"><div><small className="text-[11px] font-bold uppercase tracking-[.05em] text-[color:var(--color-accent)]">Товар · Дополнительные настройки</small><h2 id="variant-manager-title" className="mb-1 mt-[3px] text-[28px] font-[770] tracking-[-.045em] text-[#252525] max-sm:text-[22px]">Модификации товара</h2><p className="m-0 text-[12px] text-[#887f78]">Опции, фотографии, цены и остатки собраны отдельно, чтобы основная карточка оставалась простой.</p></div><button type="button" className="grid h-[40px] w-[40px] shrink-0 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-white text-[#716861]" onClick={onClose} aria-label="Закрыть модификации"><CloseIcon width={20} height={20} /></button></header>
-                <div className="min-h-0 flex-1 overflow-y-auto px-7 py-[20px] max-sm:px-[14px]"><div className="flex flex-col gap-3" aria-busy={isVariantsLoading}>
+                <header className="flex shrink-0 items-start justify-between gap-[18px] border-b border-[color:var(--color-border)] bg-white px-7 pb-[18px] pt-5 max-sm:px-4"><div><small className="text-[11px] font-bold uppercase tracking-[.05em] text-[color:var(--color-accent)]">Товар · Дополнительные настройки</small><h2 id="variant-manager-title" className="mb-1 mt-[3px] text-[28px] font-[770] tracking-[-.045em] text-[#252525] max-sm:text-[22px]">Модификации товара</h2><p className="m-0 text-[12px] text-[#887f78]">Опции, фотографии, цены и остатки собраны отдельно, чтобы основная карточка оставалась простой.</p></div><button type="button" className="grid h-[40px] w-[40px] shrink-0 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-white text-[#716861] disabled:cursor-wait disabled:opacity-60" onClick={onClose} disabled={isSaving} aria-label="Закрыть модификации"><CloseIcon width={20} height={20} /></button></header>
+                <div className="min-h-0 flex-1 overflow-y-auto px-7 py-[20px] max-sm:px-[14px]"><div className="flex flex-col gap-3" aria-busy={isVariantsLoading || isSaving}>
                     {isVariantsLoading && <div className="grid min-h-[180px] place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#f8f5f2]" role="status" aria-label="Загрузка модификаций товара"><span className="h-7 w-7 animate-spin rounded-full border-[3px] border-[#d8cbc2] border-t-[color:var(--color-accent)]" aria-hidden="true" /></div>}
                     {!isVariantsLoading && variantsError && <Alert variant="error"><span className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2"><span>{variantsError}</span><button type="button" className="button button--secondary min-h-[32px] shrink-0 justify-center" onClick={() => setVariantsRequestVersion((current) => current + 1)}>Повторить</button></span></Alert>}
                     {!isVariantsLoading && !variantsError && <>
+                    {saveErrors.length > 0 && <Alert variant="error" className="items-start"><span className="min-w-0"><strong className="block">Не удалось сохранить модификации.</strong>{saveErrors.map((message) => <span key={message} className="mt-0.5 block font-medium text-[#766d66]">{message}</span>)}</span></Alert>}
                     <div className="flex items-center justify-between gap-3 max-sm:flex-col max-sm:items-stretch"><div><strong className="block text-[13px]">Опции товара</strong><small className="text-[12px] text-[#968e87]">Добавьте характеристики типа «Список» или «Множественный список».</small></div><button type="button" className="button button--secondary min-h-[40px] shrink-0 justify-center" onClick={() => setShowOptionPicker((current) => !current)} aria-expanded={showOptionPicker}><PlusIcon width={15} height={15} />Добавить опцию</button></div>
                     {showOptionPicker && <AttributePicker attributes={attributes} addedAttributeIds={addedAttributeIds} isLoading={isAttributesLoading} error={attributesError} onAdd={addAttribute} onClose={() => setShowOptionPicker(false)} />}
                     {addedOptions.map((option) => <OptionRow key={option.id} option={option} onAddValue={addOptionValue} onDeleteOption={removeAttribute} onDeleteValue={(optionId, valueId, optionName, valueName) => setDeleteWarning({ optionId, valueId, optionName, valueName })} />)}
                     {deleteWarning && <div className="flex items-start gap-3 rounded-[10px] border border-[#e5c3bd] bg-[#fff7f5] p-[11px_13px] text-[#a6402b]" role="alert"><TrashIcon /><p className="m-0 flex-1 text-[11px] leading-[1.45]"><strong className="block text-[12px] text-[#633b33]">Значение «{deleteWarning.valueName}» связано с модификациями</strong>Модификации с этим значением опции «{deleteWarning.optionName}» будут удалены вместе с ним.</p><div className="flex shrink-0 gap-2 max-sm:flex-col"><button type="button" className="rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 text-[11px] font-bold text-[#5d554f]" onClick={() => setDeleteWarning(null)}>Отмена</button><button type="button" className="rounded-[7px] border border-[#d79d8e] bg-white px-2 py-1.5 text-[11px] font-bold text-[#a6402b]" onClick={() => removeOptionValue(deleteWarning.optionId, deleteWarning.valueId)}>Удалить значение</button></div></div>}
-                    <PhotosSection options={addedOptions} images={images} restoredState={restoredPhotoState} onOpenImage={(index) => { setLightboxIndex(index); setIsLightboxOpen(true); }} />
+                    <PhotosSection options={addedOptions} images={images} photoState={photoState} setPhotoState={setPhotoState} onOpenImage={(index) => { setLightboxIndex(index); setIsLightboxOpen(true); }} />
                     <VariantsSection combinations={combinations} totalCount={totalCount} variantData={variantData} basePrice={normalizedBasePrice} separatePrices={separatePrices} showPriceSettings={addedOptions.length > 0} onTogglePrices={toggleSeparatePrices} onVariantChange={updateVariant} />
                     </>}
                 </div></div>
-                <footer className="flex min-h-[76px] shrink-0 items-center gap-3 border-t border-[color:var(--color-border)] bg-white px-7 py-[11px] max-sm:grid max-sm:grid-cols-2 max-sm:px-[14px]"><div className="flex flex-1 flex-col max-sm:col-span-full"><span className="text-[12px] font-bold">{addedOptions.length} опции · {selectedValuesCount} значений</span><small className="text-[11px] text-[#928981]">Модификации появятся в карточке товара только после сохранения.</small></div><button type="button" className="button button--secondary min-h-[42px] justify-center" onClick={onClose}>Закрыть</button><button type="button" className="button button--primary min-h-[42px] justify-center" onClick={onClose}><SaveIcon size={16} />Сохранить модификации</button></footer>
+                <footer className="flex min-h-[76px] shrink-0 items-center gap-3 border-t border-[color:var(--color-border)] bg-white px-7 py-[11px] max-sm:grid max-sm:grid-cols-2 max-sm:px-[14px]"><div className="flex flex-1 flex-col max-sm:col-span-full"><span className="text-[12px] font-bold">{addedOptions.length} опции · {selectedValuesCount} значений</span><small className="text-[11px] text-[#928981]">Модификации появятся в карточке товара только после сохранения.</small></div><button type="button" className="button button--secondary min-h-[42px] justify-center" onClick={onClose} disabled={isSaving}>Закрыть</button><button type="button" className="button button--primary min-h-[42px] justify-center disabled:cursor-wait disabled:opacity-70" onClick={() => void saveVariants()} disabled={isSaving || isVariantsLoading || Boolean(variantsError)}>{isSaving ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" /> : <SaveIcon size={16} />}{isSaving ? 'Сохранение…' : 'Сохранить модификации'}</button></footer>
                 </section>
             </div>
             <ImageLightbox images={lightboxImages} index={lightboxIndex} open={isLightboxOpen} onClose={() => setIsLightboxOpen(false)} onIndexChange={setLightboxIndex} />
