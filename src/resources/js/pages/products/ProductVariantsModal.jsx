@@ -1,19 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
+import ImageLightbox from '../../components/admin/ImageLightbox';
+import Select from '../../components/form/Select';
 import CloseIcon from '../../components/icons/CloseIcon';
 import PlusIcon from '../../components/icons/PlusIcon';
 import SaveIcon from '../../components/icons/SaveIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
-import Select from '../../components/form/Select';
 import usePageScrollLock from '../../hooks/usePageScrollLock';
 import { getShopAttributes } from '../../services/shopAttributes';
-
-const demoPhotos = [
-    'bg-[linear-gradient(145deg,#b67b55,#5d3828)]',
-    'bg-[linear-gradient(145deg,#9e6847,#43291f)]',
-    'bg-[linear-gradient(145deg,#765040,#2f201a)]',
-    'bg-[linear-gradient(145deg,#55504d,#211f1e)]',
-    'bg-[linear-gradient(145deg,#c49775,#674634)]',
-];
 
 const combinationLimit = 100;
 
@@ -57,13 +50,11 @@ function Icon({ children, size = 16, className = '' }) {
     return <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>;
 }
 
-function PhotoTile({ index, removable = false }) {
+function PhotoTile({ image, onOpen }) {
     return (
-        <div className={`relative h-[66px] w-[54px] shrink-0 overflow-hidden rounded-[8px] border border-[#d9d1cb] ${demoPhotos[index % demoPhotos.length]}`}>
-            <i className="absolute inset-[25%] rounded-[35%_35%_18%_18%] border border-white/40 bg-[#39261f]/35" />
-            {removable && <button type="button" className="absolute right-[3px] top-[3px] grid h-[19px] w-[19px] place-items-center rounded-full border-0 bg-white/95 text-[#766b63]" aria-label="Убрать фото"><CloseIcon width={11} height={11} /></button>}
-            {!removable && <b className="absolute bottom-1 left-1 grid h-[17px] min-w-[17px] place-items-center rounded-[5px] bg-white/90 text-[11px] not-italic">{index + 1}</b>}
-        </div>
+        <button type="button" data-media-id={image.id} onClick={onOpen} className="relative h-[66px] w-[54px] shrink-0 cursor-zoom-in overflow-hidden rounded-[8px] border border-[#d9d1cb] bg-[#f5f1ee] p-0" aria-label="Открыть фотографию">
+            <img className="h-full w-full object-cover" src={image.small_url} alt="" draggable={false} />
+        </button>
     );
 }
 
@@ -151,7 +142,7 @@ function AttributePicker({ attributes, addedAttributeIds, isLoading, error, onAd
     );
 }
 
-function PhotosSection({ options }) {
+function PhotosSection({ options, images, onOpenImage }) {
     const [selectedOptionId, setSelectedOptionId] = useState('');
     const [mainValueIds, setMainValueIds] = useState({});
     const selectedOption = options.find((option) => String(option.id) === selectedOptionId) ?? options[0] ?? null;
@@ -183,16 +174,15 @@ function PhotosSection({ options }) {
                 <div className="flex items-start gap-[10px]"><span className="grid h-[36px] w-[36px] shrink-0 place-items-center rounded-[10px] bg-[#f9eee7] text-[color:var(--color-accent)]"><Icon size={18}><rect x="3" y="3" width="14" height="18" rx="2" /><path d="m3 16 4-4 3 3 3-3 4 4M20 5v6M17 8h6" /></Icon></span><p className="m-0"><strong className="block text-[13px]">Фотографии вариантов</strong><small className="mt-[3px] block max-w-[520px] text-[12px] leading-[1.45] text-[#8d847d]">Покупатель увидит фотографии выбранного значения, а не одну картинку на все варианты.</small></p></div>
                 <label className="flex flex-col gap-1"><span className="text-[11px] font-bold text-[#716861]">Фото меняются по</span><Select className="!h-[40px] !px-[10px] !text-[12px] !font-bold" value={selectedOptionValue} disabled={options.length === 0} onChange={(event) => setSelectedOptionId(event.target.value)}>{options.length === 0 && <option value="">Нет доступных опций</option>}{options.map((option) => <option key={option.id} value={String(option.id)}>{option.name}</option>)}</Select></label>
             </header>
-            {selectedOption && <div className="grid grid-cols-[minmax(190px,.7fr)_minmax(0,1.3fr)_auto] items-center gap-3 border-b border-[color:var(--color-border)] bg-[#faf8f6] px-[16px] py-3 max-md:grid-cols-1"><div><strong className="block text-[12px]">Общая галерея товара</strong><small className="mt-[3px] block text-[11px] text-[#8f867f]">Загрузите фото один раз и распределите по значениям.</small></div><div className="flex gap-[7px] overflow-x-auto">{demoPhotos.map((_, index) => <PhotoTile key={index} index={index} />)}</div><div className="flex gap-2 text-[11px]"><span className="rounded-full bg-[#eaf4ec] px-2 py-1 font-bold text-[#3c8354]">Фото назначено: 4</span><span className="rounded-full bg-[#fff0e7] px-2 py-1 font-bold text-[color:var(--color-accent)]">Фото не назначено: 1</span></div></div>}
+            <div className="grid grid-cols-[minmax(190px,.7fr)_minmax(0,1.3fr)_auto] items-center gap-3 border-b border-[color:var(--color-border)] bg-[#faf8f6] px-[16px] py-3 max-md:grid-cols-1"><div><strong className="block text-[12px]">Общая галерея товара</strong><small className="mt-[3px] block text-[11px] text-[#8f867f]">Загрузите фото один раз и распределите по значениям.</small></div>{images.length > 0 ? <><div className="flex gap-[7px] overflow-x-auto">{images.map((image, index) => <PhotoTile key={image.id} image={image} onOpen={() => onOpenImage(index)} />)}</div><div className="flex gap-2 text-[11px]"><span className="rounded-full bg-[#eaf4ec] px-2 py-1 font-bold text-[#3c8354]">Фотографий: {images.length}</span></div></> : <p className="col-span-2 m-0 rounded-[8px] border border-dashed border-[#d9d0c9] bg-white px-3 py-4 text-center text-[11px] text-[#958b83] max-md:col-span-1">У товара пока нет фотографий</p>}</div>
             <div className="flex flex-col gap-[9px] p-[13px_14px]">
                 {!selectedOption && <div className="rounded-[11px] border border-dashed border-[#d9d0c9] bg-[#fcfbfa] px-4 py-8 text-center"><strong className="block text-[12px] text-[#665e57]">Нет опций для распределения фотографий</strong><small className="mt-1 block text-[11px] text-[#978f88]">Добавьте опцию товара и её значения.</small></div>}
                 {selectedOption && selectedValues.length === 0 && <div className="rounded-[11px] border border-dashed border-[#d9d0c9] bg-[#fcfbfa] px-4 py-8 text-center"><strong className="block text-[12px] text-[#665e57]">У опции «{selectedOption.name}» нет значений</strong><small className="mt-1 block text-[11px] text-[#978f88]">Добавьте значения, чтобы распределить между ними фотографии.</small></div>}
-                {selectedValues.map((value, index) => {
+                {selectedValues.map((value) => {
                     const valueId = String(value.id);
                     const isMain = valueId === mainValueId;
-                    const photos = index === 0 ? [0, 1] : (index === 1 ? [2, 3] : []);
 
-                    return <article key={value.id} className={`rounded-[11px] border p-[11px] ${isMain ? 'border-[#dcae92] bg-[#fffaf7]' : 'border-[color:var(--color-border)] bg-[#fcfbfa]'}`}><header className="flex items-center justify-between gap-3"><div className="flex items-center gap-2"><i className={`h-[14px] w-[14px] rounded-full border-2 border-white shadow-[0_0_0_1px_#d6cec8] ${demoPhotos[index % demoPhotos.length]}`} /><span><strong className="block text-[12px]">{value.label}</strong><small className="text-[11px] text-[#928981]">{photos.length ? `${photos.length} фото` : 'Фотографии не распределены'}</small></span></div><button type="button" onClick={() => setMainValue(valueId)} className={`inline-flex min-h-[30px] items-center gap-[5px] rounded-[8px] px-2 text-[11px] font-bold ${isMain ? 'border border-[#c4531c] bg-[#fff4ec] text-[color:var(--color-accent)]' : 'border border-transparent bg-transparent text-[#8d837b]'}`}><Icon size={13} className={isMain ? 'fill-current' : ''}><path d="m12 2.5 3 6 6.5.9-4.7 4.6 1.1 6.5-5.9-3.1-5.9 3.1 1.1-6.5-4.7-4.6 6.5-.9 3-6Z" /></Icon>{isMain ? 'Основное значение' : 'Сделать основным'}</button></header><div className="mt-[9px] flex min-h-[66px] gap-[7px] overflow-x-auto">{photos.length ? photos.map((photoIndex) => <PhotoTile key={photoIndex} index={photoIndex} removable />) : <p className="m-0 inline-flex min-w-[170px] items-center justify-center rounded-[8px] border border-dashed border-[#d9d0c9] px-3 text-[11px] text-[#958b83]">Фото не назначены</p>}<button type="button" className="inline-flex min-w-[118px] items-center justify-center gap-[6px] rounded-[8px] border border-dashed border-[#d0b09d] bg-white px-[10px] text-[11px] font-bold text-[color:var(--color-accent)]"><PlusIcon size={13} />Добавить фото</button></div></article>;
+                    return <article key={value.id} className={`rounded-[11px] border p-[11px] ${isMain ? 'border-[#dcae92] bg-[#fffaf7]' : 'border-[color:var(--color-border)] bg-[#fcfbfa]'}`}><header className="flex items-center justify-between gap-3"><div className="flex items-center gap-2"><i className="h-[14px] w-[14px] rounded-full border-2 border-white bg-[#d8d0ca] shadow-[0_0_0_1px_#d6cec8]" /><span><strong className="block text-[12px]">{value.label}</strong><small className="text-[11px] text-[#928981]">Фотографии не распределены</small></span></div><button type="button" onClick={() => setMainValue(valueId)} className={`inline-flex min-h-[30px] items-center gap-[5px] rounded-[8px] px-2 text-[11px] font-bold ${isMain ? 'border border-[#c4531c] bg-[#fff4ec] text-[color:var(--color-accent)]' : 'border border-transparent bg-transparent text-[#8d837b]'}`}><Icon size={13} className={isMain ? 'fill-current' : ''}><path d="m12 2.5 3 6 6.5.9-4.7 4.6 1.1 6.5-5.9-3.1-5.9 3.1 1.1-6.5-4.7-4.6 6.5-.9 3-6Z" /></Icon>{isMain ? 'Основное значение' : 'Сделать основным'}</button></header><div className="mt-[9px] flex min-h-[66px] gap-[7px] overflow-x-auto"><p className="m-0 inline-flex min-w-[170px] items-center justify-center rounded-[8px] border border-dashed border-[#d9d0c9] px-3 text-[11px] text-[#958b83]">Фото не назначены</p><button type="button" className="inline-flex min-w-[118px] items-center justify-center gap-[6px] rounded-[8px] border border-dashed border-[#d0b09d] bg-white px-[10px] text-[11px] font-bold text-[color:var(--color-accent)]"><PlusIcon size={13} />Добавить фото</button></div></article>;
                 })}
             </div>
         </section>
@@ -228,7 +218,7 @@ function VariantsSection({ combinations, totalCount, variantData, basePrice, sep
     );
 }
 
-export default function ProductVariantsModal({ isOpen, onClose, basePrice = '' }) {
+export default function ProductVariantsModal({ isOpen, onClose, basePrice = '', media = [] }) {
     const [separatePrices, setSeparatePrices] = useState(false);
     const [areSeparatePricesInitialized, setAreSeparatePricesInitialized] = useState(false);
     const [showOptionPicker, setShowOptionPicker] = useState(false);
@@ -238,9 +228,17 @@ export default function ProductVariantsModal({ isOpen, onClose, basePrice = '' }
     const [isAttributesLoading, setIsAttributesLoading] = useState(false);
     const [attributesError, setAttributesError] = useState('');
     const [variantData, setVariantData] = useState({});
+    const [lightboxIndex, setLightboxIndex] = useState(0);
+    const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+    const images = useMemo(() => media.filter((item) => item.type === 'image'), [media]);
+    const lightboxImages = useMemo(() => images.map((item) => ({ id: item.id, src: item.large_url, alt: '' })), [images]);
     const { combinations, totalCount } = useMemo(() => buildCombinations(addedOptions), [addedOptions]);
     const normalizedBasePrice = basePrice === null || basePrice === undefined ? '' : String(basePrice);
     usePageScrollLock(isOpen);
+
+    useEffect(() => {
+        if (!isOpen || images.length === 0) setIsLightboxOpen(false);
+    }, [images.length, isOpen]);
 
     useEffect(() => {
         if (!isOpen) return undefined;
@@ -273,10 +271,18 @@ export default function ProductVariantsModal({ isOpen, onClose, basePrice = '' }
 
     useEffect(() => {
         if (!isOpen) return undefined;
-        const handleKeyDown = (event) => { if (event.key === 'Escape') onClose(); };
+        const handleKeyDown = (event) => {
+            if (event.key !== 'Escape') return;
+            if (isLightboxOpen) {
+                setIsLightboxOpen(false);
+                return;
+            }
+
+            onClose();
+        };
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, onClose]);
+    }, [isLightboxOpen, isOpen, onClose]);
 
     useEffect(() => {
         if (combinations.length === 0) return;
@@ -372,19 +378,22 @@ export default function ProductVariantsModal({ isOpen, onClose, basePrice = '' }
         setSeparatePrices((current) => !current);
     };
     return (
-        <div className="modal-overlay" role="presentation" onMouseDown={onClose}>
-            <section className="modal-dialog flex h-[min(900px,calc(100vh-40px))] !w-[min(1380px,100%)] flex-col bg-[#fbfaf8] max-sm:h-full max-sm:!w-full" role="dialog" aria-modal="true" aria-labelledby="variant-manager-title" onMouseDown={(event) => event.stopPropagation()}>
+        <>
+            <div className="modal-overlay" role="presentation" onMouseDown={onClose}>
+                <section className="modal-dialog flex h-[min(900px,calc(100vh-40px))] !w-[min(1380px,100%)] flex-col bg-[#fbfaf8] max-sm:h-full max-sm:!w-full" role="dialog" aria-modal="true" aria-labelledby="variant-manager-title" onMouseDown={(event) => event.stopPropagation()}>
                 <header className="flex shrink-0 items-start justify-between gap-[18px] border-b border-[color:var(--color-border)] bg-white px-7 pb-[18px] pt-5 max-sm:px-4"><div><small className="text-[11px] font-bold uppercase tracking-[.05em] text-[color:var(--color-accent)]">Товар · Дополнительные настройки</small><h2 id="variant-manager-title" className="mb-1 mt-[3px] text-[28px] font-[770] tracking-[-.045em] text-[#252525] max-sm:text-[22px]">Модификации товара</h2><p className="m-0 text-[12px] text-[#887f78]">Опции, фотографии, цены и остатки собраны отдельно, чтобы основная карточка оставалась простой.</p></div><button type="button" className="grid h-[40px] w-[40px] shrink-0 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-white text-[#716861]" onClick={onClose} aria-label="Закрыть модификации"><CloseIcon width={20} height={20} /></button></header>
                 <div className="min-h-0 flex-1 overflow-y-auto px-7 py-[20px] max-sm:px-[14px]"><div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between gap-3 max-sm:flex-col max-sm:items-stretch"><div><strong className="block text-[13px]">Опции товара</strong><small className="text-[12px] text-[#968e87]">Добавьте характеристики типа «Список» или «Множественный список».</small></div><button type="button" className="button button--secondary min-h-[40px] shrink-0 justify-center" onClick={() => setShowOptionPicker((current) => !current)} aria-expanded={showOptionPicker}><PlusIcon width={15} height={15} />Добавить опцию</button></div>
                     {showOptionPicker && <AttributePicker attributes={attributes} addedAttributeIds={addedAttributeIds} isLoading={isAttributesLoading} error={attributesError} onAdd={addAttribute} onClose={() => setShowOptionPicker(false)} />}
                     {addedOptions.map((option) => <OptionRow key={option.id} option={option} onAddValue={addOptionValue} onDeleteOption={removeAttribute} onDeleteValue={(optionId, valueId, optionName, valueName) => setDeleteWarning({ optionId, valueId, optionName, valueName })} />)}
                     {deleteWarning && <div className="flex items-start gap-3 rounded-[10px] border border-[#e5c3bd] bg-[#fff7f5] p-[11px_13px] text-[#a6402b]" role="alert"><TrashIcon /><p className="m-0 flex-1 text-[11px] leading-[1.45]"><strong className="block text-[12px] text-[#633b33]">Значение «{deleteWarning.valueName}» связано с модификациями</strong>Модификации с этим значением опции «{deleteWarning.optionName}» будут удалены вместе с ним.</p><div className="flex shrink-0 gap-2 max-sm:flex-col"><button type="button" className="rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 text-[11px] font-bold text-[#5d554f]" onClick={() => setDeleteWarning(null)}>Отмена</button><button type="button" className="rounded-[7px] border border-[#d79d8e] bg-white px-2 py-1.5 text-[11px] font-bold text-[#a6402b]" onClick={() => removeOptionValue(deleteWarning.optionId, deleteWarning.valueId)}>Удалить значение</button></div></div>}
-                    <PhotosSection options={addedOptions} />
+                    <PhotosSection options={addedOptions} images={images} onOpenImage={(index) => { setLightboxIndex(index); setIsLightboxOpen(true); }} />
                     <VariantsSection combinations={combinations} totalCount={totalCount} variantData={variantData} basePrice={normalizedBasePrice} separatePrices={separatePrices} onTogglePrices={toggleSeparatePrices} onVariantChange={updateVariant} />
                 </div></div>
                 <footer className="flex min-h-[76px] shrink-0 items-center gap-3 border-t border-[color:var(--color-border)] bg-white px-7 py-[11px] max-sm:grid max-sm:grid-cols-2 max-sm:px-[14px]"><div className="flex flex-1 flex-col max-sm:col-span-full"><span className="text-[12px] font-bold">{addedOptions.length} опции · {selectedValuesCount} значений</span><small className="text-[11px] text-[#928981]">Модификации появятся в карточке товара только после сохранения.</small></div><button type="button" className="button button--secondary min-h-[42px] justify-center" onClick={onClose}>Закрыть</button><button type="button" className="button button--primary min-h-[42px] justify-center" onClick={onClose}><SaveIcon size={16} />Сохранить модификации</button></footer>
-            </section>
-        </div>
+                </section>
+            </div>
+            <ImageLightbox images={lightboxImages} index={lightboxIndex} open={isLightboxOpen} onClose={() => setIsLightboxOpen(false)} onIndexChange={setLightboxIndex} />
+        </>
     );
 }
