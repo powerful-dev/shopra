@@ -6,6 +6,23 @@ export async function getShopItemMediaConfig() {
     return response.data;
 }
 
+export async function getProductVariants(productId) {
+    const response = await request(`/api/products/${productId}/variants`);
+
+    return response.data;
+}
+
+export async function updateProductVariants(productId, payload) {
+    await csrf();
+    const response = await request(`/api/products/${productId}/variants`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+    });
+
+    return response.data;
+}
+
 export async function uploadShopItemMedia(id, type, file) {
     const formData = new FormData();
     formData.append('type', type);
