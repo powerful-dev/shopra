@@ -44,4 +44,9 @@ class ShopAttribute extends Model
             ->withPivot(['id', 'text_value', 'number_value', 'boolean_value'])
             ->withTimestamps();
     }
+
+    public function variantOptions(): HasMany
+    {
+        return $this->hasMany(ShopItemVariantOption::class);
+    }
 }

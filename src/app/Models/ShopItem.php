@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ShopItem extends Model
@@ -73,5 +74,20 @@ class ShopItem extends Model
         return $this->belongsToMany(ShopAttribute::class, 'shop_item_attributes', 'shop_item_id', 'attribute_id')
             ->withPivot(['id', 'text_value', 'number_value', 'boolean_value'])
             ->withTimestamps();
+    }
+
+    public function variantOptions(): HasMany
+    {
+        return $this->hasMany(ShopItemVariantOption::class)->orderBy('sort_order');
+    }
+
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ShopItemVariant::class)->orderBy('sort_order');
+    }
+
+    public function variantSetting(): HasOne
+    {
+        return $this->hasOne(ShopItemVariantSetting::class);
     }
 }
