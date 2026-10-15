@@ -86,7 +86,15 @@ class SaveProductVariantsApiTest extends TestCase
         $updated = $this->putJson("/api/products/{$item->id}/variants", $state)
             ->assertOk()
             ->assertJsonPath('data.options.0.id', $keptOptionId)
+            ->assertJsonPath('data.options.0.shop_attribute_id', $color->id)
+            ->assertJsonPath('data.options.0.name', null)
             ->assertJsonPath('data.options.0.values.0.id', $keptValueId)
+            ->assertJsonPath('data.options.0.values.0.shop_attribute_option_id', $red->id)
+            ->assertJsonPath('data.options.0.values.0.value', null)
+            ->assertJsonPath('data.options.1.shop_attribute_id', null)
+            ->assertJsonPath('data.options.1.name', 'Size')
+            ->assertJsonPath('data.options.1.values.0.shop_attribute_option_id', null)
+            ->assertJsonPath('data.options.1.values.0.value', 'Small')
             ->assertJsonPath('data.variants.0.id', $keptVariantId)
             ->assertJsonPath('data.variants.0.price', '115.75')
             ->assertJsonPath('data.variants.0.quantity', 9)
@@ -97,7 +105,38 @@ class SaveProductVariantsApiTest extends TestCase
             ->assertJsonCount(1, 'data.photos')
             ->json('data');
 
+        $this->getJson("/api/products/{$item->id}/variants")
+            ->assertOk()
+            ->assertJsonPath('data.options.0.shop_attribute_id', $color->id)
+            ->assertJsonPath('data.options.0.name', null)
+            ->assertJsonPath('data.options.0.values.0.shop_attribute_option_id', $red->id)
+            ->assertJsonPath('data.options.0.values.0.value', null)
+            ->assertJsonPath('data.options.1.shop_attribute_id', null)
+            ->assertJsonPath('data.options.1.name', 'Size')
+            ->assertJsonPath('data.options.1.values.0.shop_attribute_option_id', null)
+            ->assertJsonPath('data.options.1.values.0.value', 'Small');
+
         $this->assertSame($keptSelectionIds, collect($updated['variants'][0]['selections'])->pluck('id')->all());
+        $this->assertDatabaseHas('shop_item_variant_options', [
+            'id' => $keptOptionId,
+            'shop_attribute_id' => $color->id,
+            'name' => null,
+        ]);
+        $this->assertDatabaseHas('shop_item_variant_values', [
+            'id' => $keptValueId,
+            'shop_attribute_option_id' => $red->id,
+            'value' => null,
+        ]);
+        $this->assertDatabaseHas('shop_item_variant_options', [
+            'id' => $state['options'][1]['id'],
+            'shop_attribute_id' => null,
+            'name' => 'Size',
+        ]);
+        $this->assertDatabaseHas('shop_item_variant_values', [
+            'id' => $state['options'][1]['values'][0]['id'],
+            'shop_attribute_option_id' => null,
+            'value' => 'Small',
+        ]);
         $this->assertDatabaseMissing('shop_item_variant_values', ['id' => $removedValueId]);
         $this->assertDatabaseMissing('shop_item_variants', ['id' => $removedVariantId]);
         $this->assertDatabaseMissing('shop_item_variant_photos', ['id' => $removedPhotoId]);
@@ -191,6 +230,29 @@ class SaveProductVariantsApiTest extends TestCase
         $this->putJson("/api/products/{$item->id}/variants", $payload)
             ->assertUnprocessable()
             ->assertJsonValidationErrors('variants');
+    }
+
+    public function test_options_and_values_require_a_reference_or_local_name(): void
+    {
+        $this->authenticateProductAdmin();
+        [$item, $color, $red, $blue, $firstMedia, $secondMedia] = $this->createCatalogData();
+        $payload = $this->creationPayload($color->id, $red->id, $blue->id, $firstMedia->id, $secondMedia->id);
+        $payload['options'][0]['shop_attribute_id'] = null;
+        $payload['options'][0]['name'] = null;
+        $payload['options'][1]['values'][0]['shop_attribute_option_id'] = null;
+        $payload['options'][1]['values'][0]['value'] = null;
+
+        $this->putJson("/api/products/{$item->id}/variants", $payload)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'options.0.shop_attribute_id',
+                'options.0.name',
+                'options.1.values.0.shop_attribute_option_id',
+                'options.1.values.0.value',
+            ]);
+
+        $this->assertDatabaseCount('shop_item_variant_options', 0);
+        $this->assertDatabaseCount('shop_item_variant_values', 0);
     }
 
     public function test_persistent_ids_must_belong_to_the_current_product(): void

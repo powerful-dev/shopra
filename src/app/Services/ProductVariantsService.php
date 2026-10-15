@@ -37,7 +37,6 @@ class ProductVariantsService
                 ->all();
 
             $this->deleteMissing($lockedItem->variantOptions(), $optionIds);
-            $currentOptions = $lockedItem->variantOptions()->get()->keyBy('id');
             if ($optionIds !== []) {
                 ShopItemVariantOption::query()
                     ->where('shop_item_id', $lockedItem->id)
@@ -47,6 +46,7 @@ class ProductVariantsService
                         'name' => null,
                     ]);
             }
+            $currentOptions = $lockedItem->variantOptions()->get()->keyBy('id');
 
             $optionMap = [];
             $valueMap = [];
@@ -68,7 +68,6 @@ class ProductVariantsService
                     ->map(fn (int|string $id): int => (int) $id)
                     ->all();
                 $this->deleteMissing($option->values(), $valueIds);
-                $currentValues = $option->values()->get()->keyBy('id');
                 if ($valueIds !== []) {
                     ShopItemVariantValue::query()
                         ->where('shop_item_variant_option_id', $option->id)
@@ -78,6 +77,7 @@ class ProductVariantsService
                             'value' => null,
                         ]);
                 }
+                $currentValues = $option->values()->get()->keyBy('id');
 
                 foreach ($optionData['values'] as $valueData) {
                     $value = $this->isPersistentReference($valueData['id'])
@@ -94,13 +94,13 @@ class ProductVariantsService
 
             $variantIds = collect($data['variants'])->pluck('id')->filter()->map(fn (int $id): int => $id)->all();
             $this->deleteMissing($lockedItem->variants(), $variantIds);
-            $currentVariants = $lockedItem->variants()->get()->keyBy('id');
             if ($variantIds !== []) {
                 ShopItemVariant::query()
                     ->where('shop_item_id', $lockedItem->id)
                     ->whereKey($variantIds)
                     ->update(['sku' => null]);
             }
+            $currentVariants = $lockedItem->variants()->get()->keyBy('id');
 
             foreach ($data['variants'] as $variantData) {
                 $variant = isset($variantData['id'])
