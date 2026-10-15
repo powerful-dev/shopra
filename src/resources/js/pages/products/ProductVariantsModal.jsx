@@ -3,6 +3,7 @@ import CloseIcon from '../../components/icons/CloseIcon';
 import PlusIcon from '../../components/icons/PlusIcon';
 import SaveIcon from '../../components/icons/SaveIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
+import Select from '../../components/form/Select';
 import usePageScrollLock from '../../hooks/usePageScrollLock';
 import { getShopAttributes } from '../../services/shopAttributes';
 
@@ -150,18 +151,49 @@ function AttributePicker({ attributes, addedAttributeIds, isLoading, error, onAd
     );
 }
 
-function PhotosSection({ mainColor, onMainColorChange }) {
-    const colors = [{ name: 'Коньяк', color: '#a9683e', photos: [0, 1] }, { name: 'Кофе', color: '#51382d', photos: [2, 3] }, { name: 'Чёрный', color: '#262321', photos: [] }];
+function PhotosSection({ options }) {
+    const [selectedOptionId, setSelectedOptionId] = useState('');
+    const [mainValueIds, setMainValueIds] = useState({});
+    const selectedOption = options.find((option) => String(option.id) === selectedOptionId) ?? options[0] ?? null;
+    const selectedOptionValue = selectedOption ? String(selectedOption.id) : '';
+    const selectedValues = selectedOption?.values ?? [];
+    const configuredMainValueId = selectedOption ? mainValueIds[selectedOptionValue] : null;
+    const mainValueId = selectedValues.some((value) => String(value.id) === configuredMainValueId)
+        ? configuredMainValueId
+        : String(selectedValues[0]?.id ?? '');
+
+    useEffect(() => {
+        setSelectedOptionId((current) => options.some((option) => String(option.id) === current)
+            ? current
+            : String(options[0]?.id ?? ''));
+    }, [options]);
+
+    const setMainValue = (valueId) => {
+        if (!selectedOption) return;
+
+        setMainValueIds((current) => ({
+            ...current,
+            [selectedOptionValue]: String(valueId),
+        }));
+    };
+
     return (
         <section className="overflow-hidden rounded-[13px] border border-[color:var(--color-border)] bg-white">
             <header className="grid min-h-[76px] grid-cols-[minmax(0,1fr)_220px] items-center gap-4 border-b border-[color:var(--color-border)] bg-[linear-gradient(100deg,#fff8f3,#fff)] px-[16px] py-3 max-sm:grid-cols-1">
-                <div className="flex items-start gap-[10px]"><span className="grid h-[36px] w-[36px] shrink-0 place-items-center rounded-[10px] bg-[#f9eee7] text-[color:var(--color-accent)]"><Icon size={18}><rect x="3" y="3" width="14" height="18" rx="2" /><path d="m3 16 4-4 3 3 3-3 4 4M20 5v6M17 8h6" /></Icon></span><p className="m-0"><strong className="block text-[13px]">Фотографии вариантов</strong><small className="mt-[3px] block max-w-[520px] text-[12px] leading-[1.45] text-[#8d847d]">Покупатель увидит фотографии выбранного цвета, а не одну картинку на все варианты.</small></p></div>
-                <label className="flex flex-col gap-1"><span className="text-[11px] font-bold text-[#716861]">Фото меняются по</span><select className="h-[40px] rounded-[9px] border border-[#d8d0ca] bg-white px-[10px] text-[12px] font-bold"><option>Цвет</option><option>Материал</option></select></label>
+                <div className="flex items-start gap-[10px]"><span className="grid h-[36px] w-[36px] shrink-0 place-items-center rounded-[10px] bg-[#f9eee7] text-[color:var(--color-accent)]"><Icon size={18}><rect x="3" y="3" width="14" height="18" rx="2" /><path d="m3 16 4-4 3 3 3-3 4 4M20 5v6M17 8h6" /></Icon></span><p className="m-0"><strong className="block text-[13px]">Фотографии вариантов</strong><small className="mt-[3px] block max-w-[520px] text-[12px] leading-[1.45] text-[#8d847d]">Покупатель увидит фотографии выбранного значения, а не одну картинку на все варианты.</small></p></div>
+                <label className="flex flex-col gap-1"><span className="text-[11px] font-bold text-[#716861]">Фото меняются по</span><Select className="!h-[40px] !px-[10px] !text-[12px] !font-bold" value={selectedOptionValue} disabled={options.length === 0} onChange={(event) => setSelectedOptionId(event.target.value)}>{options.length === 0 && <option value="">Нет доступных опций</option>}{options.map((option) => <option key={option.id} value={String(option.id)}>{option.name}</option>)}</Select></label>
             </header>
-            <div className="mx-[14px] mt-3 grid grid-cols-[40px_minmax(0,1fr)_220px] items-center gap-[11px] rounded-[11px] border border-[#e4cdbf] bg-[#fff9f5] p-[12px] max-sm:grid-cols-[38px_minmax(0,1fr)]"><span className="grid h-[40px] w-[40px] place-items-center rounded-[10px] bg-white text-[color:var(--color-accent)]"><Icon size={18} className="fill-current"><path d="m12 2.5 3 6 6.5.9-4.7 4.6 1.1 6.5-5.9-3.1-5.9 3.1 1.1-6.5-4.7-4.6 6.5-.9 3-6Z" /></Icon></span><p className="m-0"><strong className="block text-[12px]">Основное значение</strong><small className="mt-[3px] block text-[11px] text-[#877d75]">Оно и его фотографии показываются покупателю первыми.</small></p><label className="flex flex-col gap-1 max-sm:col-span-full"><span className="text-[11px] font-bold text-[#716861]">Показывать первым</span><select value={mainColor} onChange={(event) => onMainColorChange(event.target.value)} className="h-[40px] rounded-[9px] border border-[#d8d0ca] bg-white px-[10px] text-[12px] font-bold">{colors.map(({ name }) => <option key={name}>{name}</option>)}</select></label></div>
-            <div className="mt-3 grid grid-cols-[minmax(190px,.7fr)_minmax(0,1.3fr)_auto] items-center gap-3 border-y border-[color:var(--color-border)] bg-[#faf8f6] px-[16px] py-3 max-md:grid-cols-1"><div><strong className="block text-[12px]">Общая галерея товара</strong><small className="mt-[3px] block text-[11px] text-[#8f867f]">Загрузите фото один раз и распределите по значениям.</small></div><div className="flex gap-[7px] overflow-x-auto">{demoPhotos.map((_, index) => <PhotoTile key={index} index={index} />)}</div><div className="flex gap-2 text-[11px]"><span className="rounded-full bg-[#eaf4ec] px-2 py-1 font-bold text-[#3c8354]">Фото назначено: 4</span><span className="rounded-full bg-[#fff0e7] px-2 py-1 font-bold text-[color:var(--color-accent)]">Фото не назначено: 1</span></div></div>
+            {selectedOption && <div className="grid grid-cols-[minmax(190px,.7fr)_minmax(0,1.3fr)_auto] items-center gap-3 border-b border-[color:var(--color-border)] bg-[#faf8f6] px-[16px] py-3 max-md:grid-cols-1"><div><strong className="block text-[12px]">Общая галерея товара</strong><small className="mt-[3px] block text-[11px] text-[#8f867f]">Загрузите фото один раз и распределите по значениям.</small></div><div className="flex gap-[7px] overflow-x-auto">{demoPhotos.map((_, index) => <PhotoTile key={index} index={index} />)}</div><div className="flex gap-2 text-[11px]"><span className="rounded-full bg-[#eaf4ec] px-2 py-1 font-bold text-[#3c8354]">Фото назначено: 4</span><span className="rounded-full bg-[#fff0e7] px-2 py-1 font-bold text-[color:var(--color-accent)]">Фото не назначено: 1</span></div></div>}
             <div className="flex flex-col gap-[9px] p-[13px_14px]">
-                {colors.map((item) => <article key={item.name} className={`rounded-[11px] border p-[11px] ${mainColor === item.name ? 'border-[#dcae92] bg-[#fffaf7]' : 'border-[color:var(--color-border)] bg-[#fcfbfa]'}`}><header className="flex items-center justify-between gap-3"><div className="flex items-center gap-2"><i className="h-[14px] w-[14px] rounded-full border-2 border-white shadow-[0_0_0_1px_#d6cec8]" style={{ backgroundColor: item.color }} /><span><strong className="block text-[12px]">{item.name}</strong><small className="text-[11px] text-[#928981]">{item.photos.length ? `${item.photos.length} фото` : 'Фотографии не распределены'}</small></span></div><button type="button" onClick={() => onMainColorChange(item.name)} className={`inline-flex min-h-[30px] items-center gap-[5px] rounded-[8px] px-2 text-[11px] font-bold ${mainColor === item.name ? 'border border-[#c4531c] bg-[#fff4ec] text-[color:var(--color-accent)]' : 'border border-transparent bg-transparent text-[#8d837b]'}`}><Icon size={13} className={mainColor === item.name ? 'fill-current' : ''}><path d="m12 2.5 3 6 6.5.9-4.7 4.6 1.1 6.5-5.9-3.1-5.9 3.1 1.1-6.5-4.7-4.6 6.5-.9 3-6Z" /></Icon>{mainColor === item.name ? 'Основное значение' : 'Сделать основным'}</button></header><div className="mt-[9px] flex min-h-[66px] gap-[7px] overflow-x-auto">{item.photos.length ? item.photos.map((index) => <PhotoTile key={index} index={index} removable />) : <p className="m-0 inline-flex min-w-[170px] items-center justify-center rounded-[8px] border border-dashed border-[#d9d0c9] px-3 text-[11px] text-[#958b83]">Фото не назначены</p>}<button type="button" className="inline-flex min-w-[118px] items-center justify-center gap-[6px] rounded-[8px] border border-dashed border-[#d0b09d] bg-white px-[10px] text-[11px] font-bold text-[color:var(--color-accent)]"><PlusIcon size={13} />Добавить фото</button></div></article>)}
+                {!selectedOption && <div className="rounded-[11px] border border-dashed border-[#d9d0c9] bg-[#fcfbfa] px-4 py-8 text-center"><strong className="block text-[12px] text-[#665e57]">Нет опций для распределения фотографий</strong><small className="mt-1 block text-[11px] text-[#978f88]">Добавьте опцию товара и её значения.</small></div>}
+                {selectedOption && selectedValues.length === 0 && <div className="rounded-[11px] border border-dashed border-[#d9d0c9] bg-[#fcfbfa] px-4 py-8 text-center"><strong className="block text-[12px] text-[#665e57]">У опции «{selectedOption.name}» нет значений</strong><small className="mt-1 block text-[11px] text-[#978f88]">Добавьте значения, чтобы распределить между ними фотографии.</small></div>}
+                {selectedValues.map((value, index) => {
+                    const valueId = String(value.id);
+                    const isMain = valueId === mainValueId;
+                    const photos = index === 0 ? [0, 1] : (index === 1 ? [2, 3] : []);
+
+                    return <article key={value.id} className={`rounded-[11px] border p-[11px] ${isMain ? 'border-[#dcae92] bg-[#fffaf7]' : 'border-[color:var(--color-border)] bg-[#fcfbfa]'}`}><header className="flex items-center justify-between gap-3"><div className="flex items-center gap-2"><i className={`h-[14px] w-[14px] rounded-full border-2 border-white shadow-[0_0_0_1px_#d6cec8] ${demoPhotos[index % demoPhotos.length]}`} /><span><strong className="block text-[12px]">{value.label}</strong><small className="text-[11px] text-[#928981]">{photos.length ? `${photos.length} фото` : 'Фотографии не распределены'}</small></span></div><button type="button" onClick={() => setMainValue(valueId)} className={`inline-flex min-h-[30px] items-center gap-[5px] rounded-[8px] px-2 text-[11px] font-bold ${isMain ? 'border border-[#c4531c] bg-[#fff4ec] text-[color:var(--color-accent)]' : 'border border-transparent bg-transparent text-[#8d837b]'}`}><Icon size={13} className={isMain ? 'fill-current' : ''}><path d="m12 2.5 3 6 6.5.9-4.7 4.6 1.1 6.5-5.9-3.1-5.9 3.1 1.1-6.5-4.7-4.6 6.5-.9 3-6Z" /></Icon>{isMain ? 'Основное значение' : 'Сделать основным'}</button></header><div className="mt-[9px] flex min-h-[66px] gap-[7px] overflow-x-auto">{photos.length ? photos.map((photoIndex) => <PhotoTile key={photoIndex} index={photoIndex} removable />) : <p className="m-0 inline-flex min-w-[170px] items-center justify-center rounded-[8px] border border-dashed border-[#d9d0c9] px-3 text-[11px] text-[#958b83]">Фото не назначены</p>}<button type="button" className="inline-flex min-w-[118px] items-center justify-center gap-[6px] rounded-[8px] border border-dashed border-[#d0b09d] bg-white px-[10px] text-[11px] font-bold text-[color:var(--color-accent)]"><PlusIcon size={13} />Добавить фото</button></div></article>;
+                })}
             </div>
         </section>
     );
@@ -199,7 +231,6 @@ function VariantsSection({ combinations, totalCount, variantData, basePrice, sep
 export default function ProductVariantsModal({ isOpen, onClose, basePrice = '' }) {
     const [separatePrices, setSeparatePrices] = useState(false);
     const [areSeparatePricesInitialized, setAreSeparatePricesInitialized] = useState(false);
-    const [mainColor, setMainColor] = useState('Коньяк');
     const [showOptionPicker, setShowOptionPicker] = useState(false);
     const [deleteWarning, setDeleteWarning] = useState(null);
     const [attributes, setAttributes] = useState([]);
@@ -349,7 +380,7 @@ export default function ProductVariantsModal({ isOpen, onClose, basePrice = '' }
                     {showOptionPicker && <AttributePicker attributes={attributes} addedAttributeIds={addedAttributeIds} isLoading={isAttributesLoading} error={attributesError} onAdd={addAttribute} onClose={() => setShowOptionPicker(false)} />}
                     {addedOptions.map((option) => <OptionRow key={option.id} option={option} onAddValue={addOptionValue} onDeleteOption={removeAttribute} onDeleteValue={(optionId, valueId, optionName, valueName) => setDeleteWarning({ optionId, valueId, optionName, valueName })} />)}
                     {deleteWarning && <div className="flex items-start gap-3 rounded-[10px] border border-[#e5c3bd] bg-[#fff7f5] p-[11px_13px] text-[#a6402b]" role="alert"><TrashIcon /><p className="m-0 flex-1 text-[11px] leading-[1.45]"><strong className="block text-[12px] text-[#633b33]">Значение «{deleteWarning.valueName}» связано с модификациями</strong>Модификации с этим значением опции «{deleteWarning.optionName}» будут удалены вместе с ним.</p><div className="flex shrink-0 gap-2 max-sm:flex-col"><button type="button" className="rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 text-[11px] font-bold text-[#5d554f]" onClick={() => setDeleteWarning(null)}>Отмена</button><button type="button" className="rounded-[7px] border border-[#d79d8e] bg-white px-2 py-1.5 text-[11px] font-bold text-[#a6402b]" onClick={() => removeOptionValue(deleteWarning.optionId, deleteWarning.valueId)}>Удалить значение</button></div></div>}
-                    <PhotosSection mainColor={mainColor} onMainColorChange={setMainColor} />
+                    <PhotosSection options={addedOptions} />
                     <VariantsSection combinations={combinations} totalCount={totalCount} variantData={variantData} basePrice={normalizedBasePrice} separatePrices={separatePrices} onTogglePrices={toggleSeparatePrices} onVariantChange={updateVariant} />
                 </div></div>
                 <footer className="flex min-h-[76px] shrink-0 items-center gap-3 border-t border-[color:var(--color-border)] bg-white px-7 py-[11px] max-sm:grid max-sm:grid-cols-2 max-sm:px-[14px]"><div className="flex flex-1 flex-col max-sm:col-span-full"><span className="text-[12px] font-bold">{addedOptions.length} опции · {selectedValuesCount} значений</span><small className="text-[11px] text-[#928981]">Модификации появятся в карточке товара только после сохранения.</small></div><button type="button" className="button button--secondary min-h-[42px] justify-center" onClick={onClose}>Закрыть</button><button type="button" className="button button--primary min-h-[42px] justify-center" onClick={onClose}><SaveIcon size={16} />Сохранить модификации</button></footer>
