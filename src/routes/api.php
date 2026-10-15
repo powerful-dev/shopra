@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AdminModuleController;
 use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\EditorImageController;
+use App\Http\Controllers\Api\ProductVariantsController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\ShopAttributeController;
 use App\Http\Controllers\Api\ShopAttributeOptionController;
@@ -85,6 +86,7 @@ Route::middleware([
         Route::delete('/products/bulk', [ShopItemController::class, 'bulkDestroy']);
         Route::get('/products/{product}/attributes', [ShopItemAttributeController::class, 'index']);
         Route::put('/products/{product}/attributes', [ShopItemAttributeController::class, 'update']);
+        Route::get('/products/{product}/variants', [ProductVariantsController::class, 'index']);
         Route::get('/products/{product}', [ShopItemController::class, 'show']);
         Route::put('/products/{product}', [ShopItemController::class, 'update']);
         Route::post('/products/{product}/categories/{group}', [ShopItemController::class, 'storeGroup']);
