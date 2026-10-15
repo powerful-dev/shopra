@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import Alert from '../../components/admin/Alert';
 import BulkActionsBar from '../../components/admin/BulkActionsBar';
 import ImageLightbox from '../../components/admin/ImageLightbox';
 import Select from '../../components/form/Select';
@@ -9,6 +10,7 @@ import SaveIcon from '../../components/icons/SaveIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
 import usePageScrollLock from '../../hooks/usePageScrollLock';
 import { getShopAttributes } from '../../services/shopAttributes';
+import { getProductVariants } from '../../services/shopItems';
 
 const combinationLimit = 100;
 
@@ -387,7 +389,7 @@ function VariantsSection({ combinations, totalCount, variantData, basePrice, sep
     );
 }
 
-export default function ProductVariantsModal({ isOpen, onClose, basePrice = '', media = [] }) {
+export default function ProductVariantsModal({ isOpen, onClose, productId = null, basePrice = '', media = [] }) {
     const [separatePrices, setSeparatePrices] = useState(false);
     const [areSeparatePricesInitialized, setAreSeparatePricesInitialized] = useState(false);
     const [showOptionPicker, setShowOptionPicker] = useState(false);
@@ -396,6 +398,9 @@ export default function ProductVariantsModal({ isOpen, onClose, basePrice = '', 
     const [addedOptions, setAddedOptions] = useState([]);
     const [isAttributesLoading, setIsAttributesLoading] = useState(false);
     const [attributesError, setAttributesError] = useState('');
+    const [isVariantsLoading, setIsVariantsLoading] = useState(false);
+    const [variantsError, setVariantsError] = useState('');
+    const [variantsRequestVersion, setVariantsRequestVersion] = useState(0);
     const [variantData, setVariantData] = useState({});
     const [lightboxIndex, setLightboxIndex] = useState(0);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -408,6 +413,33 @@ export default function ProductVariantsModal({ isOpen, onClose, basePrice = '', 
     useEffect(() => {
         if (!isOpen || images.length === 0) setIsLightboxOpen(false);
     }, [images.length, isOpen]);
+
+    useEffect(() => {
+        if (!isOpen || !productId) {
+            setIsVariantsLoading(false);
+            setVariantsError('');
+            return undefined;
+        }
+
+        let isCurrentRequest = true;
+        setIsVariantsLoading(true);
+        setVariantsError('');
+
+        getProductVariants(productId)
+            .catch((error) => {
+                if (!isCurrentRequest) return;
+
+                console.error('Unable to load product variants.', error);
+                setVariantsError('Не удалось загрузить модификации товара.');
+            })
+            .finally(() => {
+                if (isCurrentRequest) setIsVariantsLoading(false);
+            });
+
+        return () => {
+            isCurrentRequest = false;
+        };
+    }, [isOpen, productId, variantsRequestVersion]);
 
     useEffect(() => {
         if (!isOpen) return undefined;
@@ -551,13 +583,17 @@ export default function ProductVariantsModal({ isOpen, onClose, basePrice = '', 
             <div className="modal-overlay" role="presentation" onMouseDown={onClose}>
                 <section className="modal-dialog flex h-[min(900px,calc(100vh-40px))] !w-[min(1380px,100%)] flex-col bg-[#fbfaf8] max-sm:h-full max-sm:!w-full" role="dialog" aria-modal="true" aria-labelledby="variant-manager-title" onMouseDown={(event) => event.stopPropagation()}>
                 <header className="flex shrink-0 items-start justify-between gap-[18px] border-b border-[color:var(--color-border)] bg-white px-7 pb-[18px] pt-5 max-sm:px-4"><div><small className="text-[11px] font-bold uppercase tracking-[.05em] text-[color:var(--color-accent)]">Товар · Дополнительные настройки</small><h2 id="variant-manager-title" className="mb-1 mt-[3px] text-[28px] font-[770] tracking-[-.045em] text-[#252525] max-sm:text-[22px]">Модификации товара</h2><p className="m-0 text-[12px] text-[#887f78]">Опции, фотографии, цены и остатки собраны отдельно, чтобы основная карточка оставалась простой.</p></div><button type="button" className="grid h-[40px] w-[40px] shrink-0 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-white text-[#716861]" onClick={onClose} aria-label="Закрыть модификации"><CloseIcon width={20} height={20} /></button></header>
-                <div className="min-h-0 flex-1 overflow-y-auto px-7 py-[20px] max-sm:px-[14px]"><div className="flex flex-col gap-3">
+                <div className="min-h-0 flex-1 overflow-y-auto px-7 py-[20px] max-sm:px-[14px]"><div className="flex flex-col gap-3" aria-busy={isVariantsLoading}>
+                    {isVariantsLoading && <div className="grid min-h-[180px] place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#f8f5f2]" role="status" aria-label="Загрузка модификаций товара"><span className="h-7 w-7 animate-spin rounded-full border-[3px] border-[#d8cbc2] border-t-[color:var(--color-accent)]" aria-hidden="true" /></div>}
+                    {!isVariantsLoading && variantsError && <Alert variant="error"><span className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2"><span>{variantsError}</span><button type="button" className="button button--secondary min-h-[32px] shrink-0 justify-center" onClick={() => setVariantsRequestVersion((current) => current + 1)}>Повторить</button></span></Alert>}
+                    {!isVariantsLoading && !variantsError && <>
                     <div className="flex items-center justify-between gap-3 max-sm:flex-col max-sm:items-stretch"><div><strong className="block text-[13px]">Опции товара</strong><small className="text-[12px] text-[#968e87]">Добавьте характеристики типа «Список» или «Множественный список».</small></div><button type="button" className="button button--secondary min-h-[40px] shrink-0 justify-center" onClick={() => setShowOptionPicker((current) => !current)} aria-expanded={showOptionPicker}><PlusIcon width={15} height={15} />Добавить опцию</button></div>
                     {showOptionPicker && <AttributePicker attributes={attributes} addedAttributeIds={addedAttributeIds} isLoading={isAttributesLoading} error={attributesError} onAdd={addAttribute} onClose={() => setShowOptionPicker(false)} />}
                     {addedOptions.map((option) => <OptionRow key={option.id} option={option} onAddValue={addOptionValue} onDeleteOption={removeAttribute} onDeleteValue={(optionId, valueId, optionName, valueName) => setDeleteWarning({ optionId, valueId, optionName, valueName })} />)}
                     {deleteWarning && <div className="flex items-start gap-3 rounded-[10px] border border-[#e5c3bd] bg-[#fff7f5] p-[11px_13px] text-[#a6402b]" role="alert"><TrashIcon /><p className="m-0 flex-1 text-[11px] leading-[1.45]"><strong className="block text-[12px] text-[#633b33]">Значение «{deleteWarning.valueName}» связано с модификациями</strong>Модификации с этим значением опции «{deleteWarning.optionName}» будут удалены вместе с ним.</p><div className="flex shrink-0 gap-2 max-sm:flex-col"><button type="button" className="rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 text-[11px] font-bold text-[#5d554f]" onClick={() => setDeleteWarning(null)}>Отмена</button><button type="button" className="rounded-[7px] border border-[#d79d8e] bg-white px-2 py-1.5 text-[11px] font-bold text-[#a6402b]" onClick={() => removeOptionValue(deleteWarning.optionId, deleteWarning.valueId)}>Удалить значение</button></div></div>}
                     <PhotosSection options={addedOptions} images={images} onOpenImage={(index) => { setLightboxIndex(index); setIsLightboxOpen(true); }} />
                     <VariantsSection combinations={combinations} totalCount={totalCount} variantData={variantData} basePrice={normalizedBasePrice} separatePrices={separatePrices} showPriceSettings={addedOptions.length > 0} onTogglePrices={toggleSeparatePrices} onVariantChange={updateVariant} />
+                    </>}
                 </div></div>
                 <footer className="flex min-h-[76px] shrink-0 items-center gap-3 border-t border-[color:var(--color-border)] bg-white px-7 py-[11px] max-sm:grid max-sm:grid-cols-2 max-sm:px-[14px]"><div className="flex flex-1 flex-col max-sm:col-span-full"><span className="text-[12px] font-bold">{addedOptions.length} опции · {selectedValuesCount} значений</span><small className="text-[11px] text-[#928981]">Модификации появятся в карточке товара только после сохранения.</small></div><button type="button" className="button button--secondary min-h-[42px] justify-center" onClick={onClose}>Закрыть</button><button type="button" className="button button--primary min-h-[42px] justify-center" onClick={onClose}><SaveIcon size={16} />Сохранить модификации</button></footer>
                 </section>
