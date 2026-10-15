@@ -154,9 +154,9 @@ function PhotosSection({ options, images, onOpenImage }) {
         : String(selectedValues[0]?.id ?? '');
 
     useEffect(() => {
-        setSelectedOptionId((current) => options.some((option) => String(option.id) === current)
+        setSelectedOptionId((current) => options.length === 0 || options.some((option) => String(option.id) === current)
             ? current
-            : String(options[0]?.id ?? ''));
+            : String(options[0].id));
     }, [options]);
 
     const setMainValue = (valueId) => {
@@ -168,6 +168,8 @@ function PhotosSection({ options, images, onOpenImage }) {
         }));
     };
 
+    if (options.length === 0) return null;
+
     return (
         <section className="overflow-hidden rounded-[13px] border border-[color:var(--color-border)] bg-white">
             <header className="grid min-h-[76px] grid-cols-[minmax(0,1fr)_220px] items-center gap-4 border-b border-[color:var(--color-border)] bg-[linear-gradient(100deg,#fff8f3,#fff)] px-[16px] py-3 max-sm:grid-cols-1">
@@ -177,7 +179,7 @@ function PhotosSection({ options, images, onOpenImage }) {
             <div className="grid grid-cols-[minmax(190px,.7fr)_minmax(0,1.3fr)_auto] items-center gap-3 border-b border-[color:var(--color-border)] bg-[#faf8f6] px-[16px] py-3 max-md:grid-cols-1"><div><strong className="block text-[12px]">Общая галерея товара</strong><small className="mt-[3px] block text-[11px] text-[#8f867f]">Загрузите фото один раз и распределите по значениям.</small></div>{images.length > 0 ? <><div className="flex gap-[7px] overflow-x-auto">{images.map((image, index) => <PhotoTile key={image.id} image={image} onOpen={() => onOpenImage(index)} />)}</div><div className="flex gap-2 text-[11px]"><span className="rounded-full bg-[#eaf4ec] px-2 py-1 font-bold text-[#3c8354]">Фотографий: {images.length}</span></div></> : <p className="col-span-2 m-0 rounded-[8px] border border-dashed border-[#d9d0c9] bg-white px-3 py-4 text-center text-[11px] text-[#958b83] max-md:col-span-1">У товара пока нет фотографий</p>}</div>
             <div className="flex flex-col gap-[9px] p-[13px_14px]">
                 {!selectedOption && <div className="rounded-[11px] border border-dashed border-[#d9d0c9] bg-[#fcfbfa] px-4 py-8 text-center"><strong className="block text-[12px] text-[#665e57]">Нет опций для распределения фотографий</strong><small className="mt-1 block text-[11px] text-[#978f88]">Добавьте опцию товара и её значения.</small></div>}
-                {selectedOption && selectedValues.length === 0 && <div className="rounded-[11px] border border-dashed border-[#d9d0c9] bg-[#fcfbfa] px-4 py-8 text-center"><strong className="block text-[12px] text-[#665e57]">У опции «{selectedOption.name}» нет значений</strong><small className="mt-1 block text-[11px] text-[#978f88]">Добавьте значения, чтобы распределить между ними фотографии.</small></div>}
+                {selectedOption && selectedValues.length === 0 && <div className="rounded-[11px] border border-dashed border-[#d9d0c9] bg-[#fcfbfa] px-4 py-8 text-center"><strong className="block text-[12px] text-[#665e57]">Добавьте значения опции, чтобы назначить фотографии</strong></div>}
                 {selectedValues.map((value) => {
                     const valueId = String(value.id);
                     const isMain = valueId === mainValueId;
