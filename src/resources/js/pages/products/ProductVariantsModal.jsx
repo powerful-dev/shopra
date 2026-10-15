@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import BulkActionsBar from '../../components/admin/BulkActionsBar';
 import ImageLightbox from '../../components/admin/ImageLightbox';
 import Select from '../../components/form/Select';
 import CloseIcon from '../../components/icons/CloseIcon';
@@ -285,7 +286,7 @@ function PhotosSection({ options, images, onOpenImage }) {
                         const assignedImages = images.filter((image) => assignedImageIdSet.has(String(image.id)));
                         const pickerIsOpen = openPicker?.optionId === selectedOptionValue && openPicker.valueId === valueId;
 
-                        return <article key={value.id} className={`rounded-[11px] border p-[11px] ${isMain ? 'border-[#dcae92] bg-[#fffaf7]' : 'border-[color:var(--color-border)] bg-[#fcfbfa]'}`}><header className="flex items-center justify-between gap-3"><div className="flex items-center gap-2"><i className="h-[14px] w-[14px] rounded-full border-2 border-white bg-[#d8d0ca] shadow-[0_0_0_1px_#d6cec8]" /><span><strong className="block text-[12px]">{value.label}</strong><small className="text-[11px] text-[#928981]">{assignedImages.length > 0 ? t('productEditPage.variantPhotos.valuePhotoCount', { count: assignedImages.length }) : t('productEditPage.variantPhotos.noAssignedPhotos')}</small></span></div><button type="button" onClick={() => setMainValue(valueId)} className={`inline-flex min-h-[30px] items-center gap-[5px] rounded-[8px] px-2 text-[11px] font-bold ${isMain ? 'border border-[#c4531c] bg-[#fff4ec] text-[color:var(--color-accent)]' : 'border border-transparent bg-transparent text-[#8d837b]'}`}><Icon size={13} className={isMain ? 'fill-current' : ''}><path d="m12 2.5 3 6 6.5.9-4.7 4.6 1.1 6.5-5.9-3.1-5.9 3.1 1.1-6.5-4.7-4.6 6.5-.9 3-6Z" /></Icon>{isMain ? t('productEditPage.variantPhotos.mainValue') : t('productEditPage.variantPhotos.setMainValue')}</button></header><div className="mt-[9px] flex min-h-[66px] gap-[7px] overflow-x-auto">{assignedImages.length > 0 ? assignedImages.map((image, index) => { const galleryIndex = images.findIndex((galleryImage) => galleryImage.id === image.id); return <div key={image.id} data-media-id={image.id} className="relative h-[66px] w-[54px] shrink-0 overflow-hidden rounded-[8px] border border-[#d9d1cb] bg-[#f5f1ee]"><button type="button" className="block h-full w-full cursor-zoom-in border-0 bg-transparent p-0" onClick={() => onOpenImage(galleryIndex)} aria-label={t('productEditPage.variantPhotos.openPhoto', { number: galleryIndex + 1 })}><img className="h-full w-full object-cover" src={image.small_url} alt="" draggable={false} /><b className="absolute bottom-1 left-1 grid h-[17px] min-w-[17px] place-items-center rounded-[5px] bg-white/95 text-[11px] text-[#594f48]">{index + 1}</b></button><button type="button" onClick={() => removeAssignedPhoto(valueId, image.id)} className="absolute right-[3px] top-[3px] grid h-[19px] w-[19px] place-items-center rounded-full border-0 bg-white/95 text-[#766b63]" aria-label={t('productEditPage.variantPhotos.removePhoto', { value: value.label })}><CloseIcon width={11} height={11} /></button></div>; }) : <p className="m-0 inline-flex min-w-[170px] items-center justify-center rounded-[8px] border border-dashed border-[#d9d0c9] px-3 text-[11px] text-[#958b83]">{t('productEditPage.variantPhotos.noAssignedPhotos')}</p>}<button type="button" onClick={() => openPhotoPicker(valueId)} className="inline-flex min-w-[118px] items-center justify-center gap-[6px] rounded-[8px] border border-dashed border-[#d0b09d] bg-white px-[10px] text-[11px] font-bold text-[color:var(--color-accent)]"><PlusIcon size={13} />{t('productEditPage.variantPhotos.addPhoto')}</button></div>{pickerIsOpen && <PhotoPicker valueLabel={value.label} images={images} selectedImageIds={draftImageIds} onToggle={toggleDraftImage} onCancel={closePhotoPicker} onApply={applyPhotoPicker} t={t} />}</article>;
+                        return <article key={value.id} className={`rounded-[11px] border p-[8px_10px] ${isMain ? 'border-[#dcae92] bg-[#fffaf7]' : 'border-[color:var(--color-border)] bg-[#fcfbfa]'}`}><div className="flex flex-wrap items-center gap-x-[10px] gap-y-[7px]"><span className="min-w-[105px] shrink-0"><strong className="block text-[12px]">{value.label}</strong>{assignedImages.length > 0 && <small className="text-[11px] text-[#928981]">{t('productEditPage.variantPhotos.valuePhotoCount', { count: assignedImages.length })}</small>}</span><div className="flex min-w-[150px] flex-1 flex-wrap items-center gap-[6px]">{assignedImages.map((image, index) => { const galleryIndex = images.findIndex((galleryImage) => galleryImage.id === image.id); return <div key={image.id} data-media-id={image.id} className="relative h-[54px] w-[44px] shrink-0 overflow-hidden rounded-[7px] border border-[#d9d1cb] bg-[#f5f1ee]"><button type="button" className="block h-full w-full cursor-zoom-in border-0 bg-transparent p-0" onClick={() => onOpenImage(galleryIndex)} aria-label={t('productEditPage.variantPhotos.openPhoto', { number: galleryIndex + 1 })}><img className="h-full w-full object-cover" src={image.small_url} alt="" draggable={false} /><b className="absolute bottom-[3px] left-[3px] grid h-[16px] min-w-[16px] place-items-center rounded-[4px] bg-white/95 text-[10px] text-[#594f48]">{index + 1}</b></button><button type="button" onClick={() => removeAssignedPhoto(valueId, image.id)} className="absolute right-[2px] top-[2px] grid h-[18px] w-[18px] place-items-center rounded-full border-0 bg-white/95 text-[#766b63]" aria-label={t('productEditPage.variantPhotos.removePhoto', { value: value.label })}><CloseIcon width={10} height={10} /></button></div>; })}<button type="button" onClick={() => openPhotoPicker(valueId)} className="inline-flex min-h-[54px] items-center justify-center gap-[6px] rounded-[7px] border border-dashed border-[#d0b09d] bg-white px-[10px] text-[11px] font-bold text-[color:var(--color-accent)]"><PlusIcon size={13} />{t('productEditPage.variantPhotos.addPhoto')}</button></div><button type="button" onClick={() => setMainValue(valueId)} className={`ml-auto inline-flex min-h-[30px] shrink-0 items-center gap-[5px] rounded-[8px] px-2 text-[11px] font-bold ${isMain ? 'border border-[#c4531c] bg-[#fff4ec] text-[color:var(--color-accent)]' : 'border border-transparent bg-transparent text-[#8d837b]'}`}><Icon size={13} className={isMain ? 'fill-current' : ''}><path d="m12 2.5 3 6 6.5.9-4.7 4.6 1.1 6.5-5.9-3.1-5.9 3.1 1.1-6.5-4.7-4.6 6.5-.9 3-6Z" /></Icon>{isMain ? t('productEditPage.variantPhotos.mainValue') : t('productEditPage.variantPhotos.setMainValue')}</button></div>{pickerIsOpen && <PhotoPicker valueLabel={value.label} images={images} selectedImageIds={draftImageIds} onToggle={toggleDraftImage} onCancel={closePhotoPicker} onApply={applyPhotoPicker} t={t} />}</article>;
                     })}
                 </div>
             </>}
@@ -293,26 +294,90 @@ function PhotosSection({ options, images, onOpenImage }) {
     );
 }
 
-function VariantsSection({ combinations, totalCount, variantData, basePrice, separatePrices, onTogglePrices, onVariantChange }) {
+function VariantsSection({ combinations, totalCount, variantData, basePrice, separatePrices, showPriceSettings, onTogglePrices, onVariantChange }) {
+    const { t } = useTranslation();
     const [selected, setSelected] = useState([]);
+    const [bulkEditor, setBulkEditor] = useState(null);
+    const [bulkValue, setBulkValue] = useState('');
+    const [bulkError, setBulkError] = useState('');
+    const selectAllRef = useRef(null);
     const combinationKeys = combinations.map((combination) => combination.key);
     const visibleSelected = selected.filter((key) => combinationKeys.includes(key));
     const allSelected = combinations.length > 0 && visibleSelected.length === combinations.length;
     const toggleRow = (key) => setSelected((current) => current.includes(key) ? current.filter((item) => item !== key) : [...current, key]);
+    const closeBulkEditor = () => {
+        setBulkEditor(null);
+        setBulkValue('');
+        setBulkError('');
+    };
+    const openBulkEditor = (field) => {
+        if (field === 'price' && !separatePrices) return;
+        setBulkEditor(field);
+        setBulkValue('');
+        setBulkError('');
+    };
+    const clearSelection = () => {
+        setSelected([]);
+        closeBulkEditor();
+    };
     const setSelectedActivity = (active) => {
         visibleSelected.forEach((key) => onVariantChange(key, { active }));
     };
+    const applyBulkValue = (event) => {
+        event.preventDefault();
+        const value = bulkValue.trim();
+        const numberValue = Number(value);
+        const isValid = bulkEditor === 'price'
+            ? value !== '' && Number.isFinite(numberValue) && numberValue >= 0
+            : /^\d+$/.test(value);
+
+        if (!isValid) {
+            setBulkError(t(`productEditPage.variantBulk.${bulkEditor === 'price' ? 'priceError' : 'stockError'}`));
+            return;
+        }
+
+        const nextValue = bulkEditor === 'stock' ? String(numberValue) : value;
+        visibleSelected.forEach((key) => onVariantChange(key, { [bulkEditor]: nextValue }));
+        closeBulkEditor();
+    };
+
+    useEffect(() => {
+        if (selectAllRef.current) selectAllRef.current.indeterminate = visibleSelected.length > 0 && !allSelected;
+    }, [allSelected, visibleSelected.length]);
+
+    useEffect(() => {
+        if (!separatePrices && bulkEditor === 'price') closeBulkEditor();
+    }, [bulkEditor, separatePrices]);
 
     return (
         <>
-            <section className="grid grid-cols-[48px_minmax(0,1fr)] items-center gap-3 rounded-[12px] border border-[#e0b292] bg-[#fffaf7] p-[14px_16px]">
+            {showPriceSettings && <section className="grid grid-cols-[48px_minmax(0,1fr)] items-center gap-3 rounded-[12px] border border-[#e0b292] bg-[#fffaf7] p-[14px_16px]">
                 <button type="button" className="switch-control switch-control--strong" role="switch" aria-checked={separatePrices} onClick={onTogglePrices} aria-label="Использовать отдельные цены"><i aria-hidden="true"><Icon size={14}><path d="m20 6-11 11-5-5" /></Icon></i></button><div><strong className="block text-[13px]">Цены отличаются для разных вариантов</strong><small className="mt-[3px] block text-[12px] text-[#8c837c]">Включите, если цвет или размер влияет на стоимость товара.</small></div>
-            </section>
+            </section>}
             {totalCount > combinationLimit && <div className="flex items-start gap-2 rounded-[10px] border border-[#ebc8a6] bg-[#fff8ed] p-[11px_13px] text-[#7c5228]"><Icon size={17} className="mt-0.5 shrink-0"><path d="M12 9v4M12 17h.01" /><path d="M10.3 3.4 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.4a2 2 0 0 0-3.4 0Z" /></Icon><p className="m-0 text-[11px] leading-[1.45]"><strong className="block text-[12px] text-[#5d4430]">Превышен лимит: {totalCount} комбинаций</strong>Созданы первые {combinationLimit}. Удалите лишние значения опций, чтобы вернуться в пределы лимита.</p></div>}
             <section className="overflow-hidden rounded-[12px] border border-[color:var(--color-border)] bg-white">
-                <header className="flex min-h-[58px] items-center justify-between gap-3 border-b border-[color:var(--color-border)] bg-[#faf8f6] px-[12px]"><div><div className="flex items-center gap-2"><strong className="text-[13px]">Модификации</strong><span className="rounded-full bg-[#eee9e5] px-2 py-1 text-[10px] font-bold text-[#746b64]">{totalCount > combinationLimit ? `${combinations.length} из ${totalCount}` : combinations.length} комбинаций</span></div><small className="text-[11px] text-[#978f88]">Комбинации автоматически обновляются при изменении опций.</small></div><button type="button" disabled={!separatePrices} className="min-h-[32px] rounded-[8px] border border-[#d8d0ca] bg-white px-[10px] text-[12px] font-bold text-[color:var(--color-accent)] disabled:cursor-not-allowed disabled:bg-[#f1eeeb] disabled:text-[#9a918a]">Изменить все</button></header>
-                {visibleSelected.length > 0 && <div className="flex min-h-[46px] items-center gap-2 border-b border-[#ead6ca] bg-[#fff7f1] px-[12px] text-[11px]"><strong className="mr-auto text-[12px]">Выбрано: {visibleSelected.length}</strong><button type="button" disabled={!separatePrices} className="rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 font-bold disabled:cursor-not-allowed disabled:bg-[#f1eeeb] disabled:text-[#9a918a]">Изменить цену</button><button type="button" className="rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 font-bold">Изменить остаток</button><button type="button" onClick={() => setSelectedActivity(false)} className="rounded-[7px] border border-[#e1b9ad] bg-white px-2 py-1.5 font-bold text-[#a6402b]">Отключить</button></div>}
-                {combinations.length === 0 ? <div className="px-4 py-8 text-center"><strong className="block text-[12px] text-[#665e57]">Модификаций пока нет</strong><small className="mt-1 block text-[11px] text-[#978f88]">Добавьте опцию со значениями, чтобы сформировать комбинации.</small></div> : <div className="overflow-x-auto"><div className="min-w-[820px]"><div className="grid min-h-[34px] grid-cols-[34px_minmax(250px,1.5fr)_120px_100px_130px_70px] items-center gap-[8px] bg-[#f7f4f1] px-[10px] text-[10px] font-bold uppercase text-[#918981]"><input type="checkbox" className="checkbox-control" checked={allSelected} onChange={() => setSelected(allSelected ? [] : combinationKeys)} aria-label="Выбрать все" /><span>Модификация</span><span>Цена</span><span>Остаток</span><span>SKU</span><span>Активна</span></div>{combinations.map((combination) => {
+                <header className="flex min-h-[58px] items-center gap-3 border-b border-[color:var(--color-border)] bg-[#faf8f6] px-[12px]"><div><div className="flex items-center gap-2"><strong className="text-[13px]">Модификации</strong><span className="rounded-full bg-[#eee9e5] px-2 py-1 text-[10px] font-bold text-[#746b64]">{totalCount > combinationLimit ? `${combinations.length} из ${totalCount}` : combinations.length} комбинаций</span></div><small className="text-[11px] text-[#978f88]">Комбинации автоматически обновляются при изменении опций.</small></div></header>
+                {visibleSelected.length > 0 && <div className="border-b border-[#ead6ca] bg-[#fff7f1] px-[12px] py-[7px]">
+                    <BulkActionsBar
+                        selectedCount={visibleSelected.length}
+                        countLabel={(count) => t('productEditPage.variantBulk.selectedCount', { count })}
+                        className="!min-h-[34px]"
+                        actions={[
+                            { key: 'price', label: t('productEditPage.variantBulk.editPrice'), disabled: !separatePrices, onClick: () => openBulkEditor('price') },
+                            { key: 'stock', label: t('productEditPage.variantBulk.editStock'), onClick: () => openBulkEditor('stock') },
+                            { key: 'enable', label: t('productEditPage.variantBulk.enable'), onClick: () => setSelectedActivity(true) },
+                            { key: 'disable', label: t('productEditPage.variantBulk.disable'), onClick: () => setSelectedActivity(false) },
+                            { key: 'clear', label: t('productEditPage.variantBulk.clearSelection'), onClick: clearSelection },
+                        ]}
+                    />
+                    {bulkEditor && <form className="mt-[7px] flex flex-wrap items-end gap-[7px] border-t border-[#eadfd8] pt-[7px]" onSubmit={applyBulkValue}>
+                        <label className="flex min-w-[180px] flex-1 flex-col gap-1"><span className="text-[11px] font-bold text-[#716861]">{t(`productEditPage.variantBulk.${bulkEditor === 'price' ? 'priceLabel' : 'stockLabel'}`)}</span><input autoFocus type="number" min="0" step={bulkEditor === 'price' ? '0.01' : '1'} className="h-[34px] rounded-[7px] border border-[#d8d0ca] bg-white px-[9px] text-[12px] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]" value={bulkValue} onChange={(event) => { setBulkValue(event.target.value); setBulkError(''); }} aria-invalid={Boolean(bulkError)} /></label>
+                        <button type="submit" className="button button--primary min-h-[34px] justify-center">{t('productEditPage.variantBulk.apply')}</button>
+                        <button type="button" className="button button--secondary min-h-[34px] justify-center" onClick={closeBulkEditor}>{t('productEditPage.variantBulk.cancel')}</button>
+                        {bulkError && <small className="w-full text-[11px] text-[#a6402b]" role="alert">{bulkError}</small>}
+                    </form>}
+                </div>}
+                {combinations.length === 0 ? <div className="px-4 py-8 text-center"><strong className="block text-[12px] text-[#665e57]">Модификаций пока нет</strong><small className="mt-1 block text-[11px] text-[#978f88]">Добавьте опцию со значениями, чтобы сформировать комбинации.</small></div> : <div className="overflow-x-auto"><div className="min-w-[820px]"><div className="grid min-h-[34px] grid-cols-[34px_minmax(250px,1.5fr)_120px_100px_130px_70px] items-center gap-[8px] bg-[#f7f4f1] px-[10px] text-[10px] font-bold uppercase text-[#918981]"><input ref={selectAllRef} type="checkbox" className="checkbox-control" checked={allSelected} onChange={() => setSelected(allSelected ? [] : combinationKeys)} aria-label={t('productEditPage.variantBulk.selectAll')} /><span>Модификация</span><span>Цена</span><span>Остаток</span><span>SKU</span><span>Активна</span></div>{combinations.map((combination) => {
                         const data = variantData[combination.key];
 
                         return <div key={combination.key} className="grid min-h-[50px] grid-cols-[34px_minmax(250px,1.5fr)_120px_100px_130px_70px] items-center gap-[8px] border-t border-[#f0ece8] px-[10px]"><input type="checkbox" className="checkbox-control" checked={visibleSelected.includes(combination.key)} onChange={() => toggleRow(combination.key)} aria-label={`Выбрать ${combination.label}`} /><strong className="truncate text-[11px]"><i className="mr-2 inline-block h-[9px] w-[9px] rounded-full bg-[#a9683e]" />{combination.label}</strong><label className="relative"><input className="h-[32px] w-full rounded-[7px] border border-[color:var(--color-border)] px-2 pr-9 text-[11px] disabled:bg-[#f2efec]" value={separatePrices ? (data?.price ?? basePrice) : basePrice} disabled={!separatePrices} onChange={(event) => onVariantChange(combination.key, { price: event.target.value })} /><b className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-[#9a928b]">UAH</b></label><input className="h-[32px] rounded-[7px] border border-[color:var(--color-border)] px-2 text-[11px]" value={data?.stock ?? '0'} onChange={(event) => onVariantChange(combination.key, { stock: event.target.value })} /><input className="h-[32px] rounded-[7px] border border-[color:var(--color-border)] px-2 text-[11px]" value={data?.sku ?? ''} onChange={(event) => onVariantChange(combination.key, { sku: event.target.value })} /><label className="switch" aria-label={`Активность ${combination.label}`}><input className="switch__input" type="checkbox" checked={data?.active ?? true} onChange={(event) => onVariantChange(combination.key, { active: event.target.checked })} /><span className="switch__track" /></label></div>;
@@ -492,7 +557,7 @@ export default function ProductVariantsModal({ isOpen, onClose, basePrice = '', 
                     {addedOptions.map((option) => <OptionRow key={option.id} option={option} onAddValue={addOptionValue} onDeleteOption={removeAttribute} onDeleteValue={(optionId, valueId, optionName, valueName) => setDeleteWarning({ optionId, valueId, optionName, valueName })} />)}
                     {deleteWarning && <div className="flex items-start gap-3 rounded-[10px] border border-[#e5c3bd] bg-[#fff7f5] p-[11px_13px] text-[#a6402b]" role="alert"><TrashIcon /><p className="m-0 flex-1 text-[11px] leading-[1.45]"><strong className="block text-[12px] text-[#633b33]">Значение «{deleteWarning.valueName}» связано с модификациями</strong>Модификации с этим значением опции «{deleteWarning.optionName}» будут удалены вместе с ним.</p><div className="flex shrink-0 gap-2 max-sm:flex-col"><button type="button" className="rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 text-[11px] font-bold text-[#5d554f]" onClick={() => setDeleteWarning(null)}>Отмена</button><button type="button" className="rounded-[7px] border border-[#d79d8e] bg-white px-2 py-1.5 text-[11px] font-bold text-[#a6402b]" onClick={() => removeOptionValue(deleteWarning.optionId, deleteWarning.valueId)}>Удалить значение</button></div></div>}
                     <PhotosSection options={addedOptions} images={images} onOpenImage={(index) => { setLightboxIndex(index); setIsLightboxOpen(true); }} />
-                    <VariantsSection combinations={combinations} totalCount={totalCount} variantData={variantData} basePrice={normalizedBasePrice} separatePrices={separatePrices} onTogglePrices={toggleSeparatePrices} onVariantChange={updateVariant} />
+                    <VariantsSection combinations={combinations} totalCount={totalCount} variantData={variantData} basePrice={normalizedBasePrice} separatePrices={separatePrices} showPriceSettings={addedOptions.length > 0} onTogglePrices={toggleSeparatePrices} onVariantChange={updateVariant} />
                 </div></div>
                 <footer className="flex min-h-[76px] shrink-0 items-center gap-3 border-t border-[color:var(--color-border)] bg-white px-7 py-[11px] max-sm:grid max-sm:grid-cols-2 max-sm:px-[14px]"><div className="flex flex-1 flex-col max-sm:col-span-full"><span className="text-[12px] font-bold">{addedOptions.length} опции · {selectedValuesCount} значений</span><small className="text-[11px] text-[#928981]">Модификации появятся в карточке товара только после сохранения.</small></div><button type="button" className="button button--secondary min-h-[42px] justify-center" onClick={onClose}>Закрыть</button><button type="button" className="button button--primary min-h-[42px] justify-center" onClick={onClose}><SaveIcon size={16} />Сохранить модификации</button></footer>
                 </section>

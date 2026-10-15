@@ -376,6 +376,21 @@
             "noMediaRemaining": "Больше фото и видео добавить нельзя",
             "configLoadError": "Не удалось загрузить ограничения для медиафайлов."
         },
+        "variantBulk": {
+            "selectedCount": "Выбрано: {{count}}",
+            "selectAll": "Выбрать все модификации",
+            "editPrice": "Изменить цену",
+            "editStock": "Изменить остаток",
+            "enable": "Включить",
+            "disable": "Отключить",
+            "clearSelection": "Снять выбор",
+            "priceLabel": "Новая цена",
+            "stockLabel": "Новый остаток",
+            "apply": "Применить",
+            "cancel": "Отмена",
+            "priceError": "Укажите цену не меньше 0.",
+            "stockError": "Укажите целое количество не меньше 0."
+        },
         "variantPhotos": {
             "toggleAria": "Использовать фотографии вариантов",
             "title": "Фотографии вариантов",

@@ -376,6 +376,21 @@
             "noMediaRemaining": "Більше фото та відео додати не можна",
             "configLoadError": "Не вдалося завантажити обмеження для медіафайлів."
         },
+        "variantBulk": {
+            "selectedCount": "Вибрано: {{count}}",
+            "selectAll": "Вибрати всі модифікації",
+            "editPrice": "Змінити ціну",
+            "editStock": "Змінити залишок",
+            "enable": "Увімкнути",
+            "disable": "Вимкнути",
+            "clearSelection": "Зняти вибір",
+            "priceLabel": "Нова ціна",
+            "stockLabel": "Новий залишок",
+            "apply": "Застосувати",
+            "cancel": "Скасувати",
+            "priceError": "Вкажіть ціну не менше 0.",
+            "stockError": "Вкажіть цілу кількість не менше 0."
+        },
         "variantPhotos": {
             "toggleAria": "Використовувати фотографії варіантів",
             "title": "Фотографії варіантів",

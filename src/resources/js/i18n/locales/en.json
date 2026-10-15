@@ -372,6 +372,21 @@
             "noMediaRemaining": "No more photos or videos can be added",
             "configLoadError": "Unable to load media file limits."
         },
+        "variantBulk": {
+            "selectedCount": "Selected: {{count}}",
+            "selectAll": "Select all variants",
+            "editPrice": "Change price",
+            "editStock": "Change stock",
+            "enable": "Enable",
+            "disable": "Disable",
+            "clearSelection": "Clear selection",
+            "priceLabel": "New price",
+            "stockLabel": "New stock",
+            "apply": "Apply",
+            "cancel": "Cancel",
+            "priceError": "Enter a price of 0 or more.",
+            "stockError": "Enter a whole number of 0 or more."
+        },
         "variantPhotos": {
             "toggleAria": "Use variant photos",
             "title": "Variant photos",
