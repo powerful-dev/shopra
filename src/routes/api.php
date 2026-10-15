@@ -87,6 +87,7 @@ Route::middleware([
         Route::get('/products/{product}/attributes', [ShopItemAttributeController::class, 'index']);
         Route::put('/products/{product}/attributes', [ShopItemAttributeController::class, 'update']);
         Route::get('/products/{product}/variants', [ProductVariantsController::class, 'index']);
+        Route::put('/products/{product}/variants', [ProductVariantsController::class, 'update']);
         Route::get('/products/{product}', [ShopItemController::class, 'show']);
         Route::put('/products/{product}', [ShopItemController::class, 'update']);
         Route::post('/products/{product}/categories/{group}', [ShopItemController::class, 'storeGroup']);
