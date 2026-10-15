@@ -90,6 +90,71 @@ function applyAttributeDetails(options, attributes) {
     });
 }
 
+function restoreVariantData(savedVariants = [], options = []) {
+    const restoredData = {};
+
+    for (const [variantIndex, savedVariant] of sortedByOrder(savedVariants).entries()) {
+        const selections = (savedVariant.selections ?? []).map((selection) => {
+            const option = options.find((item) => sameId(item.id, selection.option_id));
+            const value = option?.values.find((item) => sameId(item.id, selection.value_id));
+
+            return option && value ? { option, value } : null;
+        });
+
+        if (selections.length === 0 || selections.some((selection) => selection === null)) continue;
+
+        restoredData[combinationKey(selections)] = {
+            id: savedVariant.id,
+            selections: (savedVariant.selections ?? []).map((selection) => ({
+                id: selection.id,
+                optionId: selection.option_id,
+                valueId: selection.value_id,
+            })),
+            price: savedVariant.price,
+            stock: String(savedVariant.quantity ?? 0),
+            sku: savedVariant.sku ?? '',
+            active: Boolean(savedVariant.is_active),
+            sortOrder: savedVariant.sort_order ?? variantIndex,
+        };
+    }
+
+    return restoredData;
+}
+
+function emptyPhotoState() {
+    return {
+        enabled: false,
+        selectedOptionId: '',
+        mainValueIds: {},
+        assignments: {},
+    };
+}
+
+function restorePhotoState(settings = {}, savedPhotos = [], options = []) {
+    const selectedOption = options.find((option) => sameId(option.id, settings.photo_option_id));
+    const selectedOptionId = selectedOption ? String(selectedOption.id) : '';
+    const defaultValue = selectedOption?.values.find((value) => sameId(value.id, settings.default_photo_value_id));
+    const assignments = {};
+
+    for (const photo of sortedByOrder(savedPhotos)) {
+        const option = options.find((item) => item.values.some((value) => sameId(value.id, photo.shop_item_variant_value_id)));
+        if (!option) continue;
+
+        const optionId = String(option.id);
+        const valueId = String(photo.shop_item_variant_value_id);
+        assignments[optionId] ??= {};
+        assignments[optionId][valueId] ??= [];
+        assignments[optionId][valueId].push(String(photo.shop_item_media_id));
+    }
+
+    return {
+        enabled: Boolean(settings.photos_enabled),
+        selectedOptionId,
+        mainValueIds: defaultValue ? { [selectedOptionId]: String(defaultValue.id) } : {},
+        assignments,
+    };
+}
+
 function combinationKey(selections) {
     return JSON.stringify(selections
         .map(({ option, value }) => [String(option.id), String(value.id)])
@@ -244,7 +309,7 @@ function PhotoPicker({ valueLabel, images, selectedImageIds, onToggle, onCancel,
     );
 }
 
-function PhotosSection({ options, images, onOpenImage }) {
+function PhotosSection({ options, images, restoredState, onOpenImage }) {
     const { t } = useTranslation();
     const [areVariantPhotosEnabled, setAreVariantPhotosEnabled] = useState(false);
     const [selectedOptionId, setSelectedOptionId] = useState('');
@@ -262,6 +327,15 @@ function PhotosSection({ options, images, onOpenImage }) {
     const mainValueId = selectedValues.some((value) => String(value.id) === configuredMainValueId)
         ? configuredMainValueId
         : String(selectedValues[0]?.id ?? '');
+
+    useEffect(() => {
+        setAreVariantPhotosEnabled(restoredState.enabled);
+        setSelectedOptionId(restoredState.selectedOptionId);
+        setMainValueIds(restoredState.mainValueIds);
+        setPhotoAssignments(restoredState.assignments);
+        setOpenPicker(null);
+        setDraftImageIds([]);
+    }, [restoredState]);
 
     useEffect(() => {
         setSelectedOptionId((current) => options.length === 0 || options.some((option) => String(option.id) === current)
@@ -479,6 +553,7 @@ export default function ProductVariantsModal({ isOpen, onClose, productId = null
     const [variantsError, setVariantsError] = useState('');
     const [variantsRequestVersion, setVariantsRequestVersion] = useState(0);
     const [variantData, setVariantData] = useState({});
+    const [restoredPhotoState, setRestoredPhotoState] = useState(emptyPhotoState);
     const [lightboxIndex, setLightboxIndex] = useState(0);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
     const images = useMemo(() => media.filter((item) => item.type === 'image'), [media]);
@@ -506,7 +581,15 @@ export default function ProductVariantsModal({ isOpen, onClose, productId = null
             .then((loadedVariants) => {
                 if (!isCurrentRequest) return;
 
-                setAddedOptions(restoreVariantOptions(loadedVariants.options, attributesRef.current));
+                const restoredOptions = restoreVariantOptions(loadedVariants.options, attributesRef.current);
+                const restoredVariants = restoreVariantData(loadedVariants.variants, restoredOptions);
+                const settings = loadedVariants.settings ?? {};
+
+                setAddedOptions(restoredOptions);
+                setVariantData(restoredVariants);
+                setSeparatePrices(Boolean(settings.individual_prices_enabled));
+                setAreSeparatePricesInitialized((loadedVariants.variants ?? []).length > 0 || Boolean(settings.individual_prices_enabled));
+                setRestoredPhotoState(restorePhotoState(settings, loadedVariants.photos, restoredOptions));
             })
             .catch((error) => {
                 if (!isCurrentRequest) return;
@@ -572,20 +655,20 @@ export default function ProductVariantsModal({ isOpen, onClose, productId = null
     }, [isLightboxOpen, isOpen, onClose]);
 
     useEffect(() => {
-        if (combinations.length === 0) return;
+        if (isVariantsLoading || combinations.length === 0) return;
 
         setVariantData((current) => {
             let next = current;
 
-            for (const combination of combinations) {
+            for (const [sortOrder, combination] of combinations.entries()) {
                 if (Object.hasOwn(current, combination.key)) continue;
                 if (next === current) next = { ...current };
-                next[combination.key] = { price: normalizedBasePrice, stock: '0', sku: '', active: true };
+                next[combination.key] = { price: normalizedBasePrice, stock: '0', sku: '', active: true, sortOrder };
             }
 
             return next;
         });
-    }, [combinations, normalizedBasePrice]);
+    }, [combinations, isVariantsLoading, normalizedBasePrice]);
 
     if (!isOpen) return null;
 
@@ -694,7 +777,7 @@ export default function ProductVariantsModal({ isOpen, onClose, productId = null
                     {showOptionPicker && <AttributePicker attributes={attributes} addedAttributeIds={addedAttributeIds} isLoading={isAttributesLoading} error={attributesError} onAdd={addAttribute} onClose={() => setShowOptionPicker(false)} />}
                     {addedOptions.map((option) => <OptionRow key={option.id} option={option} onAddValue={addOptionValue} onDeleteOption={removeAttribute} onDeleteValue={(optionId, valueId, optionName, valueName) => setDeleteWarning({ optionId, valueId, optionName, valueName })} />)}
                     {deleteWarning && <div className="flex items-start gap-3 rounded-[10px] border border-[#e5c3bd] bg-[#fff7f5] p-[11px_13px] text-[#a6402b]" role="alert"><TrashIcon /><p className="m-0 flex-1 text-[11px] leading-[1.45]"><strong className="block text-[12px] text-[#633b33]">Значение «{deleteWarning.valueName}» связано с модификациями</strong>Модификации с этим значением опции «{deleteWarning.optionName}» будут удалены вместе с ним.</p><div className="flex shrink-0 gap-2 max-sm:flex-col"><button type="button" className="rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 text-[11px] font-bold text-[#5d554f]" onClick={() => setDeleteWarning(null)}>Отмена</button><button type="button" className="rounded-[7px] border border-[#d79d8e] bg-white px-2 py-1.5 text-[11px] font-bold text-[#a6402b]" onClick={() => removeOptionValue(deleteWarning.optionId, deleteWarning.valueId)}>Удалить значение</button></div></div>}
-                    <PhotosSection options={addedOptions} images={images} onOpenImage={(index) => { setLightboxIndex(index); setIsLightboxOpen(true); }} />
+                    <PhotosSection options={addedOptions} images={images} restoredState={restoredPhotoState} onOpenImage={(index) => { setLightboxIndex(index); setIsLightboxOpen(true); }} />
                     <VariantsSection combinations={combinations} totalCount={totalCount} variantData={variantData} basePrice={normalizedBasePrice} separatePrices={separatePrices} showPriceSettings={addedOptions.length > 0} onTogglePrices={toggleSeparatePrices} onVariantChange={updateVariant} />
                     </>}
                 </div></div>
