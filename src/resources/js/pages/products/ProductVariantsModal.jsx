@@ -167,7 +167,7 @@ function PhotosSection({ mainColor, onMainColorChange }) {
     );
 }
 
-function VariantsSection({ combinations, totalCount, variantData, separatePrices, onTogglePrices, onVariantChange }) {
+function VariantsSection({ combinations, totalCount, variantData, basePrice, separatePrices, onTogglePrices, onVariantChange }) {
     const [selected, setSelected] = useState([]);
     const combinationKeys = combinations.map((combination) => combination.key);
     const visibleSelected = selected.filter((key) => combinationKeys.includes(key));
@@ -179,17 +179,17 @@ function VariantsSection({ combinations, totalCount, variantData, separatePrices
 
     return (
         <>
-            <section className="grid grid-cols-[48px_minmax(0,1fr)_minmax(190px,240px)] items-center gap-3 rounded-[12px] border border-[#e0b292] bg-[#fffaf7] p-[14px_16px] max-sm:grid-cols-[48px_minmax(0,1fr)]">
-                <button type="button" className="switch-control switch-control--strong" role="switch" aria-checked={separatePrices} onClick={onTogglePrices} aria-label="Использовать отдельные цены"><i aria-hidden="true"><Icon size={14}><path d="m20 6-11 11-5-5" /></Icon></i></button><div><strong className="block text-[13px]">Цены отличаются для разных вариантов</strong><small className="mt-[3px] block text-[12px] text-[#8c837c]">Выберите опцию, которая влияет на цену.</small></div><label className="flex flex-col gap-[5px] max-sm:col-span-full"><span className="text-[11px] font-bold text-[#716861]">Цена зависит от</span><select disabled={!separatePrices} className="h-[40px] rounded-[9px] border border-[#d8d0ca] bg-white px-[11px] text-[12px] font-bold disabled:bg-[#f1eeeb] disabled:text-[#9a918a]"><option>Цвет</option><option>Материал</option><option>Вся комбинация</option></select></label>
+            <section className="grid grid-cols-[48px_minmax(0,1fr)] items-center gap-3 rounded-[12px] border border-[#e0b292] bg-[#fffaf7] p-[14px_16px]">
+                <button type="button" className="switch-control switch-control--strong" role="switch" aria-checked={separatePrices} onClick={onTogglePrices} aria-label="Использовать отдельные цены"><i aria-hidden="true"><Icon size={14}><path d="m20 6-11 11-5-5" /></Icon></i></button><div><strong className="block text-[13px]">Цены отличаются для разных вариантов</strong><small className="mt-[3px] block text-[12px] text-[#8c837c]">Включите, если цвет или размер влияет на стоимость товара.</small></div>
             </section>
             {totalCount > combinationLimit && <div className="flex items-start gap-2 rounded-[10px] border border-[#ebc8a6] bg-[#fff8ed] p-[11px_13px] text-[#7c5228]"><Icon size={17} className="mt-0.5 shrink-0"><path d="M12 9v4M12 17h.01" /><path d="M10.3 3.4 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.4a2 2 0 0 0-3.4 0Z" /></Icon><p className="m-0 text-[11px] leading-[1.45]"><strong className="block text-[12px] text-[#5d4430]">Превышен лимит: {totalCount} комбинаций</strong>Созданы первые {combinationLimit}. Удалите лишние значения опций, чтобы вернуться в пределы лимита.</p></div>}
             <section className="overflow-hidden rounded-[12px] border border-[color:var(--color-border)] bg-white">
-                <header className="flex min-h-[58px] items-center justify-between gap-3 border-b border-[color:var(--color-border)] bg-[#faf8f6] px-[12px]"><div><div className="flex items-center gap-2"><strong className="text-[13px]">Модификации</strong><span className="rounded-full bg-[#eee9e5] px-2 py-1 text-[10px] font-bold text-[#746b64]">{totalCount > combinationLimit ? `${combinations.length} из ${totalCount}` : combinations.length} комбинаций</span></div><small className="text-[11px] text-[#978f88]">Комбинации автоматически обновляются при изменении опций.</small></div><button type="button" className="min-h-[32px] rounded-[8px] border border-[#d8d0ca] bg-white px-[10px] text-[12px] font-bold text-[color:var(--color-accent)]">Изменить все</button></header>
-                {visibleSelected.length > 0 && <div className="flex min-h-[46px] items-center gap-2 border-b border-[#ead6ca] bg-[#fff7f1] px-[12px] text-[11px]"><strong className="mr-auto text-[12px]">Выбрано: {visibleSelected.length}</strong><button type="button" className="rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 font-bold">Изменить цену</button><button type="button" className="rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 font-bold">Изменить остаток</button><button type="button" onClick={() => setSelectedActivity(false)} className="rounded-[7px] border border-[#e1b9ad] bg-white px-2 py-1.5 font-bold text-[#a6402b]">Отключить</button></div>}
+                <header className="flex min-h-[58px] items-center justify-between gap-3 border-b border-[color:var(--color-border)] bg-[#faf8f6] px-[12px]"><div><div className="flex items-center gap-2"><strong className="text-[13px]">Модификации</strong><span className="rounded-full bg-[#eee9e5] px-2 py-1 text-[10px] font-bold text-[#746b64]">{totalCount > combinationLimit ? `${combinations.length} из ${totalCount}` : combinations.length} комбинаций</span></div><small className="text-[11px] text-[#978f88]">Комбинации автоматически обновляются при изменении опций.</small></div><button type="button" disabled={!separatePrices} className="min-h-[32px] rounded-[8px] border border-[#d8d0ca] bg-white px-[10px] text-[12px] font-bold text-[color:var(--color-accent)] disabled:cursor-not-allowed disabled:bg-[#f1eeeb] disabled:text-[#9a918a]">Изменить все</button></header>
+                {visibleSelected.length > 0 && <div className="flex min-h-[46px] items-center gap-2 border-b border-[#ead6ca] bg-[#fff7f1] px-[12px] text-[11px]"><strong className="mr-auto text-[12px]">Выбрано: {visibleSelected.length}</strong><button type="button" disabled={!separatePrices} className="rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 font-bold disabled:cursor-not-allowed disabled:bg-[#f1eeeb] disabled:text-[#9a918a]">Изменить цену</button><button type="button" className="rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 font-bold">Изменить остаток</button><button type="button" onClick={() => setSelectedActivity(false)} className="rounded-[7px] border border-[#e1b9ad] bg-white px-2 py-1.5 font-bold text-[#a6402b]">Отключить</button></div>}
                 {combinations.length === 0 ? <div className="px-4 py-8 text-center"><strong className="block text-[12px] text-[#665e57]">Модификаций пока нет</strong><small className="mt-1 block text-[11px] text-[#978f88]">Добавьте опцию со значениями, чтобы сформировать комбинации.</small></div> : <div className="overflow-x-auto"><div className="min-w-[820px]"><div className="grid min-h-[34px] grid-cols-[34px_minmax(250px,1.5fr)_120px_100px_130px_70px] items-center gap-[8px] bg-[#f7f4f1] px-[10px] text-[10px] font-bold uppercase text-[#918981]"><input type="checkbox" className="checkbox-control" checked={allSelected} onChange={() => setSelected(allSelected ? [] : combinationKeys)} aria-label="Выбрать все" /><span>Модификация</span><span>Цена</span><span>Остаток</span><span>SKU</span><span>Активна</span></div>{combinations.map((combination) => {
                         const data = variantData[combination.key];
 
-                        return <div key={combination.key} className="grid min-h-[50px] grid-cols-[34px_minmax(250px,1.5fr)_120px_100px_130px_70px] items-center gap-[8px] border-t border-[#f0ece8] px-[10px]"><input type="checkbox" className="checkbox-control" checked={visibleSelected.includes(combination.key)} onChange={() => toggleRow(combination.key)} aria-label={`Выбрать ${combination.label}`} /><strong className="truncate text-[11px]"><i className="mr-2 inline-block h-[9px] w-[9px] rounded-full bg-[#a9683e]" />{combination.label}</strong><label className="relative"><input className="h-[32px] w-full rounded-[7px] border border-[color:var(--color-border)] px-2 pr-9 text-[11px] disabled:bg-[#f2efec]" value={data?.price ?? ''} disabled={!separatePrices} onChange={(event) => onVariantChange(combination.key, { price: event.target.value })} /><b className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-[#9a928b]">UAH</b></label><input className="h-[32px] rounded-[7px] border border-[color:var(--color-border)] px-2 text-[11px]" value={data?.stock ?? '0'} onChange={(event) => onVariantChange(combination.key, { stock: event.target.value })} /><input className="h-[32px] rounded-[7px] border border-[color:var(--color-border)] px-2 text-[11px]" value={data?.sku ?? ''} onChange={(event) => onVariantChange(combination.key, { sku: event.target.value })} /><label className="switch" aria-label={`Активность ${combination.label}`}><input className="switch__input" type="checkbox" checked={data?.active ?? true} onChange={(event) => onVariantChange(combination.key, { active: event.target.checked })} /><span className="switch__track" /></label></div>;
+                        return <div key={combination.key} className="grid min-h-[50px] grid-cols-[34px_minmax(250px,1.5fr)_120px_100px_130px_70px] items-center gap-[8px] border-t border-[#f0ece8] px-[10px]"><input type="checkbox" className="checkbox-control" checked={visibleSelected.includes(combination.key)} onChange={() => toggleRow(combination.key)} aria-label={`Выбрать ${combination.label}`} /><strong className="truncate text-[11px]"><i className="mr-2 inline-block h-[9px] w-[9px] rounded-full bg-[#a9683e]" />{combination.label}</strong><label className="relative"><input className="h-[32px] w-full rounded-[7px] border border-[color:var(--color-border)] px-2 pr-9 text-[11px] disabled:bg-[#f2efec]" value={separatePrices ? (data?.price ?? basePrice) : basePrice} disabled={!separatePrices} onChange={(event) => onVariantChange(combination.key, { price: event.target.value })} /><b className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-[#9a928b]">UAH</b></label><input className="h-[32px] rounded-[7px] border border-[color:var(--color-border)] px-2 text-[11px]" value={data?.stock ?? '0'} onChange={(event) => onVariantChange(combination.key, { stock: event.target.value })} /><input className="h-[32px] rounded-[7px] border border-[color:var(--color-border)] px-2 text-[11px]" value={data?.sku ?? ''} onChange={(event) => onVariantChange(combination.key, { sku: event.target.value })} /><label className="switch" aria-label={`Активность ${combination.label}`}><input className="switch__input" type="checkbox" checked={data?.active ?? true} onChange={(event) => onVariantChange(combination.key, { active: event.target.checked })} /><span className="switch__track" /></label></div>;
                     })}</div></div>}
             </section>
         </>
@@ -197,7 +197,8 @@ function VariantsSection({ combinations, totalCount, variantData, separatePrices
 }
 
 export default function ProductVariantsModal({ isOpen, onClose, basePrice = '' }) {
-    const [separatePrices, setSeparatePrices] = useState(true);
+    const [separatePrices, setSeparatePrices] = useState(false);
+    const [areSeparatePricesInitialized, setAreSeparatePricesInitialized] = useState(false);
     const [mainColor, setMainColor] = useState('Коньяк');
     const [showOptionPicker, setShowOptionPicker] = useState(false);
     const [deleteWarning, setDeleteWarning] = useState(null);
@@ -317,6 +318,28 @@ export default function ProductVariantsModal({ isOpen, onClose, basePrice = '' }
             },
         }));
     };
+    const toggleSeparatePrices = () => {
+        if (!separatePrices && !areSeparatePricesInitialized) {
+            setVariantData((current) => {
+                const next = { ...current };
+
+                for (const combination of combinations) {
+                    next[combination.key] = {
+                        stock: '0',
+                        sku: '',
+                        active: true,
+                        ...current[combination.key],
+                        price: normalizedBasePrice,
+                    };
+                }
+
+                return next;
+            });
+            setAreSeparatePricesInitialized(true);
+        }
+
+        setSeparatePrices((current) => !current);
+    };
     return (
         <div className="modal-overlay" role="presentation" onMouseDown={onClose}>
             <section className="modal-dialog flex h-[min(900px,calc(100vh-40px))] !w-[min(1380px,100%)] flex-col bg-[#fbfaf8] max-sm:h-full max-sm:!w-full" role="dialog" aria-modal="true" aria-labelledby="variant-manager-title" onMouseDown={(event) => event.stopPropagation()}>
@@ -327,7 +350,7 @@ export default function ProductVariantsModal({ isOpen, onClose, basePrice = '' }
                     {addedOptions.map((option) => <OptionRow key={option.id} option={option} onAddValue={addOptionValue} onDeleteOption={removeAttribute} onDeleteValue={(optionId, valueId, optionName, valueName) => setDeleteWarning({ optionId, valueId, optionName, valueName })} />)}
                     {deleteWarning && <div className="flex items-start gap-3 rounded-[10px] border border-[#e5c3bd] bg-[#fff7f5] p-[11px_13px] text-[#a6402b]" role="alert"><TrashIcon /><p className="m-0 flex-1 text-[11px] leading-[1.45]"><strong className="block text-[12px] text-[#633b33]">Значение «{deleteWarning.valueName}» связано с модификациями</strong>Модификации с этим значением опции «{deleteWarning.optionName}» будут удалены вместе с ним.</p><div className="flex shrink-0 gap-2 max-sm:flex-col"><button type="button" className="rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 text-[11px] font-bold text-[#5d554f]" onClick={() => setDeleteWarning(null)}>Отмена</button><button type="button" className="rounded-[7px] border border-[#d79d8e] bg-white px-2 py-1.5 text-[11px] font-bold text-[#a6402b]" onClick={() => removeOptionValue(deleteWarning.optionId, deleteWarning.valueId)}>Удалить значение</button></div></div>}
                     <PhotosSection mainColor={mainColor} onMainColorChange={setMainColor} />
-                    <VariantsSection combinations={combinations} totalCount={totalCount} variantData={variantData} separatePrices={separatePrices} onTogglePrices={() => setSeparatePrices((current) => !current)} onVariantChange={updateVariant} />
+                    <VariantsSection combinations={combinations} totalCount={totalCount} variantData={variantData} basePrice={normalizedBasePrice} separatePrices={separatePrices} onTogglePrices={toggleSeparatePrices} onVariantChange={updateVariant} />
                 </div></div>
                 <footer className="flex min-h-[76px] shrink-0 items-center gap-3 border-t border-[color:var(--color-border)] bg-white px-7 py-[11px] max-sm:grid max-sm:grid-cols-2 max-sm:px-[14px]"><div className="flex flex-1 flex-col max-sm:col-span-full"><span className="text-[12px] font-bold">{addedOptions.length} опции · {selectedValuesCount} значений</span><small className="text-[11px] text-[#928981]">Модификации появятся в карточке товара только после сохранения.</small></div><button type="button" className="button button--secondary min-h-[42px] justify-center" onClick={onClose}>Закрыть</button><button type="button" className="button button--primary min-h-[42px] justify-center" onClick={onClose}><SaveIcon size={16} />Сохранить модификации</button></footer>
             </section>
