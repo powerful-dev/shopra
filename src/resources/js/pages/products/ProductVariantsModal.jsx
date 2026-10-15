@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import ImageLightbox from '../../components/admin/ImageLightbox';
 import Select from '../../components/form/Select';
 import CloseIcon from '../../components/icons/CloseIcon';
@@ -50,9 +51,9 @@ function Icon({ children, size = 16, className = '' }) {
     return <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>;
 }
 
-function PhotoTile({ image, onOpen }) {
+function PhotoTile({ image, onOpen, ariaLabel }) {
     return (
-        <button type="button" data-media-id={image.id} onClick={onOpen} className="relative h-[66px] w-[54px] shrink-0 cursor-zoom-in overflow-hidden rounded-[8px] border border-[#d9d1cb] bg-[#f5f1ee] p-0" aria-label="Открыть фотографию">
+        <button type="button" data-media-id={image.id} onClick={onOpen} className="relative h-[66px] w-[54px] shrink-0 cursor-zoom-in overflow-hidden rounded-[8px] border border-[#d9d1cb] bg-[#f5f1ee] p-0" aria-label={ariaLabel}>
             <img className="h-full w-full object-cover" src={image.small_url} alt="" draggable={false} />
         </button>
     );
@@ -142,13 +143,42 @@ function AttributePicker({ attributes, addedAttributeIds, isLoading, error, onAd
     );
 }
 
+function PhotoPicker({ valueLabel, images, selectedImageIds, onToggle, onCancel, onApply, t }) {
+    const selectedImageIdSet = new Set(selectedImageIds);
+
+    return (
+        <section className="mt-[10px] rounded-[10px] border border-[#dfc0ac] bg-white p-[10px] shadow-[0_12px_28px_rgba(70,45,29,.07)]">
+            <header className="flex items-start justify-between gap-3">
+                <p className="m-0 flex flex-col"><strong className="text-[12px]">{t('productEditPage.variantPhotos.pickerTitle', { value: valueLabel })}</strong><small className="mt-0.5 text-[11px] text-[#91877f]">{t('productEditPage.variantPhotos.pickerHint')}</small></p>
+                <button type="button" onClick={onCancel} className="grid h-[27px] w-[27px] shrink-0 place-items-center rounded-[7px] border-0 bg-[#f7f3f0] text-[#81766e]" aria-label={t('productEditPage.variantPhotos.closePicker')}><CloseIcon width={14} height={14} /></button>
+            </header>
+            {images.length > 0 ? <div className="mt-[9px] grid grid-cols-7 gap-[6px] max-md:grid-cols-4 max-sm:grid-cols-3">
+                {images.map((image, index) => {
+                    const imageId = String(image.id);
+                    const isSelected = selectedImageIdSet.has(imageId);
+
+                    return <button key={image.id} type="button" data-media-id={image.id} aria-pressed={isSelected} aria-label={t('productEditPage.variantPhotos.selectPhoto', { number: index + 1 })} onClick={() => onToggle(imageId)} className={`relative min-w-0 cursor-pointer overflow-hidden rounded-[8px] border-2 bg-[#f4f1ee] p-0 aspect-[.8] ${isSelected ? 'border-[color:var(--color-accent)]' : 'border-transparent'}`}><img className="h-full w-full object-cover" src={image.small_url} alt="" draggable={false} /><b className="absolute bottom-1 left-1 grid h-[17px] min-w-[17px] place-items-center rounded-[5px] bg-white/95 text-[11px] text-[#594f48]">{index + 1}</b>{isSelected && <span className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-[color:var(--color-accent)] text-white"><Icon size={12}><path d="m20 6-11 11-5-5" /></Icon></span>}</button>;
+                })}
+            </div> : <p className="my-3 rounded-[8px] border border-dashed border-[#d9d0c9] px-3 py-5 text-center text-[11px] text-[#958b83]">{t('productEditPage.variantPhotos.noProductPhotos')}</p>}
+            <footer className="mt-[9px] flex items-center justify-between border-t border-[#f0ece8] pt-2 text-[11px] text-[#847a72]"><span>{t('productEditPage.variantPhotos.selectedCount', { count: selectedImageIds.length })}</span><button type="button" onClick={onApply} className="min-h-[31px] rounded-[8px] border-0 bg-[color:var(--color-accent)] px-3 text-[11px] font-bold text-white">{t('productEditPage.variantPhotos.done')}</button></footer>
+        </section>
+    );
+}
+
 function PhotosSection({ options, images, onOpenImage }) {
+    const { t } = useTranslation();
     const [areVariantPhotosEnabled, setAreVariantPhotosEnabled] = useState(false);
     const [selectedOptionId, setSelectedOptionId] = useState('');
     const [mainValueIds, setMainValueIds] = useState({});
+    const [photoAssignments, setPhotoAssignments] = useState({});
+    const [openPicker, setOpenPicker] = useState(null);
+    const [draftImageIds, setDraftImageIds] = useState([]);
     const selectedOption = options.find((option) => String(option.id) === selectedOptionId) ?? options[0] ?? null;
     const selectedOptionValue = selectedOption ? String(selectedOption.id) : '';
     const selectedValues = selectedOption?.values ?? [];
+    const selectedOptionAssignments = photoAssignments[selectedOptionValue] ?? {};
+    const assignedImageIdSet = new Set(Object.values(selectedOptionAssignments).flat());
+    const assignedImageCount = images.filter((image) => assignedImageIdSet.has(String(image.id))).length;
     const configuredMainValueId = selectedOption ? mainValueIds[selectedOptionValue] : null;
     const mainValueId = selectedValues.some((value) => String(value.id) === configuredMainValueId)
         ? configuredMainValueId
@@ -160,6 +190,30 @@ function PhotosSection({ options, images, onOpenImage }) {
             : String(options[0].id));
     }, [options]);
 
+    useEffect(() => {
+        const orderedImageIds = images.map((image) => String(image.id));
+
+        setPhotoAssignments((current) => {
+            let hasChanges = false;
+            const next = Object.fromEntries(Object.entries(current).map(([optionId, valueAssignments]) => [
+                optionId,
+                Object.fromEntries(Object.entries(valueAssignments).map(([valueId, assignedIds]) => {
+                    const assignedIdSet = new Set(assignedIds);
+                    const nextIds = orderedImageIds.filter((imageId) => assignedIdSet.has(imageId));
+                    if (nextIds.length !== assignedIds.length || nextIds.some((imageId, index) => imageId !== assignedIds[index])) hasChanges = true;
+                    return [valueId, nextIds];
+                })),
+            ]));
+
+            return hasChanges ? next : current;
+        });
+        setDraftImageIds((current) => {
+            const selectedIdSet = new Set(current);
+            const next = orderedImageIds.filter((imageId) => selectedIdSet.has(imageId));
+            return next.length !== current.length || next.some((imageId, index) => imageId !== current[index]) ? next : current;
+        });
+    }, [images]);
+
     const setMainValue = (valueId) => {
         if (!selectedOption) return;
 
@@ -168,25 +222,70 @@ function PhotosSection({ options, images, onOpenImage }) {
             [selectedOptionValue]: String(valueId),
         }));
     };
+    const openPhotoPicker = (valueId) => {
+        const normalizedValueId = String(valueId);
+        setOpenPicker({ optionId: selectedOptionValue, valueId: normalizedValueId });
+        setDraftImageIds([...(photoAssignments[selectedOptionValue]?.[normalizedValueId] ?? [])]);
+    };
+    const closePhotoPicker = () => {
+        setOpenPicker(null);
+        setDraftImageIds([]);
+    };
+    const toggleDraftImage = (imageId) => {
+        setDraftImageIds((current) => current.includes(imageId)
+            ? current.filter((currentId) => currentId !== imageId)
+            : [...current, imageId]);
+    };
+    const applyPhotoPicker = () => {
+        if (!openPicker) return;
+
+        const selectedImageIdSet = new Set(draftImageIds);
+        const orderedImageIds = images.map((image) => String(image.id)).filter((imageId) => selectedImageIdSet.has(imageId));
+        setPhotoAssignments((current) => ({
+            ...current,
+            [openPicker.optionId]: {
+                ...current[openPicker.optionId],
+                [openPicker.valueId]: orderedImageIds,
+            },
+        }));
+        closePhotoPicker();
+    };
+    const removeAssignedPhoto = (valueId, imageId) => {
+        const normalizedValueId = String(valueId);
+        const normalizedImageId = String(imageId);
+        setPhotoAssignments((current) => ({
+            ...current,
+            [selectedOptionValue]: {
+                ...current[selectedOptionValue],
+                [normalizedValueId]: (current[selectedOptionValue]?.[normalizedValueId] ?? []).filter((assignedId) => assignedId !== normalizedImageId),
+            },
+        }));
+        if (openPicker?.optionId === selectedOptionValue && openPicker.valueId === normalizedValueId) {
+            setDraftImageIds((current) => current.filter((assignedId) => assignedId !== normalizedImageId));
+        }
+    };
 
     if (options.length === 0) return null;
 
     return (
         <section className="overflow-hidden rounded-[13px] border border-[color:var(--color-border)] bg-white">
             <header className={`grid min-h-[76px] items-center gap-4 bg-[linear-gradient(100deg,#fff8f3,#fff)] px-[16px] py-3 ${areVariantPhotosEnabled ? 'grid-cols-[48px_minmax(0,1fr)_220px] border-b border-[color:var(--color-border)] max-sm:grid-cols-[48px_minmax(0,1fr)]' : 'grid-cols-[48px_minmax(0,1fr)]'}`}>
-                <button type="button" className="switch-control switch-control--strong" role="switch" aria-checked={areVariantPhotosEnabled} onClick={() => setAreVariantPhotosEnabled((current) => !current)} aria-label="Использовать фотографии вариантов"><i aria-hidden="true"><Icon size={14}><path d="m20 6-11 11-5-5" /></Icon></i></button>
-                <p className="m-0"><strong className="block text-[13px]">Фотографии вариантов</strong><small className="mt-[3px] block max-w-[620px] text-[12px] leading-[1.45] text-[#8d847d]">Показывать разные фотографии в зависимости от выбранного цвета, размера или другой опции</small></p>
-                {areVariantPhotosEnabled && <label className="flex flex-col gap-1 max-sm:col-span-full"><span className="text-[11px] font-bold text-[#716861]">Фото меняются по</span><Select className="!h-[40px] !px-[10px] !text-[12px] !font-bold" value={selectedOptionValue} onChange={(event) => setSelectedOptionId(event.target.value)}>{options.map((option) => <option key={option.id} value={String(option.id)}>{option.name}</option>)}</Select></label>}
+                <button type="button" className="switch-control switch-control--strong" role="switch" aria-checked={areVariantPhotosEnabled} onClick={() => setAreVariantPhotosEnabled((current) => !current)} aria-label={t('productEditPage.variantPhotos.toggleAria')}><i aria-hidden="true"><Icon size={14}><path d="m20 6-11 11-5-5" /></Icon></i></button>
+                <p className="m-0"><strong className="block text-[13px]">{t('productEditPage.variantPhotos.title')}</strong><small className="mt-[3px] block max-w-[620px] text-[12px] leading-[1.45] text-[#8d847d]">{t('productEditPage.variantPhotos.description')}</small></p>
+                {areVariantPhotosEnabled && <label className="flex flex-col gap-1 max-sm:col-span-full"><span className="text-[11px] font-bold text-[#716861]">{t('productEditPage.variantPhotos.dependsOn')}</span><Select className="!h-[40px] !px-[10px] !text-[12px] !font-bold" value={selectedOptionValue} onChange={(event) => setSelectedOptionId(event.target.value)}>{options.map((option) => <option key={option.id} value={String(option.id)}>{option.name}</option>)}</Select></label>}
             </header>
             {areVariantPhotosEnabled && <>
-                <div className="grid grid-cols-[minmax(190px,.7fr)_minmax(0,1.3fr)_auto] items-center gap-3 border-b border-[color:var(--color-border)] bg-[#faf8f6] px-[16px] py-3 max-md:grid-cols-1"><div><strong className="block text-[12px]">Общая галерея товара</strong><small className="mt-[3px] block text-[11px] text-[#8f867f]">Загрузите фото один раз и распределите по значениям.</small></div>{images.length > 0 ? <><div className="flex gap-[7px] overflow-x-auto">{images.map((image, index) => <PhotoTile key={image.id} image={image} onOpen={() => onOpenImage(index)} />)}</div><div className="flex gap-2 text-[11px]"><span className="rounded-full bg-[#eaf4ec] px-2 py-1 font-bold text-[#3c8354]">Фотографий: {images.length}</span></div></> : <p className="col-span-2 m-0 rounded-[8px] border border-dashed border-[#d9d0c9] bg-white px-3 py-4 text-center text-[11px] text-[#958b83] max-md:col-span-1">У товара пока нет фотографий</p>}</div>
+                <div className="grid grid-cols-[minmax(190px,.7fr)_minmax(0,1.3fr)_auto] items-center gap-3 border-b border-[color:var(--color-border)] bg-[#faf8f6] px-[16px] py-3 max-md:grid-cols-1"><div><strong className="block text-[12px]">{t('productEditPage.variantPhotos.galleryTitle')}</strong><small className="mt-[3px] block text-[11px] text-[#8f867f]">{t('productEditPage.variantPhotos.galleryDescription')}</small></div>{images.length > 0 ? <><div className="flex gap-[7px] overflow-x-auto">{images.map((image, index) => <PhotoTile key={image.id} image={image} onOpen={() => onOpenImage(index)} ariaLabel={t('productEditPage.variantPhotos.openPhoto', { number: index + 1 })} />)}</div><div className="flex gap-2 text-[11px]"><span className="rounded-full bg-[#eaf4ec] px-2 py-1 font-bold text-[#3c8354]">{t('productEditPage.variantPhotos.assignedCount', { count: assignedImageCount })}</span><span className="rounded-full bg-[#fff0e7] px-2 py-1 font-bold text-[color:var(--color-accent)]">{t('productEditPage.variantPhotos.unassignedCount', { count: images.length - assignedImageCount })}</span></div></> : <p className="col-span-2 m-0 rounded-[8px] border border-dashed border-[#d9d0c9] bg-white px-3 py-4 text-center text-[11px] text-[#958b83] max-md:col-span-1">{t('productEditPage.variantPhotos.noProductPhotos')}</p>}</div>
                 <div className="flex flex-col gap-[9px] p-[13px_14px]">
-                    {selectedOption && selectedValues.length === 0 && <div className="rounded-[11px] border border-dashed border-[#d9d0c9] bg-[#fcfbfa] px-4 py-8 text-center"><strong className="block text-[12px] text-[#665e57]">Добавьте значения опции, чтобы назначить фотографии</strong></div>}
+                    {selectedOption && selectedValues.length === 0 && <div className="rounded-[11px] border border-dashed border-[#d9d0c9] bg-[#fcfbfa] px-4 py-8 text-center"><strong className="block text-[12px] text-[#665e57]">{t('productEditPage.variantPhotos.noOptionValues')}</strong></div>}
                     {selectedValues.map((value) => {
                         const valueId = String(value.id);
                         const isMain = valueId === mainValueId;
+                        const assignedImageIdSet = new Set(selectedOptionAssignments[valueId] ?? []);
+                        const assignedImages = images.filter((image) => assignedImageIdSet.has(String(image.id)));
+                        const pickerIsOpen = openPicker?.optionId === selectedOptionValue && openPicker.valueId === valueId;
 
-                        return <article key={value.id} className={`rounded-[11px] border p-[11px] ${isMain ? 'border-[#dcae92] bg-[#fffaf7]' : 'border-[color:var(--color-border)] bg-[#fcfbfa]'}`}><header className="flex items-center justify-between gap-3"><div className="flex items-center gap-2"><i className="h-[14px] w-[14px] rounded-full border-2 border-white bg-[#d8d0ca] shadow-[0_0_0_1px_#d6cec8]" /><span><strong className="block text-[12px]">{value.label}</strong><small className="text-[11px] text-[#928981]">Фотографии не распределены</small></span></div><button type="button" onClick={() => setMainValue(valueId)} className={`inline-flex min-h-[30px] items-center gap-[5px] rounded-[8px] px-2 text-[11px] font-bold ${isMain ? 'border border-[#c4531c] bg-[#fff4ec] text-[color:var(--color-accent)]' : 'border border-transparent bg-transparent text-[#8d837b]'}`}><Icon size={13} className={isMain ? 'fill-current' : ''}><path d="m12 2.5 3 6 6.5.9-4.7 4.6 1.1 6.5-5.9-3.1-5.9 3.1 1.1-6.5-4.7-4.6 6.5-.9 3-6Z" /></Icon>{isMain ? 'Основное значение' : 'Сделать основным'}</button></header><div className="mt-[9px] flex min-h-[66px] gap-[7px] overflow-x-auto"><p className="m-0 inline-flex min-w-[170px] items-center justify-center rounded-[8px] border border-dashed border-[#d9d0c9] px-3 text-[11px] text-[#958b83]">Фото не назначены</p><button type="button" className="inline-flex min-w-[118px] items-center justify-center gap-[6px] rounded-[8px] border border-dashed border-[#d0b09d] bg-white px-[10px] text-[11px] font-bold text-[color:var(--color-accent)]"><PlusIcon size={13} />Добавить фото</button></div></article>;
+                        return <article key={value.id} className={`rounded-[11px] border p-[11px] ${isMain ? 'border-[#dcae92] bg-[#fffaf7]' : 'border-[color:var(--color-border)] bg-[#fcfbfa]'}`}><header className="flex items-center justify-between gap-3"><div className="flex items-center gap-2"><i className="h-[14px] w-[14px] rounded-full border-2 border-white bg-[#d8d0ca] shadow-[0_0_0_1px_#d6cec8]" /><span><strong className="block text-[12px]">{value.label}</strong><small className="text-[11px] text-[#928981]">{assignedImages.length > 0 ? t('productEditPage.variantPhotos.valuePhotoCount', { count: assignedImages.length }) : t('productEditPage.variantPhotos.noAssignedPhotos')}</small></span></div><button type="button" onClick={() => setMainValue(valueId)} className={`inline-flex min-h-[30px] items-center gap-[5px] rounded-[8px] px-2 text-[11px] font-bold ${isMain ? 'border border-[#c4531c] bg-[#fff4ec] text-[color:var(--color-accent)]' : 'border border-transparent bg-transparent text-[#8d837b]'}`}><Icon size={13} className={isMain ? 'fill-current' : ''}><path d="m12 2.5 3 6 6.5.9-4.7 4.6 1.1 6.5-5.9-3.1-5.9 3.1 1.1-6.5-4.7-4.6 6.5-.9 3-6Z" /></Icon>{isMain ? t('productEditPage.variantPhotos.mainValue') : t('productEditPage.variantPhotos.setMainValue')}</button></header><div className="mt-[9px] flex min-h-[66px] gap-[7px] overflow-x-auto">{assignedImages.length > 0 ? assignedImages.map((image, index) => { const galleryIndex = images.findIndex((galleryImage) => galleryImage.id === image.id); return <div key={image.id} data-media-id={image.id} className="relative h-[66px] w-[54px] shrink-0 overflow-hidden rounded-[8px] border border-[#d9d1cb] bg-[#f5f1ee]"><button type="button" className="block h-full w-full cursor-zoom-in border-0 bg-transparent p-0" onClick={() => onOpenImage(galleryIndex)} aria-label={t('productEditPage.variantPhotos.openPhoto', { number: galleryIndex + 1 })}><img className="h-full w-full object-cover" src={image.small_url} alt="" draggable={false} /><b className="absolute bottom-1 left-1 grid h-[17px] min-w-[17px] place-items-center rounded-[5px] bg-white/95 text-[11px] text-[#594f48]">{index + 1}</b></button><button type="button" onClick={() => removeAssignedPhoto(valueId, image.id)} className="absolute right-[3px] top-[3px] grid h-[19px] w-[19px] place-items-center rounded-full border-0 bg-white/95 text-[#766b63]" aria-label={t('productEditPage.variantPhotos.removePhoto', { value: value.label })}><CloseIcon width={11} height={11} /></button></div>; }) : <p className="m-0 inline-flex min-w-[170px] items-center justify-center rounded-[8px] border border-dashed border-[#d9d0c9] px-3 text-[11px] text-[#958b83]">{t('productEditPage.variantPhotos.noAssignedPhotos')}</p>}<button type="button" onClick={() => openPhotoPicker(valueId)} className="inline-flex min-w-[118px] items-center justify-center gap-[6px] rounded-[8px] border border-dashed border-[#d0b09d] bg-white px-[10px] text-[11px] font-bold text-[color:var(--color-accent)]"><PlusIcon size={13} />{t('productEditPage.variantPhotos.addPhoto')}</button></div>{pickerIsOpen && <PhotoPicker valueLabel={value.label} images={images} selectedImageIds={draftImageIds} onToggle={toggleDraftImage} onCancel={closePhotoPicker} onApply={applyPhotoPicker} t={t} />}</article>;
                     })}
                 </div>
             </>}

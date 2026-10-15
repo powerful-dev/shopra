@@ -371,6 +371,32 @@
             "noVideosRemaining": "No more videos can be added · you can still add {{images}}",
             "noMediaRemaining": "No more photos or videos can be added",
             "configLoadError": "Unable to load media file limits."
+        },
+        "variantPhotos": {
+            "toggleAria": "Use variant photos",
+            "title": "Variant photos",
+            "description": "Show different photos depending on the selected color, size, or another option",
+            "dependsOn": "Photos change by",
+            "galleryTitle": "Product gallery",
+            "galleryDescription": "Upload photos once and assign them to option values.",
+            "assignedCount": "Photos assigned: {{count}}",
+            "unassignedCount": "Photos unassigned: {{count}}",
+            "noProductPhotos": "This product has no photos yet",
+            "noOptionValues": "Add option values to assign photos",
+            "valuePhotoCount_one": "{{count}} photo",
+            "valuePhotoCount_other": "{{count}} photos",
+            "noAssignedPhotos": "No photos assigned",
+            "mainValue": "Main value",
+            "setMainValue": "Set as main",
+            "addPhoto": "Add photo",
+            "pickerTitle": "Photos for “{{value}}”",
+            "pickerHint": "You can select multiple photos. The first photo will be the main one for this value.",
+            "closePicker": "Close photo selection",
+            "selectPhoto": "Select photo {{number}}",
+            "removePhoto": "Remove photo from “{{value}}”",
+            "openPhoto": "Open photo {{number}}",
+            "selectedCount": "Selected: {{count}}",
+            "done": "Done"
         }
     },
     "imageLightbox": {
