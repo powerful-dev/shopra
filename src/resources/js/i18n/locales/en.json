@@ -372,6 +372,21 @@
             "noMediaRemaining": "No more photos or videos can be added",
             "configLoadError": "Unable to load media file limits."
         },
+        "improvements": {
+            "title": "What to improve",
+            "complete": "The product card meets every completeness criterion.",
+            "criteria": {
+                "name": "Enter a product name",
+                "price": "Enter a valid price",
+                "category": "Choose a category",
+                "first-photo": "Add a product photo",
+                "photo-gallery": "Add at least 3 product photos",
+                "description": "Add a meaningful description",
+                "attributes": "Fill in at least one attribute",
+                "seo-title": "Add an SEO title",
+                "seo-description": "Add an SEO description"
+            }
+        },
         "variantBulk": {
             "selectedCount": "Selected: {{count}}",
             "selectAll": "Select all variants",
