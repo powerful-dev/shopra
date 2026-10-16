@@ -22,6 +22,14 @@ const emptyValueFor = (attribute) => {
 
 const normalizeRowOrder = (rows) => rows.map((row, sortOrder) => ({ ...row, sortOrder }));
 
+const rowHasValue = (row) => row.attributeId !== null && row.attributeId !== undefined && (
+    Array.isArray(row.value)
+        ? row.value.length > 0
+        : typeof row.value === 'boolean'
+            ? true
+            : String(row.value ?? '').trim().length > 0
+);
+
 const rowsFromSavedAttributes = (savedAttributes) => normalizeRowOrder(
     [...savedAttributes]
         .sort((left, right) => left.sort_order - right.sort_order || left.id - right.id)
@@ -39,7 +47,7 @@ const mergeAttributes = (current, savedAttributes) => sortAttributes([
         .filter((attribute) => attribute && !current.some((item) => item.id === attribute.id)),
 ]);
 
-const ProductAttributesSection = forwardRef(function ProductAttributesSection({ productId }, ref) {
+const ProductAttributesSection = forwardRef(function ProductAttributesSection({ productId, onFilledChange }, ref) {
     const [attributes, setAttributes] = useState([]);
     const [rows, setRows] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -142,6 +150,10 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
 
         return () => controller.abort();
     }, [productId]);
+
+    useEffect(() => {
+        onFilledChange?.(rows.some(rowHasValue));
+    }, [onFilledChange, rows]);
 
     useImperativeHandle(ref, () => ({
         preserveForProduct: (savedProductId) => {

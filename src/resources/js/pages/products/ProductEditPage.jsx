@@ -38,6 +38,7 @@ import { getCurrencySettings } from '../../services/settings';
 import useFileDropZone from '../../hooks/useFileDropZone';
 import useScrollSpy from '../../hooks/useScrollSpy';
 import { formatMediaExtensions } from '../../utils/media';
+import calculateProductCompleteness from '../../utils/productCompleteness';
 import { buildShopGroupOptions } from '../../utils/shopGroups';
 import CategoriesModal from './CategoriesModal';
 import CurrencySettingsModal from './CurrencySettingsModal';
@@ -137,6 +138,7 @@ export default function ProductEditPage() {
     const [currencyStatus, setCurrencyStatus] = useState('loading');
     const [isDeleting, setIsDeleting] = useState(false);
     const [media, setMedia] = useState([]);
+    const [hasFilledAttribute, setHasFilledAttribute] = useState(false);
     const [productCategories, setProductCategories] = useState([]);
     const [isCategorySelectOpen, setIsCategorySelectOpen] = useState(false);
     const [categoryToAddId, setCategoryToAddId] = useState(null);
@@ -520,6 +522,42 @@ export default function ProductEditPage() {
         ? null
         : shopGroupOptions.find((option) => idsMatch(option.value, form.shop_group_id))
             ?? productCategories.find((category) => idsMatch(category.id, form.shop_group_id));
+    const categoryIds = new Set([
+        form.shop_group_id,
+        ...productCategories.map((category) => category.id),
+    ].filter((categoryId) => categoryId !== null && categoryId !== undefined));
+    const imageCount = media.filter((item) => item.type === 'image').length;
+    const completeness = calculateProductCompleteness({
+        name: form.name,
+        price: form.price,
+        categoryCount: categoryIds.size,
+        photoCount: imageCount,
+        description: form.description,
+        hasFilledAttribute,
+        seoTitle: form.seo_title,
+        seoDescription: form.seo_description,
+    });
+    const normalizedPrice = String(form.price ?? '').replace(/\s/g, '').replace(',', '.');
+    const normalizedQuantity = String(form.quantity ?? '').trim();
+    const priceValue = normalizedPrice === '' ? Number.NaN : Number(normalizedPrice);
+    const quantityValue = normalizedQuantity === '' ? Number.NaN : Number(normalizedQuantity);
+    const hasRequiredQuantity = variantsSummary.hasVariants
+        ? variantsSummaryStatus === 'loaded' && Number.isFinite(variantsSummary.activeQuantity)
+        : Number.isInteger(quantityValue) && quantityValue >= 0;
+    const isReadyForSale = form.name.trim().length > 0
+        && Number.isFinite(priceValue)
+        && priceValue >= 0
+        && Boolean(form.currency)
+        && imageCount > 0
+        && hasRequiredQuantity;
+    const completenessTone = {
+        low: { color: '#b7483f', label: 'Низкая заполненность' },
+        medium: { color: '#b77a2f', label: 'Средняя заполненность' },
+        high: { color: 'var(--color-success)', label: 'Высокая заполненность' },
+    }[completeness.level];
+    const missingCriteriaLabel = completeness.missingCriteria.length === 0
+        ? 'Все критерии заполнены.'
+        : `Не выполнено ${formatRussianCount(completeness.missingCriteria.length, 'критерий', 'критерия', 'критериев')}`;
 
     return (
         <div>
@@ -549,8 +587,17 @@ export default function ProductEditPage() {
             />
 
             <section className="mb-5 flex items-center gap-4 rounded-[14px] border border-[#eadfd7] bg-[#fffaf6] p-4 max-sm:items-start">
-                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[conic-gradient(var(--color-accent)_40%,#eadfd7_0)]"><span className="grid h-[38px] w-[38px] place-items-center rounded-full bg-white text-[11px] font-[760]">40%</span></div>
-                <div className="min-w-0 flex-1"><strong className="block text-[13px]">Уже можно продавать</strong><small className="mt-1 block text-[12px] text-[color:var(--color-secondary)]">Заполните ещё 3 раздела, чтобы карточка выглядела убедительнее.</small></div>
+                <div
+                    className="grid h-12 w-12 shrink-0 place-items-center rounded-full"
+                    style={{ background: `conic-gradient(${completenessTone.color} ${completeness.score}%, #eadfd7 0)` }}
+                    aria-label={`Карточка заполнена на ${completeness.score}%`}
+                >
+                    <span className="grid h-[38px] w-[38px] place-items-center rounded-full bg-white text-[11px] font-[760]">{completeness.score}%</span>
+                </div>
+                <div className="min-w-0 flex-1">
+                    <strong className="block text-[13px]">{isReadyForSale ? 'Уже можно продавать' : 'Заполните обязательные поля'}</strong>
+                    <small className="mt-1 block text-[12px] text-[color:var(--color-secondary)]">{completenessTone.label}. {missingCriteriaLabel}</small>
+                </div>
                 <div className="flex gap-[7px] max-md:hidden">
                     {isNew ? (
                         <StatusActions status={form.status} isNew isSubmitting={isSubmitting} onSave={saveProduct} />
@@ -666,7 +713,7 @@ export default function ProductEditPage() {
                         </label>
                     </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title="Характеристики" icon={ControlsIcon}>
-                        <ProductAttributesSection ref={attributesSectionRef} productId={isNew ? null : id} />
+                        <ProductAttributesSection ref={attributesSectionRef} productId={isNew ? null : id} onFilledChange={setHasFilledAttribute} />
                     </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.seo = element; }} id="seo" title="SEO" icon={LinkIcon}>
                         <SeoFields
