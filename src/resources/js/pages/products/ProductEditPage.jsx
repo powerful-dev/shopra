@@ -19,7 +19,6 @@ import LayersIcon from '../../components/icons/LayersIcon';
 import DraftProductsIcon from '../../components/icons/DraftProductsIcon';
 import ControlsIcon from '../../components/icons/ControlsIcon';
 import LinkIcon from '../../components/icons/LinkIcon';
-import ShippingIcon from '../../components/icons/ShippingIcon';
 import CategoriesIcon from '../../components/icons/CategoriesIcon';
 import PlusIcon from '../../components/icons/PlusIcon';
 import EyeIcon from '../../components/icons/EyeIcon';
@@ -54,7 +53,6 @@ const sectionLinks = [
     ['variants', 'Варианты', LayersIcon],
     ['description', 'Описание', DraftProductsIcon],
     ['features', 'Характеристики', ControlsIcon],
-    ['delivery', 'Доставка', ShippingIcon],
     ['seo', 'SEO', LinkIcon],
 ];
 
@@ -671,7 +669,6 @@ export default function ProductEditPage() {
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title="Характеристики" icon={ControlsIcon}>
                         <ProductAttributesSection ref={attributesSectionRef} productId={isNew ? null : id} />
                     </AccordionSection>
-                    <AccordionSection sectionRef={(element) => { sectionRefs.current.delivery = element; }} id="delivery" title="Доставка" icon={ShippingIcon}><Field label="Группа доставки"><select className={fieldClass} defaultValue="standard"><option value="standard">Стандартная доставка</option><option>Крупногабаритный товар</option><option>Самовывоз</option></select></Field></AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.seo = element; }} id="seo" title="SEO" icon={LinkIcon}>
                         <SeoFields
                             title={form.seo_title}
@@ -1470,7 +1467,7 @@ function ProductAside() {
         <aside className="space-y-4 xl:sticky xl:top-[calc(var(--header-height)+24px)]">
             <section className="rounded-[16px] border border-[color:var(--color-border)] bg-white p-4 shadow-[var(--shadow-sm)]">
                 <h2 className="mb-3 text-[13px] font-[750]">Что улучшить</h2>
-                <div className="space-y-1 text-[12px]">{['Варианты', 'Описание', 'Характеристики', 'Доставка', 'SEO', 'Видео'].map((label) =>
+                <div className="space-y-1 text-[12px]">{['Варианты', 'Описание', 'Характеристики', 'SEO', 'Видео'].map((label) =>
                     <button key={label} className="flex min-h-[30px] w-full items-center gap-[7px] border-0 bg-transparent p-0 text-left text-[#625a54]" type="button">
                         <span className="grid h-[18px] w-[18px] place-items-center rounded-full border border-[#d8d0ca] text-[#837a73]"><PlusIcon width={12} height={12} /></span>
                         {label}<span className="ml-auto grid h-[18px] w-[18px] place-items-center rounded-full border border-[#d8d0ca] text-[#8b837d]"><CloseIcon /></span>
