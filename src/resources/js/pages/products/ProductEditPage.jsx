@@ -516,6 +516,11 @@ export default function ProductEditPage() {
         }
     };
 
+    const primaryCategory = form.shop_group_id === null
+        ? null
+        : shopGroupOptions.find((option) => idsMatch(option.value, form.shop_group_id))
+            ?? productCategories.find((category) => idsMatch(category.id, form.shop_group_id));
+
     return (
         <div>
             <Breadcrumbs
@@ -678,7 +683,13 @@ export default function ProductEditPage() {
                         />
                     </AccordionSection>
                 </form>
-                <ProductAside />
+                <ProductAside
+                    form={form}
+                    primaryCategoryName={primaryCategory?.name ?? primaryCategory?.label ?? ''}
+                    media={media}
+                    isMediaLoading={isMediaLoading}
+                    mainPhotoValue={variantsSummary.mainPhotoValue}
+                />
             </div>
 
             <ConfirmModal
@@ -1456,7 +1467,26 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasV
     );
 }
 
-function ProductAside() {
+function ProductAside({ form, primaryCategoryName, media, isMediaLoading, mainPhotoValue }) {
+    const { i18n } = useTranslation();
+    const images = media.filter((item) => item.type === 'image');
+    const mainImage = images.find((item) => item.is_main) ?? images[0] ?? null;
+    const previewImages = mainImage
+        ? [mainImage, ...images.filter((item) => item.id !== mainImage.id)]
+        : [];
+    const productName = form.name.trim();
+    const rawPrice = String(form.price ?? '').trim();
+    const numericPrice = Number(rawPrice.replace(/\s/g, '').replace(',', '.'));
+    const formattedPrice = rawPrice === ''
+        ? ''
+        : Number.isFinite(numericPrice)
+            ? new Intl.NumberFormat(i18n.resolvedLanguage ?? i18n.language, {
+                maximumFractionDigits: 2,
+            }).format(numericPrice)
+            : rawPrice;
+    const currencyLabel = supportedCurrencies.find(({ code }) => code === form.currency)?.symbol
+        ?? form.currency;
+
     return (
         <aside className="space-y-4 xl:sticky xl:top-[calc(var(--header-height)+24px)]">
             <section className="rounded-[16px] border border-[color:var(--color-border)] bg-white p-4 shadow-[var(--shadow-sm)]">
@@ -1473,20 +1503,47 @@ function ProductAside() {
                 <header className="flex items-center justify-between border-b border-[color:var(--color-border)] px-4 py-3">
                     <h2 className="text-[13px] font-[750]">Предпросмотр</h2><EyeIcon /></header>
                     <div className="p-4">
-                        <div className="relative aspect-[4/3] overflow-hidden rounded-[12px] bg-[linear-gradient(145deg,#d9ae84,#8d512b)]">
-                            <div className="absolute inset-x-[30%] bottom-[18%] top-[24%] rounded-[38%_38%_17%_17%] border border-white/40 bg-[#62391f]/50" />
+                        <div className="relative aspect-[4/3] overflow-hidden rounded-[12px] bg-[#f5f1ee]">
+                            {mainImage ? (
+                                <img
+                                    className="h-full w-full object-cover"
+                                    src={mainImage.large_url ?? mainImage.url ?? mainImage.small_url}
+                                    alt={productName || 'Основное фото товара'}
+                                />
+                            ) : (
+                                <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-[#9a918a]">
+                                    {isMediaLoading
+                                        ? <span className="h-6 w-6 animate-spin rounded-full border-2 border-[#d8cbc2] border-t-[color:var(--color-accent)]" aria-hidden="true" />
+                                        : <PhotoIcon />}
+                                    <small className="text-[11px]">{isMediaLoading ? 'Загрузка фотографий…' : 'Фото не добавлено'}</small>
+                                </span>
+                            )}
                         </div>
                         <div className="mt-[7px] grid grid-cols-5 gap-1">
-                            <span className="relative aspect-square overflow-hidden rounded-[5px] bg-[linear-gradient(145deg,#d9ae84,#8d512b)]" />
-                            <span className="relative aspect-square overflow-hidden rounded-[5px] bg-[linear-gradient(145deg,#c99a70,#714226)]" />
-                            <button type="button" className="grid aspect-square place-items-center rounded-[5px] border border-[color:var(--color-border)] bg-white p-0 text-[#766e67]"><PlusIcon /></button>
+                            {previewImages.slice(0, 4).map((image, index) => (
+                                <span key={image.id} className={`relative aspect-square overflow-hidden rounded-[5px] border bg-[#f5f1ee] ${index === 0 ? 'border-[color:var(--color-accent)]' : 'border-transparent'}`}>
+                                    <img className="h-full w-full object-cover" src={image.small_url ?? image.url ?? image.large_url} alt="" />
+                                </span>
+                            ))}
+                            <span className="grid aspect-square place-items-center rounded-[5px] border border-[color:var(--color-border)] bg-white p-0 text-[11px] font-[700] text-[#766e67]">
+                                {previewImages.length > 4 ? `+${previewImages.length - 4}` : <PlusIcon />}
+                            </span>
                         </div>
-                        <small className="mt-4 block text-[10px] uppercase tracking-[.06em] text-[#9a938d]">Городские рюкзаки</small>
-                        <strong className="mt-1 block text-[13px]">Кожаный рюкзак CITY</strong>
-                        <b className="mt-2 block text-[15px]">6 200 грн</b>
-                        <span className="mt-[7px] inline-flex items-center gap-[5px] rounded-[7px] bg-[#f7f2ee] px-[7px] py-[5px] text-[11px] font-[680] text-[#736960]">
-                            <i className="h-[9px] w-[9px] rounded-full bg-[#a9683e]" />По умолчанию: Коньяк
-                        </span>
+                        <small className={`mt-4 block text-[10px] uppercase tracking-[.06em] ${primaryCategoryName ? 'text-[#9a938d]' : 'text-[#b0a8a2]'}`}>
+                            {primaryCategoryName || 'Категория не выбрана'}
+                        </small>
+                        <strong className={`mt-1 block text-[13px] ${productName ? '' : 'text-[#9a938d]'}`}>
+                            {productName || 'Название товара не указано'}
+                        </strong>
+                        <b className={`mt-2 block text-[15px] ${formattedPrice ? '' : 'text-[#9a938d]'}`}>
+                            {formattedPrice || 'Цена не указана'}{formattedPrice && currencyLabel ? ` ${currencyLabel}` : ''}
+                        </b>
+                        {formattedPrice && !currencyLabel && <small className="mt-1 block text-[11px] text-[#9a938d]">Валюта не выбрана</small>}
+                        {mainPhotoValue && (
+                            <span className="mt-[7px] inline-flex items-center gap-[5px] rounded-[7px] bg-[#f7f2ee] px-[7px] py-[5px] text-[11px] font-[680] text-[#736960]">
+                                <i className="h-[9px] w-[9px] rounded-full bg-[#a9683e]" />По умолчанию: {mainPhotoValue}
+                            </span>
+                        )}
                     </div>
             </section>
 
