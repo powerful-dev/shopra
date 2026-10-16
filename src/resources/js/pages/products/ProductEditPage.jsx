@@ -1639,10 +1639,6 @@ function ProductAside({ form, primaryCategoryName, media, isMediaLoading, mainPh
                     </div>
             </section>
 
-            <div className="flex gap-3 rounded-[13px] border border-[#eadfd7] bg-[#fffaf6] p-3 text-[11px] text-[#70675f]">
-                <span className="text-[color:var(--color-accent)]">◇</span><p><strong className="block text-[#3d3732]">Ничего лишнего</strong>
-                <span className="mt-1 block">Основного уже достаточно. Остальное можно заполнить позже.</span></p>
-            </div>
         </aside>);
 }
 
