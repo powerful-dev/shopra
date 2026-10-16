@@ -10,6 +10,7 @@ import ImageLightbox from '../../components/admin/ImageLightbox';
 import { MediaDeleteButton, MediaDragHandle } from '../../components/admin/MediaCardControls';
 import RichTextEditor from '../../components/admin/RichTextEditor';
 import SearchableSelect from '../../components/admin/SearchableSelect';
+import SectionNavigation from '../../components/admin/SectionNavigation';
 import SeoFields from '../../components/admin/SeoFields';
 import BackIcon from '../../components/icons/BackIcon';
 import BoxIcon from '../../components/icons/BoxIcon';
@@ -35,7 +36,7 @@ import { getShopGroups } from '../../services/shopGroups';
 import { addShopItemCategory, deleteShopItemCategory, deleteShopItemMedia, getProductVariants, getShopItemMediaConfig, reorderShopItemMedia, uploadShopItemMedia } from '../../services/shopItems';
 import { getCurrencySettings } from '../../services/settings';
 import useFileDropZone from '../../hooks/useFileDropZone';
-import useSectionScroll from '../../hooks/useSectionScroll';
+import useScrollSpy from '../../hooks/useScrollSpy';
 import { formatMediaExtensions } from '../../utils/media';
 import { buildShopGroupOptions } from '../../utils/shopGroups';
 import CategoriesModal from './CategoriesModal';
@@ -47,13 +48,13 @@ import ProductVariantsModal from './ProductVariantsModal';
 const fieldClass = 'h-[43px] w-full rounded-[9px] border border-[#ddd5cf] bg-white px-[11px] text-[13px] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]';
 
 const sectionLinks = [
-    ['main', 'Основное', BoxIcon],
-    ['photo', 'Фото', PhotoIcon],
-    ['price', 'Цена и наличие', CurrencyIcon],
-    ['variants', 'Варианты', LayersIcon],
-    ['description', 'Описание', DraftProductsIcon],
-    ['features', 'Характеристики', ControlsIcon],
-    ['seo', 'SEO', LinkIcon],
+    { id: 'main', label: 'Основное', icon: BoxIcon },
+    { id: 'photo', label: 'Фото', icon: PhotoIcon },
+    { id: 'price', label: 'Цена и наличие', icon: CurrencyIcon },
+    { id: 'variants', label: 'Варианты', icon: LayersIcon },
+    { id: 'description', label: 'Описание', icon: DraftProductsIcon },
+    { id: 'features', label: 'Характеристики', icon: ControlsIcon },
+    { id: 'seo', label: 'SEO', icon: LinkIcon },
 ];
 
 const emptyVariantsSummary = () => ({
@@ -154,7 +155,11 @@ export default function ProductEditPage() {
     const skipProductLoadIdRef = useRef(null);
     const attributesSectionRef = useRef(null);
     const variantAttributesRef = useRef([]);
-    const scrollToSection = useSectionScroll({ stickyRef: sectionNavigationRef });
+    const { activeSectionId, scrollToSection } = useScrollSpy({
+        sections: sectionLinks,
+        sectionRefs,
+        navigationRef: sectionNavigationRef,
+    });
 
     const refreshShopGroupOptions = useCallback(() => {
         shopGroupsRequestRef.current?.abort();
@@ -529,25 +534,14 @@ export default function ProductEditPage() {
                 </div>
             </header>
 
-            <nav
-                ref={sectionNavigationRef}
-                className="sticky top-[var(--header-height)] z-30 mb-[13px] flex items-center gap-0.5 overflow-x-auto border-b border-[color:var(--color-border)] bg-[rgba(247,246,243,.95)] py-1 backdrop-blur max-lg:top-[62px] max-sm:-mx-[13px] max-sm:px-[13px]"
-                aria-label="Разделы товара"
-            >
-                {sectionLinks.map(([id, label, Icon], index) => (
-                    <button
-                        key={id}
-                        type="button"
-                        className={`flex min-h-[45px] shrink-0 cursor-pointer items-center gap-1.5 border-0 bg-transparent px-2.5 text-[12px] font-[680] ${index === 0 ? 'relative text-[color:var(--color-accent)] after:absolute after:inset-x-2.5 after:-bottom-1 after:h-0.5 after:rounded-full after:bg-[color:var(--color-accent)]' : 'text-[#756e67]'}`}
-                        onClick={() => scrollToSection(sectionRefs.current[id])}
-                    >
-                        <span className={`grid h-[25px] w-[25px] place-items-center rounded-lg ${index === 0 ? 'bg-[#f9eee7]' : 'bg-[#f0ebe7]'}`}>
-                            <Icon />
-                        </span>
-                        {label}
-                    </button>
-                ))}
-            </nav>
+            <SectionNavigation
+                navigationRef={sectionNavigationRef}
+                sections={sectionLinks}
+                activeSectionId={activeSectionId}
+                onSectionSelect={scrollToSection}
+                className="sticky top-[var(--header-height)] z-30 mb-[13px] border-b border-[color:var(--color-border)] bg-[rgba(247,246,243,.95)] py-1 backdrop-blur max-lg:top-[62px] max-sm:-mx-[13px] max-sm:px-[13px]"
+                ariaLabel="Разделы товара"
+            />
 
             <section className="mb-5 flex items-center gap-4 rounded-[14px] border border-[#eadfd7] bg-[#fffaf6] p-4 max-sm:items-start">
                 <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[conic-gradient(var(--color-accent)_40%,#eadfd7_0)]"><span className="grid h-[38px] w-[38px] place-items-center rounded-full bg-white text-[11px] font-[760]">40%</span></div>
