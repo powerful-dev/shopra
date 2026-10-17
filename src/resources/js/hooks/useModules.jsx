@@ -13,8 +13,6 @@ export function ModulesProvider({ children }) {
                 const { data } = await request('/api/me/modules');
 
                 setModules(data);
-
-                console.table(data);
             } catch (error) {
                 console.error('Не удалось загрузить модули:', error);
                 setModules([]);
