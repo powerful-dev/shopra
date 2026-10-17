@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { appName, supportedCurrencies } from '../../adminConfig';
 import ActionsMenu from '../../components/admin/ActionsMenu';
 import AdminCard from '../../components/admin/AdminCard';
+import AdminMobileActionBar from '../../components/admin/AdminMobileActionBar';
 import Alert from '../../components/admin/Alert';
 import Breadcrumbs from '../../components/admin/Breadcrumbs';
 import ConfirmModal from '../../components/admin/ConfirmModal';
@@ -757,7 +758,7 @@ export default function ProductEditPage() {
     };
 
     return (
-        <div>
+        <div className="max-lg:pb-[calc(48px+env(safe-area-inset-bottom))]">
             <Breadcrumbs
                 className="mb-5 max-lg:hidden"
                 currentLabel={isNew ? 'Новый товар' : form.name}
@@ -804,7 +805,7 @@ export default function ProductEditPage() {
                     <strong className="block text-[13px]">{isReadyForSale ? 'Уже можно продавать' : 'Заполните обязательные поля'}</strong>
                     <small className="mt-1 block text-[12px] text-[color:var(--color-secondary)]">{completenessTone.label}. {missingCriteriaLabel}</small>
                 </div>
-                <div className="flex gap-[7px] max-md:hidden">
+                <div className="flex gap-[7px] max-lg:hidden">
                     {isNew ? (
                         <StatusActions status={form.status} isNew isSubmitting={isSubmitting} onSave={saveProduct} />
                     ) : form.status && (
@@ -948,6 +949,14 @@ export default function ProductEditPage() {
                     onRecommendationClick={openAndScrollToSection}
                 />
             </div>
+
+            <AdminMobileActionBar>
+                {isNew ? (
+                    <StatusActions status={form.status} isNew isSubmitting={isSubmitting} onSave={saveProduct} />
+                ) : form.status && (
+                    <button className="button button--primary min-h-[39px] w-full whitespace-nowrap" type="button" disabled={isSubmitting || isStatusChanging} onClick={() => saveProduct(form.status)}><SaveIcon />Сохранить</button>
+                )}
+            </AdminMobileActionBar>
 
             <ConfirmModal
                 isOpen={isArchiveConfirmOpen}
