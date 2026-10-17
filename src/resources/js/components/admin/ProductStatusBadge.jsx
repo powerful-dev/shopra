@@ -6,13 +6,13 @@ const labelKeys = {
     archived: 'productsPage.statuses.archived',
 };
 
-export default function ProductStatusBadge({ status }) {
+export default function ProductStatusBadge({ status, label }) {
     const { t } = useTranslation();
     const normalizedStatus = labelKeys[status] ? status : 'archived';
 
     return (
         <span className={`status-badge status-badge--${normalizedStatus}`}>
-            {t(labelKeys[normalizedStatus])}
+            {label ?? t(labelKeys[normalizedStatus])}
         </span>
     );
 }

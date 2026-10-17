@@ -9,6 +9,7 @@ import Breadcrumbs from '../../components/admin/Breadcrumbs';
 import ConfirmModal from '../../components/admin/ConfirmModal';
 import ImageLightbox from '../../components/admin/ImageLightbox';
 import { MediaDeleteButton, MediaDragHandle } from '../../components/admin/MediaCardControls';
+import ProductStatusBadge from '../../components/admin/ProductStatusBadge';
 import RichTextEditor from '../../components/admin/RichTextEditor';
 import SearchableSelect from '../../components/admin/SearchableSelect';
 import SectionNavigation from '../../components/admin/SectionNavigation';
@@ -60,6 +61,11 @@ const sectionLinks = [
     { id: 'seo', label: 'SEO', icon: LinkIcon },
 ];
 const emptySectionLinks = [];
+const productStatusLabels = {
+    draft: 'Черновик',
+    active: 'Активный',
+    archived: 'В архиве',
+};
 
 const improvementPriority = [
     'name',
@@ -639,10 +645,13 @@ export default function ProductEditPage() {
             <header className="mb-5 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-3">
                     <Link to="/admin/products" className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-white text-[#615950] max-lg:h-8 max-lg:w-8" aria-label="Вернуться к товарам"><BackIcon /></Link>
-                    <div className="min-w-0">
-                        <h1 className="m-0 truncate text-[32px] font-[760] tracking-[-0.05em] max-lg:text-[19px]">
+                    <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
+                        <h1 className="m-0 min-w-0 truncate text-[32px] font-[760] tracking-[-0.05em] max-lg:text-[19px]">
                             {isNew ? 'Новый товар' : 'Редактирование товара'}
                         </h1>
+                        {!isNew && productStatusLabels[form.status] && (
+                            <ProductStatusBadge status={form.status} label={productStatusLabels[form.status]} />
+                        )}
                     </div>
                 </div>
             </header>
