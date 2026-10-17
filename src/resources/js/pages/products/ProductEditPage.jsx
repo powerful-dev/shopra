@@ -1841,7 +1841,7 @@ function ProductAside({ form, primaryCategoryName, media, isMediaLoading, mainPh
                 )}
             </section>
 
-            <section className="overflow-hidden rounded-[16px] border border-[color:var(--color-border)] bg-white shadow-[var(--shadow-sm)]">
+            <section className="overflow-hidden rounded-[16px] border border-[color:var(--color-border)] bg-white shadow-[var(--shadow-sm)] max-lg:hidden">
                 <header className="flex items-center justify-between border-b border-[color:var(--color-border)] px-4 py-3">
                     <h2 className="text-[13px] font-[750]">Предпросмотр</h2><EyeIcon /></header>
                     <div className="p-4">

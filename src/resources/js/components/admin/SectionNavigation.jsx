@@ -38,7 +38,7 @@ export default function SectionNavigation({
     return (
         <nav
             ref={setNavigationRef}
-            className={`flex items-center gap-0.5 overflow-x-auto ${className}`}
+            className={`flex min-w-0 items-center gap-0.5 overflow-x-auto overscroll-x-contain max-lg:[scrollbar-width:none] max-lg:[&::-webkit-scrollbar]:hidden ${className}`}
             aria-label={ariaLabel}
         >
             {sections.map(({ id, label, icon: Icon }) => {
