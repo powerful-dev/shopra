@@ -59,6 +59,7 @@ const sectionLinks = [
     { id: 'features', label: 'Характеристики', icon: ControlsIcon },
     { id: 'seo', label: 'SEO', icon: LinkIcon },
 ];
+const emptySectionLinks = [];
 
 const improvementPriority = [
     'name',
@@ -136,7 +137,10 @@ export default function ProductEditPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const isNew = id === 'new' || !id;
+    const currentProductId = isNew ? null : String(id);
     const [form, setForm] = useState({ name: '', price: '', old_price: '', currency: '', quantity: '', show_stock: true, description: '', seo_title: '', seo_description: '', shop_group_id: null, status: isNew ? 'draft' : null });
+    const [loadedProductId, setLoadedProductId] = useState(null);
+    const [productLoadError, setProductLoadError] = useState(null);
     const [shopGroupOptions, setShopGroupOptions] = useState([]);
     const [isShopGroupsLoading, setIsShopGroupsLoading] = useState(true);
     const [shopGroupsLoadError, setShopGroupsLoadError] = useState('');
@@ -171,8 +175,14 @@ export default function ProductEditPage() {
     const skipProductLoadIdRef = useRef(null);
     const attributesSectionRef = useRef(null);
     const variantAttributesRef = useRef([]);
+    const activeProductIdRef = useRef(currentProductId);
+    activeProductIdRef.current = currentProductId;
+    const isCurrentProductLoaded = isNew || loadedProductId === currentProductId;
+    const currentProductLoadError = productLoadError?.productId === currentProductId
+        ? productLoadError.message
+        : '';
     const { activeSectionId, scrollToSection } = useScrollSpy({
-        sections: sectionLinks,
+        sections: isCurrentProductLoaded ? sectionLinks : emptySectionLinks,
         sectionRefs,
         navigationRef: sectionNavigationRef,
     });
@@ -307,6 +317,8 @@ export default function ProductEditPage() {
     useEffect(() => {
         if (isNew) {
             createdProductIdRef.current = null;
+            setLoadedProductId(null);
+            setProductLoadError(null);
             setMedia([]);
             setProductCategories([]);
             setDeletingCategoryIds([]);
@@ -321,6 +333,8 @@ export default function ProductEditPage() {
 
         if (skipProductLoadIdRef.current === String(id)) {
             skipProductLoadIdRef.current = null;
+            setLoadedProductId(String(id));
+            setProductLoadError(null);
             setIsMediaLoading(false);
             setMediaLoadError('');
 
@@ -328,8 +342,16 @@ export default function ProductEditPage() {
         }
 
         let isActive = true;
+        setLoadedProductId(null);
+        setProductLoadError(null);
         setIsMediaLoading(true);
         setMediaLoadError('');
+        setIsActionsOpen(false);
+        setIsDeleteConfirmOpen(false);
+        setIsCategoriesOpen(false);
+        setIsCurrencySettingsOpen(false);
+        setIsVariantsOpen(false);
+        setIsCategorySelectOpen(false);
         setMedia([]);
         setProductCategories([]);
         setDeletingCategoryIds([]);
@@ -354,11 +376,16 @@ export default function ProductEditPage() {
                 });
                 setMedia(product.media ?? []);
                 setProductCategories(product.categories ?? []);
+                setLoadedProductId(String(id));
             })
             .catch((error) => {
-                console.error(error);
+                if (!isActive) return;
 
-                if (isActive) setMediaLoadError('Не удалось загрузить медиафайлы товара.');
+                console.error(error);
+                setProductLoadError({
+                    productId: String(id),
+                    message: 'Не удалось загрузить товар. Обновите страницу или вернитесь к списку товаров.',
+                });
             })
             .finally(() => {
                 if (isActive) setIsMediaLoading(false);
@@ -406,6 +433,7 @@ export default function ProductEditPage() {
 
             createdProductIdRef.current = product.id;
             skipProductLoadIdRef.current = String(product.id);
+            setLoadedProductId(String(product.id));
             attributesSectionRef.current?.preserveForProduct(product.id);
             setForm((current) => ({
                 ...current,
@@ -443,6 +471,11 @@ export default function ProductEditPage() {
     };
 
     const saveProduct = async (status) => {
+        const savingProductId = currentProductId;
+        const isSaveContextCurrent = () => activeProductIdRef.current === savingProductId;
+
+        if (!isSaveContextCurrent() || (!isNew && loadedProductId !== savingProductId)) return;
+
         setIsSubmitting(true);
 
         try {
@@ -452,6 +485,9 @@ export default function ProductEditPage() {
                 product = await createProduct(status, false, false);
             } else {
                 await csrf();
+
+                if (!isSaveContextCurrent()) return;
+
                 ({ data: product } = await request(`/api/products/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -467,6 +503,8 @@ export default function ProductEditPage() {
                     }),
                 }));
 
+                if (!isSaveContextCurrent()) return;
+
                 setForm((current) => ({
                     ...current,
                     currency: product.currency ?? current.currency,
@@ -474,9 +512,11 @@ export default function ProductEditPage() {
                 }));
             }
 
+            if (!isSaveContextCurrent()) return;
+
             await attributesSectionRef.current?.save(product.id);
 
-            if (isNew) {
+            if (isNew && isSaveContextCurrent()) {
                 navigate(`/admin/products/${product.id}`, { replace: true });
             }
         } catch (error) {
@@ -485,6 +525,10 @@ export default function ProductEditPage() {
             setIsSubmitting(false);
         }
     };
+
+    if (!isCurrentProductLoaded) {
+        return <ProductLoadState error={currentProductLoadError} />;
+    }
 
     const deleteProduct = async () => {
         setIsDeleting(true);
@@ -809,6 +853,37 @@ export default function ProductEditPage() {
                 }}
             />
 
+        </div>
+    );
+}
+
+function ProductLoadState({ error }) {
+    return (
+        <div aria-busy={!error}>
+            <Breadcrumbs
+                className="mb-5 max-lg:hidden"
+                currentLabel={error ? 'Ошибка загрузки' : 'Загрузка товара…'}
+            />
+
+            <header className="mb-5 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex min-w-0 items-center gap-3">
+                    <Link to="/admin/products" className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-white text-[#615950] max-lg:h-8 max-lg:w-8" aria-label="Вернуться к товарам"><BackIcon /></Link>
+                    <div className="min-w-0">
+                        <h1 className="m-0 truncate text-[32px] font-[760] tracking-[-0.05em] max-lg:text-[19px]">
+                            Редактирование товара
+                        </h1>
+                    </div>
+                </div>
+            </header>
+
+            {error ? (
+                <Alert variant="error">{error}</Alert>
+            ) : (
+                <section className="flex min-h-[120px] items-center justify-center gap-3 rounded-[14px] border border-[color:var(--color-border)] bg-white p-6 text-[13px] font-[650] text-[color:var(--color-secondary)] shadow-[0_7px_24px_rgba(70,47,31,.03)]" role="status" aria-live="polite">
+                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#cfc5be] border-t-[color:var(--color-accent)]" aria-hidden="true" />
+                    Загрузка товара…
+                </section>
+            )}
         </div>
     );
 }
