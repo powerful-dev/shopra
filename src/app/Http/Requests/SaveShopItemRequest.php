@@ -37,6 +37,7 @@ class SaveShopItemRequest extends FormRequest
                 Rule::in($this->availableCurrencyCodes()),
             ],
             'quantity' => ['nullable', 'integer', 'min:0'],
+            'show_stock' => ['sometimes', 'boolean'],
             'description' => ['nullable', 'string'],
             'seo_title' => ['nullable', 'string', 'max:255'],
             'seo_description' => ['nullable', 'string'],

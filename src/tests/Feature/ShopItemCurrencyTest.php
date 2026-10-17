@@ -150,6 +150,36 @@ class ShopItemCurrencyTest extends TestCase
         $this->assertSame(0, $defaultQuantityItem->refresh()->quantity);
     }
 
+    public function test_product_show_stock_is_saved_returned_and_updated(): void
+    {
+        $productId = $this->postJson('/api/products', [
+            ...$this->productData('Product with hidden stock'),
+            'show_stock' => false,
+        ])->assertCreated()
+            ->assertJsonPath('data.show_stock', false)
+            ->json('data.id');
+
+        $this->assertDatabaseHas('shop_items', [
+            'id' => $productId,
+            'show_stock' => false,
+        ]);
+
+        $this->putJson("/api/products/{$productId}", [
+            ...$this->productData('Product with visible stock'),
+            'show_stock' => true,
+        ])->assertOk()
+            ->assertJsonPath('data.show_stock', true);
+
+        $this->assertDatabaseHas('shop_items', [
+            'id' => $productId,
+            'show_stock' => true,
+        ]);
+
+        $this->getJson("/api/products/{$productId}")
+            ->assertOk()
+            ->assertJsonPath('data.show_stock', true);
+    }
+
     public function test_product_uses_active_variant_stock_without_overwriting_base_quantity(): void
     {
         Shop::query()->update(['low_stock_threshold' => 10]);

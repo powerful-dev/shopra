@@ -136,7 +136,7 @@ export default function ProductEditPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const isNew = id === 'new' || !id;
-    const [form, setForm] = useState({ name: '', price: '', old_price: '', currency: '', quantity: '', description: '', seo_title: '', seo_description: '', shop_group_id: null, status: isNew ? 'draft' : null });
+    const [form, setForm] = useState({ name: '', price: '', old_price: '', currency: '', quantity: '', show_stock: true, description: '', seo_title: '', seo_description: '', shop_group_id: null, status: isNew ? 'draft' : null });
     const [shopGroupOptions, setShopGroupOptions] = useState([]);
     const [isShopGroupsLoading, setIsShopGroupsLoading] = useState(true);
     const [shopGroupsLoadError, setShopGroupsLoadError] = useState('');
@@ -345,6 +345,7 @@ export default function ProductEditPage() {
                     old_price: product.old_price ?? '',
                     currency: product.currency ?? '',
                     quantity: product.quantity ?? '',
+                    show_stock: product.show_stock ?? true,
                     description: product.description ?? '',
                     seo_title: product.seo_title ?? '',
                     seo_description: product.seo_description ?? '',
@@ -369,7 +370,10 @@ export default function ProductEditPage() {
     }, [id, isNew]);
 
     const updateField = ({ target }) => {
-        setForm((current) => ({ ...current, [target.name]: target.value }));
+        setForm((current) => ({
+            ...current,
+            [target.name]: target.type === 'checkbox' ? target.checked : target.value,
+        }));
     };
 
     const createProduct = (status, useDraftDefaults = false, navigateAfterCreate = true) => {
@@ -385,6 +389,7 @@ export default function ProductEditPage() {
             price: useDraftDefaults && form.price === '' ? 0 : form.price,
             old_price: form.old_price || null,
             quantity: useDraftDefaults && form.quantity === '' ? 0 : normalizeNullableQuantity(form.quantity),
+            show_stock: form.show_stock,
             seo_title: form.seo_title || null,
             seo_description: form.seo_description || null,
             status,
@@ -455,6 +460,7 @@ export default function ProductEditPage() {
                         name: form.name.trim() || null,
                         old_price: form.old_price || null,
                         quantity: normalizeNullableQuantity(form.quantity),
+                        show_stock: form.show_stock,
                         seo_title: form.seo_title || null,
                         seo_description: form.seo_description || null,
                         status,
@@ -1527,7 +1533,13 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasV
                         {!hasVariants && !isVariantsLoading && form.quantity === '' && <small className="mt-1.5 block text-[11px] leading-[1.4] text-[#8c837c]">Укажите актуальный остаток товара</small>}
                     </div>
                     <label className="mt-3 flex items-center gap-[7px] text-[12px] text-[#6d655e]">
-                        <input className="h-[14px] w-[14px] accent-[color:var(--color-accent)]" type="checkbox" defaultChecked />
+                        <input
+                            className="h-[14px] w-[14px] accent-[color:var(--color-accent)]"
+                            type="checkbox"
+                            name="show_stock"
+                            checked={form.show_stock}
+                            onChange={onChange}
+                        />
                         Показывать остаток на витрине
                     </label>
                 </div>

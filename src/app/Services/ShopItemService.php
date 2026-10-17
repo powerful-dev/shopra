@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 
 class ShopItemService
 {
-    /** @param array{name: string|null, price: numeric-string|int|float, old_price?: numeric-string|int|float|null, currency: string, quantity?: int|null, description?: string|null, seo_title?: string|null, seo_description?: string|null, shop_group_id?: int|null, status: string} $data */
+    /** @param array{name: string|null, price: numeric-string|int|float, old_price?: numeric-string|int|float|null, currency: string, quantity?: int|null, show_stock?: bool, description?: string|null, seo_title?: string|null, seo_description?: string|null, shop_group_id?: int|null, status: string} $data */
     public function create(array $data): ShopItem
     {
         return ShopItem::query()->create([
@@ -24,7 +24,7 @@ class ShopItemService
         ]);
     }
 
-    /** @param array{name: string|null, price: numeric-string|int|float, old_price?: numeric-string|int|float|null, currency: string, quantity?: int|null, description?: string|null, seo_title?: string|null, seo_description?: string|null, shop_group_id?: int|null, status: string} $data */
+    /** @param array{name: string|null, price: numeric-string|int|float, old_price?: numeric-string|int|float|null, currency: string, quantity?: int|null, show_stock?: bool, description?: string|null, seo_title?: string|null, seo_description?: string|null, shop_group_id?: int|null, status: string} $data */
     public function update(ShopItem $shopItem, array $data): ShopItem
     {
         if ($shopItem->variants()->exists()) {
