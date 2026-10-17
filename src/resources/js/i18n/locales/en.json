@@ -352,6 +352,9 @@
         "confirmDeleteMessage": "Are you sure you want to delete the “{{name}}” group and all its contents?"
     },
     "productEditPage": {
+        "created": "Product created successfully",
+        "saved": "Product saved successfully",
+        "saveError": "Unable to save the product.",
         "createAttribute": {
             "isVisible": "Show on the product page",
             "isFilterable": "Use in filters",

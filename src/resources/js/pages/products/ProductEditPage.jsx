@@ -156,6 +156,7 @@ function buildStatusUpdatePayload(product, status) {
 }
 
 export default function ProductEditPage() {
+    const { t } = useTranslation();
     const { id } = useParams();
     const navigate = useNavigate();
     const isNew = id === 'new' || !id;
@@ -172,6 +173,7 @@ export default function ProductEditPage() {
     const [isArchiveConfirmOpen, setIsArchiveConfirmOpen] = useState(false);
     const [isStatusChanging, setIsStatusChanging] = useState(false);
     const [statusActionError, setStatusActionError] = useState(null);
+    const [saveNotification, setSaveNotification] = useState(null);
     const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
     const [isCurrencySettingsOpen, setIsCurrencySettingsOpen] = useState(false);
     const [isVariantsOpen, setIsVariantsOpen] = useState(false);
@@ -210,6 +212,10 @@ export default function ProductEditPage() {
     const currentStatusActionError = statusActionError?.productId === currentProductId
         ? statusActionError.message
         : '';
+    const saveNotificationProductId = isNew ? 'new' : currentProductId;
+    const currentSaveNotification = saveNotification?.productId === saveNotificationProductId
+        ? saveNotification
+        : null;
     const { activeSectionId, scrollToSection } = useScrollSpy({
         sections: isCurrentProductLoaded ? sectionLinks : emptySectionLinks,
         sectionRefs,
@@ -512,6 +518,7 @@ export default function ProductEditPage() {
 
         if (!isSaveContextCurrent() || (!isNew && loadedProductId !== savingProductId)) return;
 
+        setSaveNotification(null);
         setIsSubmitting(true);
 
         try {
@@ -552,11 +559,26 @@ export default function ProductEditPage() {
 
             await attributesSectionRef.current?.save(product.id);
 
-            if (isNew && isSaveContextCurrent()) {
+            if (!isSaveContextCurrent()) return;
+
+            setSaveNotification({
+                productId: String(product.id),
+                type: 'success',
+                message: t(isNew ? 'productEditPage.created' : 'productEditPage.saved'),
+            });
+
+            if (isNew) {
                 navigate(`/admin/products/${product.id}`, { replace: true });
             }
         } catch (error) {
             console.error(error);
+            if (isSaveContextCurrent()) {
+                setSaveNotification({
+                    productId: savingProductId ?? 'new',
+                    type: 'error',
+                    message: error.message || t('productEditPage.saveError'),
+                });
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -754,6 +776,12 @@ export default function ProductEditPage() {
                     </div>
                 </div>
             </header>
+
+            {currentSaveNotification && (
+                <Alert variant={currentSaveNotification.type} className="mb-5 h-[40px] py-0">
+                    {currentSaveNotification.message}
+                </Alert>
+            )}
 
             <SectionNavigation
                 navigationRef={sectionNavigationRef}
