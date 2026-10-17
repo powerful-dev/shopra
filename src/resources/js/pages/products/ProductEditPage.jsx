@@ -199,6 +199,7 @@ export default function ProductEditPage() {
     const shopGroupsRequestRef = useRef(null);
     const productCategoriesRequestRef = useRef(null);
     const productCreationPromiseRef = useRef(null);
+    const saveInProgressRef = useRef(false);
     const createdProductIdRef = useRef(isNew ? null : id);
     const skipProductLoadIdRef = useRef(null);
     const attributesSectionRef = useRef(null);
@@ -517,8 +518,9 @@ export default function ProductEditPage() {
         const savingProductId = currentProductId;
         const isSaveContextCurrent = () => activeProductIdRef.current === savingProductId;
 
-        if (!isSaveContextCurrent() || (!isNew && loadedProductId !== savingProductId)) return;
+        if (saveInProgressRef.current || !isSaveContextCurrent() || (!isNew && loadedProductId !== savingProductId)) return;
 
+        saveInProgressRef.current = true;
         setSaveNotification(null);
         setIsSubmitting(true);
 
@@ -581,6 +583,7 @@ export default function ProductEditPage() {
                 });
             }
         } finally {
+            saveInProgressRef.current = false;
             setIsSubmitting(false);
         }
     };
