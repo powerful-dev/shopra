@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { appName, supportedCurrencies } from '../../adminConfig';
 import ActionsMenu from '../../components/admin/ActionsMenu';
+import AdminCard from '../../components/admin/AdminCard';
 import Alert from '../../components/admin/Alert';
 import Breadcrumbs from '../../components/admin/Breadcrumbs';
 import ConfirmModal from '../../components/admin/ConfirmModal';
@@ -848,7 +849,7 @@ function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen
         });
 
     return (
-        <Card sectionRef={sectionRef} id="main" title="Основное" icon={BoxIcon} required>
+        <AdminCard sectionRef={sectionRef} id="main" title="Основное" icon={BoxIcon} required className="!scroll-mt-0">
             <Field label={<>Название товара <b className="text-[color:var(--color-accent)]">*</b></>}>
                 <Input name="name" value={form.name} onChange={onChange} />
             </Field>
@@ -908,7 +909,7 @@ function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen
                     </div>
                 )}
             </div>
-        </Card>
+        </AdminCard>
     );
 }
 
@@ -1194,13 +1195,13 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
     }
 
     return (
-        <Card
+        <AdminCard
             sectionRef={sectionRef}
             id="photo"
             title="Фото и видео"
             icon={PhotoIcon}
             required
-            className={`transition-[border-color,box-shadow] ${isDragActive ? 'border-[color:var(--color-accent)] ring-[3px] ring-[rgba(184,79,24,.09)]' : ''}`}
+            className={`!scroll-mt-0 transition-[border-color,box-shadow] ${isDragActive ? 'border-[color:var(--color-accent)] ring-[3px] ring-[rgba(184,79,24,.09)]' : ''}`}
             sectionProps={dropZoneProps}
         >
             <div ref={mediaGridRef} className="product-media-grid">
@@ -1350,7 +1351,7 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
                 onClose={() => setIsLightboxOpen(false)}
                 onIndexChange={setLightboxIndex}
             />
-        </Card>
+        </AdminCard>
     );
 }
 
@@ -1406,7 +1407,7 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasV
     const storefrontOldPrice = convertPrice(form.old_price);
 
     return (
-        <Card sectionRef={sectionRef} id="price" title="Цена и наличие" icon={CurrencyIcon} required bodyClassName="">
+        <AdminCard sectionRef={sectionRef} id="price" title="Цена и наличие" icon={CurrencyIcon} required bodyClassName="" className="!scroll-mt-0">
             <div className="flex min-h-[47px] flex-wrap items-center gap-x-1.5 gap-y-1 border-b border-[#f1e5dc] bg-[#fff8ed] px-[24px] py-3 text-[12px] text-[#92512f] max-sm:px-[13px]">
                 {currencyStatus === 'loading' && <span>Загрузка валюты магазина…</span>}
                 {currencyStatus === 'error' && <span>Не удалось загрузить валюты магазина.</span>}
@@ -1531,7 +1532,7 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasV
                     </label>
                 </div>
             </div>
-        </Card>
+        </AdminCard>
     );
 }
 
@@ -1641,10 +1642,6 @@ function ProductAside({ form, primaryCategoryName, media, isMediaLoading, mainPh
             </section>
 
         </aside>);
-}
-
-function Card({ sectionRef, id, title, icon: Icon, required, children, bodyClassName = 'p-[15px_17px_17px] max-sm:p-[13px]', className = '', sectionProps = {} }) {
-    return <section ref={sectionRef} id={id} className={`rounded-[14px] border border-[color:var(--color-border)] bg-white shadow-[0_7px_24px_rgba(70,47,31,.03)] ${className}`} {...sectionProps}><header className="flex min-h-[48px] items-center gap-[9px] border-b border-[#f0ece8] px-[17px]">{Icon && <span className="accordion__icon [&_svg]:h-[14px] [&_svg]:w-[14px]"><Icon /></span>}<h2 className="text-[15px] font-[740]">{title}</h2>{required && <em className="rounded-full bg-[color:var(--color-success-soft)] px-[7px] py-1 text-[11px] font-[720] not-italic text-[color:var(--color-success)]">Обязательно</em>}</header><div className={bodyClassName}>{children}</div></section>;
 }
 
 function AccordionSection({ sectionRef, id, title, icon: Icon, children, open = true }) {
