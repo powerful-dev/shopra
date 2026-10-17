@@ -4,7 +4,21 @@ import useSectionScroll from './useSectionScroll';
 const scrollIdleDelay = 120;
 
 function resolveElement(reference) {
-    return reference?.current ?? reference ?? null;
+    if (reference === null || reference === undefined) return null;
+    if (typeof reference === 'object' && 'current' in reference) {
+        return reference.current ?? null;
+    }
+
+    return reference;
+}
+
+function isElement(value) {
+    return value !== null && typeof value === 'object' && value.nodeType === 1;
+}
+
+function isEventTarget(value) {
+    return typeof value?.addEventListener === 'function'
+        && typeof value?.removeEventListener === 'function';
 }
 
 function getSectionElement(sectionRefs, sectionId) {
@@ -42,11 +56,13 @@ export default function useScrollSpy({
     const updateActiveSection = useCallback(() => {
         if (programmaticTargetRef.current) return;
 
-        const scrollContainer = resolveElement(containerRef);
-        const navigation = resolveElement(navigationRef);
+        const resolvedScrollContainer = resolveElement(containerRef);
+        const resolvedNavigation = resolveElement(navigationRef);
+        const scrollContainer = isElement(resolvedScrollContainer) ? resolvedScrollContainer : null;
+        const navigation = isElement(resolvedNavigation) ? resolvedNavigation : null;
         const sectionElements = (sections ?? [])
             .map(({ id }) => ({ id, element: getSectionElement(sectionRefs, id) }))
-            .filter(({ element }) => element);
+            .filter(({ element }) => isElement(element));
 
         if (sectionElements.length === 0) return;
 
@@ -91,7 +107,8 @@ export default function useScrollSpy({
     }, [finishProgrammaticScroll, scheduleUpdate]);
 
     useEffect(() => {
-        const scrollTarget = resolveElement(containerRef) ?? window;
+        const resolvedScrollTarget = resolveElement(containerRef);
+        const scrollTarget = isEventTarget(resolvedScrollTarget) ? resolvedScrollTarget : window;
         const resizeObserver = typeof ResizeObserver === 'undefined'
             ? null
             : new ResizeObserver(scheduleUpdate);
@@ -99,10 +116,10 @@ export default function useScrollSpy({
         scrollTarget.addEventListener('scroll', handleScroll, { passive: true });
         window.addEventListener('resize', scheduleUpdate);
         const navigation = resolveElement(navigationRef);
-        if (navigation) resizeObserver?.observe(navigation);
+        if (isElement(navigation)) resizeObserver?.observe(navigation);
         (sections ?? []).forEach(({ id }) => {
             const section = getSectionElement(sectionRefs, id);
-            if (section) resizeObserver?.observe(section);
+            if (isElement(section)) resizeObserver?.observe(section);
         });
         scheduleUpdate();
 
@@ -127,7 +144,7 @@ export default function useScrollSpy({
 
     const scrollToSection = useCallback((sectionId) => {
         const section = getSectionElement(sectionRefs, sectionId);
-        if (!section) return;
+        if (!isElement(section)) return;
 
         activeSectionIdRef.current = sectionId;
         setActiveSectionId(sectionId);
