@@ -23,7 +23,6 @@ import { deleteShopGroupImage, updateShopGroup, uploadShopGroupImage } from '../
 import { getShopItemMediaConfig } from '../../services/shopItems';
 import { formatMediaExtensions } from '../../utils/media';
 
-const fieldWrapperClass = '[&.form-field]:gap-[7px] [&>.form-label]:text-[12px] [&>.form-label]:leading-normal [&>.form-label]:text-[#554e48]';
 const categoryImageUploadMaxBytes = Number(document.querySelector('meta[name="category-image-upload-max-bytes"]')?.content);
 export default function CategoryEditModal({ category, parentOptions = [], isLoadingParents = false, parentsError = '', onClose, onUpdated, onImageChanged }) {
     const { t, i18n } = useTranslation();
@@ -276,16 +275,16 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
                 <div className="space-y-3 px-5 pb-5 pt-[13px] max-[620px]:px-3 max-[620px]:pb-3">
                     <AdminCard sectionRef={(element) => { sectionRefs.current['category-edit-main'] = element; }} id="category-edit-main" title={t('categoryEditModal.main.title')}>
                     <div className="grid grid-cols-[120px_minmax(0,1fr)] gap-3 max-[620px]:grid-cols-1">
-                        <Field label={t('categoryEditModal.main.id')} className={fieldWrapperClass}>
+                        <Field label={t('categoryEditModal.main.id')}>
                             <Input className="bg-[#f7f4f1] text-[#8d857e]" type="text" value={category.id} readOnly />
                         </Field>
-                        <Field label={t('categoryEditModal.main.name')} className={fieldWrapperClass}>
+                        <Field label={t('categoryEditModal.main.name')}>
                             <Input type="text" value={name} onChange={(event) => setName(event.target.value)} disabled={isSaving} />
                             <CategorySlugField slug={slug} isEditing={isEditingSlug} disabled={isSaving} onChange={setSlug} onEditingChange={setIsEditingSlug} />
                         </Field>
                     </div>
                     <div className="mt-[15px]">
-                        <Field label={t('categoryEditModal.main.parent')} className={fieldWrapperClass}>
+                        <Field label={t('categoryEditModal.main.parent')}>
                             <SearchableSelect
                                 options={[
                                     {
@@ -314,7 +313,7 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
                         </Field>
                     </div>
                     <div className="mt-[15px]">
-                        <Field label={t('categoryEditModal.main.shortDescription')} className={fieldWrapperClass}>
+                        <Field label={t('categoryEditModal.main.shortDescription')}>
                             <RichTextEditor
                                 instanceKey="short-description"
                                 value={description}
@@ -324,7 +323,7 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
                         </Field>
                     </div>
                     <div className="mt-[15px]">
-                        <Field label={t('categoryEditModal.main.fullDescription')} className={fieldWrapperClass}>
+                        <Field label={t('categoryEditModal.main.fullDescription')}>
                             <RichTextEditor
                                 instanceKey="full-description"
                                 value={text}

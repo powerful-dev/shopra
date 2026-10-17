@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ConfirmModal from '../../components/admin/ConfirmModal';
 import SearchableSelect from '../../components/admin/SearchableSelect';
+import Field from '../../components/form/Field';
+import Input from '../../components/form/Input';
 import CategoryEditModal from './CategoryEditModal';
 import CategoryRow from './CategoryRow';
 import CategorySlugField from './CategorySlugField';
@@ -546,23 +548,23 @@ function CategoryCreateForm({ parentOptions, isLoadingParents, parentsError, onC
             className="mx-7 mb-[13px] grid grid-cols-2 gap-[9px] rounded-[11px] border border-[color:var(--color-border)] bg-white p-[11px] max-[620px]:mx-[14px] max-[620px]:grid-cols-1"
             onSubmit={saveCategory}
         >
-            <div className="flex min-w-0 flex-col gap-[5px]">
-                <label htmlFor="new-category-name" className="text-xs font-bold text-[#554e48]">{t('categoriesModal.form.name')}</label>
-                <input
-                    id="new-category-name"
-                    name="name"
-                    className="h-[38px] w-full rounded-lg border border-[#d8d0ca] bg-white px-[9px] text-xs text-[#312d29] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]"
-                    type="text"
-                    autoFocus
-                    maxLength={255}
-                    disabled={isSaving}
-                    value={name}
-                    onChange={(event) => {
-                        setName(event.target.value);
-                        setManualSlug(null);
-                    }}
-                    placeholder={t('categoriesModal.form.namePlaceholder')}
-                />
+            <div className="min-w-0 space-y-[5px]">
+                <Field label={t('categoriesModal.form.name')}>
+                    <Input
+                        id="new-category-name"
+                        name="name"
+                        type="text"
+                        autoFocus
+                        maxLength={255}
+                        disabled={isSaving}
+                        value={name}
+                        onChange={(event) => {
+                            setName(event.target.value);
+                            setManualSlug(null);
+                        }}
+                        placeholder={t('categoriesModal.form.namePlaceholder')}
+                    />
+                </Field>
                 {(name || slug || manualSlug !== null) && (
                     <CategorySlugField
                         slug={slug}
@@ -578,8 +580,7 @@ function CategoryCreateForm({ parentOptions, isLoadingParents, parentsError, onC
                     />
                 )}
             </div>
-            <div className="flex min-w-0 flex-col gap-[5px]">
-                <span className="text-xs font-bold text-[#554e48]">{t('categoriesModal.form.parent')}</span>
+            <Field label={t('categoriesModal.form.parent')}>
                 <SearchableSelect
                     options={[
                         {
@@ -603,7 +604,7 @@ function CategoryCreateForm({ parentOptions, isLoadingParents, parentsError, onC
                     ariaBusy={isLoadingParents}
                 />
                 {parentsError && <span className="text-xs text-[#8d857e]" role="alert">{parentsError}</span>}
-            </div>
+            </Field>
             {saveError && <p role="alert" className="col-span-2 m-0 text-xs text-[#8d857e] max-[620px]:col-span-1">{saveError}</p>}
             <div className="col-span-2 flex justify-end gap-2 max-[620px]:col-span-1">
                 <button type="button" className="button button--secondary min-h-[36px]" onClick={onCancel} disabled={isSaving}>{t('categoriesModal.form.cancel')}</button>

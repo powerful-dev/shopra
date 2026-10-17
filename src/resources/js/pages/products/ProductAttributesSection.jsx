@@ -1,13 +1,12 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { MediaDragHandle } from '../../components/admin/MediaCardControls';
 import SearchableSelect from '../../components/admin/SearchableSelect';
+import Input from '../../components/form/Input';
 import PlusIcon from '../../components/icons/PlusIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
 import { createShopAttributeOption, getShopAttributes, getShopItemAttributes, syncShopItemAttributes } from '../../services/shopAttributes';
 import CreateAttributeModal from './CreateAttributeModal';
 import ProductAttributesModal from './ProductAttributesModal';
-
-const fieldClass = 'h-[41px] w-full rounded-[9px] border border-[#ddd5cf] bg-white px-[11px] text-[13px] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]';
 
 const sortAttributes = (attributes) => [...attributes].sort((left, right) => (
     left.sort_order - right.sort_order || left.id - right.id
@@ -525,7 +524,7 @@ function AttributeValueControl({ attribute, value, disabled, isCreatingOption, o
     if (attribute.type === 'number') {
         return (
             <div className="relative">
-                <input className={`${fieldClass} ${attribute.unit ? 'pr-[58px]' : ''}`} type="number" step="any" value={value} disabled={disabled} onChange={(event) => onChange(event.target.value)} />
+                <Input className={attribute.unit ? 'pr-[58px]' : ''} type="number" step="any" value={value} disabled={disabled} onChange={(event) => onChange(event.target.value)} />
                 {attribute.unit && <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[12px] font-bold text-[#817870]">{attribute.unit}</span>}
             </div>
         );
@@ -543,5 +542,5 @@ function AttributeValueControl({ attribute, value, disabled, isCreatingOption, o
         );
     }
 
-    return <input className={fieldClass} type="text" value={value} placeholder="Введите значение" disabled={disabled} onChange={(event) => onChange(event.target.value)} />;
+    return <Input type="text" value={value} placeholder="Введите значение" disabled={disabled} onChange={(event) => onChange(event.target.value)} />;
 }

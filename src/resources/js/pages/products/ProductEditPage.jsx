@@ -12,6 +12,9 @@ import RichTextEditor from '../../components/admin/RichTextEditor';
 import SearchableSelect from '../../components/admin/SearchableSelect';
 import SectionNavigation from '../../components/admin/SectionNavigation';
 import SeoFields from '../../components/admin/SeoFields';
+import Field from '../../components/form/Field';
+import Input from '../../components/form/Input';
+import Select from '../../components/form/Select';
 import BackIcon from '../../components/icons/BackIcon';
 import BoxIcon from '../../components/icons/BoxIcon';
 import PhotoIcon from '../../components/icons/PhotoIcon';
@@ -45,8 +48,6 @@ import CurrencySettingsModal from './CurrencySettingsModal';
 import ProductAttributesSection from './ProductAttributesSection';
 import ProductVariantsModal from './ProductVariantsModal';
 
-
-const fieldClass = 'h-[43px] w-full rounded-[9px] border border-[#ddd5cf] bg-white px-[11px] text-[13px] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]';
 
 const sectionLinks = [
     { id: 'main', label: 'Основное', icon: BoxIcon },
@@ -849,7 +850,7 @@ function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen
     return (
         <Card sectionRef={sectionRef} id="main" title="Основное" icon={BoxIcon} required>
             <Field label={<>Название товара <b className="text-[color:var(--color-accent)]">*</b></>}>
-                <input className={fieldClass} name="name" value={form.name} onChange={onChange} />
+                <Input name="name" value={form.name} onChange={onChange} />
             </Field>
             <div className="relative mt-[15px]">
                 <div className="mb-[7px] text-[12px] font-bold text-[#554e48]">{appCategoryLabel}</div>
@@ -1425,9 +1426,9 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasV
 
             <div className="p-[17px] max-sm:p-[13px]">
                 <div className="flex items-end justify-between gap-6 max-sm:flex-col max-sm:items-stretch max-sm:gap-4">
-                    <Field label="Валюта цены">
-                        <select
-                            className={`${fieldClass} w-[182px] cursor-pointer pr-9 font-[700] max-sm:w-full`}
+                    <Field className="w-[182px] max-sm:w-full" label="Валюта цены">
+                        <Select
+                            className="cursor-pointer pr-9 font-[700]"
                             name="currency"
                             value={priceCurrency}
                             disabled={currencyStatus !== 'loaded' || priceCurrencies.length === 0}
@@ -1444,7 +1445,7 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasV
                                     {currency} — {t(`currencies.${currency}`)}
                                 </option>
                             ))}
-                        </select>
+                        </Select>
                     </Field>
 
                     <button
@@ -1650,5 +1651,4 @@ function AccordionSection({ sectionRef, id, title, icon: Icon, children, open = 
     return <details ref={sectionRef} id={id} className="accordion" open={open}><summary className="accordion__summary"><span className="accordion__icon [&_svg]:h-[14px] [&_svg]:w-[14px]"><Icon /></span><strong className="accordion__title">{title}</strong><em className="accordion__badge">Необязательно</em><ChevronIcon /></summary><div className="accordion__body">{children}</div></details>;
 }
 
-function Field({ label, children }) { return <label className="flex flex-col gap-[7px]"><span className="text-[12px] font-bold text-[#554e48]">{label}</span>{children}</label>; }
-function PriceField({ label, name, value, onChange, suffix, required, disabled = false }) { return <Field label={<>{label} {required && <b className="text-[color:var(--color-accent)]">*</b>}</>}><span className="relative"><input className={`${fieldClass} ${suffix ? 'pr-11' : ''} font-bold disabled:cursor-not-allowed disabled:bg-[#f2efec] disabled:text-[#817870]`} name={name} value={value} onChange={onChange} disabled={disabled} />{suffix && <b className="absolute right-[11px] top-1/2 -translate-y-1/2 text-[11px] text-[#8d857f]">{suffix}</b>}</span></Field>; }
+function PriceField({ label, name, value, onChange, suffix, required, disabled = false }) { return <Field label={<>{label} {required && <b className="text-[color:var(--color-accent)]">*</b>}</>}><span className="relative"><Input className={`${suffix ? 'pr-11' : ''} font-bold disabled:cursor-not-allowed disabled:bg-[#f2efec] disabled:text-[#817870]`} name={name} value={value} onChange={onChange} disabled={disabled} />{suffix && <b className="absolute right-[11px] top-1/2 -translate-y-1/2 text-[11px] text-[#8d857f]">{suffix}</b>}</span></Field>; }
