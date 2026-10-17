@@ -35,7 +35,7 @@ import RocketIcon from '../../components/icons/RocketIcon';
 import ChevronIcon from '../../components/icons/ChevronIcon';
 import SaveIcon from '../../components/icons/SaveIcon';
 import PencilIcon from '../../components/icons/PencilIcon';
-import { csrf, request } from '../../services/api';
+import { ApiError, csrf, request } from '../../services/api';
 import { getShopAttributes } from '../../services/shopAttributes';
 import { getShopGroups } from '../../services/shopGroups';
 import { addShopItemCategory, deleteShopItemCategory, deleteShopItemMedia, getProductVariants, getShopItemMediaConfig, reorderShopItemMedia, uploadShopItemMedia } from '../../services/shopItems';
@@ -139,6 +139,22 @@ function normalizeNullableQuantity(quantity) {
     return quantity === '' || quantity === null || quantity === undefined ? null : quantity;
 }
 
+function buildStatusUpdatePayload(product, status) {
+    return {
+        name: product.name,
+        price: product.price,
+        old_price: product.old_price,
+        currency: product.currency,
+        quantity: product.quantity,
+        show_stock: product.show_stock,
+        description: product.description,
+        seo_title: product.seo_title,
+        seo_description: product.seo_description,
+        shop_group_id: product.shop_group_id,
+        status,
+    };
+}
+
 export default function ProductEditPage() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -153,6 +169,9 @@ export default function ProductEditPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isActionsOpen, setIsActionsOpen] = useState(false);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+    const [isArchiveConfirmOpen, setIsArchiveConfirmOpen] = useState(false);
+    const [isStatusChanging, setIsStatusChanging] = useState(false);
+    const [statusActionError, setStatusActionError] = useState(null);
     const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
     const [isCurrencySettingsOpen, setIsCurrencySettingsOpen] = useState(false);
     const [isVariantsOpen, setIsVariantsOpen] = useState(false);
@@ -181,11 +200,15 @@ export default function ProductEditPage() {
     const skipProductLoadIdRef = useRef(null);
     const attributesSectionRef = useRef(null);
     const variantAttributesRef = useRef([]);
+    const statusActionRequestRef = useRef(0);
     const activeProductIdRef = useRef(currentProductId);
     activeProductIdRef.current = currentProductId;
     const isCurrentProductLoaded = isNew || loadedProductId === currentProductId;
     const currentProductLoadError = productLoadError?.productId === currentProductId
         ? productLoadError.message
+        : '';
+    const currentStatusActionError = statusActionError?.productId === currentProductId
+        ? statusActionError.message
         : '';
     const { activeSectionId, scrollToSection } = useScrollSpy({
         sections: isCurrentProductLoaded ? sectionLinks : emptySectionLinks,
@@ -282,6 +305,13 @@ export default function ProductEditPage() {
 
         return () => controller.abort();
     }, []);
+
+    useEffect(() => {
+        statusActionRequestRef.current += 1;
+        setIsStatusChanging(false);
+        setIsArchiveConfirmOpen(false);
+        setStatusActionError(null);
+    }, [id, isNew]);
 
     useEffect(() => {
         if (isNew) {
@@ -536,6 +566,75 @@ export default function ProductEditPage() {
         return <ProductLoadState error={currentProductLoadError} />;
     }
 
+    const updateProductStatus = async (status) => {
+        const productId = currentProductId;
+        const isRestoring = form.status === 'archived' && status === 'active';
+
+        if (!productId || loadedProductId !== productId || activeProductIdRef.current !== productId) return;
+
+        const requestId = statusActionRequestRef.current + 1;
+        statusActionRequestRef.current = requestId;
+        const isActionCurrent = () => statusActionRequestRef.current === requestId
+            && activeProductIdRef.current === productId;
+
+        setIsStatusChanging(true);
+        setStatusActionError(null);
+
+        try {
+            const { data: savedProduct } = await request(`/api/products/${productId}`);
+
+            if (!isActionCurrent()) return;
+
+            await csrf();
+
+            if (!isActionCurrent()) return;
+
+            const { data: updatedProduct } = await request(`/api/products/${productId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(buildStatusUpdatePayload(savedProduct, status)),
+            });
+
+            if (!isActionCurrent()) return;
+
+            setForm((current) => ({ ...current, status: updatedProduct.status }));
+            setIsArchiveConfirmOpen(false);
+        } catch (error) {
+            if (!isActionCurrent()) return;
+
+            console.error(error);
+            setStatusActionError({
+                productId,
+                message: error instanceof ApiError && error.status === 422 && status === 'active'
+                    ? `${isRestoring ? 'Не удалось восстановить' : 'Не удалось опубликовать'} товар. Заполните и сохраните обязательные данные.`
+                    : 'Не удалось изменить статус товара. Попробуйте ещё раз.',
+            });
+        } finally {
+            if (isActionCurrent()) setIsStatusChanging(false);
+        }
+    };
+
+    const statusMenuAction = {
+        draft: {
+            label: 'Опубликовать',
+            icon: <RocketIcon />,
+            onClick: () => updateProductStatus('active'),
+        },
+        active: {
+            label: 'Перенести в архив',
+            icon: <BoxIcon />,
+            onClick: () => {
+                setStatusActionError(null);
+                setIsArchiveConfirmOpen(true);
+            },
+        },
+        archived: {
+            label: 'Восстановить',
+            icon: <RocketIcon />,
+            onClick: () => updateProductStatus('active'),
+        },
+    }[form.status];
+
     const deleteProduct = async () => {
         setIsDeleting(true);
 
@@ -682,7 +781,7 @@ export default function ProductEditPage() {
                         <StatusActions status={form.status} isNew isSubmitting={isSubmitting} onSave={saveProduct} />
                     ) : form.status && (
                         <>
-                            <button className="button button--primary min-h-[39px] min-w-[120px] whitespace-nowrap" type="button" disabled={isSubmitting} onClick={() => saveProduct(form.status)}><SaveIcon />Сохранить</button>
+                            <button className="button button--primary min-h-[39px] min-w-[120px] whitespace-nowrap" type="button" disabled={isSubmitting || isStatusChanging} onClick={() => saveProduct(form.status)}><SaveIcon />Сохранить</button>
                             <button className="button button--outline min-h-[39px] whitespace-nowrap" type="button"><EyeIcon />Предпросмотр</button>
                             <ActionsMenu
                                 ariaLabel={`Действия ${form.name || 'товара'}`}
@@ -690,25 +789,27 @@ export default function ProductEditPage() {
                                 onToggle={() => setIsActionsOpen((isOpen) => !isOpen)}
                                 onClose={() => setIsActionsOpen(false)}
                                 actions={[
-                                    {
-                                        label: 'Перенести в архив',
-                                        icon: <BoxIcon />,
-                                        disabled: isSubmitting || form.status === 'archived',
-                                        onClick: () => saveProduct('archived'),
+                                    statusMenuAction && {
+                                        ...statusMenuAction,
+                                        disabled: isSubmitting || isStatusChanging,
                                     },
                                     {
                                         label: 'Удалить товар',
                                         icon: <TrashIcon />,
                                         variant: 'danger',
-                                        disabled: isDeleting,
+                                        disabled: isDeleting || isSubmitting || isStatusChanging,
                                         onClick: () => setIsDeleteConfirmOpen(true),
                                     },
-                                ]}
+                                ].filter(Boolean)}
                             />
                         </>
                     )}
                 </div>
             </section>
+
+            {currentStatusActionError && !isArchiveConfirmOpen && (
+                <Alert variant="error" className="mb-3">{currentStatusActionError}</Alert>
+            )}
 
             <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
                 <form className="space-y-3" aria-label="Данные товара" onSubmit={(event) => event.preventDefault()}>
@@ -820,6 +921,20 @@ export default function ProductEditPage() {
                 />
             </div>
 
+            <ConfirmModal
+                isOpen={isArchiveConfirmOpen}
+                title="Перенести товар в архив?"
+                message="Товар будет скрыт с витрины. Позже его можно будет восстановить."
+                confirmText="Перенести в архив"
+                cancelText="Отмена"
+                isLoading={isStatusChanging}
+                error={currentStatusActionError}
+                onConfirm={() => updateProductStatus('archived')}
+                onClose={() => {
+                    setIsArchiveConfirmOpen(false);
+                    setStatusActionError(null);
+                }}
+            />
             <ConfirmModal
                 isOpen={isDeleteConfirmOpen}
                 title="Подтвердите удаление"
