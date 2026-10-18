@@ -13,27 +13,62 @@ use Illuminate\Support\Str;
 
 class ShopItemService
 {
-    /** @param array{name: string|null, price: numeric-string|int|float, old_price?: numeric-string|int|float|null, currency: string, quantity?: int|null, show_stock?: bool, description?: string|null, seo_title?: string|null, seo_description?: string|null, shop_group_id?: int|null, status: string} $data */
+    public function __construct(private readonly ShopItemAttributeService $shopItemAttributeService) {}
+
+    /** @param array{name: string|null, price: numeric-string|int|float, old_price?: numeric-string|int|float|null, currency: string, quantity?: int|null, show_stock?: bool, description?: string|null, seo_title?: string|null, seo_description?: string|null, shop_group_id?: int|null, status: string, attributes?: array<int, array{attribute_id: int, value: mixed, sort_order: int}>} $data */
     public function create(array $data): ShopItem
     {
-        return ShopItem::query()->create([
-            ...$data,
-            'url' => $data['name'] === null
-                ? 'draft-'.Str::uuid()->toString()
-                : Str::slug($data['name']),
-        ]);
+        return DB::transaction(function () use ($data): ShopItem {
+            [$itemData, $attributes] = $this->splitAttributes($data);
+            $shopItem = ShopItem::query()->create([
+                ...$itemData,
+                'url' => $itemData['name'] === null
+                    ? 'draft-'.Str::uuid()->toString()
+                    : Str::slug($itemData['name']),
+            ]);
+
+            if ($attributes !== null) {
+                $this->shopItemAttributeService->sync($shopItem, $attributes);
+            }
+
+            return $shopItem;
+        });
     }
 
-    /** @param array{name: string|null, price: numeric-string|int|float, old_price?: numeric-string|int|float|null, currency: string, quantity?: int|null, show_stock?: bool, description?: string|null, seo_title?: string|null, seo_description?: string|null, shop_group_id?: int|null, status: string} $data */
+    /** @param array{name: string|null, price: numeric-string|int|float, old_price?: numeric-string|int|float|null, currency: string, quantity?: int|null, show_stock?: bool, description?: string|null, seo_title?: string|null, seo_description?: string|null, shop_group_id?: int|null, status: string, attributes?: array<int, array{attribute_id: int, value: mixed, sort_order: int}>} $data */
     public function update(ShopItem $shopItem, array $data): ShopItem
     {
-        if ($shopItem->variants()->exists()) {
-            unset($data['quantity']);
+        return DB::transaction(function () use ($shopItem, $data): ShopItem {
+            [$itemData, $attributes] = $this->splitAttributes($data);
+
+            if ($shopItem->variants()->exists()) {
+                unset($itemData['quantity']);
+            }
+
+            $shopItem->update($itemData);
+
+            if ($attributes !== null) {
+                $this->shopItemAttributeService->sync($shopItem, $attributes);
+            }
+
+            return $shopItem;
+        });
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array{array<string, mixed>, array<int, array{attribute_id: int, value: mixed, sort_order: int}>|null}
+     */
+    private function splitAttributes(array $data): array
+    {
+        if (! array_key_exists('attributes', $data)) {
+            return [$data, null];
         }
 
-        $shopItem->update($data);
+        $attributes = $data['attributes'];
+        unset($data['attributes']);
 
-        return $shopItem;
+        return [$data, $attributes];
     }
 
     public function delete(ShopItem $shopItem): void

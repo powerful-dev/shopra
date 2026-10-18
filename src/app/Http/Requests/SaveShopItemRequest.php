@@ -4,13 +4,17 @@ namespace App\Http\Requests;
 
 use App\Enums\ShopItemStatus;
 use App\Enums\SupportedCurrency;
+use App\Http\Requests\Concerns\ValidatesShopItemAttributes;
 use App\Models\ShopItem;
 use App\Services\SettingsService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class SaveShopItemRequest extends FormRequest
 {
+    use ValidatesShopItemAttributes;
+
     /** @var list<string>|null */
     private ?array $availableCurrencyCodes = null;
 
@@ -47,7 +51,14 @@ class SaveShopItemRequest extends FormRequest
                 Rule::exists('shop_groups', 'id')->whereNull('deleted_at'),
             ],
             'status' => ['required', Rule::enum(ShopItemStatus::class)],
+            ...$this->shopItemAttributeRules('sometimes'),
         ];
+    }
+
+    /** @return array<int, callable(Validator): void> */
+    public function after(): array
+    {
+        return [fn (Validator $validator) => $this->validateShopItemAttributes($validator)];
     }
 
     protected function prepareForValidation(): void
