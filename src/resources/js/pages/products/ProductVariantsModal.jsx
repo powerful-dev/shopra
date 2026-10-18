@@ -294,6 +294,20 @@ function Icon({ children, size = 16, className = '' }) {
     return <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>;
 }
 
+function handleToggleAreaClick(event, onToggle) {
+    const nestedControl = event.target.closest('button, input, select, textarea, a, label, [role="button"], [role="switch"]');
+    if (nestedControl && nestedControl !== event.currentTarget) return;
+
+    onToggle();
+}
+
+function handleToggleAreaKeyDown(event, onToggle) {
+    if (event.target !== event.currentTarget || !['Enter', ' '].includes(event.key)) return;
+
+    event.preventDefault();
+    onToggle();
+}
+
 function PhotoTile({ image, onOpen, ariaLabel }) {
     return (
         <button type="button" data-media-id={image.id} onClick={onOpen} className="relative h-[66px] w-[54px] shrink-0 cursor-zoom-in overflow-hidden rounded-[8px] border border-[#d9d1cb] bg-[#f5f1ee] p-0" aria-label={ariaLabel}>
@@ -338,13 +352,13 @@ function OptionRow({ option, onAddValue, onDeleteOption, onDeleteValue }) {
                 <div><small className="block text-[11px] text-[#a19992]">Опция</small><strong className="text-[12px]">{option.name}</strong></div>
                 <div className="flex flex-wrap gap-[5px] max-sm:col-start-2">
                     {option.values.map((value) => (
-                        <button key={value.id} type="button" onClick={() => onDeleteValue(option.id, value.id, option.name, value.label)} className="inline-flex min-h-[29px] items-center gap-[6px] rounded-full border border-[#ddd5cf] bg-[#f8f4f0] px-[10px] text-[11px] text-[#5d554f]" aria-label={`Удалить значение ${value.label}`}>
+                        <button key={value.id} type="button" onClick={() => onDeleteValue(option.id, value.id, option.name, value.label)} className="inline-flex min-h-[29px] cursor-pointer items-center gap-[6px] rounded-full border border-[#ddd5cf] bg-[#f8f4f0] px-[10px] text-[11px] text-[#5d554f]" aria-label={`Удалить значение ${value.label}`}>
                             {value.label}<CloseIcon width={11} height={11} />
                         </button>
                     ))}
-                    <button type="button" className="inline-flex min-h-[29px] items-center gap-[5px] rounded-[7px] border border-dashed border-[#d2aaa0] bg-white px-2 text-[11px] font-bold text-[color:var(--color-accent)]" onClick={() => setIsValueFormOpen(true)} aria-expanded={isValueFormOpen}><PlusIcon width={12} height={12} />Добавить значение</button>
+                    <button type="button" className="inline-flex min-h-[29px] cursor-pointer items-center gap-[5px] rounded-[7px] border border-dashed border-[#d2aaa0] bg-white px-2 text-[11px] font-bold text-[color:var(--color-accent)]" onClick={() => setIsValueFormOpen(true)} aria-expanded={isValueFormOpen}><PlusIcon width={12} height={12} />Добавить значение</button>
                 </div>
-                <button type="button" className="grid h-[29px] w-[29px] place-items-center rounded-[8px] border border-[#e3d7d0] bg-white text-[#c24820]" aria-label={`Удалить опцию ${option.name}`} onClick={() => onDeleteOption(option.id)}><TrashIcon size={14} /></button>
+                <button type="button" className="grid h-[29px] w-[29px] cursor-pointer place-items-center rounded-[8px] border border-[#e3d7d0] bg-white text-[#c24820]" aria-label={`Удалить опцию ${option.name}`} onClick={() => onDeleteOption(option.id)}><TrashIcon size={14} /></button>
             </article>
             {isValueFormOpen && <form className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-end gap-[8px] rounded-[11px] border border-[#dfb596] bg-[linear-gradient(120deg,#fff8f3,#fff)] p-[11px_12px] shadow-[0_8px_22px_rgba(80,49,29,.05)] max-sm:grid-cols-1" onSubmit={addValue}>
                 <label className="flex min-w-0 flex-col gap-[5px]"><span className="text-[12px] font-bold text-[#514943]">Добавить значение в «{option.name}»</span><input autoFocus className="h-[38px] rounded-[8px] border border-[#d8d0ca] bg-white px-[10px] text-[12px] outline-none focus:border-[#c77d56] focus:shadow-[0_0_0_3px_rgba(184,79,24,.07)]" value={newValue} onChange={(event) => { setNewValue(event.target.value); setValueError(''); }} placeholder="Новое значение" aria-invalid={Boolean(valueError)} />{valueError && <small className="text-[11px] text-[#a6402b]" role="alert">{valueError}</small>}</label>
@@ -374,7 +388,7 @@ function AttributePicker({ attributes, addedAttributeIds, isLoading, error, onAd
                     const values = (attribute.options ?? []).map((option) => option.value);
 
                     return (
-                        <button key={attribute.id} type="button" disabled={isAdded} onClick={() => onAdd(attribute.id)} className="grid min-h-[76px] grid-cols-[30px_minmax(0,1fr)] items-center gap-x-[9px] rounded-[10px] border border-[#ddd5cf] bg-white p-[10px] text-left text-[#544c46] transition-colors hover:border-[#d6a88d] disabled:cursor-default disabled:bg-[#f6f3f0] disabled:opacity-70">
+                        <button key={attribute.id} type="button" disabled={isAdded} onClick={() => onAdd(attribute.id)} className="grid min-h-[76px] cursor-pointer grid-cols-[30px_minmax(0,1fr)] items-center gap-x-[9px] rounded-[10px] border border-[#ddd5cf] bg-white p-[10px] text-left text-[#544c46] transition-colors hover:border-[#d6a88d] disabled:cursor-default disabled:bg-[#f6f3f0] disabled:opacity-70">
                             <span className={`row-span-2 grid h-[30px] w-[30px] place-items-center rounded-[8px] ${isAdded ? 'bg-[#e9f4ec] text-[#3c8354]' : 'bg-[#f9eee7] text-[color:var(--color-accent)]'}`}>{isAdded ? <Icon size={14}><path d="m20 6-11 11-5-5" /></Icon> : <PlusIcon width={14} height={14} />}</span>
                             <p className="m-0 min-w-0"><strong className="block text-[12px]">{attribute.name}</strong><small className="block text-[11px] text-[#8f867f]">{attribute.type === 'multiselect' ? 'Множественный список' : 'Список'}</small></p>
                             <em className={`col-start-2 block truncate text-[11px] not-italic ${isAdded ? 'text-[#a06745]' : 'text-[#8f867f]'}`}>{isAdded ? 'Добавлено' : (values.join(', ') || 'Нет значений')}</em>
@@ -523,13 +537,17 @@ function PhotosSection({ options, images, photoState, setPhotoState, onOpenImage
             setDraftImageIds((current) => current.filter((assignedId) => assignedId !== normalizedImageId));
         }
     };
+    const toggleVariantPhotos = () => {
+        onChange();
+        setPhotoState((current) => ({ ...current, enabled: !current.enabled }));
+    };
 
     if (options.length === 0) return null;
 
     return (
         <section className="overflow-hidden rounded-[13px] border border-[color:var(--color-border)] bg-white">
-            <header className={`grid min-h-[76px] items-center gap-4 bg-[linear-gradient(100deg,#fff8f3,#fff)] px-[16px] py-3 ${areVariantPhotosEnabled ? 'grid-cols-[48px_minmax(0,1fr)_220px] border-b border-[color:var(--color-border)] max-sm:grid-cols-[48px_minmax(0,1fr)]' : 'grid-cols-[48px_minmax(0,1fr)]'}`}>
-                <button type="button" className="switch-control switch-control--strong" role="switch" aria-checked={areVariantPhotosEnabled} onClick={() => { onChange(); setPhotoState((current) => ({ ...current, enabled: !current.enabled })); }} aria-label={t('productEditPage.variantPhotos.toggleAria')}><i aria-hidden="true"><Icon size={14}><path d="m20 6-11 11-5-5" /></Icon></i></button>
+            <header className={`grid min-h-[76px] cursor-pointer items-center gap-4 bg-[linear-gradient(100deg,#fff8f3,#fff)] px-[16px] py-3 focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_rgba(184,79,24,.18)] ${areVariantPhotosEnabled ? 'grid-cols-[48px_minmax(0,1fr)_220px] border-b border-[color:var(--color-border)] max-sm:grid-cols-[48px_minmax(0,1fr)]' : 'grid-cols-[48px_minmax(0,1fr)]'}`} role="switch" tabIndex={0} aria-checked={areVariantPhotosEnabled} aria-label={t('productEditPage.variantPhotos.toggleAria')} onClick={(event) => handleToggleAreaClick(event, toggleVariantPhotos)} onKeyDown={(event) => handleToggleAreaKeyDown(event, toggleVariantPhotos)}>
+                <button type="button" className="switch-control switch-control--strong" role="switch" aria-checked={areVariantPhotosEnabled} onClick={toggleVariantPhotos} aria-label={t('productEditPage.variantPhotos.toggleAria')}><i aria-hidden="true"><Icon size={14}><path d="m20 6-11 11-5-5" /></Icon></i></button>
                 <p className="m-0"><strong className="block text-[13px]">{t('productEditPage.variantPhotos.title')}</strong><small className="mt-[3px] block max-w-[620px] text-[12px] leading-[1.45] text-[#8d847d]">{t('productEditPage.variantPhotos.description')}</small></p>
                 {areVariantPhotosEnabled && <Field className="max-sm:col-span-full" label={t('productEditPage.variantPhotos.dependsOn')}><Select className="font-bold" value={selectedOptionValue} onChange={(event) => { onChange(); setPhotoState((current) => ({ ...current, selectedOptionId: event.target.value })); }}>{options.map((option) => <option key={option.id} value={String(option.id)}>{option.name}</option>)}</Select></Field>}
             </header>
@@ -609,7 +627,7 @@ function VariantsSection({ combinations, totalCount, variantData, basePrice, sep
 
     return (
         <>
-            {showPriceSettings && <section className="grid grid-cols-[48px_minmax(0,1fr)] items-center gap-3 rounded-[12px] border border-[#e0b292] bg-[#fffaf7] p-[14px_16px]">
+            {showPriceSettings && <section className="grid cursor-pointer grid-cols-[48px_minmax(0,1fr)] items-center gap-3 rounded-[12px] border border-[#e0b292] bg-[#fffaf7] p-[14px_16px] focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_rgba(184,79,24,.18)]" role="switch" tabIndex={0} aria-checked={separatePrices} aria-label="Использовать отдельные цены" onClick={(event) => handleToggleAreaClick(event, onTogglePrices)} onKeyDown={(event) => handleToggleAreaKeyDown(event, onTogglePrices)}>
                 <button type="button" className="switch-control switch-control--strong" role="switch" aria-checked={separatePrices} onClick={onTogglePrices} aria-label="Использовать отдельные цены"><i aria-hidden="true"><Icon size={14}><path d="m20 6-11 11-5-5" /></Icon></i></button><div><strong className="block text-[13px]">Цены отличаются для разных вариантов</strong><small className="mt-[3px] block text-[12px] text-[#8c837c]">Включите, если цвет или размер влияет на стоимость товара.</small></div>
             </section>}
             {totalCount > combinationLimit && <div className="flex items-start gap-2 rounded-[10px] border border-[#ebc8a6] bg-[#fff8ed] p-[11px_13px] text-[#7c5228]"><Icon size={17} className="mt-0.5 shrink-0"><path d="M12 9v4M12 17h.01" /><path d="M10.3 3.4 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.4a2 2 0 0 0-3.4 0Z" /></Icon><p className="m-0 text-[11px] leading-[1.45]"><strong className="block text-[12px] text-[#5d4430]">Превышен лимит: {totalCount} комбинаций</strong>Созданы первые {combinationLimit}. Удалите лишние значения опций, чтобы вернуться в пределы лимита.</p></div>}
@@ -965,7 +983,7 @@ export default function ProductVariantsModal({
                     {!isVariantsLoading && variantsError && <Alert variant="error"><span className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2"><span>{variantsError}</span><button type="button" className="button button--secondary min-h-[32px] shrink-0 justify-center" onClick={() => setVariantsRequestVersion((current) => current + 1)}>Повторить</button></span></Alert>}
                     {!isVariantsLoading && !variantsError && <>
                     {saveErrors.length > 0 && <Alert variant="error" className="items-start"><span className="min-w-0"><strong className="block">Не удалось сохранить модификации.</strong>{saveErrors.map((message) => <span key={message} className="mt-0.5 block font-medium text-[#766d66]">{message}</span>)}</span></Alert>}
-                    <div className="flex items-center justify-between gap-3 max-sm:flex-col max-sm:items-stretch"><div><strong className="block text-[13px]">Опции товара</strong><small className="text-[12px] text-[#968e87]">Добавьте характеристики типа «Список» или «Множественный список».</small></div><button type="button" className="button button--secondary min-h-[40px] shrink-0 justify-center" onClick={() => setShowOptionPicker((current) => !current)} aria-expanded={showOptionPicker}><PlusIcon width={15} height={15} />Добавить опцию</button></div>
+                    <div className="flex items-center justify-between gap-3 max-sm:flex-col max-sm:items-stretch"><div><strong className="block text-[13px]">Опции товара</strong><small className="text-[12px] text-[#968e87]">Добавьте характеристики типа «Список» или «Множественный список».</small></div><button type="button" className="button button--primary min-h-[40px] shrink-0 cursor-pointer justify-center" onClick={() => setShowOptionPicker((current) => !current)} aria-expanded={showOptionPicker}><PlusIcon width={15} height={15} />Добавить опцию</button></div>
                     {showOptionPicker && <AttributePicker attributes={attributes} addedAttributeIds={addedAttributeIds} isLoading={isAttributesLoading} error={attributesError} onAdd={addAttribute} onClose={() => setShowOptionPicker(false)} />}
                     {addedOptions.map((option) => <OptionRow key={option.id} option={option} onAddValue={addOptionValue} onDeleteOption={removeAttribute} onDeleteValue={(optionId, valueId, optionName, valueName) => setDeleteWarning({ optionId, valueId, optionName, valueName })} />)}
                     {deleteWarning && <div className="flex items-start gap-3 rounded-[10px] border border-[#e5c3bd] bg-[#fff7f5] p-[11px_13px] text-[#a6402b]" role="alert"><TrashIcon /><p className="m-0 flex-1 text-[11px] leading-[1.45]"><strong className="block text-[12px] text-[#633b33]">Значение «{deleteWarning.valueName}» связано с модификациями</strong>Модификации с этим значением опции «{deleteWarning.optionName}» будут удалены вместе с ним.</p><div className="flex shrink-0 gap-2 max-sm:flex-col"><button type="button" className="rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 text-[11px] font-bold text-[#5d554f]" onClick={() => setDeleteWarning(null)}>Отмена</button><button type="button" className="rounded-[7px] border border-[#d79d8e] bg-white px-2 py-1.5 text-[11px] font-bold text-[#a6402b]" onClick={() => removeOptionValue(deleteWarning.optionId, deleteWarning.valueId)}>Удалить значение</button></div></div>}
