@@ -390,6 +390,8 @@
             "delete": "Delete",
             "cancel": "Cancel",
             "add": "Add",
+            "close": "Close",
+            "saving": "Saving…",
             "saveDraft": "Save draft"
         },
         "errors": {
@@ -547,11 +549,49 @@
             }
         },
         "createAttribute": {
+            "newTitle": "New attribute",
+            "editTitle": "Edit attribute",
+            "name": "Name",
+            "type": "Type",
+            "typeLockedHint": "The type cannot be changed after the attribute is created.",
             "isVisible": "Show on the product page",
             "isFilterable": "Use in filters",
             "measurementUnit": "Measurement unit",
             "withoutMeasurementUnit": "No measurement unit",
-            "unitsLoadError": "Unable to load measurement units."
+            "unitsLoadError": "Unable to load measurement units.",
+            "valueOptions": "Value options",
+            "addOption": "Add option",
+            "optionPlaceholder": "Option {{number}}",
+            "removeOption": "Delete option {{number}}",
+            "create": "Create",
+            "types": {
+                "text": "Text",
+                "number": "Number",
+                "boolean": "Yes / No",
+                "select": "List",
+                "multiselect": "Multiple list"
+            },
+            "errors": {
+                "nameRequired": "Enter an attribute name.",
+                "duplicateOptions": "Option values must be unique.",
+                "save": "Unable to save the attribute.",
+                "create": "Unable to create the attribute."
+            }
+        },
+        "attributesModal": {
+            "directory": "Directory",
+            "description": "Create attributes and configure their value options.",
+            "allAttributes": "All attributes",
+            "empty": "No attributes have been created yet.",
+            "unit": "Unit",
+            "visibility": "Visibility",
+            "filter": "Filter",
+            "visible": "Visible",
+            "hidden": "Hidden",
+            "inFilter": "In filter",
+            "notInFilter": "Not in filter",
+            "editAria": "Edit attribute “{{name}}”",
+            "edit": "Edit"
         },
         "media": {
             "imageRequirements": "Photos: {{formats}} · up to {{size}} MB",

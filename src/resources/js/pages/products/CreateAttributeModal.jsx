@@ -10,13 +10,7 @@ import TrashIcon from '../../components/icons/TrashIcon';
 import usePageScrollLock from '../../hooks/usePageScrollLock';
 import { createShopAttributeWithOptions, getShopAttributeUnits, updateShopAttributeWithOptions } from '../../services/shopAttributes';
 
-const attributeTypes = [
-    ['text', 'Текст'],
-    ['number', 'Число'],
-    ['boolean', 'Да / Нет'],
-    ['select', 'Список'],
-    ['multiselect', 'Множественный список'],
-];
+const attributeTypes = ['text', 'number', 'boolean', 'select', 'multiselect'];
 
 const emptyForm = (name = '', attribute = null) => ({
     name: attribute?.name ?? name,
@@ -117,14 +111,14 @@ export default function CreateAttributeModal({ isOpen, initialName = '', attribu
             : [];
 
         if (!name) {
-            setErrors({ name: ['Введите название характеристики.'] });
+            setErrors({ name: [t('productEditPage.createAttribute.errors.nameRequired')] });
             nameRef.current?.focus();
             return;
         }
 
         const normalizedOptions = optionValues.map((option) => option.value.toLocaleLowerCase());
         if (new Set(normalizedOptions).size !== normalizedOptions.length) {
-            setErrors({ value: ['Значения вариантов не должны повторяться.'] });
+            setErrors({ value: [t('productEditPage.createAttribute.errors.duplicateOptions')] });
             return;
         }
 
@@ -150,7 +144,7 @@ export default function CreateAttributeModal({ isOpen, initialName = '', attribu
             onCreated?.(savedAttribute);
         } catch (error) {
             setErrors(error.errors ?? {});
-            setMessage(error.message || (isEditing ? 'Не удалось сохранить характеристику.' : 'Не удалось создать характеристику.'));
+            setMessage(error.message || t(`productEditPage.createAttribute.errors.${isEditing ? 'save' : 'create'}`));
         } finally {
             setIsSaving(false);
         }
@@ -172,25 +166,25 @@ export default function CreateAttributeModal({ isOpen, initialName = '', attribu
             >
                 <header className="flex items-start justify-between gap-4 border-b border-[color:var(--color-border)] bg-white px-5 py-4">
                     <div>
-                        <p className="m-0 text-[11px] font-bold uppercase tracking-[.12em] text-[color:var(--color-accent)]">Справочник</p>
-                        <h2 id="attribute-form-modal-title" className="mb-0 mt-1 text-[21px] font-[760] tracking-[-.035em] text-[#312d29]">{isEditing ? 'Редактирование характеристики' : 'Новая характеристика'}</h2>
+                        <p className="m-0 text-[11px] font-bold uppercase tracking-[.12em] text-[color:var(--color-accent)]">{t('productEditPage.attributesModal.directory')}</p>
+                        <h2 id="attribute-form-modal-title" className="mb-0 mt-1 text-[21px] font-[760] tracking-[-.035em] text-[#312d29]">{t(`productEditPage.createAttribute.${isEditing ? 'editTitle' : 'newTitle'}`)}</h2>
                     </div>
-                    <button type="button" className="grid h-[36px] w-[36px] shrink-0 place-items-center rounded-[9px] border border-[color:var(--color-border)] bg-white text-[#706861] hover:text-[color:var(--color-accent)]" disabled={isSaving} onClick={close} aria-label="Закрыть">
+                    <button type="button" className="grid h-[36px] w-[36px] shrink-0 place-items-center rounded-[9px] border border-[color:var(--color-border)] bg-white text-[#706861] hover:text-[color:var(--color-accent)]" disabled={isSaving} onClick={close} aria-label={t('productEditPage.actions.close')}>
                         <CloseIcon width="17" height="17" />
                     </button>
                 </header>
 
                 <form id="attribute-form" className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5" onSubmit={submit}>
                     {message && <p className="m-0 rounded-lg bg-red-50 px-3 py-2 text-[12px] text-red-700" role="alert">{message}</p>}
-                    <Field label="Название" error={errors.name}>
+                    <Field label={t('productEditPage.createAttribute.name')} error={errors.name}>
                         <Input ref={nameRef} value={form.name} disabled={isSaving} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
                     </Field>
                     <div className={`grid gap-3 ${form.type === 'number' ? 'sm:grid-cols-[minmax(0,1fr)_160px]' : ''}`}>
-                        <Field label="Тип" error={errors.type}>
+                        <Field label={t('productEditPage.createAttribute.type')} error={errors.type}>
                             <Select value={form.type} disabled={isSaving || isEditing} onChange={(event) => updateType(event.target.value)}>
-                                {attributeTypes.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                                {attributeTypes.map((type) => <option key={type} value={type}>{t(`productEditPage.createAttribute.types.${type}`)}</option>)}
                             </Select>
-                            {isEditing && <span className="mt-1 text-[11px] leading-[1.4] text-[#918880]">Тип нельзя изменить после создания характеристики.</span>}
+                            {isEditing && <span className="mt-1 text-[11px] leading-[1.4] text-[#918880]">{t('productEditPage.createAttribute.typeLockedHint')}</span>}
                         </Field>
                         {form.type === 'number' && (
                             <Field label={t('productEditPage.createAttribute.measurementUnit')} error={errors.unit ?? unitsError}>
@@ -223,16 +217,16 @@ export default function CreateAttributeModal({ isOpen, initialName = '', attribu
                     {isListType && (
                         <div>
                             <div className="mb-2 flex items-center justify-between gap-3">
-                                <span className="text-[12px] font-bold text-[#554e48]">Варианты значений</span>
+                                <span className="text-[12px] font-bold text-[#554e48]">{t('productEditPage.createAttribute.valueOptions')}</span>
                                 <button type="button" className="inline-flex cursor-pointer items-center gap-1 border-0 bg-transparent p-0 text-[12px] font-bold text-[color:var(--color-accent)]" disabled={isSaving} onClick={() => setForm((current) => ({ ...current, options: [...current.options, newOption(nextOptionKeyRef)] }))}>
-                                    <PlusIcon width="15" height="15" />Добавить вариант
+                                    <PlusIcon width="15" height="15" />{t('productEditPage.createAttribute.addOption')}
                                 </button>
                             </div>
                             <div className="space-y-2">
                                 {form.options.map((option, index) => (
                                     <div className="grid grid-cols-[minmax(0,1fr)_36px] gap-2" key={option.key}>
-                                        <Input value={option.value} placeholder={`Вариант ${index + 1}`} disabled={isSaving} onChange={(event) => updateOption(option.key, event.target.value)} />
-                                        <button type="button" className="grid h-[42px] w-[36px] cursor-pointer place-items-center rounded-[9px] border border-[#e2d9d3] bg-white text-[#8b8179] hover:border-[#e1b9ad] hover:text-[#b7483f]" disabled={isSaving} onClick={() => removeOption(option.key)} aria-label={`Удалить вариант ${index + 1}`}>
+                                        <Input value={option.value} placeholder={t('productEditPage.createAttribute.optionPlaceholder', { number: index + 1 })} disabled={isSaving} onChange={(event) => updateOption(option.key, event.target.value)} />
+                                        <button type="button" className="grid h-[42px] w-[36px] cursor-pointer place-items-center rounded-[9px] border border-[#e2d9d3] bg-white text-[#8b8179] hover:border-[#e1b9ad] hover:text-[#b7483f]" disabled={isSaving} onClick={() => removeOption(option.key)} aria-label={t('productEditPage.createAttribute.removeOption', { number: index + 1 })}>
                                             <TrashIcon />
                                         </button>
                                     </div>
@@ -244,8 +238,8 @@ export default function CreateAttributeModal({ isOpen, initialName = '', attribu
                 </form>
 
                 <footer className="flex items-center justify-end gap-2 border-t border-[color:var(--color-border)] bg-white px-5 py-3">
-                    <button type="button" className="button button--secondary" disabled={isSaving} onClick={close}>Отмена</button>
-                    <button type="submit" form="attribute-form" className="button button--primary" disabled={isSaving}>{isSaving ? 'Сохранение…' : (isEditing ? 'Сохранить' : 'Создать')}</button>
+                    <button type="button" className="button button--secondary" disabled={isSaving} onClick={close}>{t('productEditPage.actions.cancel')}</button>
+                    <button type="submit" form="attribute-form" className="button button--primary" disabled={isSaving}>{isSaving ? t('productEditPage.actions.saving') : (isEditing ? t('common.save') : t('productEditPage.createAttribute.create'))}</button>
                 </footer>
             </section>
         </div>,
