@@ -504,7 +504,7 @@ export default function ProductEditPage() {
         }));
     };
 
-    const createProduct = (status, useDraftDefaults = false) => {
+    const createProduct = (status, useDraftDefaults = false, attributes = undefined) => {
         const creationContextVersion = productContextRef.current.version;
 
         if (createdProductIdRef.current) {
@@ -535,6 +535,7 @@ export default function ProductEditPage() {
             seo_title: form.seo_title || null,
             seo_description: form.seo_description || null,
             status,
+            ...(attributes === undefined ? {} : { attributes }),
         };
         let creationPromise;
 
@@ -618,6 +619,10 @@ export default function ProductEditPage() {
 
         try {
             let product;
+            const attributes = await attributesSectionRef.current?.prepareSave() ?? [];
+
+            if (!isSaveContextCurrent()) return;
+
             const payload = {
                 ...form,
                 name: form.name.trim() || null,
@@ -627,10 +632,11 @@ export default function ProductEditPage() {
                 seo_title: form.seo_title || null,
                 seo_description: form.seo_description || null,
                 status,
+                attributes,
             };
 
             if (isNew) {
-                product = await createProduct(status);
+                product = await createProduct(status, false, attributes);
 
                 if (!isSaveContextCurrent()) return;
 
@@ -676,9 +682,7 @@ export default function ProductEditPage() {
 
             if (!isSaveContextCurrent()) return;
 
-            await attributesSectionRef.current?.save(product.id);
-
-            if (!isSaveContextCurrent()) return;
+            attributesSectionRef.current?.markSaved(product.id);
 
             setSaveNotification({
                 productId: String(product.id),
@@ -692,6 +696,7 @@ export default function ProductEditPage() {
         } catch (error) {
             console.error(error);
             if (isSaveContextCurrent()) {
+                attributesSectionRef.current?.handleSaveError(error);
                 setSaveNotification({
                     productId: savingProductId ?? 'new',
                     type: 'error',

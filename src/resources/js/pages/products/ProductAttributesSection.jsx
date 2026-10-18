@@ -4,7 +4,7 @@ import SearchableSelect from '../../components/admin/SearchableSelect';
 import Input from '../../components/form/Input';
 import PlusIcon from '../../components/icons/PlusIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
-import { createShopAttributeOption, getShopAttributes, getShopItemAttributes, syncShopItemAttributes } from '../../services/shopAttributes';
+import { createShopAttributeOption, getShopAttributes, getShopItemAttributes } from '../../services/shopAttributes';
 import CreateAttributeModal from './CreateAttributeModal';
 import ProductAttributesModal from './ProductAttributesModal';
 
@@ -160,7 +160,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
         preserveForProduct: (savedProductId) => {
             lastSavedProductIdRef.current = String(savedProductId);
         },
-        save: async (savedProductId) => {
+        prepareSave: async () => {
             const savingProductId = productIdRef.current === null || productIdRef.current === undefined
                 ? null
                 : String(productIdRef.current);
@@ -180,30 +180,35 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                     throw new Error('Не удалось загрузить характеристики товара перед сохранением.');
                 }
 
-                if (!isSaveContextCurrent()) return [];
+                if (!isSaveContextCurrent()) return null;
 
-                const savedAttributes = await syncShopItemAttributes(savedProductId, rowsRef.current
+                return rowsRef.current
                     .filter((row) => row.attributeId !== null)
                     .map((row) => ({
                         attribute_id: row.attributeId,
                         value: row.value,
                         sort_order: row.sortOrder,
-                    })));
-
-                if (!isSaveContextCurrent()) return savedAttributes;
-
-                lastSavedProductIdRef.current = productIdRef.current ? null : String(savedProductId);
-                setAttributes((current) => mergeAttributes(current, savedAttributes));
-                updateRows(rowsFromSavedAttributes(savedAttributes));
-
-                return savedAttributes;
+                    }));
             } catch (error) {
-                console.error('Unable to save product attribute values.', error);
                 if (isSaveContextCurrent()) {
                     setSaveError(error.message || 'Не удалось сохранить характеристики товара.');
                 }
                 throw error;
             }
+        },
+        handleSaveError: (error) => {
+            const messages = Object.entries(error.errors ?? {})
+                .filter(([field]) => field === 'attributes' || field.startsWith('attributes.'))
+                .flatMap(([, fieldMessages]) => fieldMessages)
+                .filter(Boolean);
+
+            if (messages.length > 0) {
+                setSaveError([...new Set(messages)].join(' '));
+            }
+        },
+        markSaved: (savedProductId) => {
+            setSaveError('');
+            lastSavedProductIdRef.current = productIdRef.current ? null : String(savedProductId);
         },
     }), []);
 
