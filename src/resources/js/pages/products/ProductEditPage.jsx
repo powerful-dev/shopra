@@ -93,6 +93,9 @@ const emptyVariantsSummary = () => ({
 const idsMatch = (left, right) => left !== null && left !== undefined
     && right !== null && right !== undefined
     && String(left) === String(right);
+const nullableIdsMatch = (left, right) => (
+    (left === null || left === undefined) && (right === null || right === undefined)
+) || idsMatch(left, right);
 
 function buildVariantsSummary(variants, attributes = []) {
     const options = Array.isArray(variants?.options) ? variants.options : [];
@@ -199,14 +202,59 @@ export default function ProductEditPage() {
     const shopGroupsRequestRef = useRef(null);
     const productCategoriesRequestRef = useRef(null);
     const productCreationPromiseRef = useRef(null);
-    const saveInProgressRef = useRef(false);
+    const productCreationContextRef = useRef(null);
+    const productCreationKindRef = useRef(null);
+    const automaticallyCreatedProductIdRef = useRef(null);
+    const saveInProgressRef = useRef(null);
+    const submittingOperationsRef = useRef(new Map());
     const createdProductIdRef = useRef(isNew ? null : id);
     const skipProductLoadIdRef = useRef(null);
     const attributesSectionRef = useRef(null);
     const variantAttributesRef = useRef([]);
     const statusActionRequestRef = useRef(0);
     const activeProductIdRef = useRef(currentProductId);
+    const productContextRef = useRef({ productId: currentProductId, version: 0 });
+    if (!nullableIdsMatch(productContextRef.current.productId, currentProductId)) {
+        productContextRef.current = {
+            productId: currentProductId,
+            version: productContextRef.current.version + 1,
+        };
+    }
     activeProductIdRef.current = currentProductId;
+    const isProductContextVersionCurrent = (contextVersion) => (
+        productContextRef.current.version === contextVersion
+    );
+    const isProductContextCurrent = (contextVersion, productId = null) => {
+        if (!isProductContextVersionCurrent(contextVersion)) return false;
+        if (productId === null || productId === undefined) return true;
+
+        return idsMatch(activeProductIdRef.current, productId)
+            || (activeProductIdRef.current === null && idsMatch(createdProductIdRef.current, productId));
+    };
+    const navigateToCreatedProduct = (productId, contextVersion) => {
+        if (!isProductContextCurrent(contextVersion, productId)) return false;
+
+        productContextRef.current.productId = String(productId);
+        navigate(`/admin/products/${productId}`, { replace: true });
+
+        return true;
+    };
+    const beginSubmitting = (contextVersion = productContextRef.current.version) => {
+        const operationCount = submittingOperationsRef.current.get(contextVersion) ?? 0;
+        submittingOperationsRef.current.set(contextVersion, operationCount + 1);
+        if (isProductContextVersionCurrent(contextVersion)) setIsSubmitting(true);
+    };
+    const endSubmitting = (contextVersion) => {
+        const operationCount = Math.max(0, (submittingOperationsRef.current.get(contextVersion) ?? 0) - 1);
+
+        if (operationCount === 0) {
+            submittingOperationsRef.current.delete(contextVersion);
+        } else {
+            submittingOperationsRef.current.set(contextVersion, operationCount);
+        }
+
+        if (isProductContextVersionCurrent(contextVersion)) setIsSubmitting(operationCount > 0);
+    };
     const isCurrentProductLoaded = isNew || loadedProductId === currentProductId;
     const currentProductLoadError = productLoadError?.productId === currentProductId
         ? productLoadError.message
@@ -319,6 +367,7 @@ export default function ProductEditPage() {
         setIsStatusChanging(false);
         setIsArchiveConfirmOpen(false);
         setStatusActionError(null);
+        setIsSubmitting((submittingOperationsRef.current.get(productContextRef.current.version) ?? 0) > 0);
     }, [id, isNew]);
 
     useEffect(() => {
@@ -361,10 +410,14 @@ export default function ProductEditPage() {
     useEffect(() => {
         if (isNew) {
             createdProductIdRef.current = null;
+            automaticallyCreatedProductIdRef.current = null;
             setLoadedProductId(null);
             setProductLoadError(null);
             setMedia([]);
             setProductCategories([]);
+            setCategoryToAddId(null);
+            setIsAddingCategory(false);
+            setCategoryAddError('');
             setDeletingCategoryIds([]);
             setCategoryDeleteError('');
             setIsMediaLoading(false);
@@ -385,6 +438,7 @@ export default function ProductEditPage() {
             return undefined;
         }
 
+        automaticallyCreatedProductIdRef.current = null;
         let isActive = true;
         setLoadedProductId(null);
         setProductLoadError(null);
@@ -398,6 +452,9 @@ export default function ProductEditPage() {
         setIsCategorySelectOpen(false);
         setMedia([]);
         setProductCategories([]);
+        setCategoryToAddId(null);
+        setIsAddingCategory(false);
+        setCategoryAddError('');
         setDeletingCategoryIds([]);
         setCategoryDeleteError('');
 
@@ -447,12 +504,26 @@ export default function ProductEditPage() {
         }));
     };
 
-    const createProduct = (status, useDraftDefaults = false, navigateAfterCreate = true) => {
+    const createProduct = (status, useDraftDefaults = false) => {
+        const creationContextVersion = productContextRef.current.version;
+
         if (createdProductIdRef.current) {
             return Promise.resolve({ id: createdProductIdRef.current, status: form.status ?? status });
         }
 
-        if (productCreationPromiseRef.current) return productCreationPromiseRef.current;
+        if (productCreationPromiseRef.current && productCreationContextRef.current === creationContextVersion) {
+            if (useDraftDefaults && productCreationKindRef.current === 'explicit-save') {
+                return productCreationPromiseRef.current.catch(() => {
+                    if (!isProductContextVersionCurrent(creationContextVersion)) {
+                        throw new Error('Product context changed during creation.');
+                    }
+
+                    return createProduct('draft', true);
+                });
+            }
+
+            return productCreationPromiseRef.current;
+        }
 
         const payload = {
             ...form,
@@ -475,7 +546,10 @@ export default function ProductEditPage() {
                 body: JSON.stringify(payload),
             });
 
+            if (!isProductContextVersionCurrent(creationContextVersion)) return product;
+
             createdProductIdRef.current = product.id;
+            automaticallyCreatedProductIdRef.current = useDraftDefaults ? String(product.id) : null;
             skipProductLoadIdRef.current = String(product.id);
             setLoadedProductId(String(product.id));
             attributesSectionRef.current?.preserveForProduct(product.id);
@@ -484,51 +558,102 @@ export default function ProductEditPage() {
                 currency: product.currency ?? current.currency,
                 status: product.status,
             }));
-            if (navigateAfterCreate) {
-                navigate(`/admin/products/${product.id}`, { replace: true });
-            }
-
             return product;
         })().finally(() => {
             if (productCreationPromiseRef.current === creationPromise) {
                 productCreationPromiseRef.current = null;
+                productCreationContextRef.current = null;
+                productCreationKindRef.current = null;
             }
         });
 
         productCreationPromiseRef.current = creationPromise;
+        productCreationContextRef.current = creationContextVersion;
+        productCreationKindRef.current = useDraftDefaults ? 'automatic-draft' : 'explicit-save';
 
         return creationPromise;
     };
 
-    const ensureProductForMedia = async () => {
-        if (createdProductIdRef.current) return createdProductIdRef.current;
+    const ensureProduct = async () => {
+        const contextVersion = productContextRef.current.version;
 
-        setIsSubmitting(true);
+        if (createdProductIdRef.current) {
+            const productId = createdProductIdRef.current;
+
+            if (activeProductIdRef.current === null && saveInProgressRef.current !== contextVersion) {
+                navigateToCreatedProduct(productId, contextVersion);
+            }
+
+            return productId;
+        }
+
+        beginSubmitting(contextVersion);
 
         try {
             const product = await createProduct('draft', true);
 
+            if (!isProductContextCurrent(contextVersion, product.id)) return null;
+
+            if (saveInProgressRef.current !== contextVersion) {
+                navigateToCreatedProduct(product.id, contextVersion);
+            }
+
             return product.id;
         } finally {
-            setIsSubmitting(false);
+            endSubmitting(contextVersion);
         }
     };
 
     const saveProduct = async (status) => {
         const savingProductId = currentProductId;
-        const isSaveContextCurrent = () => activeProductIdRef.current === savingProductId;
+        const savingContextVersion = productContextRef.current.version;
+        const isSaveContextCurrent = () => isProductContextVersionCurrent(savingContextVersion)
+            && activeProductIdRef.current === savingProductId;
 
-        if (saveInProgressRef.current || !isSaveContextCurrent() || (!isNew && loadedProductId !== savingProductId)) return;
+        if (saveInProgressRef.current === savingContextVersion || !isSaveContextCurrent() || (!isNew && loadedProductId !== savingProductId)) return;
 
-        saveInProgressRef.current = true;
+        saveInProgressRef.current = savingContextVersion;
         setSaveNotification(null);
-        setIsSubmitting(true);
+        beginSubmitting(savingContextVersion);
 
         try {
             let product;
+            const payload = {
+                ...form,
+                name: form.name.trim() || null,
+                old_price: form.old_price || null,
+                quantity: normalizeNullableQuantity(form.quantity),
+                show_stock: form.show_stock,
+                seo_title: form.seo_title || null,
+                seo_description: form.seo_description || null,
+                status,
+            };
 
             if (isNew) {
-                product = await createProduct(status, false, false);
+                product = await createProduct(status);
+
+                if (!isSaveContextCurrent()) return;
+
+                if (idsMatch(automaticallyCreatedProductIdRef.current, product.id)) {
+                    await csrf();
+
+                    if (!isSaveContextCurrent()) return;
+
+                    ({ data: product } = await request(`/api/products/${product.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                    }));
+
+                    if (!isSaveContextCurrent()) return;
+
+                    automaticallyCreatedProductIdRef.current = null;
+                    setForm((current) => ({
+                        ...current,
+                        currency: product.currency ?? current.currency,
+                        status: product.status,
+                    }));
+                }
             } else {
                 await csrf();
 
@@ -537,16 +662,7 @@ export default function ProductEditPage() {
                 ({ data: product } = await request(`/api/products/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        ...form,
-                        name: form.name.trim() || null,
-                        old_price: form.old_price || null,
-                        quantity: normalizeNullableQuantity(form.quantity),
-                        show_stock: form.show_stock,
-                        seo_title: form.seo_title || null,
-                        seo_description: form.seo_description || null,
-                        status,
-                    }),
+                    body: JSON.stringify(payload),
                 }));
 
                 if (!isSaveContextCurrent()) return;
@@ -571,7 +687,7 @@ export default function ProductEditPage() {
             });
 
             if (isNew) {
-                navigate(`/admin/products/${product.id}`, { replace: true });
+                navigateToCreatedProduct(product.id, savingContextVersion);
             }
         } catch (error) {
             console.error(error);
@@ -583,8 +699,8 @@ export default function ProductEditPage() {
                 });
             }
         } finally {
-            saveInProgressRef.current = false;
-            setIsSubmitting(false);
+            if (saveInProgressRef.current === savingContextVersion) saveInProgressRef.current = null;
+            endSubmitting(savingContextVersion);
         }
     };
 
@@ -679,37 +795,54 @@ export default function ProductEditPage() {
         const productId = createdProductIdRef.current;
         if (!productId || deletingCategoryIds.includes(categoryId)) return;
 
+        const contextVersion = productContextRef.current.version;
         setDeletingCategoryIds((current) => [...current, categoryId]);
         setCategoryDeleteError('');
 
         try {
             await deleteShopItemCategory(productId, categoryId);
-            setProductCategories((current) => current.filter((category) => category.id !== categoryId));
+            if (isProductContextCurrent(contextVersion, productId)) {
+                setProductCategories((current) => current.filter((category) => category.id !== categoryId));
+            }
         } catch (error) {
+            if (!isProductContextCurrent(contextVersion, productId)) return;
+
             console.error(error);
             setCategoryDeleteError('Не удалось убрать товар из категории.');
         } finally {
-            setDeletingCategoryIds((current) => current.filter((id) => id !== categoryId));
+            if (isProductContextVersionCurrent(contextVersion)) {
+                setDeletingCategoryIds((current) => current.filter((id) => id !== categoryId));
+            }
         }
     };
 
     const attachProductCategory = async (categoryId) => {
         if (categoryId === null || isAddingCategory) return;
 
+        const contextVersion = productContextRef.current.version;
+        let productId = null;
         setCategoryToAddId(categoryId);
         setIsAddingCategory(true);
         setCategoryAddError('');
 
         try {
-            const productId = await ensureProductForMedia();
+            productId = await ensureProduct();
+            if (!productId || !isProductContextCurrent(contextVersion, productId)) return;
+
             const product = await addShopItemCategory(productId, categoryId);
-            setProductCategories(product.categories ?? []);
+            if (isProductContextCurrent(contextVersion, productId)) {
+                setProductCategories(product.categories ?? []);
+            }
         } catch (error) {
+            if (!isProductContextCurrent(contextVersion, productId)) return;
+
             console.error(error);
             setCategoryAddError('Не удалось добавить товар в категорию.');
         } finally {
-            setCategoryToAddId(null);
-            setIsAddingCategory(false);
+            if (isProductContextVersionCurrent(contextVersion)) {
+                setCategoryToAddId(null);
+                setIsAddingCategory(false);
+            }
         }
     };
 
@@ -872,7 +1005,10 @@ export default function ProductEditPage() {
                         media={media}
                         isLoading={isMediaLoading}
                         loadError={mediaLoadError}
-                        resolveProductId={ensureProductForMedia}
+                        resolveProductId={ensureProduct}
+                        productContextVersion={productContextRef.current.version}
+                        getProductContextVersion={() => productContextRef.current.version}
+                        isProductContextCurrent={isProductContextCurrent}
                         onMediaUploaded={(uploadedMedia) => {
                             setMedia((current) => [...current, uploadedMedia]
                                 .sort((left, right) => left.sort_order - right.sort_order || left.id - right.id));
@@ -925,7 +1061,7 @@ export default function ProductEditPage() {
                         </label>
                     </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title="Характеристики" icon={ControlsIcon}>
-                        <ProductAttributesSection ref={attributesSectionRef} productId={isNew ? null : id} onFilledChange={setHasFilledAttribute} />
+                        <ProductAttributesSection ref={attributesSectionRef} productId={isNew ? null : id} productContextVersion={productContextRef.current.version} onFilledChange={setHasFilledAttribute} />
                     </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.seo = element; }} id="seo" title="SEO" icon={LinkIcon}>
                         <SeoFields
@@ -1158,11 +1294,11 @@ function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen
     );
 }
 
-function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductId, onMediaUploaded, onMediaOrderChanged }) {
+function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductId, productContextVersion, getProductContextVersion, isProductContextCurrent, onMediaUploaded, onMediaOrderChanged }) {
     const { t, i18n } = useTranslation();
     const inputRef = useRef(null);
     const mediaGridRef = useRef(null);
-    const uploadInProgressRef = useRef(false);
+    const uploadInProgressRef = useRef(null);
     const draggedMediaIdRef = useRef(null);
     const deletedMediaIdsRef = useRef(new Set());
     const deletingMediaIdsRef = useRef(new Set());
@@ -1222,6 +1358,18 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
         };
     }, [t]);
 
+    useEffect(() => {
+        setPendingMedia([]);
+        setUploadErrors([]);
+        setSortError('');
+        setDeleteError('');
+        setDeletingMediaIds([]);
+        setIsSortingMedia(false);
+        deletingMediaIdsRef.current.clear();
+        deletedMediaIdsRef.current.clear();
+        endMediaDrag();
+    }, [productContextVersion]);
+
     useLayoutEffect(() => {
         const grid = mediaGridRef.current;
 
@@ -1264,6 +1412,7 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
         event.preventDefault();
         event.stopPropagation();
         const previousMedia = media;
+        const contextVersion = getProductContextVersion();
         const targetRect = event.currentTarget.getBoundingClientRect();
         const position = event.clientX < targetRect.left + targetRect.width / 2 ? 'before' : 'after';
         const reordered = media.filter((item) => item.id !== draggedId);
@@ -1295,22 +1444,29 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
 
         try {
             const productId = await resolveProductId();
+            if (!productId || !isProductContextCurrent(contextVersion, productId)) return;
+
             const savedMedia = await reorderShopItemMedia(productId, optimisticMedia.map((item) => item.id));
 
-            onMediaOrderChanged(savedMedia);
+            if (isProductContextCurrent(contextVersion, productId)) {
+                onMediaOrderChanged(savedMedia);
+            }
         } catch (error) {
-            onMediaOrderChanged(previousMedia);
-            setSortError(Object.values(error.errors ?? {}).flat().join(' ') || 'Не удалось сохранить порядок медиафайлов.');
+            if (isProductContextCurrent(contextVersion)) {
+                onMediaOrderChanged(previousMedia);
+                setSortError(Object.values(error.errors ?? {}).flat().join(' ') || 'Не удалось сохранить порядок медиафайлов.');
+            }
         } finally {
-            setIsSortingMedia(false);
+            if (isProductContextCurrent(contextVersion)) setIsSortingMedia(false);
         }
     };
 
     const uploadFiles = async (fileList) => {
         const files = Array.from(fileList ?? []);
 
-        if (uploadInProgressRef.current || files.length === 0 || !mediaConfig) return;
+        if (uploadInProgressRef.current === getProductContextVersion() || files.length === 0 || !mediaConfig) return;
 
+        const contextVersion = getProductContextVersion();
         const pending = files.map((file, index) => {
             const extension = file.name.split('.').pop()?.toLowerCase();
             const mimeType = file.type.toLowerCase();
@@ -1329,7 +1485,7 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
         });
         const errors = [];
 
-        uploadInProgressRef.current = true;
+        uploadInProgressRef.current = contextVersion;
         setUploadErrors([]);
         setPendingMedia(pending);
 
@@ -1337,7 +1493,24 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
 
         try {
             productId = await resolveProductId();
+            if (!productId || !isProductContextCurrent(contextVersion, productId)) {
+                pending.forEach((item) => {
+                    if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+                });
+                if (uploadInProgressRef.current === contextVersion) uploadInProgressRef.current = null;
+
+                return;
+            }
         } catch (error) {
+            if (!isProductContextCurrent(contextVersion)) {
+                pending.forEach((item) => {
+                    if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+                });
+                if (uploadInProgressRef.current === contextVersion) uploadInProgressRef.current = null;
+
+                return;
+            }
+
             const validationMessage = Object.values(error.errors ?? {}).flat().join(' ');
             const message = validationMessage || error.message || 'Не удалось создать черновик товара.';
 
@@ -1349,18 +1522,24 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
                 message,
                 filenames: pending.map((item) => item.file.name),
             }]);
-            uploadInProgressRef.current = false;
+            if (uploadInProgressRef.current === contextVersion) uploadInProgressRef.current = null;
 
             return;
         }
 
         for (const item of pending) {
+            if (!isProductContextCurrent(contextVersion, productId)) break;
+
             try {
                 if (!item.type) throw new Error('Поддерживаются только фотографии и видео.');
 
                 const uploadedMedia = await uploadShopItemMedia(productId, item.type, item.file);
-                onMediaUploaded(uploadedMedia);
+                if (isProductContextCurrent(contextVersion, productId)) {
+                    onMediaUploaded(uploadedMedia);
+                }
             } catch (error) {
+                if (!isProductContextCurrent(contextVersion, productId)) continue;
+
                 const validationMessages = Object.values(error.errors ?? {}).flat().filter(Boolean);
                 const messages = error.status === 413
                     ? ['Файл слишком большой для загрузки.']
@@ -1385,33 +1564,50 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
                 })));
             } finally {
                 if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
-                setPendingMedia((current) => current.filter((pendingItem) => pendingItem.id !== item.id));
+                if (isProductContextCurrent(contextVersion)) {
+                    setPendingMedia((current) => current.filter((pendingItem) => pendingItem.id !== item.id));
+                }
             }
         }
 
-        uploadInProgressRef.current = false;
+        pending.forEach((item) => {
+            if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+        });
+        if (isProductContextCurrent(contextVersion)) {
+            setPendingMedia((current) => current.filter((pendingItem) => !pending.some((item) => item.id === pendingItem.id)));
+        }
+        if (uploadInProgressRef.current === contextVersion) uploadInProgressRef.current = null;
     };
 
     const deleteMedia = async (item) => {
         if (deletingMediaIdsRef.current.has(item.id)) return;
 
+        const contextVersion = getProductContextVersion();
         deletingMediaIdsRef.current.add(item.id);
         setDeleteError('');
         setDeletingMediaIds((current) => [...current, item.id]);
 
         try {
             const productId = await resolveProductId();
+            if (!productId || !isProductContextCurrent(contextVersion, productId)) return;
+
             const savedMedia = await deleteShopItemMedia(productId, item.id);
 
-            deletedMediaIdsRef.current.add(item.id);
-            onMediaOrderChanged(savedMedia.filter((mediaItem) => !deletedMediaIdsRef.current.has(mediaItem.id)));
+            if (isProductContextCurrent(contextVersion, productId)) {
+                deletedMediaIdsRef.current.add(item.id);
+                onMediaOrderChanged(savedMedia.filter((mediaItem) => !deletedMediaIdsRef.current.has(mediaItem.id)));
+            }
         } catch (error) {
+            if (!isProductContextCurrent(contextVersion)) return;
+
             const validationMessage = Object.values(error.errors ?? {}).flat().join(' ');
 
             setDeleteError(validationMessage || error.message || 'Не удалось удалить медиафайл.');
         } finally {
             deletingMediaIdsRef.current.delete(item.id);
-            setDeletingMediaIds((current) => current.filter((mediaId) => mediaId !== item.id));
+            if (isProductContextCurrent(contextVersion)) {
+                setDeletingMediaIds((current) => current.filter((mediaId) => mediaId !== item.id));
+            }
         }
     };
     const { isDragActive, dropZoneProps } = useFileDropZone({

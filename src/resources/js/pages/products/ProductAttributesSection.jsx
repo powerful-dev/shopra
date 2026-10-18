@@ -46,7 +46,7 @@ const mergeAttributes = (current, savedAttributes) => sortAttributes([
         .filter((attribute) => attribute && !current.some((item) => item.id === attribute.id)),
 ]);
 
-const ProductAttributesSection = forwardRef(function ProductAttributesSection({ productId, onFilledChange }, ref) {
+const ProductAttributesSection = forwardRef(function ProductAttributesSection({ productId, productContextVersion, onFilledChange }, ref) {
     const [attributes, setAttributes] = useState([]);
     const [rows, setRows] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -63,11 +63,13 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
     const nextRowIdRef = useRef(1);
     const lastSavedProductIdRef = useRef(null);
     const productIdRef = useRef(productId);
+    const productContextVersionRef = useRef(productContextVersion);
     const rowsRef = useRef([]);
     const draggedRowIdRef = useRef(null);
     const valuesLoadPromiseRef = useRef(null);
     const creatingOptionRowIdsRef = useRef(new Set());
     productIdRef.current = productId;
+    productContextVersionRef.current = productContextVersion;
 
     const updateRows = (value) => {
         setRows((current) => {
@@ -159,12 +161,26 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
             lastSavedProductIdRef.current = String(savedProductId);
         },
         save: async (savedProductId) => {
+            const savingProductId = productIdRef.current === null || productIdRef.current === undefined
+                ? null
+                : String(productIdRef.current);
+            const savingContextVersion = productContextVersionRef.current;
+            const isSaveContextCurrent = () => {
+                const currentProductId = productIdRef.current === null || productIdRef.current === undefined
+                    ? null
+                    : String(productIdRef.current);
+
+                return currentProductId === savingProductId
+                    && productContextVersionRef.current === savingContextVersion;
+            };
             setSaveError('');
 
             try {
                 if (valuesLoadPromiseRef.current && ! await valuesLoadPromiseRef.current) {
                     throw new Error('Не удалось загрузить характеристики товара перед сохранением.');
                 }
+
+                if (!isSaveContextCurrent()) return [];
 
                 const savedAttributes = await syncShopItemAttributes(savedProductId, rowsRef.current
                     .filter((row) => row.attributeId !== null)
@@ -174,6 +190,8 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                         sort_order: row.sortOrder,
                     })));
 
+                if (!isSaveContextCurrent()) return savedAttributes;
+
                 lastSavedProductIdRef.current = productIdRef.current ? null : String(savedProductId);
                 setAttributes((current) => mergeAttributes(current, savedAttributes));
                 updateRows(rowsFromSavedAttributes(savedAttributes));
@@ -181,7 +199,9 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                 return savedAttributes;
             } catch (error) {
                 console.error('Unable to save product attribute values.', error);
-                setSaveError(error.message || 'Не удалось сохранить характеристики товара.');
+                if (isSaveContextCurrent()) {
+                    setSaveError(error.message || 'Не удалось сохранить характеристики товара.');
+                }
                 throw error;
             }
         },
