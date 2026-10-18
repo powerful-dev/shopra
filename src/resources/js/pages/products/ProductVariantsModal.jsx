@@ -641,7 +641,17 @@ function VariantsSection({ combinations, totalCount, variantData, basePrice, sep
     );
 }
 
-export default function ProductVariantsModal({ isOpen, onClose, onSaved, productId = null, basePrice = '', media = [] }) {
+export default function ProductVariantsModal({
+    isOpen,
+    onClose,
+    onSaved,
+    productId = null,
+    basePrice = '',
+    media = [],
+    resolveProductId,
+    productContextVersion = 0,
+    isProductContextCurrent = () => true,
+}) {
     const [separatePrices, setSeparatePrices] = useState(false);
     const [areSeparatePricesInitialized, setAreSeparatePricesInitialized] = useState(false);
     const [showOptionPicker, setShowOptionPicker] = useState(false);
@@ -660,6 +670,8 @@ export default function ProductVariantsModal({ isOpen, onClose, onSaved, product
     const [saveErrors, setSaveErrors] = useState([]);
     const [lightboxIndex, setLightboxIndex] = useState(0);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+    const modalSessionRef = useRef({ isOpen: false, openedWithoutProduct: false });
+    const saveOperationRef = useRef(null);
     const images = useMemo(() => media.filter((item) => item.type === 'image'), [media]);
     const lightboxImages = useMemo(() => images.map((item) => ({ id: item.id, src: item.large_url, alt: '' })), [images]);
     const { combinations, totalCount } = useMemo(() => buildCombinations(addedOptions), [addedOptions]);
@@ -671,7 +683,20 @@ export default function ProductVariantsModal({ isOpen, onClose, onSaved, product
     }, [images.length, isOpen]);
 
     useEffect(() => {
-        if (!isOpen || !productId) {
+        saveOperationRef.current = null;
+        setIsSaving(false);
+    }, [productContextVersion]);
+
+    useEffect(() => {
+        if (isOpen && !modalSessionRef.current.isOpen) {
+            modalSessionRef.current = { isOpen: true, openedWithoutProduct: !productId };
+        } else if (!isOpen) {
+            modalSessionRef.current = { isOpen: false, openedWithoutProduct: false };
+        }
+    }, [isOpen, productId]);
+
+    useEffect(() => {
+        if (!isOpen || !productId || modalSessionRef.current.openedWithoutProduct) {
             setIsVariantsLoading(false);
             setVariantsError('');
             return undefined;
@@ -870,17 +895,20 @@ export default function ProductVariantsModal({ isOpen, onClose, onSaved, product
         setSeparatePrices((current) => !current);
     };
     const saveVariants = async () => {
-        if (isSaving) return;
-        if (!productId) {
-            setSaveErrors(['Сначала сохраните товар, затем настройте модификации.']);
-            return;
-        }
+        const contextVersion = productContextVersion;
+        if (saveOperationRef.current?.contextVersion === contextVersion) return;
 
+        const operation = { contextVersion };
+        saveOperationRef.current = operation;
         setIsSaving(true);
         setSaveErrors([]);
 
         try {
-            const savedVariants = await updateProductVariants(productId, buildProductVariantsPayload({
+            const savedProductId = productId ?? await resolveProductId?.();
+
+            if (!savedProductId || !isProductContextCurrent(contextVersion, savedProductId)) return;
+
+            const savedVariants = await updateProductVariants(savedProductId, buildProductVariantsPayload({
                 options: addedOptions,
                 combinations,
                 variantData,
@@ -888,6 +916,9 @@ export default function ProductVariantsModal({ isOpen, onClose, onSaved, product
                 photoState,
                 basePrice: normalizedBasePrice,
             }));
+
+            if (!isProductContextCurrent(contextVersion, savedProductId)) return;
+
             const restoredState = restoreProductVariantsState(savedVariants, attributesRef.current);
 
             setAddedOptions(restoredState.options);
@@ -898,10 +929,15 @@ export default function ProductVariantsModal({ isOpen, onClose, onSaved, product
             onSaved?.(savedVariants);
             onClose();
         } catch (error) {
+            if (!isProductContextCurrent(contextVersion)) return;
+
             console.error('Unable to save product variants.', error);
             setSaveErrors(validationMessages(error));
         } finally {
-            setIsSaving(false);
+            if (saveOperationRef.current === operation) {
+                saveOperationRef.current = null;
+                if (isProductContextCurrent(contextVersion)) setIsSaving(false);
+            }
         }
     };
     return (

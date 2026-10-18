@@ -1146,6 +1146,9 @@ export default function ProductEditPage() {
                 productId={isNew ? null : id}
                 basePrice={form.price}
                 media={media}
+                resolveProductId={ensureProduct}
+                productContextVersion={productContextRef.current.version}
+                isProductContextCurrent={isProductContextCurrent}
                 onClose={() => setIsVariantsOpen(false)}
                 onSaved={(variants) => {
                     const updatedSummary = buildVariantsSummary(variants, variantAttributesRef.current);
