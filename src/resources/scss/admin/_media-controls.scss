@@ -82,14 +82,5 @@
 @media (max-width: 639px) {
     .product-media-grid {
         --media-card-width: 119px;
-
-        grid-template-columns: repeat(auto-fill, minmax(var(--media-card-width), 1fr));
-        justify-items: center;
-    }
-
-    .product-media-upload {
-        width: 100%;
-        grid-column: 1 / -1;
-        justify-self: stretch;
     }
 }

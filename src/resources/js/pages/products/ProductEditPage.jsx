@@ -1479,8 +1479,15 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
 
             const columnCount = Math.max(1, Math.floor((grid.clientWidth + columnGap) / (cardWidth + columnGap)));
             const occupiedLastRow = occupiedMediaSlots % columnCount;
-            const freeColumns = occupiedLastRow === 0 ? columnCount : columnCount - occupiedLastRow;
-            const uploadSpan = freeColumns >= 3 ? freeColumns : columnCount;
+            const availableUploadWidth = grid.clientWidth - (occupiedLastRow * (cardWidth + columnGap));
+            const uploadSpan = occupiedLastRow > 0 && availableUploadWidth >= 280
+                ? columnCount - occupiedLastRow
+                : columnCount;
+            const flexibleColumn = `minmax(${cardWidth}px, 1fr)`;
+
+            grid.style.gridTemplateColumns = columnCount > 1
+                ? `repeat(${columnCount - 1}, ${cardWidth}px) ${flexibleColumn}`
+                : flexibleColumn;
 
             grid.style.setProperty('--media-upload-column-span', String(uploadSpan));
         };
