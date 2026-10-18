@@ -44,6 +44,7 @@ import { getCurrencySettings } from '../../services/settings';
 import useFileDropZone from '../../hooks/useFileDropZone';
 import useScrollSpy from '../../hooks/useScrollSpy';
 import { formatMediaExtensions } from '../../utils/media';
+import { convertPriceToStoreCurrency, findCurrencyRate, isValidCurrencyRate, parsePrice } from '../../utils/prices';
 import calculateProductCompleteness from '../../utils/productCompleteness';
 import { buildShopGroupOptions } from '../../utils/shopGroups';
 import CategoriesModal from './CategoriesModal';
@@ -1157,6 +1158,7 @@ export default function ProductEditPage() {
                 </form>
                 <ProductAside
                     form={form}
+                    currencySettings={currencySettings}
                     primaryCategoryName={primaryCategory?.name ?? primaryCategory?.label ?? ''}
                     media={media}
                     isMediaLoading={isMediaLoading}
@@ -1964,36 +1966,21 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasV
         }
     }, [currencyStatus, onChange, priceCurrencies, priceCurrency]);
 
-    const selectedCurrencyRate = currencyRates.find(({ code }) => code === priceCurrency)?.rate;
-    const numericRate = Number(selectedCurrencyRate);
-    const hasRate = Number.isFinite(numericRate) && numericRate > 0;
+    const selectedCurrencyRate = findCurrencyRate(currencyRates, priceCurrency);
+    const hasRate = isValidCurrencyRate(selectedCurrencyRate);
     const shouldShowPricePreview = Boolean(
         storeCurrency && priceCurrency && priceCurrency !== storeCurrency
     );
     const storeCurrencySymbol = supportedCurrencies.find(({ code }) => code === storeCurrency)?.symbol
         ?? storeCurrency;
-    const parsePrice = (value) => {
-        if (value === '' || value === null || value === undefined) {
-            return null;
-        }
-
-        const parsedValue = Number(String(value).replace(/\s/g, '').replace(',', '.'));
-
-        return Number.isFinite(parsedValue) ? parsedValue : null;
-    };
-    const convertPrice = (value) => {
-        const parsedValue = parsePrice(value);
-
-        return parsedValue === null || !hasRate ? null : parsedValue * numericRate;
-    };
     const formatPrice = (value) => value === null
         ? '—'
         : `${new Intl.NumberFormat(i18n.resolvedLanguage, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
         }).format(value)} ${storeCurrencySymbol}`;
-    const storefrontPrice = convertPrice(form.price);
-    const storefrontOldPrice = convertPrice(form.old_price);
+    const storefrontPrice = convertPriceToStoreCurrency(form.price, priceCurrency, storeCurrency, currencyRates);
+    const storefrontOldPrice = convertPriceToStoreCurrency(form.old_price, priceCurrency, storeCurrency, currencyRates);
 
     return (
         <AdminCard sectionRef={sectionRef} id="price" title="Цена и наличие" icon={CurrencyIcon} required bodyClassName="" className="!scroll-mt-0">
@@ -2131,7 +2118,7 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasV
     );
 }
 
-function ProductAside({ form, primaryCategoryName, media, isMediaLoading, mainPhotoValue, missingCriteria, onRecommendationClick }) {
+function ProductAside({ form, currencySettings, primaryCategoryName, media, isMediaLoading, mainPhotoValue, missingCriteria, onRecommendationClick }) {
     const { t, i18n } = useTranslation();
     const images = media.filter((item) => item.type === 'image');
     const mainImage = images.find((item) => item.is_main) ?? images[0] ?? null;
@@ -2140,16 +2127,21 @@ function ProductAside({ form, primaryCategoryName, media, isMediaLoading, mainPh
         : [];
     const productName = form.name.trim();
     const rawPrice = String(form.price ?? '').trim();
-    const numericPrice = Number(rawPrice.replace(/\s/g, '').replace(',', '.'));
-    const formattedPrice = rawPrice === ''
+    const storeCurrency = currencySettings.currency;
+    const storePrice = convertPriceToStoreCurrency(
+        form.price,
+        form.currency,
+        storeCurrency,
+        currencySettings.currency_rates,
+    );
+    const formattedPrice = storePrice === null
         ? ''
-        : Number.isFinite(numericPrice)
-            ? new Intl.NumberFormat(i18n.resolvedLanguage ?? i18n.language, {
-                maximumFractionDigits: 2,
-            }).format(numericPrice)
-            : rawPrice;
-    const currencyLabel = supportedCurrencies.find(({ code }) => code === form.currency)?.symbol
-        ?? form.currency;
+        : new Intl.NumberFormat(i18n.resolvedLanguage ?? i18n.language, {
+            maximumFractionDigits: 2,
+        }).format(storePrice);
+    const currencyLabel = supportedCurrencies.find(({ code }) => code === storeCurrency)?.symbol
+        ?? storeCurrency;
+    const unavailablePrice = rawPrice !== '' && parsePrice(form.price) !== null && !formattedPrice;
     const missingCriterionIds = new Set(missingCriteria.map(({ id }) => id));
     const recommendations = missingCriteria
         .filter(({ id }) => id !== 'photo-gallery' || !missingCriterionIds.has('first-photo'))
@@ -2225,7 +2217,7 @@ function ProductAside({ form, primaryCategoryName, media, isMediaLoading, mainPh
                             {productName || 'Название товара не указано'}
                         </strong>
                         <b className={`mt-2 block text-[15px] ${formattedPrice ? '' : 'text-[#9a938d]'}`}>
-                            {formattedPrice || 'Цена не указана'}{formattedPrice && currencyLabel ? ` ${currencyLabel}` : ''}
+                            {formattedPrice || (unavailablePrice ? 'Цена в валюте магазина недоступна' : 'Цена не указана')}{formattedPrice && currencyLabel ? ` ${currencyLabel}` : ''}
                         </b>
                         {formattedPrice && !currencyLabel && <small className="mt-1 block text-[11px] text-[#9a938d]">Валюта не выбрана</small>}
                         {mainPhotoValue && (
