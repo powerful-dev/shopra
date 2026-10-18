@@ -1373,7 +1373,7 @@ function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen
     );
 }
 
-function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductId, productContextVersion, getProductContextVersion, isProductContextCurrent, onMediaUploaded, onMediaOrderChanged }) {
+function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadError, resolveProductId, productContextVersion, getProductContextVersion, isProductContextCurrent, onMediaUploaded, onMediaOrderChanged }) {
     const { t, i18n } = useTranslation();
     const inputRef = useRef(null);
     const mediaGridRef = useRef(null);
@@ -1382,6 +1382,7 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
     const deletedMediaIdsRef = useRef(new Set());
     const deletingMediaIdsRef = useRef(new Set());
     const [pendingMedia, setPendingMedia] = useState([]);
+    const [pendingUploadProductId, setPendingUploadProductId] = useState(null);
     const [uploadErrors, setUploadErrors] = useState([]);
     const [sortError, setSortError] = useState('');
     const [deleteError, setDeleteError] = useState('');
@@ -1438,8 +1439,23 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
     }, [t]);
 
     useEffect(() => {
-        setPendingMedia([]);
-        setUploadErrors([]);
+        const uploadOperation = uploadInProgressRef.current;
+        const isCreatingCurrentProduct = uploadOperation?.sourceWasNew
+            && !uploadOperation.started
+            && (uploadOperation.targetProductId === null
+                || isNew
+                || idsMatch(productId, uploadOperation.targetProductId));
+
+        if (!isCreatingCurrentProduct) {
+            uploadOperation?.pending.forEach((item) => {
+                if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+            });
+            uploadInProgressRef.current = null;
+            setPendingUploadProductId(null);
+            setPendingMedia([]);
+            setUploadErrors([]);
+        }
+
         setSortError('');
         setDeleteError('');
         setDeletingMediaIds([]);
@@ -1540,84 +1556,34 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
         }
     };
 
-    const uploadFiles = async (fileList) => {
-        const files = Array.from(fileList ?? []);
-
-        if (uploadInProgressRef.current === getProductContextVersion() || files.length === 0 || !mediaConfig) return;
-
-        const contextVersion = getProductContextVersion();
-        const pending = files.map((file, index) => {
-            const extension = file.name.split('.').pop()?.toLowerCase();
-            const mimeType = file.type.toLowerCase();
-            const type = mediaConfig.video.mime_types.includes(mimeType) || mediaConfig.video.extensions.includes(extension)
-                ? 'video'
-                : mediaConfig.image.extensions.includes(extension) || mediaConfig.image.mime_types.includes(mimeType)
-                    ? 'image'
-                    : null;
-
-            return {
-                id: `${Date.now()}-${index}-${file.name}`,
-                file,
-                type,
-                previewUrl: type ? URL.createObjectURL(file) : null,
-            };
+    const discardUploadOperation = (operation) => {
+        operation.pending.forEach((item) => {
+            if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
         });
+        if (uploadInProgressRef.current === operation) uploadInProgressRef.current = null;
+        setPendingUploadProductId(null);
+        setPendingMedia([]);
+    };
+
+    const uploadPendingFiles = async (operation) => {
+        const { pending, targetProductId, contextVersion } = operation;
         const errors = [];
 
-        uploadInProgressRef.current = contextVersion;
-        setUploadErrors([]);
-        setPendingMedia(pending);
-
-        let productId;
-
-        try {
-            productId = await resolveProductId();
-            if (!productId || !isProductContextCurrent(contextVersion, productId)) {
-                pending.forEach((item) => {
-                    if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
-                });
-                if (uploadInProgressRef.current === contextVersion) uploadInProgressRef.current = null;
-
-                return;
-            }
-        } catch (error) {
-            if (!isProductContextCurrent(contextVersion)) {
-                pending.forEach((item) => {
-                    if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
-                });
-                if (uploadInProgressRef.current === contextVersion) uploadInProgressRef.current = null;
-
-                return;
-            }
-
-            const validationMessage = Object.values(error.errors ?? {}).flat().join(' ');
-            const message = validationMessage || error.message || 'Не удалось создать черновик товара.';
-
-            pending.forEach((item) => {
-                if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
-            });
-            setPendingMedia([]);
-            setUploadErrors([{
-                message,
-                filenames: pending.map((item) => item.file.name),
-            }]);
-            if (uploadInProgressRef.current === contextVersion) uploadInProgressRef.current = null;
-
-            return;
-        }
-
         for (const item of pending) {
-            if (!isProductContextCurrent(contextVersion, productId)) break;
+            if (uploadInProgressRef.current !== operation
+                || !isProductContextCurrent(contextVersion, targetProductId)) break;
 
             try {
                 if (!item.type) throw new Error('Поддерживаются только фотографии и видео.');
 
-                const uploadedMedia = await uploadShopItemMedia(productId, item.type, item.file);
-                if (isProductContextCurrent(contextVersion, productId)) {
+                const uploadedMedia = await uploadShopItemMedia(targetProductId, item.type, item.file);
+                if (uploadInProgressRef.current === operation
+                    && isProductContextCurrent(contextVersion, targetProductId)) {
                     onMediaUploaded(uploadedMedia);
                 }
             } catch (error) {
-                if (!isProductContextCurrent(contextVersion, productId)) continue;
+                if (uploadInProgressRef.current !== operation
+                    || !isProductContextCurrent(contextVersion, targetProductId)) continue;
 
                 const validationMessages = Object.values(error.errors ?? {}).flat().filter(Boolean);
                 const messages = error.status === 413
@@ -1643,7 +1609,8 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
                 })));
             } finally {
                 if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
-                if (isProductContextCurrent(contextVersion)) {
+                if (uploadInProgressRef.current === operation
+                    && isProductContextCurrent(contextVersion, targetProductId)) {
                     setPendingMedia((current) => current.filter((pendingItem) => pendingItem.id !== item.id));
                 }
             }
@@ -1652,11 +1619,106 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
         pending.forEach((item) => {
             if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
         });
-        if (isProductContextCurrent(contextVersion)) {
-            setPendingMedia((current) => current.filter((pendingItem) => !pending.some((item) => item.id === pendingItem.id)));
+        if (uploadInProgressRef.current === operation) {
+            uploadInProgressRef.current = null;
+            setPendingUploadProductId(null);
+            if (isProductContextCurrent(contextVersion, targetProductId)) {
+                setPendingMedia((current) => current.filter((pendingItem) => !pending.some((item) => item.id === pendingItem.id)));
+            }
         }
-        if (uploadInProgressRef.current === contextVersion) uploadInProgressRef.current = null;
     };
+
+    const uploadFiles = async (fileList) => {
+        const files = Array.from(fileList ?? []);
+
+        if (uploadInProgressRef.current || files.length === 0 || !mediaConfig) return;
+
+        const contextVersion = getProductContextVersion();
+        const pending = files.map((file, index) => {
+            const extension = file.name.split('.').pop()?.toLowerCase();
+            const mimeType = file.type.toLowerCase();
+            const type = mediaConfig.video.mime_types.includes(mimeType) || mediaConfig.video.extensions.includes(extension)
+                ? 'video'
+                : mediaConfig.image.extensions.includes(extension) || mediaConfig.image.mime_types.includes(mimeType)
+                    ? 'image'
+                    : null;
+
+            return {
+                id: `${Date.now()}-${index}-${file.name}`,
+                file,
+                type,
+                previewUrl: type ? URL.createObjectURL(file) : null,
+            };
+        });
+        const operation = {
+            contextVersion,
+            pending,
+            sourceWasNew: isNew,
+            targetProductId: null,
+            started: false,
+        };
+
+        uploadInProgressRef.current = operation;
+        setUploadErrors([]);
+        setPendingMedia(pending);
+
+        try {
+            const resolvedProductId = await resolveProductId();
+
+            if (uploadInProgressRef.current !== operation) return;
+            if (!resolvedProductId) {
+                discardUploadOperation(operation);
+                return;
+            }
+
+            operation.targetProductId = String(resolvedProductId);
+
+            if (operation.sourceWasNew) {
+                setPendingUploadProductId(operation.targetProductId);
+                return;
+            }
+
+            if (!isProductContextCurrent(contextVersion, operation.targetProductId)) {
+                discardUploadOperation(operation);
+                return;
+            }
+
+            operation.started = true;
+            await uploadPendingFiles(operation);
+        } catch (error) {
+            if (uploadInProgressRef.current !== operation) return;
+
+            if (isProductContextCurrent(contextVersion)) {
+                const validationMessage = Object.values(error.errors ?? {}).flat().join(' ');
+                const message = validationMessage || error.message || 'Не удалось создать черновик товара.';
+
+                setUploadErrors([{
+                    message,
+                    filenames: pending.map((item) => item.file.name),
+                }]);
+            }
+            discardUploadOperation(operation);
+        }
+    };
+
+    useEffect(() => {
+        const operation = uploadInProgressRef.current;
+
+        if (!operation || operation.started || !pendingUploadProductId || isNew) return;
+
+        if (!idsMatch(productId, pendingUploadProductId)) {
+            discardUploadOperation(operation);
+            return;
+        }
+
+        const contextVersion = getProductContextVersion();
+        if (!isProductContextCurrent(contextVersion, pendingUploadProductId)) return;
+
+        operation.contextVersion = contextVersion;
+        operation.started = true;
+        setPendingUploadProductId(null);
+        void uploadPendingFiles(operation);
+    }, [isNew, pendingUploadProductId, productContextVersion, productId]);
 
     const deleteMedia = async (item) => {
         if (deletingMediaIdsRef.current.has(item.id)) return;
