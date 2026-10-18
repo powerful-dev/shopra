@@ -15,6 +15,7 @@ import RichTextEditor from '../../components/admin/RichTextEditor';
 import SearchableSelect from '../../components/admin/SearchableSelect';
 import SectionNavigation from '../../components/admin/SectionNavigation';
 import SeoFields from '../../components/admin/SeoFields';
+import Skeleton from '../../components/admin/Skeleton';
 import Field from '../../components/form/Field';
 import Input from '../../components/form/Input';
 import Select from '../../components/form/Select';
@@ -1239,11 +1240,13 @@ export default function ProductEditPage() {
 }
 
 function ProductLoadState({ error }) {
+    if (!error) return <ProductEditSkeleton />;
+
     return (
-        <div aria-busy={!error}>
+        <div>
             <Breadcrumbs
                 className="mb-5 max-lg:hidden"
-                currentLabel={error ? 'Ошибка загрузки' : 'Загрузка товара…'}
+                currentLabel="Ошибка загрузки"
             />
 
             <header className="mb-5 flex flex-wrap items-center justify-between gap-4">
@@ -1257,14 +1260,174 @@ function ProductLoadState({ error }) {
                 </div>
             </header>
 
-            {error ? (
-                <Alert variant="error">{error}</Alert>
-            ) : (
-                <section className="flex min-h-[120px] items-center justify-center gap-3 rounded-[14px] border border-[color:var(--color-border)] bg-white p-6 text-[13px] font-[650] text-[color:var(--color-secondary)] shadow-[0_7px_24px_rgba(70,47,31,.03)]" role="status" aria-live="polite">
-                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#cfc5be] border-t-[color:var(--color-accent)]" aria-hidden="true" />
-                    Загрузка товара…
-                </section>
-            )}
+            <Alert variant="error">{error}</Alert>
+        </div>
+    );
+}
+
+function ProductEditSkeletonCard({ title, required = false, bodyClassName = 'p-[15px_17px_17px] max-sm:p-[13px]', children }) {
+    return (
+        <section className="rounded-[14px] border border-[color:var(--color-border)] bg-white shadow-[0_7px_24px_rgba(70,47,31,.03)]">
+            <header className="flex min-h-[48px] items-center gap-[9px] border-b border-[#f0ece8] px-[17px]">
+                <Skeleton className="h-7 w-7 rounded-lg" />
+                <h2 className="text-[13px] font-[700]">{title}</h2>
+                {required && <Skeleton className="h-[22px] w-[76px] rounded-full" />}
+            </header>
+            <div className={bodyClassName}>{children}</div>
+        </section>
+    );
+}
+
+function ProductEditSkeleton() {
+    const navigationWidths = ['w-[66px]', 'w-[48px]', 'w-[104px]', 'w-[72px]', 'w-[76px]', 'w-[108px]', 'w-[34px]'];
+
+    return (
+        <div className="max-lg:pb-[calc(48px+env(safe-area-inset-bottom))]" aria-busy="true">
+            <span className="sr-only" role="status">Загрузка товара…</span>
+
+            <div className="mb-5 flex h-[13px] items-center gap-1 max-lg:hidden" aria-hidden="true">
+                <Skeleton className="h-[11px] w-[62px]" />
+                <span className="text-[11px] text-[#c8c0ba]">/</span>
+                <Skeleton className="h-[11px] w-[128px]" />
+            </div>
+
+            <header className="mb-5 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex min-w-0 items-center gap-3">
+                    <Skeleton className="h-[38px] w-[38px] shrink-0 rounded-[10px] max-lg:h-8 max-lg:w-8" />
+                    <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
+                        <h1 className="m-0 min-w-0 truncate text-[32px] font-[760] tracking-[-0.05em] max-lg:text-[19px]">
+                            Редактирование товара
+                        </h1>
+                        <Skeleton className="h-[22px] w-[76px] rounded-full" />
+                    </div>
+                </div>
+            </header>
+
+            <nav className="sticky top-[var(--header-height)] z-30 mb-[13px] flex min-w-0 items-center gap-0.5 overflow-hidden border-b border-[color:var(--color-border)] bg-[rgba(247,246,243,.95)] py-1 backdrop-blur max-lg:top-[62px] max-sm:-mx-[13px] max-sm:px-[13px]" aria-hidden="true">
+                {navigationWidths.map((width, index) => (
+                    <span key={index} className="flex min-h-[45px] shrink-0 items-center gap-1.5 px-2.5">
+                        <Skeleton className="h-[25px] w-[25px] rounded-lg" />
+                        <Skeleton className={`h-3 ${width}`} />
+                    </span>
+                ))}
+            </nav>
+
+            <section className="mb-5 flex min-h-[82px] items-center gap-4 rounded-[14px] border border-[#eadfd7] bg-[#fffaf6] p-4 max-sm:items-start" aria-hidden="true">
+                <Skeleton className="h-12 w-12 shrink-0 rounded-full" />
+                <div className="min-w-0 flex-1">
+                    <Skeleton className="h-[13px] w-[210px] max-w-full" />
+                    <Skeleton className="mt-2 h-3 w-[330px] max-w-full" />
+                </div>
+                <div className="flex gap-[7px] max-lg:hidden">
+                    <Skeleton className="h-[39px] w-[120px] rounded-[9px]" />
+                    <Skeleton className="h-[39px] w-[126px] rounded-[9px]" />
+                    <Skeleton className="h-[39px] w-[39px] rounded-[9px]" />
+                </div>
+            </section>
+
+            <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
+                <div className="space-y-3">
+                    <ProductEditSkeletonCard title="Основное" required>
+                        <Skeleton className="h-3 w-[118px]" />
+                        <Skeleton className="mt-[7px] h-[43px] w-full rounded-[9px]" />
+                        <Skeleton className="mt-[15px] h-3 w-[138px]" />
+                        <Skeleton className="mt-[7px] h-[58px] w-full rounded-[10px]" />
+                        <div className="mt-[17px] border-t border-[#f0ece8] pt-[15px]">
+                            <Skeleton className="h-3 w-[150px]" />
+                            <Skeleton className="mt-2 h-[29px] w-[230px] max-w-full rounded-lg" />
+                        </div>
+                    </ProductEditSkeletonCard>
+
+                    <ProductEditSkeletonCard title="Фото и видео" required>
+                        <div className="flex gap-2 overflow-hidden">
+                            <Skeleton className="h-[178px] w-[139px] shrink-0 rounded-[10px] max-sm:h-[153px] max-sm:w-[119px]" />
+                            <Skeleton className="h-[178px] w-[139px] shrink-0 rounded-[10px] max-sm:h-[153px] max-sm:w-[119px]" />
+                            <Skeleton className="h-[178px] min-w-[139px] flex-1 rounded-[10px] max-sm:h-[153px] max-sm:min-w-[119px]" />
+                        </div>
+                        <Skeleton className="mt-2 h-3 w-[310px] max-w-full" />
+                    </ProductEditSkeletonCard>
+
+                    <ProductEditSkeletonCard title="Цена и наличие" required bodyClassName="">
+                        <div className="border-b border-[#f1e5dc] bg-[#fff8ed] px-6 py-[17px] max-sm:px-[13px]">
+                            <Skeleton className="h-3 w-[190px]" />
+                        </div>
+                        <div className="p-[17px] max-sm:p-[13px]">
+                            <Skeleton className="h-3 w-[96px]" />
+                            <Skeleton className="mt-[7px] h-[43px] w-[182px] max-w-full rounded-[9px]" />
+                            <div className="mt-[18px] grid grid-cols-2 gap-5 max-md:grid-cols-1">
+                                <Skeleton className="h-[66px] w-full rounded-[9px]" />
+                                <Skeleton className="h-[66px] w-full rounded-[9px]" />
+                            </div>
+                            <Skeleton className="mt-6 h-[66px] w-[420px] max-w-full rounded-[9px]" />
+                        </div>
+                    </ProductEditSkeletonCard>
+
+                    <ProductEditSkeletonCard title="Модификации">
+                        <div className="grid min-h-[82px] grid-cols-[42px_minmax(0,1fr)_116px] items-center gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[12px_13px] max-md:grid-cols-[38px_minmax(0,1fr)]">
+                            <Skeleton className="h-[42px] w-[42px] rounded-[11px] max-md:h-[38px] max-md:w-[38px]" />
+                            <div>
+                                <Skeleton className="h-[13px] w-[160px] max-w-full" />
+                                <Skeleton className="mt-2 h-3 w-[280px] max-w-full" />
+                            </div>
+                            <Skeleton className="h-9 w-[116px] rounded-[9px] max-md:col-span-full max-md:w-full" />
+                        </div>
+                    </ProductEditSkeletonCard>
+
+                    <ProductEditSkeletonCard title="Описание">
+                        <Skeleton className="h-3 w-[126px]" />
+                        <Skeleton className="mt-[7px] h-10 w-full rounded-t-[9px]" />
+                        <Skeleton className="mt-px h-[132px] w-full rounded-b-[9px]" />
+                    </ProductEditSkeletonCard>
+
+                    <ProductEditSkeletonCard title="Характеристики">
+                        <div className="space-y-3">
+                            {['w-[72%]', 'w-[60%]', 'w-[68%]'].map((widthClass) => (
+                                <div key={widthClass} className="grid grid-cols-[minmax(110px,0.45fr)_1fr] items-center gap-4 max-sm:grid-cols-1 max-sm:gap-2">
+                                    <Skeleton className={`h-3 ${widthClass} max-sm:w-[120px]`} />
+                                    <Skeleton className="h-[39px] w-full rounded-[9px]" />
+                                </div>
+                            ))}
+                        </div>
+                    </ProductEditSkeletonCard>
+
+                    <ProductEditSkeletonCard title="SEO">
+                        <Skeleton className="h-3 w-[154px]" />
+                        <Skeleton className="mt-[7px] h-[43px] w-full rounded-[9px]" />
+                        <Skeleton className="mt-[15px] h-3 w-[180px]" />
+                        <Skeleton className="mt-[7px] h-[86px] w-full rounded-[9px]" />
+                    </ProductEditSkeletonCard>
+                </div>
+
+                <aside className="space-y-4">
+                    <section className="rounded-[16px] border border-[color:var(--color-border)] bg-white p-4 shadow-[var(--shadow-sm)]" aria-hidden="true">
+                        <h2 className="mb-4 text-[13px] font-[750]">Что улучшить</h2>
+                        <div className="space-y-3">
+                            {['w-[92%]', 'w-[76%]', 'w-[84%]', 'w-[68%]'].map((widthClass) => (
+                                <div key={widthClass} className="flex items-center gap-[7px]">
+                                    <Skeleton className="h-[18px] w-[18px] shrink-0 rounded-full" />
+                                    <Skeleton className={`h-3 ${widthClass}`} />
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    <section className="overflow-hidden rounded-[16px] border border-[color:var(--color-border)] bg-white shadow-[var(--shadow-sm)] max-lg:hidden" aria-hidden="true">
+                        <header className="flex items-center justify-between border-b border-[color:var(--color-border)] px-4 py-3">
+                            <h2 className="text-[13px] font-[750]">Предпросмотр</h2>
+                            <Skeleton className="h-[18px] w-[18px] rounded-full" />
+                        </header>
+                        <div className="p-4">
+                            <Skeleton className="aspect-[4/3] w-full rounded-[12px]" />
+                            <div className="mt-[7px] grid grid-cols-5 gap-1">
+                                {Array.from({ length: 5 }, (_, index) => <Skeleton key={index} className="aspect-square w-full rounded-[5px]" />)}
+                            </div>
+                            <Skeleton className="mt-4 h-[10px] w-[92px]" />
+                            <Skeleton className="mt-2 h-[13px] w-[190px] max-w-full" />
+                            <Skeleton className="mt-3 h-[15px] w-[86px]" />
+                        </div>
+                    </section>
+                </aside>
+            </div>
         </div>
     );
 }
