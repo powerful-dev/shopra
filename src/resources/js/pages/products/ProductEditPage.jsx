@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { appName, supportedCurrencies } from '../../adminConfig';
@@ -55,19 +55,19 @@ import ProductVariantsModal from './ProductVariantsModal';
 
 
 const sectionLinks = [
-    { id: 'main', label: 'Основное', icon: BoxIcon },
-    { id: 'photo', label: 'Фото', icon: PhotoIcon },
-    { id: 'price', label: 'Цена и наличие', icon: CurrencyIcon },
-    { id: 'variants', label: 'Варианты', icon: LayersIcon },
-    { id: 'description', label: 'Описание', icon: DraftProductsIcon },
-    { id: 'features', label: 'Характеристики', icon: ControlsIcon },
-    { id: 'seo', label: 'SEO', icon: LinkIcon },
+    { id: 'main', labelKey: 'main', icon: BoxIcon },
+    { id: 'photo', labelKey: 'photo', icon: PhotoIcon },
+    { id: 'price', labelKey: 'price', icon: CurrencyIcon },
+    { id: 'variants', labelKey: 'variantsNav', icon: LayersIcon },
+    { id: 'description', labelKey: 'description', icon: DraftProductsIcon },
+    { id: 'features', labelKey: 'features', icon: ControlsIcon },
+    { id: 'seo', labelKey: 'seo', icon: LinkIcon },
 ];
 const emptySectionLinks = [];
-const productStatusLabels = {
-    draft: 'Черновик',
-    active: 'Активный',
-    archived: 'В архиве',
+const productStatusLabelKeys = {
+    draft: 'draft',
+    active: 'active',
+    archived: 'archived',
 };
 
 const improvementPriority = [
@@ -99,7 +99,7 @@ const nullableIdsMatch = (left, right) => (
     (left === null || left === undefined) && (right === null || right === undefined)
 ) || idsMatch(left, right);
 
-function buildVariantsSummary(variants, attributes = []) {
+function buildVariantsSummary(variants, attributes = [], formatOptionFallback = (id) => `#${id}`) {
     const options = Array.isArray(variants?.options) ? variants.options : [];
     const combinations = Array.isArray(variants?.variants) ? variants.variants : [];
     const attributeForOption = (option) => attributes.find((attribute) => idsMatch(attribute.id, option.shop_attribute_id));
@@ -125,20 +125,9 @@ function buildVariantsSummary(variants, attributes = []) {
             : quantity, 0),
         optionCount: options.length,
         valueCount: options.reduce((count, option) => count + (option.values?.length ?? 0), 0),
-        optionNames: options.map((option) => option.name ?? attributeForOption(option)?.name ?? `Опция #${option.id}`),
+        optionNames: options.map((option) => option.name ?? attributeForOption(option)?.name ?? formatOptionFallback(option.id)),
         mainPhotoValue,
     };
-}
-
-function formatRussianCount(count, one, few, many) {
-    const remainder100 = count % 100;
-    const remainder10 = count % 10;
-
-    if (remainder100 >= 11 && remainder100 <= 14) return `${count} ${many}`;
-    if (remainder10 === 1) return `${count} ${one}`;
-    if (remainder10 >= 2 && remainder10 <= 4) return `${count} ${few}`;
-
-    return `${count} ${many}`;
 }
 
 function normalizeNullableQuantity(quantity) {
@@ -272,8 +261,12 @@ export default function ProductEditPage() {
     const currentSaveNotification = saveNotification?.productId === saveNotificationProductId
         ? saveNotification
         : null;
+    const localizedSectionLinks = useMemo(() => sectionLinks.map((section) => ({
+        ...section,
+        label: t(`productEditPage.sections.${section.labelKey}`),
+    })), [t]);
     const { activeSectionId, scrollToSection } = useScrollSpy({
-        sections: isCurrentProductLoaded ? sectionLinks : emptySectionLinks,
+        sections: isCurrentProductLoaded ? localizedSectionLinks : emptySectionLinks,
         sectionRefs,
         navigationRef: sectionNavigationRef,
     });
@@ -289,7 +282,7 @@ export default function ProductEditPage() {
             .then((groups) => {
                 if (!controller.signal.aborted) {
                     setShopGroupOptions([
-                        { value: null, label: 'Без категории' },
+                        { value: null, label: t('productEditPage.main.noCategory') },
                         ...buildShopGroupOptions(groups),
                     ]);
                     setForm((current) => current.shop_group_id === null || groups.some((group) => group.id === current.shop_group_id)
@@ -300,7 +293,7 @@ export default function ProductEditPage() {
             .catch((error) => {
                 if (!controller.signal.aborted) {
                     console.error('Unable to load Shopra categories.', error);
-                    setShopGroupsLoadError('Не удалось загрузить категории Shopra.');
+                    setShopGroupsLoadError(t('productEditPage.errors.categoriesLoad', { appName }));
                 }
             })
             .finally(() => {
@@ -419,7 +412,11 @@ export default function ProductEditPage() {
                 if (!isActive) return;
 
                 variantAttributesRef.current = attributes;
-                setVariantsSummary(buildVariantsSummary(variants, attributes));
+                setVariantsSummary(buildVariantsSummary(
+                    variants,
+                    attributes,
+                    (optionId) => t('productEditPage.variants.optionFallback', { id: optionId }),
+                ));
                 setVariantsSummaryStatus('loaded');
             })
             .catch((error) => {
@@ -513,7 +510,7 @@ export default function ProductEditPage() {
                 console.error(error);
                 setProductLoadError({
                     productId: String(id),
-                    message: 'Не удалось загрузить товар. Обновите страницу или вернитесь к списку товаров.',
+                    message: t('productEditPage.errors.productLoad'),
                 });
             })
             .finally(() => {
@@ -663,7 +660,7 @@ export default function ProductEditPage() {
                 || !isProductContextVersionCurrent(contextVersion)) return;
 
             console.error('Unable to create a product draft for variants.', error);
-            setVariantsOpenError('Не удалось создать черновик товара. Попробуйте ещё раз.');
+            setVariantsOpenError(t('productEditPage.errors.draftCreate'));
         } finally {
             if (variantsOpenOperationRef.current === operation) {
                 variantsOpenOperationRef.current = null;
@@ -822,8 +819,10 @@ export default function ProductEditPage() {
             setStatusActionError({
                 productId,
                 message: error instanceof ApiError && error.status === 422 && status === 'active'
-                    ? `${isRestoring ? 'Не удалось восстановить' : 'Не удалось опубликовать'} товар. Заполните и сохраните обязательные данные.`
-                    : 'Не удалось изменить статус товара. Попробуйте ещё раз.',
+                    ? t(isRestoring
+                        ? 'productEditPage.errors.restoreValidation'
+                        : 'productEditPage.errors.publishValidation')
+                    : t('productEditPage.errors.statusChange'),
             });
         } finally {
             if (isActionCurrent()) setIsStatusChanging(false);
@@ -832,12 +831,12 @@ export default function ProductEditPage() {
 
     const statusMenuAction = {
         draft: {
-            label: 'Опубликовать',
+            label: t('productEditPage.actions.publish'),
             icon: <RocketIcon />,
             onClick: () => updateProductStatus('active'),
         },
         active: {
-            label: 'Перенести в архив',
+            label: t('productEditPage.actions.archive'),
             icon: <BoxIcon />,
             onClick: () => {
                 setStatusActionError(null);
@@ -845,7 +844,7 @@ export default function ProductEditPage() {
             },
         },
         archived: {
-            label: 'Восстановить',
+            label: t('productEditPage.actions.restore'),
             icon: <RocketIcon />,
             onClick: () => updateProductStatus('active'),
         },
@@ -882,7 +881,7 @@ export default function ProductEditPage() {
             if (!isProductContextCurrent(contextVersion, productId)) return;
 
             console.error(error);
-            setCategoryDeleteError('Не удалось убрать товар из категории.');
+            setCategoryDeleteError(t('productEditPage.errors.categoryRemove'));
         } finally {
             if (isProductContextVersionCurrent(contextVersion)) {
                 setDeletingCategoryIds((current) => current.filter((id) => id !== categoryId));
@@ -911,7 +910,7 @@ export default function ProductEditPage() {
             if (!isProductContextCurrent(contextVersion, productId)) return;
 
             console.error(error);
-            setCategoryAddError('Не удалось добавить товар в категорию.');
+            setCategoryAddError(t('productEditPage.errors.categoryAdd'));
         } finally {
             if (isProductContextVersionCurrent(contextVersion)) {
                 setCategoryToAddId(null);
@@ -953,13 +952,13 @@ export default function ProductEditPage() {
         && imageCount > 0
         && hasRequiredQuantity;
     const completenessTone = {
-        low: { color: '#b7483f', label: 'Низкая заполненность' },
-        medium: { color: '#b77a2f', label: 'Средняя заполненность' },
-        high: { color: 'var(--color-success)', label: 'Высокая заполненность' },
+        low: { color: '#b7483f', label: t('productEditPage.completeness.low') },
+        medium: { color: '#b77a2f', label: t('productEditPage.completeness.medium') },
+        high: { color: 'var(--color-success)', label: t('productEditPage.completeness.high') },
     }[completeness.level];
     const missingCriteriaLabel = completeness.missingCriteria.length === 0
-        ? 'Все критерии заполнены.'
-        : `Не выполнено ${formatRussianCount(completeness.missingCriteria.length, 'критерий', 'критерия', 'критериев')}`;
+        ? t('productEditPage.completeness.complete')
+        : t('productEditPage.completeness.missingCriteria', { count: completeness.missingCriteria.length });
     const openAndScrollToSection = (sectionId) => {
         const section = sectionRefs.current[sectionId];
 
@@ -971,18 +970,18 @@ export default function ProductEditPage() {
         <div className="max-lg:pb-[calc(48px+env(safe-area-inset-bottom))]">
             <Breadcrumbs
                 className="mb-5 max-lg:hidden"
-                currentLabel={isNew ? 'Новый товар' : form.name}
+                currentLabel={isNew ? t('productEditPage.header.newProduct') : form.name}
             />
 
             <header className="mb-5 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-3">
-                    <Link to="/admin/products" className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-white text-[#615950] max-lg:h-8 max-lg:w-8" aria-label="Вернуться к товарам"><BackIcon /></Link>
+                    <Link to="/admin/products" className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-white text-[#615950] max-lg:h-8 max-lg:w-8" aria-label={t('productEditPage.header.backToProducts')}><BackIcon /></Link>
                     <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
                         <h1 className="m-0 min-w-0 truncate text-[32px] font-[760] tracking-[-0.05em] max-lg:text-[19px]">
-                            {isNew ? 'Новый товар' : 'Редактирование товара'}
+                            {isNew ? t('productEditPage.header.newProduct') : t('productEditPage.header.editProduct')}
                         </h1>
-                        {!isNew && productStatusLabels[form.status] && (
-                            <ProductStatusBadge status={form.status} label={productStatusLabels[form.status]} />
+                        {!isNew && productStatusLabelKeys[form.status] && (
+                            <ProductStatusBadge status={form.status} label={t(`productEditPage.statuses.${productStatusLabelKeys[form.status]}`)} />
                         )}
                     </div>
                 </div>
@@ -996,23 +995,23 @@ export default function ProductEditPage() {
 
             <SectionNavigation
                 navigationRef={sectionNavigationRef}
-                sections={sectionLinks}
+                sections={localizedSectionLinks}
                 activeSectionId={activeSectionId}
                 onSectionSelect={scrollToSection}
                 className="sticky top-[var(--header-height)] z-30 mb-[13px] border-b border-[color:var(--color-border)] bg-[rgba(247,246,243,.95)] py-1 backdrop-blur max-lg:top-[62px] max-sm:-mx-[13px] max-sm:px-[13px]"
-                ariaLabel="Разделы товара"
+                ariaLabel={t('productEditPage.sections.ariaLabel')}
             />
 
             <section className="mb-5 flex items-center gap-4 rounded-[14px] border border-[#eadfd7] bg-[#fffaf6] p-4 max-sm:items-start">
                 <div
                     className="grid h-12 w-12 shrink-0 place-items-center rounded-full"
                     style={{ background: `conic-gradient(${completenessTone.color} ${completeness.score}%, #eadfd7 0)` }}
-                    aria-label={`Карточка заполнена на ${completeness.score}%`}
+                    aria-label={t('productEditPage.completeness.scoreAria', { score: completeness.score })}
                 >
                     <span className="grid h-[38px] w-[38px] place-items-center rounded-full bg-white text-[11px] font-[760]">{completeness.score}%</span>
                 </div>
                 <div className="min-w-0 flex-1">
-                    <strong className="block text-[13px]">{isReadyForSale ? 'Уже можно продавать' : 'Заполните обязательные поля'}</strong>
+                    <strong className="block text-[13px]">{t(isReadyForSale ? 'productEditPage.completeness.ready' : 'productEditPage.completeness.fillRequired')}</strong>
                     <small className="mt-1 block text-[12px] text-[color:var(--color-secondary)]">{completenessTone.label}. {missingCriteriaLabel}</small>
                 </div>
                 <div className="flex gap-[7px] max-lg:hidden">
@@ -1020,10 +1019,10 @@ export default function ProductEditPage() {
                         <StatusActions status={form.status} isNew isSubmitting={isSubmitting} onSave={saveProduct} />
                     ) : form.status && (
                         <>
-                            <button className="button button--primary min-h-[39px] min-w-[120px] whitespace-nowrap" type="button" disabled={isSubmitting || isStatusChanging} onClick={() => saveProduct(form.status)}><SaveIcon />Сохранить</button>
-                            <button className="button button--outline min-h-[39px] whitespace-nowrap" type="button"><EyeIcon />Предпросмотр</button>
+                            <button className="button button--primary min-h-[39px] min-w-[120px] whitespace-nowrap" type="button" disabled={isSubmitting || isStatusChanging} onClick={() => saveProduct(form.status)}><SaveIcon />{t('common.save')}</button>
+                            <button className="button button--outline min-h-[39px] whitespace-nowrap" type="button"><EyeIcon />{t('productEditPage.actions.preview')}</button>
                             <ActionsMenu
-                                ariaLabel={`Действия ${form.name || 'товара'}`}
+                                ariaLabel={t('productEditPage.actions.menuAria', { name: form.name || t('common.product').toLocaleLowerCase() })}
                                 isOpen={isActionsOpen}
                                 onToggle={() => setIsActionsOpen((isOpen) => !isOpen)}
                                 onClose={() => setIsActionsOpen(false)}
@@ -1033,7 +1032,7 @@ export default function ProductEditPage() {
                                         disabled: isSubmitting || isStatusChanging,
                                     },
                                     {
-                                        label: 'Удалить товар',
+                                        label: t('productEditPage.actions.deleteProduct'),
                                         icon: <TrashIcon />,
                                         variant: 'danger',
                                         disabled: isDeleting || isSubmitting || isStatusChanging,
@@ -1051,7 +1050,7 @@ export default function ProductEditPage() {
             )}
 
             <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
-                <form className="space-y-3" aria-label="Данные товара" onSubmit={(event) => event.preventDefault()}>
+                <form className="space-y-3" aria-label={t('productEditPage.formAria')} onSubmit={(event) => event.preventDefault()}>
                     <MainSection
                         sectionRef={(element) => { sectionRefs.current.main = element; }}
                         form={form}
@@ -1100,22 +1099,22 @@ export default function ProductEditPage() {
                         onChange={updateField}
                         onOpenCurrencySettings={() => setIsCurrencySettingsOpen(true)}
                     />
-                    <AccordionSection sectionRef={(element) => { sectionRefs.current.variants = element; }} id="variants" title="Модификации товара" icon={LayersIcon} open>
+                    <AccordionSection sectionRef={(element) => { sectionRefs.current.variants = element; }} id="variants" title={t('productEditPage.sections.variants')} icon={LayersIcon} open>
                         {variantsOpenError && <Alert variant="error" className="mb-3">{variantsOpenError}</Alert>}
                         <article className="grid min-h-[82px] grid-cols-[42px_minmax(0,1fr)_auto] items-center gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[12px_13px] max-md:grid-cols-[38px_minmax(0,1fr)]">
                             <span className="grid h-[42px] w-[42px] place-items-center rounded-[11px] bg-[#f1ece8] text-[#81766e]">
                                 {variantsSummaryStatus === 'loading'
-                                    ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#cfc5be] border-t-[color:var(--color-accent)]" aria-label="Загрузка модификаций" />
+                                    ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#cfc5be] border-t-[color:var(--color-accent)]" aria-label={t('productEditPage.variants.loading')} />
                                     : <LayersIcon />}
                             </span>
                             <div className="min-w-0">
-                                {variantsSummaryStatus === 'loading' && <><strong className="block text-[13px]">Загрузка модификаций…</strong><small className="mt-0.5 block text-[12px] leading-[1.4] text-[#8c837c]">Получаем сохранённые настройки товара.</small></>}
-                                {variantsSummaryStatus === 'error' && <><strong className="block text-[13px]">Не удалось загрузить модификации</strong><small className="mt-0.5 block text-[12px] leading-[1.4] text-[#8c837c]">Откройте настройки, чтобы повторить загрузку сохранённых данных.</small></>}
-                                {variantsSummaryStatus === 'loaded' && !variantsSummary.hasModifications && <><strong className="block text-[13px]">Модификации не добавлены</strong><small className="mt-0.5 block text-[12px] leading-[1.4] text-[#8c837c]">Добавьте варианты товара по цвету, размеру или другим характеристикам</small></>}
+                                {variantsSummaryStatus === 'loading' && <><strong className="block text-[13px]">{t('productEditPage.variants.loading')}</strong><small className="mt-0.5 block text-[12px] leading-[1.4] text-[#8c837c]">{t('productEditPage.variants.loadingHint')}</small></>}
+                                {variantsSummaryStatus === 'error' && <><strong className="block text-[13px]">{t('productEditPage.variants.loadError')}</strong><small className="mt-0.5 block text-[12px] leading-[1.4] text-[#8c837c]">{t('productEditPage.variants.loadErrorHint')}</small></>}
+                                {variantsSummaryStatus === 'loaded' && !variantsSummary.hasModifications && <><strong className="block text-[13px]">{t('productEditPage.variants.empty')}</strong><small className="mt-0.5 block text-[12px] leading-[1.4] text-[#8c837c]">{t('productEditPage.variants.emptyHint')}</small></>}
                                 {variantsSummaryStatus === 'loaded' && variantsSummary.hasModifications && <>
-                                    <strong className="block text-[13px]">{formatRussianCount(variantsSummary.optionCount, 'опция', 'опции', 'опций')} · {formatRussianCount(variantsSummary.valueCount, 'значение', 'значения', 'значений')}</strong>
+                                    <strong className="block text-[13px]">{t('productEditPage.variants.optionCount', { count: variantsSummary.optionCount })} · {t('productEditPage.variants.valueCount', { count: variantsSummary.valueCount })}</strong>
                                     <small className="mt-0.5 block break-words text-[12px] leading-[1.4] text-[#8c837c]">{variantsSummary.optionNames.join(', ')}</small>
-                                    {variantsSummary.mainPhotoValue && <small className="mt-1.5 inline-flex items-center gap-1.5 rounded-md bg-white px-2 py-1 text-[11px] font-semibold text-[#756b64]"><i className="h-2 w-2 rounded-full bg-[#a9683e]" />Основное значение: {variantsSummary.mainPhotoValue}</small>}
+                                    {variantsSummary.mainPhotoValue && <small className="mt-1.5 inline-flex items-center gap-1.5 rounded-md bg-white px-2 py-1 text-[11px] font-semibold text-[#756b64]"><i className="h-2 w-2 rounded-full bg-[#a9683e]" />{t('productEditPage.variants.mainValue', { value: variantsSummary.mainPhotoValue })}</small>}
                                 </>}
                             </div>
                             <button type="button" className="button button--primary min-h-9 disabled:cursor-wait disabled:opacity-70 max-md:col-span-full max-md:w-full" onClick={() => void openProductVariants()} disabled={isPreparingVariants}>
@@ -1123,14 +1122,14 @@ export default function ProductEditPage() {
                                     ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" />
                                     : variantsSummary.hasModifications || variantsSummaryStatus === 'error' ? <PencilIcon /> : <PlusIcon />}
                                 {isPreparingVariants
-                                    ? 'Создание черновика…'
-                                    : variantsSummary.hasModifications || variantsSummaryStatus === 'error' ? 'Настроить' : 'Добавить модификации'}
+                                    ? t('productEditPage.variants.creatingDraft')
+                                    : variantsSummary.hasModifications || variantsSummaryStatus === 'error' ? t('productEditPage.variants.configure') : t('productEditPage.variants.add')}
                             </button>
                         </article>
                     </AccordionSection>
-                    <AccordionSection sectionRef={(element) => { sectionRefs.current.description = element; }} id="description" title="Описание" icon={DraftProductsIcon}>
+                    <AccordionSection sectionRef={(element) => { sectionRefs.current.description = element; }} id="description" title={t('productEditPage.sections.description')} icon={DraftProductsIcon}>
                         <label className="flex flex-col gap-[7px]">
-                            <span className="flex items-center justify-between text-[12px] font-bold text-[#554e48]">Описание товара</span>
+                            <span className="flex items-center justify-between text-[12px] font-bold text-[#554e48]">{t('productEditPage.description.label')}</span>
                             <RichTextEditor
                                 instanceKey="product-description"
                                 value={form.description}
@@ -1139,16 +1138,16 @@ export default function ProductEditPage() {
                             />
                         </label>
                     </AccordionSection>
-                    <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title="Характеристики" icon={ControlsIcon}>
+                    <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title={t('productEditPage.sections.features')} icon={ControlsIcon}>
                         <ProductAttributesSection ref={attributesSectionRef} productId={isNew ? null : id} productContextVersion={productContextRef.current.version} onFilledChange={setHasFilledAttribute} />
                     </AccordionSection>
-                    <AccordionSection sectionRef={(element) => { sectionRefs.current.seo = element; }} id="seo" title="SEO" icon={LinkIcon}>
+                    <AccordionSection sectionRef={(element) => { sectionRefs.current.seo = element; }} id="seo" title={t('productEditPage.sections.seo')} icon={LinkIcon}>
                         <SeoFields
                             title={form.seo_title}
                             description={form.seo_description}
                             url="shopra.store/products/kozhanyy-ryukzak-city"
-                            titleLabel="Заголовок для поиска"
-                            descriptionLabel="Описание для поиска"
+                            titleLabel={t('productEditPage.seo.title')}
+                            descriptionLabel={t('productEditPage.seo.description')}
                             titleName="seo_title"
                             descriptionName="seo_description"
                             disabled={isSubmitting}
@@ -1173,16 +1172,16 @@ export default function ProductEditPage() {
                 {isNew ? (
                     <StatusActions status={form.status} isNew isSubmitting={isSubmitting} onSave={saveProduct} />
                 ) : form.status && (
-                    <button className="button button--primary min-h-[39px] w-full whitespace-nowrap" type="button" disabled={isSubmitting || isStatusChanging} onClick={() => saveProduct(form.status)}><SaveIcon />Сохранить</button>
+                    <button className="button button--primary min-h-[39px] w-full whitespace-nowrap" type="button" disabled={isSubmitting || isStatusChanging} onClick={() => saveProduct(form.status)}><SaveIcon />{t('common.save')}</button>
                 )}
             </AdminMobileActionBar>
 
             <ConfirmModal
                 isOpen={isArchiveConfirmOpen}
-                title="Перенести товар в архив?"
-                message="Товар будет скрыт с витрины. Позже его можно будет восстановить."
-                confirmText="Перенести в архив"
-                cancelText="Отмена"
+                title={t('productEditPage.archive.title')}
+                message={t('productEditPage.archive.message')}
+                confirmText={t('productEditPage.actions.archive')}
+                cancelText={t('productEditPage.actions.cancel')}
                 isLoading={isStatusChanging}
                 error={currentStatusActionError}
                 onConfirm={() => updateProductStatus('archived')}
@@ -1193,10 +1192,10 @@ export default function ProductEditPage() {
             />
             <ConfirmModal
                 isOpen={isDeleteConfirmOpen}
-                title="Подтвердите удаление"
-                message={`Удалить товар ${form.name || ''}?`}
-                confirmText="Удалить"
-                cancelText="Отмена"
+                title={t('productEditPage.delete.title')}
+                message={t('productEditPage.delete.message', { name: form.name || '' })}
+                confirmText={t('productEditPage.actions.delete')}
+                cancelText={t('productEditPage.actions.cancel')}
                 isLoading={isDeleting}
                 variant="danger"
                 onConfirm={deleteProduct}
@@ -1225,7 +1224,11 @@ export default function ProductEditPage() {
                 isProductContextCurrent={isProductContextCurrent}
                 onClose={() => setIsVariantsOpen(false)}
                 onSaved={(variants) => {
-                    const updatedSummary = buildVariantsSummary(variants, variantAttributesRef.current);
+                    const updatedSummary = buildVariantsSummary(
+                        variants,
+                        variantAttributesRef.current,
+                        (optionId) => t('productEditPage.variants.optionFallback', { id: optionId }),
+                    );
 
                     if (variantsSummary.hasVariants && !updatedSummary.hasVariants) {
                         setForm((current) => ({ ...current, quantity: '' }));
@@ -1240,21 +1243,23 @@ export default function ProductEditPage() {
 }
 
 function ProductLoadState({ error }) {
+    const { t } = useTranslation();
+
     if (!error) return <ProductEditSkeleton />;
 
     return (
         <div>
             <Breadcrumbs
                 className="mb-5 max-lg:hidden"
-                currentLabel="Ошибка загрузки"
+                currentLabel={t('productEditPage.loading.errorBreadcrumb')}
             />
 
             <header className="mb-5 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-3">
-                    <Link to="/admin/products" className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-white text-[#615950] max-lg:h-8 max-lg:w-8" aria-label="Вернуться к товарам"><BackIcon /></Link>
+                    <Link to="/admin/products" className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-white text-[#615950] max-lg:h-8 max-lg:w-8" aria-label={t('productEditPage.header.backToProducts')}><BackIcon /></Link>
                     <div className="min-w-0">
                         <h1 className="m-0 truncate text-[32px] font-[760] tracking-[-0.05em] max-lg:text-[19px]">
-                            Редактирование товара
+                            {t('productEditPage.header.editProduct')}
                         </h1>
                     </div>
                 </div>
@@ -1279,11 +1284,12 @@ function ProductEditSkeletonCard({ title, required = false, bodyClassName = 'p-[
 }
 
 function ProductEditSkeleton() {
+    const { t } = useTranslation();
     const navigationWidths = ['w-[66px]', 'w-[48px]', 'w-[104px]', 'w-[72px]', 'w-[76px]', 'w-[108px]', 'w-[34px]'];
 
     return (
         <div className="max-lg:pb-[calc(48px+env(safe-area-inset-bottom))]" aria-busy="true">
-            <span className="sr-only" role="status">Загрузка товара…</span>
+            <span className="sr-only" role="status">{t('productEditPage.loading.product')}</span>
 
             <div className="mb-5 flex h-[13px] items-center gap-1 max-lg:hidden" aria-hidden="true">
                 <Skeleton className="h-[11px] w-[62px]" />
@@ -1296,7 +1302,7 @@ function ProductEditSkeleton() {
                     <Skeleton className="h-[38px] w-[38px] shrink-0 rounded-[10px] max-lg:h-8 max-lg:w-8" />
                     <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
                         <h1 className="m-0 min-w-0 truncate text-[32px] font-[760] tracking-[-0.05em] max-lg:text-[19px]">
-                            Редактирование товара
+                            {t('productEditPage.header.editProduct')}
                         </h1>
                         <Skeleton className="h-[22px] w-[76px] rounded-full" />
                     </div>
@@ -1327,7 +1333,7 @@ function ProductEditSkeleton() {
 
             <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
                 <div className="space-y-3">
-                    <ProductEditSkeletonCard title="Основное" required>
+                    <ProductEditSkeletonCard title={t('productEditPage.sections.main')} required>
                         <Skeleton className="h-3 w-[118px]" />
                         <Skeleton className="mt-[7px] h-[43px] w-full rounded-[9px]" />
                         <Skeleton className="mt-[15px] h-3 w-[138px]" />
@@ -1338,7 +1344,7 @@ function ProductEditSkeleton() {
                         </div>
                     </ProductEditSkeletonCard>
 
-                    <ProductEditSkeletonCard title="Фото и видео" required>
+                    <ProductEditSkeletonCard title={t('productEditPage.sections.media')} required>
                         <div className="flex gap-2 overflow-hidden">
                             <Skeleton className="h-[178px] w-[139px] shrink-0 rounded-[10px] max-sm:h-[153px] max-sm:w-[119px]" />
                             <Skeleton className="h-[178px] w-[139px] shrink-0 rounded-[10px] max-sm:h-[153px] max-sm:w-[119px]" />
@@ -1347,7 +1353,7 @@ function ProductEditSkeleton() {
                         <Skeleton className="mt-2 h-3 w-[310px] max-w-full" />
                     </ProductEditSkeletonCard>
 
-                    <ProductEditSkeletonCard title="Цена и наличие" required bodyClassName="">
+                    <ProductEditSkeletonCard title={t('productEditPage.sections.price')} required bodyClassName="">
                         <div className="border-b border-[#f1e5dc] bg-[#fff8ed] px-6 py-[17px] max-sm:px-[13px]">
                             <Skeleton className="h-3 w-[190px]" />
                         </div>
@@ -1362,7 +1368,7 @@ function ProductEditSkeleton() {
                         </div>
                     </ProductEditSkeletonCard>
 
-                    <ProductEditSkeletonCard title="Модификации">
+                    <ProductEditSkeletonCard title={t('productEditPage.sections.variants')}>
                         <div className="grid min-h-[82px] grid-cols-[42px_minmax(0,1fr)_116px] items-center gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[12px_13px] max-md:grid-cols-[38px_minmax(0,1fr)]">
                             <Skeleton className="h-[42px] w-[42px] rounded-[11px] max-md:h-[38px] max-md:w-[38px]" />
                             <div>
@@ -1373,13 +1379,13 @@ function ProductEditSkeleton() {
                         </div>
                     </ProductEditSkeletonCard>
 
-                    <ProductEditSkeletonCard title="Описание">
+                    <ProductEditSkeletonCard title={t('productEditPage.sections.description')}>
                         <Skeleton className="h-3 w-[126px]" />
                         <Skeleton className="mt-[7px] h-10 w-full rounded-t-[9px]" />
                         <Skeleton className="mt-px h-[132px] w-full rounded-b-[9px]" />
                     </ProductEditSkeletonCard>
 
-                    <ProductEditSkeletonCard title="Характеристики">
+                    <ProductEditSkeletonCard title={t('productEditPage.sections.features')}>
                         <div className="space-y-3">
                             {['w-[72%]', 'w-[60%]', 'w-[68%]'].map((widthClass) => (
                                 <div key={widthClass} className="grid grid-cols-[minmax(110px,0.45fr)_1fr] items-center gap-4 max-sm:grid-cols-1 max-sm:gap-2">
@@ -1390,7 +1396,7 @@ function ProductEditSkeleton() {
                         </div>
                     </ProductEditSkeletonCard>
 
-                    <ProductEditSkeletonCard title="SEO">
+                    <ProductEditSkeletonCard title={t('productEditPage.sections.seo')}>
                         <Skeleton className="h-3 w-[154px]" />
                         <Skeleton className="mt-[7px] h-[43px] w-full rounded-[9px]" />
                         <Skeleton className="mt-[15px] h-3 w-[180px]" />
@@ -1400,7 +1406,7 @@ function ProductEditSkeleton() {
 
                 <aside className="space-y-4">
                     <section className="rounded-[16px] border border-[color:var(--color-border)] bg-white p-4 shadow-[var(--shadow-sm)]" aria-hidden="true">
-                        <h2 className="mb-4 text-[13px] font-[750]">Что улучшить</h2>
+                        <h2 className="mb-4 text-[13px] font-[750]">{t('productEditPage.improvements.title')}</h2>
                         <div className="space-y-3">
                             {['w-[92%]', 'w-[76%]', 'w-[84%]', 'w-[68%]'].map((widthClass) => (
                                 <div key={widthClass} className="flex items-center gap-[7px]">
@@ -1413,7 +1419,7 @@ function ProductEditSkeleton() {
 
                     <section className="overflow-hidden rounded-[16px] border border-[color:var(--color-border)] bg-white shadow-[var(--shadow-sm)] max-lg:hidden" aria-hidden="true">
                         <header className="flex items-center justify-between border-b border-[color:var(--color-border)] px-4 py-3">
-                            <h2 className="text-[13px] font-[750]">Предпросмотр</h2>
+                            <h2 className="text-[13px] font-[750]">{t('productEditPage.preview.title')}</h2>
                             <Skeleton className="h-[18px] w-[18px] rounded-full" />
                         </header>
                         <div className="p-4">
@@ -1433,12 +1439,14 @@ function ProductEditSkeleton() {
 }
 
 function StatusActions({ status, isNew, isSubmitting, onSave }) {
+    const { t } = useTranslation();
+
     if (!isNew && !status) return null;
 
     const currentStatus = isNew ? 'draft' : status;
     const nextStatus = status === 'active' ? 'archived' : 'active';
-    const saveLabel = isNew ? 'Сохранить черновик' : 'Сохранить';
-    const statusLabel = status === 'active' ? 'Перенести в архив' : 'Опубликовать';
+    const saveLabel = isNew ? t('productEditPage.actions.saveDraft') : t('common.save');
+    const statusLabel = status === 'active' ? t('productEditPage.actions.archive') : t('productEditPage.actions.publish');
 
     return <>
             <button className="button button--outline min-h-[39px] flex-1 whitespace-nowrap sm:min-w-[120px]" type="button" disabled={isSubmitting} onClick={() => onSave(currentStatus)}><SaveIcon />{saveLabel}</button>
@@ -1447,7 +1455,8 @@ function StatusActions({ status, isNew, isSubmitting, onSave }) {
 }
 
 function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen, categoryToAddId, isAddingCategory, categoryAddError, deletingCategoryIds, categoryDeleteError, shopGroupOptions, isShopGroupsLoading, shopGroupsLoadError, onChange, onShopGroupChange, onAddCategory, onDeleteCategory, onToggleCategorySelect, onOpenCategories }) {
-    const appCategoryLabel = `Категория ${appName}`;
+    const { t } = useTranslation();
+    const appCategoryLabel = t('productEditPage.main.appCategory', { appName });
     const productCategoryIds = new Set(productCategories.map((category) => category.id));
     const primaryCategoryOption = form.shop_group_id === null
         ? null
@@ -1474,8 +1483,8 @@ function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen
         });
 
     return (
-        <AdminCard sectionRef={sectionRef} id="main" title="Основное" icon={BoxIcon} required className="!scroll-mt-0">
-            <Field label={<>Название товара <b className="text-[color:var(--color-accent)]">*</b></>}>
+        <AdminCard sectionRef={sectionRef} id="main" title={t('productEditPage.sections.main')} icon={BoxIcon} required requiredLabel={t('productEditPage.required')} className="!scroll-mt-0">
+            <Field label={<>{t('productEditPage.main.productName')} <b className="text-[color:var(--color-accent)]">*</b></>}>
                 <Input name="name" value={form.name} onChange={onChange} />
             </Field>
             <div className="relative mt-[15px]">
@@ -1486,9 +1495,9 @@ function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen
                     options={shopGroupOptions}
                     value={form.shop_group_id}
                     onChange={onShopGroupChange}
-                    placeholder={isShopGroupsLoading ? 'Загрузка категорий…' : 'Без категории'}
-                    searchPlaceholder="Поиск категории"
-                    emptyMessage="Категории не найдены"
+                    placeholder={isShopGroupsLoading ? t('productEditPage.main.loadingCategories') : t('productEditPage.main.noCategory')}
+                    searchPlaceholder={t('productEditPage.main.searchCategory')}
+                    emptyMessage={t('productEditPage.main.categoriesNotFound')}
                     ariaLabel={appCategoryLabel}
                     disabled={isShopGroupsLoading || Boolean(shopGroupsLoadError)}
                     ariaBusy={isShopGroupsLoading}
@@ -1496,8 +1505,8 @@ function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen
                 {shopGroupsLoadError && <p className="mt-1.5 text-[12px] text-[#8d857e]" role="alert">{shopGroupsLoadError}</p>}
             </div>
             <div className="mt-[17px] border-t border-[#f0ece8] pt-[15px]">
-                <div className="mb-[7px] flex items-center justify-between gap-2 text-[12px] font-bold text-[#554e48]"><span>Категории магазина</span><button type="button" className="inline-flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[9px] border border-[#dfc0ac] bg-[#fff8f3] px-[11px] text-[12px] font-[700] text-[color:var(--color-accent)]" onClick={onOpenCategories}><CategoriesIcon />Управление категориями</button></div>
-                <p className="mb-[9px] text-[12px] text-[#958d86]">Товар отображается в этих категориях вашего магазина.</p>
+                <div className="mb-[7px] flex items-center justify-between gap-2 text-[12px] font-bold text-[#554e48]"><span>{t('productEditPage.main.storeCategories')}</span><button type="button" className="inline-flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[9px] border border-[#dfc0ac] bg-[#fff8f3] px-[11px] text-[12px] font-[700] text-[color:var(--color-accent)]" onClick={onOpenCategories}><CategoriesIcon />{t('productEditPage.main.manageCategories')}</button></div>
+                <p className="mb-[9px] text-[12px] text-[#958d86]">{t('productEditPage.main.storeCategoriesHint')}</p>
                 <div className="flex flex-wrap gap-1.5">
                     {visibleProductCategories.length > 0
                         ? visibleProductCategories.map((category) => {
@@ -1507,12 +1516,12 @@ function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen
                             return (
                                 <span key={category.id} className={`inline-flex min-h-[29px] items-center rounded-lg border border-[#dfd6d0] bg-[#faf8f6] text-[12px] font-[650] text-[#5d554f] ${isPrimary ? 'px-[9px]' : 'gap-1 pl-[9px] pr-1.5'}`}>
                                     {category.name}
-                                    {!isPrimary && <button type="button" className="grid h-5 w-5 cursor-pointer place-items-center rounded border-0 bg-transparent p-0 text-[#817870] hover:bg-[#f0ebe7] hover:text-[color:var(--color-accent)] disabled:cursor-wait disabled:opacity-50" aria-label={`Убрать из категории ${category.name}`} disabled={isDeleting} onClick={() => onDeleteCategory(category.id)}><CloseIcon /></button>}
+                                    {!isPrimary && <button type="button" className="grid h-5 w-5 cursor-pointer place-items-center rounded border-0 bg-transparent p-0 text-[#817870] hover:bg-[#f0ebe7] hover:text-[color:var(--color-accent)] disabled:cursor-wait disabled:opacity-50" aria-label={t('productEditPage.main.removeCategory', { name: category.name })} disabled={isDeleting} onClick={() => onDeleteCategory(category.id)}><CloseIcon /></button>}
                                 </span>
                             );
                         })
-                        : <span className="text-[12px] text-[#958d86]">Категории не назначены.</span>}
-                    <button type="button" className="flex min-h-[29px] cursor-pointer items-center gap-1 rounded-lg border border-dashed border-[#dfd6d0] bg-white px-[9px] text-[12px] font-[650] text-[color:var(--color-accent)]" aria-expanded={isCategorySelectOpen} onClick={onToggleCategorySelect}><PlusIcon />Добавить</button>
+                        : <span className="text-[12px] text-[#958d86]">{t('productEditPage.main.noStoreCategories')}</span>}
+                    <button type="button" className="flex min-h-[29px] cursor-pointer items-center gap-1 rounded-lg border border-dashed border-[#dfd6d0] bg-white px-[9px] text-[12px] font-[650] text-[color:var(--color-accent)]" aria-expanded={isCategorySelectOpen} onClick={onToggleCategorySelect}><PlusIcon />{t('productEditPage.actions.add')}</button>
                 </div>
                 {categoryDeleteError && <p className="mb-0 mt-1.5 text-[12px] text-[#8d857e]" role="alert">{categoryDeleteError}</p>}
                 {isCategorySelectOpen && (
@@ -1522,10 +1531,10 @@ function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen
                             options={productCategoryOptions}
                             value={categoryToAddId}
                             onChange={onAddCategory}
-                            placeholder="Выберите категорию"
-                            searchPlaceholder="Поиск категории"
-                            emptyMessage="Категории не найдены"
-                            ariaLabel="Добавить категорию магазина"
+                            placeholder={t('productEditPage.main.selectCategory')}
+                            searchPlaceholder={t('productEditPage.main.searchCategory')}
+                            emptyMessage={t('productEditPage.main.categoriesNotFound')}
+                            ariaLabel={t('productEditPage.main.addStoreCategory')}
                             ariaBusy={isAddingCategory}
                             disabled={isShopGroupsLoading || Boolean(shopGroupsLoadError)}
                             closeOnSelect={false}
@@ -1721,7 +1730,7 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
         } catch (error) {
             if (isProductContextCurrent(contextVersion)) {
                 onMediaOrderChanged(previousMedia);
-                setSortError(Object.values(error.errors ?? {}).flat().join(' ') || 'Не удалось сохранить порядок медиафайлов.');
+                setSortError(Object.values(error.errors ?? {}).flat().join(' ') || t('productEditPage.media.sortError'));
             }
         } finally {
             if (isProductContextCurrent(contextVersion)) setIsSortingMedia(false);
@@ -1746,7 +1755,7 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
                 || !isProductContextCurrent(contextVersion, targetProductId)) break;
 
             try {
-                if (!item.type) throw new Error('Поддерживаются только фотографии и видео.');
+                if (!item.type) throw new Error(t('productEditPage.media.unsupportedType'));
 
                 const uploadedMedia = await uploadShopItemMedia(targetProductId, item.type, item.file);
                 if (uploadInProgressRef.current === operation
@@ -1759,10 +1768,10 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
 
                 const validationMessages = Object.values(error.errors ?? {}).flat().filter(Boolean);
                 const messages = error.status === 413
-                    ? ['Файл слишком большой для загрузки.']
+                    ? [t('productEditPage.media.fileTooLarge')]
                     : validationMessages.length > 0
                         ? validationMessages
-                        : [error.message || 'Не удалось загрузить файл.'];
+                        : [error.message || t('productEditPage.media.uploadError')];
 
                 messages.forEach((message) => {
                     const existingError = errors.find((uploadError) => uploadError.message === message);
@@ -1862,7 +1871,7 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
 
             if (isProductContextCurrent(contextVersion)) {
                 const validationMessage = Object.values(error.errors ?? {}).flat().join(' ');
-                const message = validationMessage || error.message || 'Не удалось создать черновик товара.';
+                const message = validationMessage || error.message || t('productEditPage.media.draftCreateError');
 
                 setUploadErrors([{
                     message,
@@ -1915,7 +1924,7 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
 
             const validationMessage = Object.values(error.errors ?? {}).flat().join(' ');
 
-            setDeleteError(validationMessage || error.message || 'Не удалось удалить медиафайл.');
+            setDeleteError(validationMessage || error.message || t('productEditPage.media.deleteError'));
         } finally {
             deletingMediaIdsRef.current.delete(item.id);
             if (isProductContextCurrent(contextVersion)) {
@@ -1952,9 +1961,10 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
         <AdminCard
             sectionRef={sectionRef}
             id="photo"
-            title="Фото и видео"
+            title={t('productEditPage.sections.media')}
             icon={PhotoIcon}
             required
+            requiredLabel={t('productEditPage.required')}
             className={`!scroll-mt-0 transition-[border-color,box-shadow] ${isDragActive ? 'border-[color:var(--color-accent)] ring-[3px] ring-[rgba(184,79,24,.09)]' : ''}`}
             sectionProps={dropZoneProps}
         >
@@ -1984,7 +1994,7 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
                                     type="button"
                                     draggable={false}
                                     className="block h-full w-full cursor-zoom-in border-0 bg-transparent p-0"
-                                    aria-label="Открыть фотографию"
+                                    aria-label={t('productEditPage.media.openPhoto')}
                                     onClick={() => {
                                         setLightboxIndex(images.findIndex((image) => image.id === item.id));
                                         setIsLightboxOpen(true);
@@ -1997,8 +2007,8 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
                             )}
                             <MediaDragHandle
                                 className={`${isSortingMedia || isDeletingMedia ? '!cursor-not-allowed opacity-60' : ''} ${draggedMediaId === item.id ? '!cursor-grabbing' : ''}`}
-                                aria-label="Изменить порядок медиафайла"
-                                title="Перетащить"
+                                aria-label={t('productEditPage.media.reorder')}
+                                title={t('productEditPage.media.drag')}
                                 draggable={!isSortingMedia && !isUploading && !isDeletingMedia}
                                 onDragStart={(event) => {
                                     if (isDeletingMedia) {
@@ -2017,17 +2027,17 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
                                 onDragEnd={endMediaDrag}
                             />
                             <MediaDeleteButton
-                                aria-label="Удалить медиафайл"
-                                title="Удалить"
+                                aria-label={t('productEditPage.media.delete')}
+                                title={t('productEditPage.actions.delete')}
                                 disabled={isDeleting || isSortingMedia}
                                 onClick={() => void deleteMedia(item)}
                             />
                             {mediaDropTarget?.id === item.id && (
                                 <span className={`pointer-events-none absolute inset-y-2 z-30 w-0.5 rounded-full bg-[color:var(--color-accent)] ${mediaDropTarget.position === 'before' ? 'left-1' : 'right-1'}`} aria-hidden="true" />
                             )}
-                            {item.is_main && <span className="pointer-events-none absolute bottom-[5px] right-[5px] rounded-[5px] bg-white/90 px-[5px] py-[3px] text-[11px] font-[750] text-[#9b3f14]">Главное</span>}
+                            {item.is_main && <span className="pointer-events-none absolute bottom-[5px] right-[5px] rounded-[5px] bg-white/90 px-[5px] py-[3px] text-[11px] font-[750] text-[#9b3f14]">{t('productEditPage.media.main')}</span>}
                             {isDeleting && (
-                                <div className="absolute inset-0 z-30 grid place-items-center bg-black/35" role="status" aria-label="Удаление медиафайла">
+                                <div className="absolute inset-0 z-30 grid place-items-center bg-black/35" role="status" aria-label={t('productEditPage.media.deleting')}>
                                     <span className="h-7 w-7 animate-spin rounded-full border-[3px] border-white/40 border-t-white" aria-hidden="true" />
                                 </div>
                             )}
@@ -2041,13 +2051,13 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
                         ) : item.type === 'image' && item.previewUrl ? (
                             <img className="h-full w-full object-cover" src={item.previewUrl} alt="" draggable={false} />
                         ) : null}
-                        <div className="absolute inset-0 z-20 grid place-items-center bg-black/35" role="status" aria-label={`Загрузка ${item.file.name}`}>
+                        <div className="absolute inset-0 z-20 grid place-items-center bg-black/35" role="status" aria-label={t('productEditPage.media.uploadingFile', { name: item.file.name })}>
                             <span className="h-7 w-7 animate-spin rounded-full border-[3px] border-white/40 border-t-white" aria-hidden="true" />
                         </div>
                     </div>
                 ))}
                 {isLoading && (
-                    <div className="grid h-[178px] w-[139px] place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#f8f5f2] max-sm:h-[153px] max-sm:w-[119px]" role="status" aria-label="Загрузка медиафайлов">
+                    <div className="grid h-[178px] w-[139px] place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#f8f5f2] max-sm:h-[153px] max-sm:w-[119px]" role="status" aria-label={t('productEditPage.media.loading')}>
                         <span className="h-7 w-7 animate-spin rounded-full border-[3px] border-[#d8cbc2] border-t-[color:var(--color-accent)]" aria-hidden="true" />
                     </div>
                 )}
@@ -2065,7 +2075,7 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
                         }}
                     />
                     <UploadIcon />
-                    <strong className="mt-1.5 text-[11px] text-[#5d554f]">Добавить</strong>
+                    <strong className="mt-1.5 text-[11px] text-[#5d554f]">{t('productEditPage.actions.add')}</strong>
                     {mediaConfig && (
                         <span className="mt-2 space-y-0.5 text-center text-[12px] leading-[1.4] text-[#98918a]">
                             <small className="block">{t('productEditPage.media.imageRequirements', {
@@ -2088,7 +2098,7 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
                             <span className="min-w-0">
                                 <strong className="block">{message}</strong>
                                 <span className="mt-0.5 block break-words font-medium text-[#766d66]">
-                                    {filenames.length === 1 ? 'Файл' : 'Файлы'}: {filenames.join(', ')}
+                                    {t('productEditPage.media.fileList', { count: filenames.length, files: filenames.join(', ') })}
                                 </span>
                             </span>
                         </Alert>
@@ -2146,12 +2156,12 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasV
     const storefrontOldPrice = convertPriceToStoreCurrency(form.old_price, priceCurrency, storeCurrency, currencyRates);
 
     return (
-        <AdminCard sectionRef={sectionRef} id="price" title="Цена и наличие" icon={CurrencyIcon} required bodyClassName="" className="!scroll-mt-0">
+        <AdminCard sectionRef={sectionRef} id="price" title={t('productEditPage.sections.price')} icon={CurrencyIcon} required requiredLabel={t('productEditPage.required')} bodyClassName="" className="!scroll-mt-0">
             <div className="flex min-h-[47px] flex-wrap items-center gap-x-1.5 gap-y-1 border-b border-[#f1e5dc] bg-[#fff8ed] px-[24px] py-3 text-[12px] text-[#92512f] max-sm:px-[13px]">
-                {currencyStatus === 'loading' && <span>Загрузка валюты магазина…</span>}
-                {currencyStatus === 'error' && <span>Не удалось загрузить валюты магазина.</span>}
+                {currencyStatus === 'loading' && <span>{t('productEditPage.price.storeCurrencyLoading')}</span>}
+                {currencyStatus === 'error' && <span>{t('productEditPage.price.storeCurrencyLoadError')}</span>}
                 {currencyStatus === 'loaded' && (storeCurrency !== null ? (
-                    <span>Валюта магазина: <strong className="font-[650]">{storeCurrency}</strong>.</span>
+                    <span>{t('productEditPage.price.storeCurrency')}: <strong className="font-[650]">{storeCurrency}</strong>.</span>
                 ) : (
                     <button
                         className="cursor-pointer border-0 bg-transparent p-0 text-[12px] text-[#a94416] underline decoration-[#d59a78] underline-offset-2"
@@ -2159,25 +2169,25 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasV
                         data-currency-modal-trigger
                         onClick={onOpenCurrencySettings}
                     >
-                        Выбрать валюту перед добавлением товаров
+                        {t('productEditPage.price.selectStoreCurrency')}
                     </button>
                 ))}
             </div>
 
             <div className="p-[17px] max-sm:p-[13px]">
                 <div className="flex items-end justify-between gap-6 max-sm:flex-col max-sm:items-stretch max-sm:gap-4">
-                    <Field className="w-[182px] max-sm:w-full" label="Валюта цены">
+                    <Field className="w-[182px] max-sm:w-full" label={t('productEditPage.price.priceCurrency')}>
                         <Select
                             className="cursor-pointer pr-9 font-[700]"
                             name="currency"
                             value={priceCurrency}
                             disabled={currencyStatus !== 'loaded' || priceCurrencies.length === 0}
                             onChange={onChange}
-                            aria-label="Валюта цены"
+                            aria-label={t('productEditPage.price.priceCurrency')}
                         >
                             {priceCurrencies.length === 0 && (
                                 <option value="">
-                                    {currencyStatus === 'error' ? 'Валюты недоступны' : 'Загрузка…'}
+                                    {currencyStatus === 'error' ? t('productEditPage.price.currenciesUnavailable') : t('productEditPage.loading.short')}
                                 </option>
                             )}
                             {priceCurrencies.map((currency) => (
@@ -2199,20 +2209,20 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasV
                             <circle cx="16" cy="7" r="2" />
                             <circle cx="8" cy="17" r="2" />
                         </svg>
-                        Курсы валют
+                        {t('productEditPage.price.currencyRates')}
                     </button>
                 </div>
 
                 <div className="mt-[18px] grid grid-cols-2 gap-x-5 gap-y-3 max-md:grid-cols-1">
-                    <PriceField label="Цена" name="price" value={form.price} onChange={onChange} required />
-                    <PriceField label="Старая цена" name="old_price" value={form.old_price} onChange={onChange} />
+                    <PriceField label={t('common.price')} name="price" value={form.price} onChange={onChange} required />
+                    <PriceField label={t('productEditPage.price.oldPrice')} name="old_price" value={form.old_price} onChange={onChange} />
                 </div>
 
                 {shouldShowPricePreview && (
                     <>
                         <div className={`mt-[18px] flex min-h-[124px] items-center justify-between gap-8 rounded-[11px] border px-5 py-4 max-sm:flex-col max-sm:items-start max-sm:gap-4 ${hasRate ? 'border-[#efcfbb] bg-[#fff9f4]' : 'border-[#e8c7a8] bg-[#fff8ed]'}`}>
                             <div>
-                                <p className="m-0 text-[12px] text-[#a06d50]">Цена на витрине · {storeCurrency}</p>
+                                <p className="m-0 text-[12px] text-[#a06d50]">{t('productEditPage.price.storefrontPrice', { currency: storeCurrency })}</p>
                                 {hasRate ? (
                                     <>
                                         <strong className="mt-2 block text-[24px] font-[760] leading-none tracking-[-0.025em] text-[#713010]">
@@ -2227,26 +2237,30 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasV
                                 ) : (
                                     <>
                                         <strong className="mt-2 block text-[16px] font-[720] text-[#8f461e]">
-                                            Курс для {priceCurrency} не задан
+                                            {t('productEditPage.price.rateMissing', { currency: priceCurrency })}
                                         </strong>
                                         <p className="mt-2 text-[12px] leading-[1.45] text-[#9c6b50]">
-                                            Пересчёт цены на витрине недоступен.
+                                            {t('productEditPage.price.conversionUnavailable')}
                                         </p>
                                     </>
                                 )}
                             </div>
                             <div className="max-w-[235px] text-left max-sm:max-w-none">
                                 <p className="m-0 text-[12px] font-[600] text-[#96522e]">
-                                    1 {priceCurrency} = {hasRate ? selectedCurrencyRate : '—'} {storeCurrency}
+                                    {t('productEditPage.price.rateEquation', {
+                                        priceCurrency,
+                                        rate: hasRate ? selectedCurrencyRate : '—',
+                                        storeCurrency,
+                                    })}
                                 </p>
                                 <p className="mt-2 text-[11px] leading-[1.45] text-[#b07a5d]">
-                                    {hasRate ? 'Используется курс магазина.' : 'Добавьте курс в настройках валют.'}
+                                    {t(hasRate ? 'productEditPage.price.storeRateUsed' : 'productEditPage.price.addRate')}
                                 </p>
                             </div>
                         </div>
 
                         <p className="mt-[18px] text-[12px] leading-[1.5] text-[#887e76]">
-                            При смене валюты сумма в поле сохраняется. Проверьте её перед сохранением товара.
+                            {t('productEditPage.price.currencyChangeHint')}
                         </p>
                     </>
                 )}
@@ -2254,16 +2268,16 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasV
                 <div className="mt-6 border-t border-[#eee8e3] pt-[18px]">
                     <div className="max-w-[420px]">
                         <PriceField
-                            label="Количество"
+                            label={t('productEditPage.price.quantity')}
                             name="quantity"
                             value={hasVariants ? variantsQuantity : form.quantity}
                             onChange={onChange}
-                            suffix="шт"
+                            suffix={t('shopUnits.piece.shortName')}
                             disabled={hasVariants || isVariantsLoading}
                             required
                         />
-                        {hasVariants && <small className="mt-1.5 block text-[11px] leading-[1.4] text-[#8c837c]">Количество рассчитывается по остаткам активных модификаций</small>}
-                        {!hasVariants && !isVariantsLoading && form.quantity === '' && <small className="mt-1.5 block text-[11px] leading-[1.4] text-[#8c837c]">Укажите актуальный остаток товара</small>}
+                        {hasVariants && <small className="mt-1.5 block text-[11px] leading-[1.4] text-[#8c837c]">{t('productEditPage.price.variantQuantityHint')}</small>}
+                        {!hasVariants && !isVariantsLoading && form.quantity === '' && <small className="mt-1.5 block text-[11px] leading-[1.4] text-[#8c837c]">{t('productEditPage.price.quantityHint')}</small>}
                     </div>
                     <label className="mt-3 flex items-center gap-[7px] text-[12px] text-[#6d655e]">
                         <input
@@ -2273,7 +2287,7 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasV
                             checked={form.show_stock}
                             onChange={onChange}
                         />
-                        Показывать остаток на витрине
+                        {t('productEditPage.price.showStock')}
                     </label>
                 </div>
             </div>
@@ -2345,21 +2359,21 @@ function ProductAside({ form, currencySettings, primaryCategoryName, media, isMe
 
             <section className="overflow-hidden rounded-[16px] border border-[color:var(--color-border)] bg-white shadow-[var(--shadow-sm)] max-lg:hidden">
                 <header className="flex items-center justify-between border-b border-[color:var(--color-border)] px-4 py-3">
-                    <h2 className="text-[13px] font-[750]">Предпросмотр</h2><EyeIcon /></header>
+                    <h2 className="text-[13px] font-[750]">{t('productEditPage.preview.title')}</h2><EyeIcon /></header>
                     <div className="p-4">
                         <div className="relative aspect-[4/3] overflow-hidden rounded-[12px] bg-[#f5f1ee]">
                             {mainImage ? (
                                 <img
                                     className="h-full w-full object-cover"
                                     src={mainImage.large_url ?? mainImage.url ?? mainImage.small_url}
-                                    alt={productName || 'Основное фото товара'}
+                                    alt={productName || t('productEditPage.preview.mainPhotoAlt')}
                                 />
                             ) : (
                                 <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-[#9a918a]">
                                     {isMediaLoading
                                         ? <span className="h-6 w-6 animate-spin rounded-full border-2 border-[#d8cbc2] border-t-[color:var(--color-accent)]" aria-hidden="true" />
                                         : <PhotoIcon />}
-                                    <small className="text-[11px]">{isMediaLoading ? 'Загрузка фотографий…' : 'Фото не добавлено'}</small>
+                                    <small className="text-[11px]">{t(isMediaLoading ? 'productEditPage.preview.loadingPhotos' : 'productEditPage.preview.noPhoto')}</small>
                                 </span>
                             )}
                         </div>
@@ -2374,18 +2388,18 @@ function ProductAside({ form, currencySettings, primaryCategoryName, media, isMe
                             </span>
                         </div>
                         <small className={`mt-4 block text-[10px] uppercase tracking-[.06em] ${primaryCategoryName ? 'text-[#9a938d]' : 'text-[#b0a8a2]'}`}>
-                            {primaryCategoryName || 'Категория не выбрана'}
+                            {primaryCategoryName || t('productEditPage.preview.noCategory')}
                         </small>
                         <strong className={`mt-1 block text-[13px] ${productName ? '' : 'text-[#9a938d]'}`}>
-                            {productName || 'Название товара не указано'}
+                            {productName || t('productEditPage.preview.noName')}
                         </strong>
                         <b className={`mt-2 block text-[15px] ${formattedPrice ? '' : 'text-[#9a938d]'}`}>
-                            {formattedPrice || (unavailablePrice ? 'Цена в валюте магазина недоступна' : 'Цена не указана')}{formattedPrice && currencyLabel ? ` ${currencyLabel}` : ''}
+                            {formattedPrice || t(unavailablePrice ? 'productEditPage.preview.priceUnavailable' : 'productEditPage.preview.noPrice')}{formattedPrice && currencyLabel ? ` ${currencyLabel}` : ''}
                         </b>
-                        {formattedPrice && !currencyLabel && <small className="mt-1 block text-[11px] text-[#9a938d]">Валюта не выбрана</small>}
+                        {formattedPrice && !currencyLabel && <small className="mt-1 block text-[11px] text-[#9a938d]">{t('productEditPage.preview.noCurrency')}</small>}
                         {mainPhotoValue && (
                             <span className="mt-[7px] inline-flex items-center gap-[5px] rounded-[7px] bg-[#f7f2ee] px-[7px] py-[5px] text-[11px] font-[680] text-[#736960]">
-                                <i className="h-[9px] w-[9px] rounded-full bg-[#a9683e]" />По умолчанию: {mainPhotoValue}
+                                <i className="h-[9px] w-[9px] rounded-full bg-[#a9683e]" />{t('productEditPage.preview.defaultValue', { value: mainPhotoValue })}
                             </span>
                         )}
                     </div>
@@ -2395,7 +2409,9 @@ function ProductAside({ form, currencySettings, primaryCategoryName, media, isMe
 }
 
 function AccordionSection({ sectionRef, id, title, icon: Icon, children, open = true }) {
-    return <details ref={sectionRef} id={id} className="accordion" open={open}><summary className="accordion__summary"><span className="accordion__icon [&_svg]:h-[14px] [&_svg]:w-[14px]"><Icon /></span><strong className="accordion__title">{title}</strong><em className="accordion__badge">Необязательно</em><ChevronIcon /></summary><div className="accordion__body">{children}</div></details>;
+    const { t } = useTranslation();
+
+    return <details ref={sectionRef} id={id} className="accordion" open={open}><summary className="accordion__summary"><span className="accordion__icon [&_svg]:h-[14px] [&_svg]:w-[14px]"><Icon /></span><strong className="accordion__title">{title}</strong><em className="accordion__badge">{t('productEditPage.optional')}</em><ChevronIcon /></summary><div className="accordion__body">{children}</div></details>;
 }
 
 function PriceField({ label, name, value, onChange, suffix, required, disabled = false }) { return <Field label={<>{label} {required && <b className="text-[color:var(--color-accent)]">*</b>}</>}><span className="relative"><Input className={`${suffix ? 'pr-11' : ''} font-bold disabled:cursor-not-allowed disabled:bg-[#f2efec] disabled:text-[#817870]`} name={name} value={value} onChange={onChange} disabled={disabled} />{suffix && <b className="absolute right-[11px] top-1/2 -translate-y-1/2 text-[11px] text-[#8d857f]">{suffix}</b>}</span></Field>; }

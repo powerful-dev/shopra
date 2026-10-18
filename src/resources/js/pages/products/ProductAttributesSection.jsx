@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MediaDragHandle } from '../../components/admin/MediaCardControls';
 import SearchableSelect from '../../components/admin/SearchableSelect';
 import Input from '../../components/form/Input';
@@ -47,6 +48,8 @@ const mergeAttributes = (current, savedAttributes) => sortAttributes([
 ]);
 
 const ProductAttributesSection = forwardRef(function ProductAttributesSection({ productId, productContextVersion, onFilledChange }, ref) {
+    const { t } = useTranslation();
+    const translationRef = useRef(t);
     const [attributes, setAttributes] = useState([]);
     const [rows, setRows] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -70,6 +73,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
     const creatingOptionRowIdsRef = useRef(new Set());
     productIdRef.current = productId;
     productContextVersionRef.current = productContextVersion;
+    translationRef.current = t;
 
     const updateRows = (value) => {
         setRows((current) => {
@@ -91,7 +95,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
             .catch((error) => {
                 if (error.name !== 'AbortError') {
                     console.error('Unable to load product attributes.', error);
-                    setLoadError('Не удалось загрузить справочник характеристик.');
+                    setLoadError(t('productEditPage.attributesSection.errors.directoryLoad'));
                 }
             })
             .finally(() => {
@@ -138,7 +142,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
             .catch((error) => {
                 if (error.name !== 'AbortError') {
                     console.error('Unable to load product attribute values.', error);
-                    setValuesError('Не удалось загрузить характеристики товара.');
+                    setValuesError(t('productEditPage.attributesSection.errors.valuesLoad'));
                 }
 
                 return false;
@@ -177,7 +181,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
 
             try {
                 if (valuesLoadPromiseRef.current && ! await valuesLoadPromiseRef.current) {
-                    throw new Error('Не удалось загрузить характеристики товара перед сохранением.');
+                    throw new Error(translationRef.current('productEditPage.attributesSection.errors.valuesBeforeSave'));
                 }
 
                 if (!isSaveContextCurrent()) return null;
@@ -191,7 +195,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                     }));
             } catch (error) {
                 if (isSaveContextCurrent()) {
-                    setSaveError(error.message || 'Не удалось сохранить характеристики товара.');
+                    setSaveError(error.message || translationRef.current('productEditPage.attributesSection.errors.save'));
                 }
                 throw error;
             }
@@ -271,7 +275,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
         const normalizedValue = value.trim().toLocaleLowerCase();
 
         if (options.some((option) => option.value.trim().toLocaleLowerCase() === normalizedValue)) {
-            setOptionError(`Значение «${value.trim()}» уже существует.`);
+            setOptionError(t('productEditPage.attributesSection.errors.optionExists', { value: value.trim() }));
 
             return false;
         }
@@ -309,7 +313,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
             console.error('Unable to create product attribute option.', error);
             setOptionError(Object.values(error.errors ?? {}).flat()[0]
                 || error.message
-                || 'Не удалось создать значение характеристики.');
+                || t('productEditPage.attributesSection.errors.optionCreate'));
 
             return false;
         } finally {
@@ -354,15 +358,15 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
         <div>
             <div className="mb-3 flex items-start justify-between gap-4 max-sm:flex-col">
                 <div>
-                    <strong className="block text-[12px] text-[#554e48]">Характеристики товара</strong>
-                    <p className="mb-0 mt-1 text-[12px] leading-[1.45] text-[#918880]">Добавьте параметры, по которым покупатели смогут сравнивать товары.</p>
+                    <strong className="block text-[12px] text-[#554e48]">{t('productEditPage.attributesSection.title')}</strong>
+                    <p className="mb-0 mt-1 text-[12px] leading-[1.45] text-[#918880]">{t('productEditPage.attributesSection.description')}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-3 max-sm:w-full max-sm:flex-col-reverse max-sm:items-stretch">
                     <button type="button" className="cursor-pointer border-0 bg-transparent p-0 text-[12px] font-bold text-[color:var(--color-accent)] hover:underline" onClick={() => setIsManagerOpen(true)}>
-                        Управление характеристиками
+                        {t('productEditPage.attributesSection.manage')}
                     </button>
                     <button type="button" className="button button--outline min-h-9 shrink-0 max-sm:w-full" disabled={isValuesLoading} onClick={addRow}>
-                        <PlusIcon width="15" height="15" />Добавить характеристику
+                        <PlusIcon width="15" height="15" />{t('productEditPage.attributesSection.addAttribute')}
                     </button>
                 </div>
             </div>
@@ -374,7 +378,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
 
             {rows.length === 0 ? (
                 <div className="rounded-[11px] border border-dashed border-[#ded6d0] bg-[#fcfbfa] px-4 py-5 text-center text-[12px] text-[#918880]">
-                    {isValuesLoading ? 'Загрузка характеристик…' : 'Характеристики ещё не добавлены.'}
+                    {t(isValuesLoading ? 'productEditPage.attributesSection.loading' : 'productEditPage.attributesSection.empty')}
                 </div>
             ) : (
                 <div className="space-y-2.5">
@@ -407,8 +411,8 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                             >
                                 <MediaDragHandle
                                     className={`mt-[24px] !grid h-[41px] w-[30px] shrink-0 place-items-center rounded-[8px] border border-transparent text-[#9a918a] hover:border-[#ddd3cc] hover:bg-white hover:text-[color:var(--color-accent)] ${isValuesLoading ? '!cursor-not-allowed opacity-50' : '!cursor-grab'} ${draggedRowId === row.id ? '!cursor-grabbing' : ''} max-md:col-start-1 max-md:row-start-1`}
-                                    aria-label="Изменить порядок характеристики"
-                                    title="Перетащить"
+                                    aria-label={t('productEditPage.attributesSection.reorder')}
+                                    title={t('productEditPage.attributesSection.drag')}
                                     draggable={!isValuesLoading}
                                     onDragStart={(event) => {
                                         if (isValuesLoading) {
@@ -426,23 +430,23 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                                     onDragEnd={endRowDrag}
                                 />
                                 <div className="max-md:col-span-2 max-md:col-start-2 max-md:row-start-1">
-                                    <span className="mb-1.5 block text-[11px] font-bold text-[#756d66]">Характеристика</span>
+                                    <span className="mb-1.5 block text-[11px] font-bold text-[#756d66]">{t('productEditPage.attributesSection.attribute')}</span>
                                     <SearchableSelect
                                         options={attributeOptions}
                                         value={row.attributeId}
                                         onChange={(attributeId) => updateRowAttribute(row.id, attributeId)}
-                                        placeholder={isBusy ? 'Загрузка…' : 'Выберите характеристику'}
-                                        searchPlaceholder="Поиск характеристики"
-                                        emptyMessage="Характеристики не найдены"
-                                        ariaLabel="Выберите характеристику"
+                                        placeholder={isBusy ? t('productEditPage.loading.short') : t('productEditPage.attributesSection.selectAttribute')}
+                                        searchPlaceholder={t('productEditPage.attributesSection.searchAttribute')}
+                                        emptyMessage={t('productEditPage.attributesSection.attributesNotFound')}
+                                        ariaLabel={t('productEditPage.attributesSection.selectAttribute')}
                                         ariaBusy={isBusy}
                                         disabled={isBusy}
-                                        actionLabel="Создать характеристику"
+                                        actionLabel={t('productEditPage.attributesSection.createAttribute')}
                                         onAction={(query) => setCreatingForRow({ rowId: row.id, initialName: query })}
                                     />
                                 </div>
                                 <div className="max-md:col-span-2 max-md:col-start-1 max-md:row-start-2">
-                                    <span className="mb-1.5 block text-[11px] font-bold text-[#756d66]">Значение</span>
+                                    <span className="mb-1.5 block text-[11px] font-bold text-[#756d66]">{t('productEditPage.attributesSection.value')}</span>
                                     <AttributeValueControl
                                         attribute={attribute}
                                         value={row.value}
@@ -452,7 +456,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                                         onCreateOption={(value) => createOptionForRow(row.id, attribute, value)}
                                     />
                                 </div>
-                                <button type="button" className="mt-[24px] grid h-[41px] w-[38px] cursor-pointer place-items-center rounded-[9px] border border-[#e2d9d3] bg-white text-[#8b8179] hover:border-[#e1b9ad] hover:text-[#b7483f] disabled:cursor-wait disabled:opacity-50 max-md:col-start-3 max-md:row-start-2 max-md:mt-[22px]" disabled={isValuesLoading} onClick={() => updateRows((current) => current.filter((item) => item.id !== row.id))} aria-label="Удалить характеристику">
+                                <button type="button" className="mt-[24px] grid h-[41px] w-[38px] cursor-pointer place-items-center rounded-[9px] border border-[#e2d9d3] bg-white text-[#8b8179] hover:border-[#e1b9ad] hover:text-[#b7483f] disabled:cursor-wait disabled:opacity-50 max-md:col-start-3 max-md:row-start-2 max-md:mt-[22px]" disabled={isValuesLoading} onClick={() => updateRows((current) => current.filter((item) => item.id !== row.id))} aria-label={t('productEditPage.attributesSection.deleteAttribute')}>
                                     <TrashIcon />
                                 </button>
                                 {rowDropTarget?.id === row.id && (
@@ -483,8 +487,10 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
 export default ProductAttributesSection;
 
 function AttributeValueControl({ attribute, value, disabled, isCreatingOption, onChange, onCreateOption }) {
+    const { t } = useTranslation();
+
     if (!attribute) {
-        return <div className="flex h-[41px] items-center rounded-[9px] border border-dashed border-[#ddd5cf] bg-white px-[11px] text-[12px] text-[#aaa19a]">Сначала выберите характеристику</div>;
+        return <div className="flex h-[41px] items-center rounded-[9px] border border-dashed border-[#ddd5cf] bg-white px-[11px] text-[12px] text-[#aaa19a]">{t('productEditPage.attributesSection.selectAttributeFirst')}</div>;
     }
 
     const options = (attribute.options ?? []).map((option) => ({
@@ -498,20 +504,20 @@ function AttributeValueControl({ attribute, value, disabled, isCreatingOption, o
                 options={options}
                 value={value || null}
                 onChange={onChange}
-                placeholder={isCreatingOption ? 'Создание…' : (options.length > 0 ? 'Выберите значение' : 'Введите новое значение')}
-                searchPlaceholder="Поиск значения"
-                emptyMessage="Значения не найдены"
-                ariaLabel={`Значение ${attribute.name}`}
+                placeholder={isCreatingOption ? t('productEditPage.attributesSection.creating') : (options.length > 0 ? t('productEditPage.attributesSection.selectValue') : t('productEditPage.attributesSection.enterNewValue'))}
+                searchPlaceholder={t('productEditPage.attributesSection.searchValue')}
+                emptyMessage={t('productEditPage.attributesSection.valuesNotFound')}
+                ariaLabel={t('productEditPage.attributesSection.valueAria', { name: attribute.name })}
                 ariaBusy={isCreatingOption}
                 disabled={disabled}
-                actionLabel={(query) => `Создать «${query}»`}
+                actionLabel={(query) => t('productEditPage.attributesSection.createValue', { value: query })}
                 actionRequiresQuery
                 actionWhenNoResults
                 onAction={onCreateOption}
-                createActionLabel="Добавить новое значение"
-                createInputPlaceholder="Новое значение"
-                createSubmitLabel="Добавить"
-                createCancelLabel="Отмена"
+                createActionLabel={t('productEditPage.attributesSection.addNewValue')}
+                createInputPlaceholder={t('productEditPage.attributesSection.newValue')}
+                createSubmitLabel={t('productEditPage.actions.add')}
+                createCancelLabel={t('productEditPage.actions.cancel')}
                 createPending={isCreatingOption}
                 onCreate={onCreateOption}
             />
@@ -524,22 +530,22 @@ function AttributeValueControl({ attribute, value, disabled, isCreatingOption, o
                 options={options}
                 value={Array.isArray(value) ? value : []}
                 onChange={onChange}
-                placeholder={isCreatingOption ? 'Создание…' : (options.length > 0 ? 'Выберите значения' : 'Введите новое значение')}
-                searchPlaceholder="Поиск значений"
-                emptyMessage="Значения не найдены"
-                ariaLabel={`Значения ${attribute.name}`}
+                placeholder={isCreatingOption ? t('productEditPage.attributesSection.creating') : (options.length > 0 ? t('productEditPage.attributesSection.selectValues') : t('productEditPage.attributesSection.enterNewValue'))}
+                searchPlaceholder={t('productEditPage.attributesSection.searchValues')}
+                emptyMessage={t('productEditPage.attributesSection.valuesNotFound')}
+                ariaLabel={t('productEditPage.attributesSection.valuesAria', { name: attribute.name })}
                 ariaBusy={isCreatingOption}
                 disabled={disabled}
                 multiple
                 closeOnSelect={false}
-                actionLabel={(query) => `Создать «${query}»`}
+                actionLabel={(query) => t('productEditPage.attributesSection.createValue', { value: query })}
                 actionRequiresQuery
                 actionWhenNoResults
                 onAction={onCreateOption}
-                createActionLabel="Добавить новое значение"
-                createInputPlaceholder="Новое значение"
-                createSubmitLabel="Добавить"
-                createCancelLabel="Отмена"
+                createActionLabel={t('productEditPage.attributesSection.addNewValue')}
+                createInputPlaceholder={t('productEditPage.attributesSection.newValue')}
+                createSubmitLabel={t('productEditPage.actions.add')}
+                createCancelLabel={t('productEditPage.actions.cancel')}
                 createPending={isCreatingOption}
                 onCreate={onCreateOption}
             />
@@ -559,13 +565,13 @@ function AttributeValueControl({ attribute, value, disabled, isCreatingOption, o
         return (
             <div className="flex h-[41px] items-center gap-2.5 rounded-[9px] border border-[#ddd5cf] bg-white px-[11px]">
                 <label className="switch">
-                    <input className="switch__input" type="checkbox" checked={Boolean(value)} disabled={disabled} aria-label={`${attribute.name}: ${value ? 'Да' : 'Нет'}`} onChange={(event) => onChange(event.target.checked)} />
+                    <input className="switch__input" type="checkbox" checked={Boolean(value)} disabled={disabled} aria-label={t('productEditPage.attributesSection.booleanAria', { name: attribute.name, value: t(value ? 'productEditPage.attributesSection.yes' : 'productEditPage.attributesSection.no') })} onChange={(event) => onChange(event.target.checked)} />
                     <span className="switch__track" />
                 </label>
-                <span className="text-[12px] font-bold text-[#554e48]">{value ? 'Да' : 'Нет'}</span>
+                <span className="text-[12px] font-bold text-[#554e48]">{t(value ? 'productEditPage.attributesSection.yes' : 'productEditPage.attributesSection.no')}</span>
             </div>
         );
     }
 
-    return <Input type="text" value={value} placeholder="Введите значение" disabled={disabled} onChange={(event) => onChange(event.target.value)} />;
+    return <Input type="text" value={value} placeholder={t('productEditPage.attributesSection.enterValue')} disabled={disabled} onChange={(event) => onChange(event.target.value)} />;
 }
