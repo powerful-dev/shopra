@@ -405,6 +405,11 @@
             "priceError": "Enter a price of 0 or more.",
             "stockError": "Enter a whole number of 0 or more."
         },
+        "variantSaveStatus": {
+            "saving": "Saving…",
+            "success": "Changes saved",
+            "error": "Failed to save changes"
+        },
         "variantPhotos": {
             "toggleAria": "Use variant photos",
             "title": "Variant photos",

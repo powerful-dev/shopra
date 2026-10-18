@@ -5,6 +5,7 @@ import BulkActionsBar from '../../components/admin/BulkActionsBar';
 import ImageLightbox from '../../components/admin/ImageLightbox';
 import Field from '../../components/form/Field';
 import Select from '../../components/form/Select';
+import CheckIcon from '../../components/icons/CheckIcon';
 import CloseIcon from '../../components/icons/CloseIcon';
 import PlusIcon from '../../components/icons/PlusIcon';
 import SaveIcon from '../../components/icons/SaveIcon';
@@ -407,7 +408,7 @@ function PhotoPicker({ valueLabel, images, selectedImageIds, onToggle, onCancel,
     );
 }
 
-function PhotosSection({ options, images, photoState, setPhotoState, onOpenImage }) {
+function PhotosSection({ options, images, photoState, setPhotoState, onOpenImage, onChange }) {
     const { t } = useTranslation();
     const [openPicker, setOpenPicker] = useState(null);
     const [draftImageIds, setDraftImageIds] = useState([]);
@@ -463,6 +464,7 @@ function PhotosSection({ options, images, photoState, setPhotoState, onOpenImage
     const setMainValue = (valueId) => {
         if (!selectedOption) return;
 
+        onChange();
         setPhotoState((current) => ({
             ...current,
             mainValueIds: {
@@ -488,6 +490,7 @@ function PhotosSection({ options, images, photoState, setPhotoState, onOpenImage
     const applyPhotoPicker = () => {
         if (!openPicker) return;
 
+        onChange();
         const selectedImageIdSet = new Set(draftImageIds);
         const orderedImageIds = images.map((image) => String(image.id)).filter((imageId) => selectedImageIdSet.has(imageId));
         setPhotoState((current) => ({
@@ -505,6 +508,7 @@ function PhotosSection({ options, images, photoState, setPhotoState, onOpenImage
     const removeAssignedPhoto = (valueId, imageId) => {
         const normalizedValueId = String(valueId);
         const normalizedImageId = String(imageId);
+        onChange();
         setPhotoState((current) => ({
             ...current,
             assignments: {
@@ -525,9 +529,9 @@ function PhotosSection({ options, images, photoState, setPhotoState, onOpenImage
     return (
         <section className="overflow-hidden rounded-[13px] border border-[color:var(--color-border)] bg-white">
             <header className={`grid min-h-[76px] items-center gap-4 bg-[linear-gradient(100deg,#fff8f3,#fff)] px-[16px] py-3 ${areVariantPhotosEnabled ? 'grid-cols-[48px_minmax(0,1fr)_220px] border-b border-[color:var(--color-border)] max-sm:grid-cols-[48px_minmax(0,1fr)]' : 'grid-cols-[48px_minmax(0,1fr)]'}`}>
-                <button type="button" className="switch-control switch-control--strong" role="switch" aria-checked={areVariantPhotosEnabled} onClick={() => setPhotoState((current) => ({ ...current, enabled: !current.enabled }))} aria-label={t('productEditPage.variantPhotos.toggleAria')}><i aria-hidden="true"><Icon size={14}><path d="m20 6-11 11-5-5" /></Icon></i></button>
+                <button type="button" className="switch-control switch-control--strong" role="switch" aria-checked={areVariantPhotosEnabled} onClick={() => { onChange(); setPhotoState((current) => ({ ...current, enabled: !current.enabled })); }} aria-label={t('productEditPage.variantPhotos.toggleAria')}><i aria-hidden="true"><Icon size={14}><path d="m20 6-11 11-5-5" /></Icon></i></button>
                 <p className="m-0"><strong className="block text-[13px]">{t('productEditPage.variantPhotos.title')}</strong><small className="mt-[3px] block max-w-[620px] text-[12px] leading-[1.45] text-[#8d847d]">{t('productEditPage.variantPhotos.description')}</small></p>
-                {areVariantPhotosEnabled && <Field className="max-sm:col-span-full" label={t('productEditPage.variantPhotos.dependsOn')}><Select className="font-bold" value={selectedOptionValue} onChange={(event) => setPhotoState((current) => ({ ...current, selectedOptionId: event.target.value }))}>{options.map((option) => <option key={option.id} value={String(option.id)}>{option.name}</option>)}</Select></Field>}
+                {areVariantPhotosEnabled && <Field className="max-sm:col-span-full" label={t('productEditPage.variantPhotos.dependsOn')}><Select className="font-bold" value={selectedOptionValue} onChange={(event) => { onChange(); setPhotoState((current) => ({ ...current, selectedOptionId: event.target.value })); }}>{options.map((option) => <option key={option.id} value={String(option.id)}>{option.name}</option>)}</Select></Field>}
             </header>
             {areVariantPhotosEnabled && <>
                 <div className="grid grid-cols-[minmax(190px,.7fr)_minmax(0,1.3fr)_auto] items-center gap-3 border-b border-[color:var(--color-border)] bg-[#faf8f6] px-[16px] py-3 max-md:grid-cols-1"><div><strong className="block text-[12px]">{t('productEditPage.variantPhotos.galleryTitle')}</strong><small className="mt-[3px] block text-[11px] text-[#8f867f]">{t('productEditPage.variantPhotos.galleryDescription')}</small></div>{images.length > 0 ? <><div className="flex gap-[7px] overflow-x-auto">{images.map((image, index) => <PhotoTile key={image.id} image={image} onOpen={() => onOpenImage(index)} ariaLabel={t('productEditPage.variantPhotos.openPhoto', { number: index + 1 })} />)}</div><div className="flex gap-2 text-[11px]"><span className="rounded-full bg-[#eaf4ec] px-2 py-1 font-bold text-[#3c8354]">{t('productEditPage.variantPhotos.assignedCount', { count: assignedImageCount })}</span><span className="rounded-full bg-[#fff0e7] px-2 py-1 font-bold text-[color:var(--color-accent)]">{t('productEditPage.variantPhotos.unassignedCount', { count: images.length - assignedImageCount })}</span></div></> : <p className="col-span-2 m-0 rounded-[8px] border border-dashed border-[#d9d0c9] bg-white px-3 py-4 text-center text-[11px] text-[#958b83] max-md:col-span-1">{t('productEditPage.variantPhotos.noProductPhotos')}</p>}</div>
@@ -652,6 +656,7 @@ export default function ProductVariantsModal({
     productContextVersion = 0,
     isProductContextCurrent = () => true,
 }) {
+    const { t } = useTranslation();
     const [separatePrices, setSeparatePrices] = useState(false);
     const [areSeparatePricesInitialized, setAreSeparatePricesInitialized] = useState(false);
     const [showOptionPicker, setShowOptionPicker] = useState(false);
@@ -668,6 +673,7 @@ export default function ProductVariantsModal({
     const [photoState, setPhotoState] = useState(emptyPhotoState);
     const [isSaving, setIsSaving] = useState(false);
     const [saveErrors, setSaveErrors] = useState([]);
+    const [saveStatus, setSaveStatus] = useState(null);
     const [lightboxIndex, setLightboxIndex] = useState(0);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
     const modalSessionRef = useRef({ isOpen: false, openedWithoutProduct: false });
@@ -685,6 +691,7 @@ export default function ProductVariantsModal({
     useEffect(() => {
         saveOperationRef.current = null;
         setIsSaving(false);
+        setSaveStatus(null);
     }, [productContextVersion]);
 
     useEffect(() => {
@@ -692,6 +699,7 @@ export default function ProductVariantsModal({
             modalSessionRef.current = { isOpen: true, openedWithoutProduct: !productId };
         } else if (!isOpen) {
             modalSessionRef.current = { isOpen: false, openedWithoutProduct: false };
+            setSaveStatus(null);
         }
     }, [isOpen, productId]);
 
@@ -744,6 +752,7 @@ export default function ProductVariantsModal({
         attributesRef.current = [];
         setAttributesError('');
         setSaveErrors([]);
+        setSaveStatus(null);
         setIsAttributesLoading(true);
 
         getShopAttributes({ signal: controller.signal })
@@ -806,11 +815,15 @@ export default function ProductVariantsModal({
         .map((option) => option.shopAttributeId)
         .filter((attributeId) => attributeId !== null && attributeId !== undefined));
     const selectedValuesCount = addedOptions.reduce((count, option) => count + option.values.length, 0);
+    const markVariantsChanged = () => {
+        setSaveStatus((current) => current === 'success' ? null : current);
+    };
     const addAttribute = (attributeId) => {
         const attribute = attributes.find((item) => item.id === attributeId);
         if (!attribute || addedAttributeIds.has(attribute.id)) return;
 
         const availableValues = attributeValues(attribute);
+        markVariantsChanged();
         setAddedOptions((current) => [...current, {
             id: temporaryId('option'),
             shopAttributeId: attribute.id,
@@ -829,6 +842,7 @@ export default function ProductVariantsModal({
         }]);
     };
     const removeAttribute = (attributeId) => {
+        markVariantsChanged();
         setAddedOptions((current) => current.filter((option) => option.id !== attributeId));
         setDeleteWarning(null);
     };
@@ -836,6 +850,7 @@ export default function ProductVariantsModal({
         const trimmedValue = valueLabel.trim();
         if (!trimmedValue) return;
 
+        markVariantsChanged();
         const normalizedValue = trimmedValue.toLocaleLowerCase();
         setAddedOptions((current) => current.map((option) => {
             if (option.id !== attributeId || option.values.some((value) => value.label.trim().toLocaleLowerCase() === normalizedValue)) return option;
@@ -854,12 +869,14 @@ export default function ProductVariantsModal({
         }));
     };
     const removeOptionValue = (attributeId, valueId) => {
+        markVariantsChanged();
         setAddedOptions((current) => current.map((option) => option.id === attributeId
             ? { ...option, values: option.values.filter((value) => value.id !== valueId) }
             : option));
         setDeleteWarning(null);
     };
     const updateVariant = (key, fields) => {
+        markVariantsChanged();
         setVariantData((current) => ({
             ...current,
             [key]: {
@@ -873,6 +890,7 @@ export default function ProductVariantsModal({
         }));
     };
     const toggleSeparatePrices = () => {
+        markVariantsChanged();
         if (!separatePrices && !areSeparatePricesInitialized) {
             setVariantData((current) => {
                 const next = { ...current };
@@ -902,6 +920,7 @@ export default function ProductVariantsModal({
         saveOperationRef.current = operation;
         setIsSaving(true);
         setSaveErrors([]);
+        setSaveStatus(null);
 
         try {
             const savedProductId = productId ?? await resolveProductId?.();
@@ -926,13 +945,14 @@ export default function ProductVariantsModal({
             setSeparatePrices(restoredState.separatePrices);
             setAreSeparatePricesInitialized(restoredState.separatePricesInitialized);
             setPhotoState(restoredState.photos);
+            setSaveStatus('success');
             onSaved?.(savedVariants);
-            onClose();
         } catch (error) {
             if (!isProductContextCurrent(contextVersion)) return;
 
             console.error('Unable to save product variants.', error);
             setSaveErrors(validationMessages(error));
+            setSaveStatus('error');
         } finally {
             if (saveOperationRef.current === operation) {
                 saveOperationRef.current = null;
@@ -954,11 +974,11 @@ export default function ProductVariantsModal({
                     {showOptionPicker && <AttributePicker attributes={attributes} addedAttributeIds={addedAttributeIds} isLoading={isAttributesLoading} error={attributesError} onAdd={addAttribute} onClose={() => setShowOptionPicker(false)} />}
                     {addedOptions.map((option) => <OptionRow key={option.id} option={option} onAddValue={addOptionValue} onDeleteOption={removeAttribute} onDeleteValue={(optionId, valueId, optionName, valueName) => setDeleteWarning({ optionId, valueId, optionName, valueName })} />)}
                     {deleteWarning && <div className="flex items-start gap-3 rounded-[10px] border border-[#e5c3bd] bg-[#fff7f5] p-[11px_13px] text-[#a6402b]" role="alert"><TrashIcon /><p className="m-0 flex-1 text-[11px] leading-[1.45]"><strong className="block text-[12px] text-[#633b33]">Значение «{deleteWarning.valueName}» связано с модификациями</strong>Модификации с этим значением опции «{deleteWarning.optionName}» будут удалены вместе с ним.</p><div className="flex shrink-0 gap-2 max-sm:flex-col"><button type="button" className="rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 text-[11px] font-bold text-[#5d554f]" onClick={() => setDeleteWarning(null)}>Отмена</button><button type="button" className="rounded-[7px] border border-[#d79d8e] bg-white px-2 py-1.5 text-[11px] font-bold text-[#a6402b]" onClick={() => removeOptionValue(deleteWarning.optionId, deleteWarning.valueId)}>Удалить значение</button></div></div>}
-                    <PhotosSection options={addedOptions} images={images} photoState={photoState} setPhotoState={setPhotoState} onOpenImage={(index) => { setLightboxIndex(index); setIsLightboxOpen(true); }} />
+                    <PhotosSection options={addedOptions} images={images} photoState={photoState} setPhotoState={setPhotoState} onOpenImage={(index) => { setLightboxIndex(index); setIsLightboxOpen(true); }} onChange={markVariantsChanged} />
                     <VariantsSection combinations={combinations} totalCount={totalCount} variantData={variantData} basePrice={normalizedBasePrice} separatePrices={separatePrices} showPriceSettings={addedOptions.length > 0} onTogglePrices={toggleSeparatePrices} onVariantChange={updateVariant} />
                     </>}
                 </div></div>
-                <footer className="flex min-h-[76px] shrink-0 items-center gap-3 border-t border-[color:var(--color-border)] bg-white px-7 py-[11px] max-sm:grid max-sm:grid-cols-2 max-sm:px-[14px]"><div className="flex flex-1 flex-col max-sm:col-span-full"><span className="text-[12px] font-bold">{addedOptions.length} опции · {selectedValuesCount} значений</span><small className="text-[11px] text-[#928981]">Модификации появятся в карточке товара только после сохранения.</small></div><button type="button" className="button button--secondary min-h-[42px] justify-center" onClick={onClose} disabled={isSaving}>Закрыть</button><button type="button" className="button button--primary min-h-[42px] justify-center disabled:cursor-wait disabled:opacity-70" onClick={() => void saveVariants()} disabled={isSaving || isVariantsLoading || Boolean(variantsError)}>{isSaving ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" /> : <SaveIcon size={16} />}{isSaving ? 'Сохранение…' : 'Сохранить модификации'}</button></footer>
+                <footer className="flex min-h-[76px] shrink-0 items-center gap-3 border-t border-[color:var(--color-border)] bg-white px-7 py-[11px] max-sm:grid max-sm:grid-cols-2 max-sm:px-[14px]"><div className="flex flex-1 flex-col max-sm:col-span-full"><span className="text-[12px] font-bold">{addedOptions.length} опции · {selectedValuesCount} значений</span><small className="text-[11px] text-[#928981]">Модификации появятся в карточке товара только после сохранения.</small></div>{(isSaving || saveStatus) && <div className={`flex shrink-0 items-center gap-2 text-[12px] font-bold max-sm:col-span-full ${saveStatus === 'error' ? 'text-[#a6402b]' : isSaving ? 'text-[#766d66]' : 'text-[#3c8354]'}`} role={saveStatus === 'error' ? 'alert' : 'status'} aria-live="polite">{isSaving ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#cfc6bf] border-t-[color:var(--color-accent)]" aria-hidden="true" /> : <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-white ${saveStatus === 'error' ? 'bg-[#b94d38]' : 'bg-[#4c9564]'}`} aria-hidden="true">{saveStatus === 'success' ? <CheckIcon /> : <CloseIcon width={12} height={12} />}</span>}<span>{isSaving ? t('productEditPage.variantSaveStatus.saving') : t(`productEditPage.variantSaveStatus.${saveStatus}`)}</span></div>}<button type="button" className="button button--secondary min-h-[42px] justify-center" onClick={onClose} disabled={isSaving}>Закрыть</button><button type="button" className="button button--primary min-h-[42px] justify-center disabled:cursor-wait disabled:opacity-70" onClick={() => void saveVariants()} disabled={isSaving || isVariantsLoading || Boolean(variantsError)}>{isSaving ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" /> : <SaveIcon size={16} />}{isSaving ? 'Сохранение…' : 'Сохранить модификации'}</button></footer>
                 </section>
             </div>
             <ImageLightbox images={lightboxImages} index={lightboxIndex} open={isLightboxOpen} onClose={() => setIsLightboxOpen(false)} onIndexChange={setLightboxIndex} />
