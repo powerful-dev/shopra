@@ -181,6 +181,9 @@ export default function ProductEditPage() {
     const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
     const [isCurrencySettingsOpen, setIsCurrencySettingsOpen] = useState(false);
     const [isVariantsOpen, setIsVariantsOpen] = useState(false);
+    const [isPreparingVariants, setIsPreparingVariants] = useState(false);
+    const [variantsOpenError, setVariantsOpenError] = useState('');
+    const [pendingVariantsProductId, setPendingVariantsProductId] = useState(null);
     const [variantsSummary, setVariantsSummary] = useState(emptyVariantsSummary);
     const [variantsSummaryStatus, setVariantsSummaryStatus] = useState(isNew ? 'loaded' : 'loading');
     const [currencySettings, setCurrencySettings] = useState({ currency: null, currency_rates: [] });
@@ -212,6 +215,7 @@ export default function ProductEditPage() {
     const attributesSectionRef = useRef(null);
     const variantAttributesRef = useRef([]);
     const statusActionRequestRef = useRef(0);
+    const variantsOpenOperationRef = useRef(null);
     const activeProductIdRef = useRef(currentProductId);
     const productContextRef = useRef({ productId: currentProductId, version: 0 });
     if (!nullableIdsMatch(productContextRef.current.productId, currentProductId)) {
@@ -367,8 +371,30 @@ export default function ProductEditPage() {
         setIsStatusChanging(false);
         setIsArchiveConfirmOpen(false);
         setStatusActionError(null);
+        setVariantsOpenError('');
+
+        if (variantsOpenOperationRef.current
+            && variantsOpenOperationRef.current.contextVersion !== productContextRef.current.version) {
+            variantsOpenOperationRef.current = null;
+            setIsPreparingVariants(false);
+            setPendingVariantsProductId(null);
+        }
+
         setIsSubmitting((submittingOperationsRef.current.get(productContextRef.current.version) ?? 0) > 0);
     }, [id, isNew]);
+
+    useEffect(() => {
+        if (!pendingVariantsProductId) return;
+
+        if (idsMatch(currentProductId, pendingVariantsProductId)) {
+            setPendingVariantsProductId(null);
+            setIsPreparingVariants(false);
+            setIsVariantsOpen(true);
+        } else if (currentProductId !== null) {
+            setPendingVariantsProductId(null);
+            setIsPreparingVariants(false);
+        }
+    }, [currentProductId, pendingVariantsProductId]);
 
     useEffect(() => {
         if (isNew) {
@@ -602,6 +628,47 @@ export default function ProductEditPage() {
             return product.id;
         } finally {
             endSubmitting(contextVersion);
+        }
+    };
+
+    const openProductVariants = async () => {
+        if (!isNew) {
+            setVariantsOpenError('');
+            setIsVariantsOpen(true);
+            return;
+        }
+
+        if (variantsOpenOperationRef.current) return;
+
+        const contextVersion = productContextRef.current.version;
+        const operation = { contextVersion };
+        let isWaitingForRoute = false;
+        variantsOpenOperationRef.current = operation;
+        setIsPreparingVariants(true);
+        setVariantsOpenError('');
+
+        try {
+            const productId = await ensureProduct();
+
+            if (variantsOpenOperationRef.current !== operation
+                || !productId
+                || !isProductContextCurrent(contextVersion, productId)) return;
+
+            isWaitingForRoute = true;
+            setPendingVariantsProductId(String(productId));
+        } catch (error) {
+            if (variantsOpenOperationRef.current !== operation
+                || !isProductContextVersionCurrent(contextVersion)) return;
+
+            console.error('Unable to create a product draft for variants.', error);
+            setVariantsOpenError('Не удалось создать черновик товара. Попробуйте ещё раз.');
+        } finally {
+            if (variantsOpenOperationRef.current === operation) {
+                variantsOpenOperationRef.current = null;
+                if (!isWaitingForRoute && isProductContextVersionCurrent(contextVersion)) {
+                    setIsPreparingVariants(false);
+                }
+            }
         }
     };
 
@@ -1032,6 +1099,7 @@ export default function ProductEditPage() {
                         onOpenCurrencySettings={() => setIsCurrencySettingsOpen(true)}
                     />
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.variants = element; }} id="variants" title="Модификации товара" icon={LayersIcon} open>
+                        {variantsOpenError && <Alert variant="error" className="mb-3">{variantsOpenError}</Alert>}
                         <article className="grid min-h-[82px] grid-cols-[42px_minmax(0,1fr)_auto] items-center gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[12px_13px] max-md:grid-cols-[38px_minmax(0,1fr)]">
                             <span className="grid h-[42px] w-[42px] place-items-center rounded-[11px] bg-[#f1ece8] text-[#81766e]">
                                 {variantsSummaryStatus === 'loading'
@@ -1048,9 +1116,13 @@ export default function ProductEditPage() {
                                     {variantsSummary.mainPhotoValue && <small className="mt-1.5 inline-flex items-center gap-1.5 rounded-md bg-white px-2 py-1 text-[11px] font-semibold text-[#756b64]"><i className="h-2 w-2 rounded-full bg-[#a9683e]" />Основное значение: {variantsSummary.mainPhotoValue}</small>}
                                 </>}
                             </div>
-                            <button type="button" className="button button--primary min-h-9 max-md:col-span-full max-md:w-full" onClick={() => setIsVariantsOpen(true)}>
-                                {variantsSummary.hasModifications || variantsSummaryStatus === 'error' ? <PencilIcon /> : <PlusIcon />}
-                                {variantsSummary.hasModifications || variantsSummaryStatus === 'error' ? 'Настроить' : 'Добавить модификации'}
+                            <button type="button" className="button button--primary min-h-9 disabled:cursor-wait disabled:opacity-70 max-md:col-span-full max-md:w-full" onClick={() => void openProductVariants()} disabled={isPreparingVariants}>
+                                {isPreparingVariants
+                                    ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" />
+                                    : variantsSummary.hasModifications || variantsSummaryStatus === 'error' ? <PencilIcon /> : <PlusIcon />}
+                                {isPreparingVariants
+                                    ? 'Создание черновика…'
+                                    : variantsSummary.hasModifications || variantsSummaryStatus === 'error' ? 'Настроить' : 'Добавить модификации'}
                             </button>
                         </article>
                     </AccordionSection>
@@ -1146,7 +1218,6 @@ export default function ProductEditPage() {
                 productId={isNew ? null : id}
                 basePrice={form.price}
                 media={media}
-                resolveProductId={ensureProduct}
                 productContextVersion={productContextRef.current.version}
                 isProductContextCurrent={isProductContextCurrent}
                 onClose={() => setIsVariantsOpen(false)}

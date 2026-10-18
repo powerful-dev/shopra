@@ -652,7 +652,6 @@ export default function ProductVariantsModal({
     productId = null,
     basePrice = '',
     media = [],
-    resolveProductId,
     productContextVersion = 0,
     isProductContextCurrent = () => true,
 }) {
@@ -676,7 +675,6 @@ export default function ProductVariantsModal({
     const [saveStatus, setSaveStatus] = useState(null);
     const [lightboxIndex, setLightboxIndex] = useState(0);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-    const modalSessionRef = useRef({ isOpen: false, openedWithoutProduct: false });
     const saveOperationRef = useRef(null);
     const images = useMemo(() => media.filter((item) => item.type === 'image'), [media]);
     const lightboxImages = useMemo(() => images.map((item) => ({ id: item.id, src: item.large_url, alt: '' })), [images]);
@@ -695,16 +693,11 @@ export default function ProductVariantsModal({
     }, [productContextVersion]);
 
     useEffect(() => {
-        if (isOpen && !modalSessionRef.current.isOpen) {
-            modalSessionRef.current = { isOpen: true, openedWithoutProduct: !productId };
-        } else if (!isOpen) {
-            modalSessionRef.current = { isOpen: false, openedWithoutProduct: false };
-            setSaveStatus(null);
-        }
-    }, [isOpen, productId]);
+        if (!isOpen) setSaveStatus(null);
+    }, [isOpen]);
 
     useEffect(() => {
-        if (!isOpen || !productId || modalSessionRef.current.openedWithoutProduct) {
+        if (!isOpen || !productId) {
             setIsVariantsLoading(false);
             setVariantsError('');
             return undefined;
@@ -913,6 +906,8 @@ export default function ProductVariantsModal({
         setSeparatePrices((current) => !current);
     };
     const saveVariants = async () => {
+        if (!productId) return;
+
         const contextVersion = productContextVersion;
         if (saveOperationRef.current?.contextVersion === contextVersion) return;
 
@@ -923,9 +918,9 @@ export default function ProductVariantsModal({
         setSaveStatus(null);
 
         try {
-            const savedProductId = productId ?? await resolveProductId?.();
+            const savedProductId = productId;
 
-            if (!savedProductId || !isProductContextCurrent(contextVersion, savedProductId)) return;
+            if (!isProductContextCurrent(contextVersion, savedProductId)) return;
 
             const savedVariants = await updateProductVariants(savedProductId, buildProductVariantsPayload({
                 options: addedOptions,
@@ -978,7 +973,7 @@ export default function ProductVariantsModal({
                     <VariantsSection combinations={combinations} totalCount={totalCount} variantData={variantData} basePrice={normalizedBasePrice} separatePrices={separatePrices} showPriceSettings={addedOptions.length > 0} onTogglePrices={toggleSeparatePrices} onVariantChange={updateVariant} />
                     </>}
                 </div></div>
-                <footer className="flex min-h-[76px] shrink-0 items-center gap-3 border-t border-[color:var(--color-border)] bg-white px-7 py-[11px] max-sm:grid max-sm:grid-cols-2 max-sm:px-[14px]"><div className="flex flex-1 flex-col max-sm:col-span-full"><span className="text-[12px] font-bold">{addedOptions.length} опции · {selectedValuesCount} значений</span><small className="text-[11px] text-[#928981]">Модификации появятся в карточке товара только после сохранения.</small></div>{(isSaving || saveStatus) && <div className={`flex shrink-0 items-center gap-2 text-[12px] font-bold max-sm:col-span-full ${saveStatus === 'error' ? 'text-[#a6402b]' : isSaving ? 'text-[#766d66]' : 'text-[#3c8354]'}`} role={saveStatus === 'error' ? 'alert' : 'status'} aria-live="polite">{isSaving ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#cfc6bf] border-t-[color:var(--color-accent)]" aria-hidden="true" /> : <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-white ${saveStatus === 'error' ? 'bg-[#b94d38]' : 'bg-[#4c9564]'}`} aria-hidden="true">{saveStatus === 'success' ? <CheckIcon /> : <CloseIcon width={12} height={12} />}</span>}<span>{isSaving ? t('productEditPage.variantSaveStatus.saving') : t(`productEditPage.variantSaveStatus.${saveStatus}`)}</span></div>}<button type="button" className="button button--secondary min-h-[42px] justify-center" onClick={onClose} disabled={isSaving}>Закрыть</button><button type="button" className="button button--primary min-h-[42px] justify-center disabled:cursor-wait disabled:opacity-70" onClick={() => void saveVariants()} disabled={isSaving || isVariantsLoading || Boolean(variantsError)}>{isSaving ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" /> : <SaveIcon size={16} />}{isSaving ? 'Сохранение…' : 'Сохранить модификации'}</button></footer>
+                <footer className="flex min-h-[76px] shrink-0 items-center gap-3 border-t border-[color:var(--color-border)] bg-white px-7 py-[11px] max-sm:grid max-sm:grid-cols-2 max-sm:px-[14px]"><div className="flex flex-1 flex-col max-sm:col-span-full"><span className="text-[12px] font-bold">{addedOptions.length} опции · {selectedValuesCount} значений</span><small className="text-[11px] text-[#928981]">Модификации появятся в карточке товара только после сохранения.</small></div>{(isSaving || saveStatus) && <div className={`flex shrink-0 items-center gap-2 text-[12px] font-bold max-sm:col-span-full ${saveStatus === 'error' ? 'text-[#a6402b]' : isSaving ? 'text-[#766d66]' : 'text-[#3c8354]'}`} role={saveStatus === 'error' ? 'alert' : 'status'} aria-live="polite">{isSaving ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#cfc6bf] border-t-[color:var(--color-accent)]" aria-hidden="true" /> : <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-white ${saveStatus === 'error' ? 'bg-[#b94d38]' : 'bg-[#4c9564]'}`} aria-hidden="true">{saveStatus === 'success' ? <CheckIcon /> : <CloseIcon width={12} height={12} />}</span>}<span>{isSaving ? t('productEditPage.variantSaveStatus.saving') : t(`productEditPage.variantSaveStatus.${saveStatus}`)}</span></div>}<button type="button" className="button button--secondary min-h-[42px] justify-center" onClick={onClose} disabled={isSaving}>Закрыть</button><button type="button" className="button button--primary min-h-[42px] justify-center disabled:cursor-wait disabled:opacity-70" onClick={() => void saveVariants()} disabled={!productId || isSaving || isVariantsLoading || Boolean(variantsError)}>{isSaving ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" /> : <SaveIcon size={16} />}{isSaving ? 'Сохранение…' : 'Сохранить модификации'}</button></footer>
                 </section>
             </div>
             <ImageLightbox images={lightboxImages} index={lightboxIndex} open={isLightboxOpen} onClose={() => setIsLightboxOpen(false)} onIndexChange={setLightboxIndex} />
