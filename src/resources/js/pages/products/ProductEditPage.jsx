@@ -967,7 +967,7 @@ export default function ProductEditPage() {
     };
 
     return (
-        <div className="max-lg:pb-[calc(48px+env(safe-area-inset-bottom))]">
+        <div className="min-w-0 max-w-full max-lg:pb-[calc(48px+env(safe-area-inset-bottom))]">
             <Breadcrumbs
                 className="mb-5 max-lg:hidden"
                 currentLabel={isNew ? t('productEditPage.header.newProduct') : form.name}
@@ -1049,8 +1049,8 @@ export default function ProductEditPage() {
                 <Alert variant="error" className="mb-3">{currentStatusActionError}</Alert>
             )}
 
-            <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
-                <form className="space-y-3" aria-label={t('productEditPage.formAria')} onSubmit={(event) => event.preventDefault()}>
+            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
+                <form className="min-w-0 space-y-3" aria-label={t('productEditPage.formAria')} onSubmit={(event) => event.preventDefault()}>
                     <MainSection
                         sectionRef={(element) => { sectionRefs.current.main = element; }}
                         form={form}
@@ -1449,8 +1449,8 @@ function StatusActions({ status, isNew, isSubmitting, onSave }) {
     const statusLabel = status === 'active' ? t('productEditPage.actions.archive') : t('productEditPage.actions.publish');
 
     return <>
-            <button className="button button--outline min-h-[39px] flex-1 whitespace-nowrap sm:min-w-[120px]" type="button" disabled={isSubmitting} onClick={() => onSave(currentStatus)}><SaveIcon />{saveLabel}</button>
-            <button className="button button--primary min-w-[132px] min-h-[39px]" type="button" disabled={isSubmitting} onClick={() => onSave(nextStatus)}>{nextStatus === 'active' && <RocketIcon />}{statusLabel}</button>
+            <button className="button button--outline min-h-[39px] min-w-0 flex-1 whitespace-normal text-center sm:min-w-[120px]" type="button" disabled={isSubmitting} onClick={() => onSave(currentStatus)}><SaveIcon />{saveLabel}</button>
+            <button className="button button--primary min-h-[39px] min-w-[132px] whitespace-normal text-center max-sm:min-w-0 max-sm:flex-1" type="button" disabled={isSubmitting} onClick={() => onSave(nextStatus)}>{nextStatus === 'active' && <RocketIcon />}{statusLabel}</button>
         </>;
 }
 
@@ -1505,7 +1505,7 @@ function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen
                 {shopGroupsLoadError && <p className="mt-1.5 text-[12px] text-[#8d857e]" role="alert">{shopGroupsLoadError}</p>}
             </div>
             <div className="mt-[17px] border-t border-[#f0ece8] pt-[15px]">
-                <div className="mb-[7px] flex items-center justify-between gap-2 text-[12px] font-bold text-[#554e48]"><span>{t('productEditPage.main.storeCategories')}</span><button type="button" className="inline-flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[9px] border border-[#dfc0ac] bg-[#fff8f3] px-[11px] text-[12px] font-[700] text-[color:var(--color-accent)]" onClick={onOpenCategories}><CategoriesIcon />{t('productEditPage.main.manageCategories')}</button></div>
+                <div className="mb-[7px] flex flex-wrap items-center justify-between gap-2 text-[12px] font-bold text-[#554e48]"><span className="min-w-0 break-words">{t('productEditPage.main.storeCategories')}</span><button type="button" className="inline-flex min-h-[36px] max-w-full min-w-0 cursor-pointer items-center gap-[6px] whitespace-normal rounded-[9px] border border-[#dfc0ac] bg-[#fff8f3] px-[11px] text-left text-[12px] font-[700] text-[color:var(--color-accent)]" onClick={onOpenCategories}><CategoriesIcon />{t('productEditPage.main.manageCategories')}</button></div>
                 <p className="mb-[9px] text-[12px] text-[#958d86]">{t('productEditPage.main.storeCategoriesHint')}</p>
                 <div className="flex flex-wrap gap-1.5">
                     {visibleProductCategories.length > 0
@@ -1514,7 +1514,7 @@ function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen
                             const isDeleting = deletingCategoryIds.includes(category.id);
 
                             return (
-                                <span key={category.id} className={`inline-flex min-h-[29px] items-center rounded-lg border border-[#dfd6d0] bg-[#faf8f6] text-[12px] font-[650] text-[#5d554f] ${isPrimary ? 'px-[9px]' : 'gap-1 pl-[9px] pr-1.5'}`}>
+                                <span key={category.id} className={`inline-flex min-h-[29px] max-w-full min-w-0 items-center break-words rounded-lg border border-[#dfd6d0] bg-[#faf8f6] text-[12px] font-[650] text-[#5d554f] ${isPrimary ? 'px-[9px]' : 'gap-1 pl-[9px] pr-1.5'}`}>
                                     {category.name}
                                     {!isPrimary && <button type="button" className="grid h-5 w-5 cursor-pointer place-items-center rounded border-0 bg-transparent p-0 text-[#817870] hover:bg-[#f0ebe7] hover:text-[color:var(--color-accent)] disabled:cursor-wait disabled:opacity-50" aria-label={t('productEditPage.main.removeCategory', { name: category.name })} disabled={isDeleting} onClick={() => onDeleteCategory(category.id)}><CloseIcon /></button>}
                                 </span>
