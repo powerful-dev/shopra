@@ -58,9 +58,9 @@ const sectionLinks = [
     { id: 'main', labelKey: 'main', icon: BoxIcon },
     { id: 'photo', labelKey: 'photo', icon: PhotoIcon },
     { id: 'price', labelKey: 'price', icon: CurrencyIcon },
+    { id: 'features', labelKey: 'features', icon: ControlsIcon },
     { id: 'variants', labelKey: 'variantsNav', icon: LayersIcon },
     { id: 'description', labelKey: 'description', icon: DraftProductsIcon },
-    { id: 'features', labelKey: 'features', icon: ControlsIcon },
     { id: 'seo', labelKey: 'seo', icon: LinkIcon },
 ];
 const emptySectionLinks = [];
@@ -1099,6 +1099,9 @@ export default function ProductEditPage() {
                         onChange={updateField}
                         onOpenCurrencySettings={() => setIsCurrencySettingsOpen(true)}
                     />
+                    <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title={t('productEditPage.sections.features')} icon={ControlsIcon}>
+                        <ProductAttributesSection ref={attributesSectionRef} productId={isNew ? null : id} productContextVersion={productContextRef.current.version} onFilledChange={setHasFilledAttribute} />
+                    </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.variants = element; }} id="variants" title={t('productEditPage.sections.variants')} icon={LayersIcon} open>
                         {variantsOpenError && <Alert variant="error" className="mb-3">{variantsOpenError}</Alert>}
                         <article className="grid min-h-[82px] grid-cols-[42px_minmax(0,1fr)_auto] items-center gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[12px_13px] max-md:grid-cols-[38px_minmax(0,1fr)]">
@@ -1137,9 +1140,6 @@ export default function ProductEditPage() {
                                 disabled={isSubmitting}
                             />
                         </label>
-                    </AccordionSection>
-                    <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title={t('productEditPage.sections.features')} icon={ControlsIcon}>
-                        <ProductAttributesSection ref={attributesSectionRef} productId={isNew ? null : id} productContextVersion={productContextRef.current.version} onFilledChange={setHasFilledAttribute} />
                     </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.seo = element; }} id="seo" title={t('productEditPage.sections.seo')} icon={LinkIcon}>
                         <SeoFields
@@ -1368,6 +1368,17 @@ function ProductEditSkeleton() {
                         </div>
                     </ProductEditSkeletonCard>
 
+                    <ProductEditSkeletonCard title={t('productEditPage.sections.features')}>
+                        <div className="space-y-3">
+                            {['w-[72%]', 'w-[60%]', 'w-[68%]'].map((widthClass) => (
+                                <div key={widthClass} className="grid grid-cols-[minmax(110px,0.45fr)_1fr] items-center gap-4 max-sm:grid-cols-1 max-sm:gap-2">
+                                    <Skeleton className={`h-3 ${widthClass} max-sm:w-[120px]`} />
+                                    <Skeleton className="h-[39px] w-full rounded-[9px]" />
+                                </div>
+                            ))}
+                        </div>
+                    </ProductEditSkeletonCard>
+
                     <ProductEditSkeletonCard title={t('productEditPage.sections.variants')}>
                         <div className="grid min-h-[82px] grid-cols-[42px_minmax(0,1fr)_116px] items-center gap-3 rounded-[12px] border border-[color:var(--color-border)] bg-[#fcfbfa] p-[12px_13px] max-md:grid-cols-[38px_minmax(0,1fr)]">
                             <Skeleton className="h-[42px] w-[42px] rounded-[11px] max-md:h-[38px] max-md:w-[38px]" />
@@ -1383,17 +1394,6 @@ function ProductEditSkeleton() {
                         <Skeleton className="h-3 w-[126px]" />
                         <Skeleton className="mt-[7px] h-10 w-full rounded-t-[9px]" />
                         <Skeleton className="mt-px h-[132px] w-full rounded-b-[9px]" />
-                    </ProductEditSkeletonCard>
-
-                    <ProductEditSkeletonCard title={t('productEditPage.sections.features')}>
-                        <div className="space-y-3">
-                            {['w-[72%]', 'w-[60%]', 'w-[68%]'].map((widthClass) => (
-                                <div key={widthClass} className="grid grid-cols-[minmax(110px,0.45fr)_1fr] items-center gap-4 max-sm:grid-cols-1 max-sm:gap-2">
-                                    <Skeleton className={`h-3 ${widthClass} max-sm:w-[120px]`} />
-                                    <Skeleton className="h-[39px] w-full rounded-[9px]" />
-                                </div>
-                            ))}
-                        </div>
                     </ProductEditSkeletonCard>
 
                     <ProductEditSkeletonCard title={t('productEditPage.sections.seo')}>
