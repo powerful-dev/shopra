@@ -12,9 +12,9 @@ import { createShopAttributeWithOptions, getShopAttributeUnits, updateShopAttrib
 
 const attributeTypes = ['text', 'number', 'boolean', 'select', 'multiselect'];
 
-const emptyForm = (name = '', attribute = null) => ({
+const emptyForm = (name = '', attribute = null, initialType = 'text') => ({
     name: attribute?.name ?? name,
-    type: attribute?.type ?? 'text',
+    type: attribute?.type ?? initialType,
     unit: attribute?.unit ?? '',
     options: (attribute?.options ?? []).map((option) => ({
         key: `option-${option.id}`,
@@ -25,7 +25,19 @@ const emptyForm = (name = '', attribute = null) => ({
     isFilterable: attribute?.is_filterable ?? false,
 });
 
-export default function CreateAttributeModal({ isOpen, initialName = '', attribute = null, onClose, onCreated, onSaved }) {
+export default function CreateAttributeModal({
+    isOpen,
+    initialName = '',
+    initialType = 'text',
+    allowedTypes = attributeTypes,
+    attribute = null,
+    overlayClassName = '',
+    returnFocusRef,
+    fallbackFocusRef,
+    onClose,
+    onCreated,
+    onSaved,
+}) {
     const { t } = useTranslation();
     const [form, setForm] = useState(() => emptyForm());
     const [errors, setErrors] = useState({});
@@ -34,21 +46,77 @@ export default function CreateAttributeModal({ isOpen, initialName = '', attribu
     const [units, setUnits] = useState([]);
     const [areUnitsLoading, setAreUnitsLoading] = useState(false);
     const [unitsError, setUnitsError] = useState(null);
+    const dialogRef = useRef(null);
     const nameRef = useRef(null);
     const nextOptionKeyRef = useRef(1);
+    const previousFocusRef = useRef(null);
     const isEditing = attribute !== null;
     const isListType = form.type === 'select' || form.type === 'multiselect';
+    const availableTypes = attributeTypes.filter((type) => allowedTypes.includes(type));
+    const defaultType = availableTypes.includes(initialType) ? initialType : (availableTypes[0] ?? 'text');
     usePageScrollLock(isOpen);
 
     useEffect(() => {
         if (!isOpen) return;
 
-        setForm(emptyForm(initialName, attribute));
+        previousFocusRef.current = returnFocusRef?.current ?? document.activeElement;
+        nextOptionKeyRef.current = 1;
+        const nextForm = emptyForm(initialName, attribute, defaultType);
+
+        if (!attribute && ['select', 'multiselect'].includes(nextForm.type)) {
+            nextForm.options = [newOption(nextOptionKeyRef)];
+        }
+
+        setForm(nextForm);
         setErrors({});
         setMessage('');
         setIsSaving(false);
-        window.requestAnimationFrame(() => nameRef.current?.focus());
-    }, [attribute, initialName, isOpen]);
+        const focusFrame = window.requestAnimationFrame(() => nameRef.current?.focus());
+
+        return () => {
+            window.cancelAnimationFrame(focusFrame);
+            let returnTarget = returnFocusRef?.current;
+
+            if (!returnTarget?.isConnected) returnTarget = fallbackFocusRef?.current;
+            if (!returnTarget?.isConnected) returnTarget = previousFocusRef.current;
+            if (!returnTarget?.isConnected) returnTarget = null;
+
+            window.requestAnimationFrame(() => returnTarget?.focus());
+        };
+    }, [attribute, defaultType, fallbackFocusRef, initialName, isOpen, returnFocusRef]);
+
+    useEffect(() => {
+        if (!isOpen) return undefined;
+
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape' && !isSaving) {
+                event.preventDefault();
+                event.stopPropagation();
+                onClose();
+                return;
+            }
+
+            if (event.key !== 'Tab') return;
+
+            const dialog = dialogRef.current;
+            if (!dialog) return;
+
+            const focusableElements = [...dialog.querySelectorAll('button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])')];
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements.at(-1);
+
+            if (event.shiftKey && (document.activeElement === firstElement || !dialog.contains(document.activeElement))) {
+                event.preventDefault();
+                lastElement?.focus();
+            } else if (!event.shiftKey && document.activeElement === lastElement) {
+                event.preventDefault();
+                firstElement?.focus();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, isSaving, onClose]);
 
     useEffect(() => {
         if (!isOpen) return undefined;
@@ -155,8 +223,9 @@ export default function CreateAttributeModal({ isOpen, initialName = '', attribu
     };
 
     return createPortal(
-        <div className="modal-overlay" role="presentation" onMouseDown={close}>
+        <div className={`modal-overlay ${overlayClassName}`} role="presentation" onMouseDown={close}>
             <section
+                ref={dialogRef}
                 className="modal-dialog flex max-h-[min(720px,calc(100vh-44px))] max-w-[560px] flex-col bg-[#fbfaf8]"
                 role="dialog"
                 aria-modal="true"
@@ -182,7 +251,7 @@ export default function CreateAttributeModal({ isOpen, initialName = '', attribu
                     <div className={`grid gap-3 ${form.type === 'number' ? 'sm:grid-cols-[minmax(0,1fr)_160px]' : ''}`}>
                         <Field label={t('productEditPage.createAttribute.type')} error={errors.type}>
                             <Select value={form.type} disabled={isSaving || isEditing} onChange={(event) => updateType(event.target.value)}>
-                                {attributeTypes.map((type) => <option key={type} value={type}>{t(`productEditPage.createAttribute.types.${type}`)}</option>)}
+                                {availableTypes.map((type) => <option key={type} value={type}>{t(`productEditPage.createAttribute.types.${type}`)}</option>)}
                             </Select>
                             {isEditing && <span className="mt-1 text-[11px] leading-[1.4] text-[#918880]">{t('productEditPage.createAttribute.typeLockedHint')}</span>}
                         </Field>

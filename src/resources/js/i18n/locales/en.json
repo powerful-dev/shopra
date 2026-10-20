@@ -690,6 +690,8 @@
             "noValues": "No values",
             "emptyOptionsTitle": "Create the first product option",
             "addFirstOption": "Add the first option",
+            "emptyAttributesTitle": "To create variants, first add an attribute such as “Size” or “Color”.",
+            "createAttribute": "Create attribute",
             "separatePricesAria": "Use individual prices",
             "separatePricesTitle": "Prices differ between variants",
             "separatePricesHint": "Enable this if color or size affects the product price.",

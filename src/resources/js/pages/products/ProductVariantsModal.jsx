@@ -16,8 +16,10 @@ import TrashIcon from '../../components/icons/TrashIcon';
 import usePageScrollLock from '../../hooks/usePageScrollLock';
 import { getShopAttributes } from '../../services/shopAttributes';
 import { getProductVariants, updateProductVariants } from '../../services/shopItems';
+import CreateAttributeModal from './CreateAttributeModal';
 
 const combinationLimit = 100;
+const variantAttributeTypes = ['select', 'multiselect'];
 let temporaryIdSequence = 0;
 
 function temporaryId(type) {
@@ -578,15 +580,17 @@ function PhotosSection({ options, images, photoState, setPhotoState, onOpenImage
     );
 }
 
-function EmptyVariantsState({ onAddOption }) {
+function EmptyVariantsState({ hasAvailableAttributes, createAttributeButtonRef, onAddOption, onCreateAttribute }) {
     const { t } = useTranslation();
 
     return (
         <section className="grid min-h-[220px] place-items-center rounded-[12px] border border-dashed border-[#d9d0c9] bg-white px-4 py-8 text-center">
             <div className="flex flex-col items-center">
                 <span className="grid h-12 w-12 place-items-center rounded-[13px] bg-[#f9eee7] text-[color:var(--color-accent)]"><LayersIcon /></span>
-                <strong className="mt-3 block text-[14px] text-[#514943]">{t('productEditPage.variantModal.emptyOptionsTitle')}</strong>
-                <button type="button" className="button button--primary mt-4 cursor-pointer" onClick={onAddOption}><PlusIcon width={15} height={15} />{t('productEditPage.variantModal.addFirstOption')}</button>
+                <strong className="mt-3 block max-w-[520px] text-[14px] leading-[1.5] text-[#514943]">{t(`productEditPage.variantModal.${hasAvailableAttributes ? 'emptyOptionsTitle' : 'emptyAttributesTitle'}`)}</strong>
+                {hasAvailableAttributes
+                    ? <button type="button" className="button button--primary mt-4 cursor-pointer" onClick={onAddOption}><PlusIcon width={15} height={15} />{t('productEditPage.variantModal.addFirstOption')}</button>
+                    : <button ref={createAttributeButtonRef} type="button" className="button button--primary mt-4 cursor-pointer" onClick={onCreateAttribute}><PlusIcon width={15} height={15} />{t('productEditPage.variantModal.createAttribute')}</button>}
             </div>
         </section>
     );
@@ -699,6 +703,7 @@ export default function ProductVariantsModal({
     const [separatePrices, setSeparatePrices] = useState(false);
     const [areSeparatePricesInitialized, setAreSeparatePricesInitialized] = useState(false);
     const [showOptionPicker, setShowOptionPicker] = useState(false);
+    const [isCreateAttributeOpen, setIsCreateAttributeOpen] = useState(false);
     const [deleteWarning, setDeleteWarning] = useState(null);
     const [attributes, setAttributes] = useState([]);
     const attributesRef = useRef([]);
@@ -716,6 +721,8 @@ export default function ProductVariantsModal({
     const [lightboxIndex, setLightboxIndex] = useState(0);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
     const saveOperationRef = useRef(null);
+    const addOptionButtonRef = useRef(null);
+    const createAttributeButtonRef = useRef(null);
     const images = useMemo(() => media.filter((item) => item.type === 'image'), [media]);
     const lightboxImages = useMemo(() => images.map((item) => ({ id: item.id, src: item.large_url, alt: '' })), [images]);
     const { combinations, totalCount } = useMemo(() => buildCombinations(addedOptions), [addedOptions]);
@@ -780,6 +787,7 @@ export default function ProductVariantsModal({
 
         const controller = new AbortController();
         setShowOptionPicker(false);
+        setIsCreateAttributeOpen(false);
         setDeleteWarning(null);
         setAttributes([]);
         attributesRef.current = [];
@@ -792,7 +800,7 @@ export default function ProductVariantsModal({
             .then((loadedAttributes) => {
                 if (controller.signal.aborted) return;
 
-                const supportedAttributes = loadedAttributes.filter((attribute) => ['select', 'multiselect'].includes(attribute.type));
+                const supportedAttributes = loadedAttributes.filter((attribute) => variantAttributeTypes.includes(attribute.type));
                 attributesRef.current = supportedAttributes;
                 setAttributes(supportedAttributes);
                 setAddedOptions((current) => applyAttributeDetails(current, supportedAttributes));
@@ -813,7 +821,7 @@ export default function ProductVariantsModal({
     useEffect(() => {
         if (!isOpen) return undefined;
         const handleKeyDown = (event) => {
-            if (event.key !== 'Escape') return;
+            if (event.key !== 'Escape' || isCreateAttributeOpen) return;
             if (isLightboxOpen) {
                 setIsLightboxOpen(false);
                 return;
@@ -824,7 +832,7 @@ export default function ProductVariantsModal({
         };
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [isLightboxOpen, isOpen, isSaving, onClose]);
+    }, [isCreateAttributeOpen, isLightboxOpen, isOpen, isSaving, onClose]);
 
     useEffect(() => {
         if (isVariantsLoading || combinations.length === 0) return;
@@ -851,28 +859,46 @@ export default function ProductVariantsModal({
     const markVariantsChanged = () => {
         setSaveStatus((current) => current === 'success' ? null : current);
     };
-    const addAttribute = (attributeId) => {
-        const attribute = attributes.find((item) => item.id === attributeId);
-        if (!attribute || addedAttributeIds.has(attribute.id)) return;
+    const addAttributeToOptions = (attribute) => {
+        if (!attribute) return;
 
         const availableValues = attributeValues(attribute);
         markVariantsChanged();
-        setAddedOptions((current) => [...current, {
-            id: temporaryId('option'),
-            shopAttributeId: attribute.id,
-            localName: null,
-            name: attribute.name,
-            type: attribute.type,
-            sortOrder: current.length,
-            availableValues,
-            values: availableValues.map((value, sortOrder) => ({
-                id: temporaryId('value'),
-                shopAttributeOptionId: value.shopAttributeOptionId,
-                localValue: null,
-                label: value.label,
-                sortOrder,
-            })),
-        }]);
+        setAddedOptions((current) => current.some((option) => sameId(option.shopAttributeId, attribute.id))
+            ? current
+            : [...current, {
+                id: temporaryId('option'),
+                shopAttributeId: attribute.id,
+                localName: null,
+                name: attribute.name,
+                type: attribute.type,
+                sortOrder: current.length,
+                availableValues,
+                values: availableValues.map((value, sortOrder) => ({
+                    id: temporaryId('value'),
+                    shopAttributeOptionId: value.shopAttributeOptionId,
+                    localValue: null,
+                    label: value.label,
+                    sortOrder,
+                })),
+            }]);
+    };
+    const addAttribute = (attributeId) => {
+        addAttributeToOptions(attributes.find((item) => sameId(item.id, attributeId)));
+    };
+    const handleAttributeCreated = (createdAttribute) => {
+        if (!variantAttributeTypes.includes(createdAttribute.type)) return;
+
+        const nextAttributes = [
+            ...attributes.filter((attribute) => !sameId(attribute.id, createdAttribute.id)),
+            createdAttribute,
+        ];
+
+        attributesRef.current = nextAttributes;
+        setAttributes(nextAttributes);
+        addAttributeToOptions(createdAttribute);
+        setShowOptionPicker(false);
+        setIsCreateAttributeOpen(false);
     };
     const removeAttribute = (attributeId) => {
         markVariantsChanged();
@@ -997,25 +1023,35 @@ export default function ProductVariantsModal({
     };
     return (
         <>
-            <div className="modal-overlay" role="presentation" onMouseDown={isSaving ? undefined : onClose}>
-                <section className="modal-dialog flex h-[min(900px,calc(100vh-40px))] max-w-full min-w-0 !w-[min(1380px,100%)] flex-col bg-[#fbfaf8] max-sm:h-full max-sm:!w-full" role="dialog" aria-modal="true" aria-labelledby="variant-manager-title" onMouseDown={(event) => event.stopPropagation()}>
+            <div className="modal-overlay" role="presentation" onMouseDown={isSaving || isCreateAttributeOpen ? undefined : onClose}>
+                <section className="modal-dialog flex h-[min(900px,calc(100vh-40px))] max-w-full min-w-0 !w-[min(1380px,100%)] flex-col bg-[#fbfaf8] max-sm:h-full max-sm:!w-full" role="dialog" aria-modal={isCreateAttributeOpen ? undefined : 'true'} aria-labelledby="variant-manager-title" aria-hidden={isCreateAttributeOpen ? 'true' : undefined} inert={isCreateAttributeOpen} onMouseDown={(event) => event.stopPropagation()}>
                 <header className="flex min-w-0 shrink-0 items-start justify-between gap-[18px] border-b border-[color:var(--color-border)] bg-white px-7 pb-[18px] pt-5 max-sm:px-4"><div className="min-w-0 break-words"><small className="text-[11px] font-bold uppercase tracking-[.05em] text-[color:var(--color-accent)]">{t('productEditPage.variantModal.eyebrow', { product: t('common.product') })}</small><h2 id="variant-manager-title" className="mb-1 mt-[3px] text-[28px] font-[770] tracking-[-.045em] text-[#252525] max-sm:text-[22px]">{t('productEditPage.sections.variants')}</h2><p className="m-0 text-[12px] text-[#887f78]">{t('productEditPage.variantModal.description')}</p></div><button type="button" className="grid h-[40px] w-[40px] shrink-0 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-white text-[#716861] disabled:cursor-wait disabled:opacity-60" onClick={onClose} disabled={isSaving} aria-label={t('productEditPage.variantModal.closeAria')}><CloseIcon width={20} height={20} /></button></header>
                 <div className="min-h-0 min-w-0 flex-1 overflow-y-auto px-7 py-[20px] max-sm:px-[14px]"><div className="flex min-w-0 flex-col gap-3" aria-busy={isVariantsLoading || isSaving}>
                     {isVariantsLoading && <div className="grid min-h-[180px] place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#f8f5f2]" role="status" aria-label={t('productEditPage.variantModal.loadingAria')}><span className="h-7 w-7 animate-spin rounded-full border-[3px] border-[#d8cbc2] border-t-[color:var(--color-accent)]" aria-hidden="true" /></div>}
                     {!isVariantsLoading && variantsError && <Alert variant="error"><span className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2"><span>{variantsError}</span><button type="button" className="button button--secondary min-h-[32px] shrink-0 justify-center" onClick={() => setVariantsRequestVersion((current) => current + 1)}>{t('productEditPage.variantModal.retry')}</button></span></Alert>}
                     {!isVariantsLoading && !variantsError && <>
                     {saveErrors.length > 0 && <Alert variant="error" className="items-start"><span className="min-w-0"><strong className="block">{t('productEditPage.variantModal.saveErrorTitle')}</strong>{saveErrors.map((message) => <span key={message} className="mt-0.5 block font-medium text-[#766d66]">{message}</span>)}</span></Alert>}
-                    <div className="flex min-w-0 items-center justify-between gap-3 max-sm:flex-col max-sm:items-stretch"><div className="min-w-0 break-words"><strong className="block text-[13px]">{t('productEditPage.variantModal.optionsTitle')}</strong><small className="text-[12px] text-[#968e87]">{t('productEditPage.variantModal.optionsDescription', { appName })}</small></div>{addedOptions.length > 0 && <button type="button" className="button button--primary min-h-[40px] min-w-0 shrink-0 cursor-pointer justify-center whitespace-normal" onClick={() => setShowOptionPicker((current) => !current)} aria-expanded={showOptionPicker}><PlusIcon width={15} height={15} />{t('productEditPage.variantModal.addOption')}</button>}</div>
+                    <div className="flex min-w-0 items-center justify-between gap-3 max-sm:flex-col max-sm:items-stretch"><div className="min-w-0 break-words"><strong className="block text-[13px]">{t('productEditPage.variantModal.optionsTitle')}</strong><small className="text-[12px] text-[#968e87]">{t('productEditPage.variantModal.optionsDescription', { appName })}</small></div>{addedOptions.length > 0 && <button ref={addOptionButtonRef} type="button" className="button button--primary min-h-[40px] min-w-0 shrink-0 cursor-pointer justify-center whitespace-normal" onClick={() => setShowOptionPicker((current) => !current)} aria-expanded={showOptionPicker}><PlusIcon width={15} height={15} />{t('productEditPage.variantModal.addOption')}</button>}</div>
                     {showOptionPicker && <AttributePicker attributes={attributes} addedAttributeIds={addedAttributeIds} isLoading={isAttributesLoading} error={attributesError} onAdd={addAttribute} onClose={() => setShowOptionPicker(false)} />}
                     {addedOptions.map((option) => <OptionRow key={option.id} option={option} onAddValue={addOptionValue} onDeleteOption={removeAttribute} onDeleteValue={(optionId, valueId, optionName, valueName) => setDeleteWarning({ optionId, valueId, optionName, valueName })} />)}
                     {deleteWarning && <div className="flex min-w-0 items-start gap-3 rounded-[10px] border border-[#e5c3bd] bg-[#fff7f5] p-[11px_13px] text-[#a6402b] max-sm:grid max-sm:grid-cols-[20px_minmax(0,1fr)]" role="alert"><TrashIcon /><p className="m-0 min-w-0 flex-1 break-words text-[11px] leading-[1.45]"><strong className="block text-[12px] text-[#633b33]">{t('productEditPage.variantModal.deleteValueTitle', { value: deleteWarning.valueName })}</strong>{t('productEditPage.variantModal.deleteValueWarning', { option: deleteWarning.optionName })}</p><div className="flex min-w-0 shrink-0 gap-2 max-sm:col-start-2 max-sm:flex-wrap"><button type="button" className="max-w-full min-w-0 rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 text-[11px] font-bold text-[#5d554f]" onClick={() => setDeleteWarning(null)}>{t('productEditPage.actions.cancel')}</button><button type="button" className="max-w-full min-w-0 rounded-[7px] border border-[#d79d8e] bg-white px-2 py-1.5 text-[11px] font-bold text-[#a6402b]" onClick={() => removeOptionValue(deleteWarning.optionId, deleteWarning.valueId)}>{t('productEditPage.variantModal.deleteValue')}</button></div></div>}
-                    {addedOptions.length === 0 && !showOptionPicker && <EmptyVariantsState onAddOption={() => setShowOptionPicker(true)} />}
+                    {addedOptions.length === 0 && !showOptionPicker && <EmptyVariantsState hasAvailableAttributes={isAttributesLoading || Boolean(attributesError) || attributes.length > 0} createAttributeButtonRef={createAttributeButtonRef} onAddOption={() => setShowOptionPicker(true)} onCreateAttribute={() => setIsCreateAttributeOpen(true)} />}
                     {addedOptions.length > 0 && <><PhotosSection options={addedOptions} images={images} photoState={photoState} setPhotoState={setPhotoState} onOpenImage={(index) => { setLightboxIndex(index); setIsLightboxOpen(true); }} onChange={markVariantsChanged} /><VariantsSection combinations={combinations} totalCount={totalCount} variantData={variantData} basePrice={normalizedBasePrice} separatePrices={separatePrices} showPriceSettings onTogglePrices={toggleSeparatePrices} onVariantChange={updateVariant} /></>}
                     </>}
                 </div></div>
                 <footer className="flex min-h-[76px] min-w-0 shrink-0 items-center gap-3 border-t border-[color:var(--color-border)] bg-white px-7 py-[11px] max-sm:grid max-sm:grid-cols-1 max-sm:px-[14px] max-sm:pb-[calc(11px+env(safe-area-inset-bottom))]"><div className="flex min-w-0 flex-1 flex-col max-sm:col-span-full"><span className="break-words text-[12px] font-bold">{t('productEditPage.variants.optionCount', { count: addedOptions.length })} · {t('productEditPage.variants.valueCount', { count: selectedValuesCount })}</span><small className="break-words text-[11px] text-[#928981]">{t('productEditPage.variantModal.footerHint')}</small></div>{(isSaving || saveStatus) && <div className={`flex min-w-0 shrink-0 items-center gap-2 break-words text-[12px] font-bold max-sm:col-span-full ${saveStatus === 'error' ? 'text-[#a6402b]' : isSaving ? 'text-[#766d66]' : 'text-[#3c8354]'}`} role={saveStatus === 'error' ? 'alert' : 'status'} aria-live="polite">{isSaving ? <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[#cfc6bf] border-t-[color:var(--color-accent)]" aria-hidden="true" /> : <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-white ${saveStatus === 'error' ? 'bg-[#b94d38]' : 'bg-[#4c9564]'}`} aria-hidden="true">{saveStatus === 'success' ? <CheckIcon /> : <CloseIcon width={12} height={12} />}</span>}<span>{isSaving ? t('productEditPage.variantSaveStatus.saving') : t(`productEditPage.variantSaveStatus.${saveStatus}`)}</span></div>}<button type="button" className="button button--secondary min-h-[42px] min-w-0 justify-center whitespace-normal max-sm:w-full" onClick={onClose} disabled={isSaving}>{t('productEditPage.variantModal.close')}</button><button type="button" className="button button--primary min-h-[42px] min-w-0 justify-center whitespace-normal disabled:cursor-wait disabled:opacity-70 max-sm:w-full" onClick={() => void saveVariants()} disabled={!productId || isSaving || isVariantsLoading || Boolean(variantsError)}>{isSaving ? <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" /> : <SaveIcon />}{isSaving ? t('productEditPage.variantSaveStatus.saving') : t('productEditPage.variantModal.save')}</button></footer>
                 </section>
             </div>
+            <CreateAttributeModal
+                isOpen={isCreateAttributeOpen}
+                initialType="select"
+                allowedTypes={variantAttributeTypes}
+                overlayClassName="!z-[600]"
+                returnFocusRef={createAttributeButtonRef}
+                fallbackFocusRef={addOptionButtonRef}
+                onClose={() => setIsCreateAttributeOpen(false)}
+                onCreated={handleAttributeCreated}
+            />
             <ImageLightbox images={lightboxImages} index={lightboxIndex} open={isLightboxOpen} onClose={() => setIsLightboxOpen(false)} onIndexChange={setLightboxIndex} />
         </>
     );
