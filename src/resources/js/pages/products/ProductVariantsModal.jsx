@@ -184,6 +184,33 @@ function restoreProductVariantsState(data, attributes = [], translate) {
     };
 }
 
+function photoAssignmentKey(optionId, valueId) {
+    return `${String(optionId)}:${String(valueId)}`;
+}
+
+function dirtyPhotoAssignmentKeys(assignments = {}, savedAssignments = {}) {
+    const keys = new Set();
+    const optionIds = new Set([...Object.keys(assignments), ...Object.keys(savedAssignments)]);
+
+    for (const optionId of optionIds) {
+        const currentValues = assignments[optionId] ?? {};
+        const savedValues = savedAssignments[optionId] ?? {};
+        const valueIds = new Set([...Object.keys(currentValues), ...Object.keys(savedValues)]);
+
+        for (const valueId of valueIds) {
+            const currentImageIds = currentValues[valueId] ?? [];
+            const savedImageIds = savedValues[valueId] ?? [];
+
+            if (currentImageIds.length !== savedImageIds.length
+                || currentImageIds.some((imageId, index) => String(imageId) !== String(savedImageIds[index]))) {
+                keys.add(photoAssignmentKey(optionId, valueId));
+            }
+        }
+    }
+
+    return keys;
+}
+
 function validationMessages(error, fallbackMessage) {
     const messages = Object.values(error?.errors ?? {}).flat().filter(Boolean);
     return [...new Set(messages.length > 0 ? messages : [error?.message || fallbackMessage])];
@@ -408,14 +435,14 @@ function AttributePicker({ attributes, addedAttributeIds, isLoading, error, onAd
     );
 }
 
-function PhotoPicker({ valueLabel, images, selectedImageIds, onToggle, onCancel, onApply, t }) {
+function PhotoPicker({ valueLabel, images, selectedImageIds, onToggle, onClose, t }) {
     const selectedImageIdSet = new Set(selectedImageIds);
 
     return (
         <section className="mt-[10px] min-w-0 rounded-[10px] border border-[#dfc0ac] bg-white p-[10px] shadow-[0_12px_28px_rgba(70,45,29,.07)]">
             <header className="flex items-start justify-between gap-3">
                 <p className="m-0 flex min-w-0 flex-col break-words"><strong className="text-[12px]">{t('productEditPage.variantPhotos.pickerTitle', { value: valueLabel })}</strong><small className="mt-0.5 text-[11px] text-[#91877f]">{t('productEditPage.variantPhotos.pickerHint')}</small></p>
-                <button type="button" onClick={onCancel} className="grid h-[27px] w-[27px] shrink-0 place-items-center rounded-[7px] border-0 bg-[#f7f3f0] text-[#81766e]" aria-label={t('productEditPage.variantPhotos.closePicker')}><CloseIcon width={14} height={14} /></button>
+                <button type="button" onClick={onClose} className="grid h-[27px] w-[27px] shrink-0 place-items-center rounded-[7px] border-0 bg-[#f7f3f0] text-[#81766e]" aria-label={t('productEditPage.variantPhotos.closePicker')}><CloseIcon width={14} height={14} /></button>
             </header>
             {images.length > 0 ? <div className="mt-[9px] grid grid-cols-7 gap-[6px] max-md:grid-cols-4 max-sm:grid-cols-3">
                 {images.map((image, index) => {
@@ -425,15 +452,14 @@ function PhotoPicker({ valueLabel, images, selectedImageIds, onToggle, onCancel,
                     return <button key={image.id} type="button" data-media-id={image.id} aria-pressed={isSelected} aria-label={t('productEditPage.variantPhotos.selectPhoto', { number: index + 1 })} onClick={() => onToggle(imageId)} className={`relative min-w-0 cursor-pointer overflow-hidden rounded-[8px] border-2 bg-[#f4f1ee] p-0 aspect-[.8] ${isSelected ? 'border-[color:var(--color-accent)]' : 'border-transparent'}`}><img className="h-full w-full object-cover" src={image.small_url} alt="" draggable={false} /><b className="absolute bottom-1 left-1 grid h-[17px] min-w-[17px] place-items-center rounded-[5px] bg-white/95 text-[11px] text-[#594f48]">{index + 1}</b>{isSelected && <span className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-[color:var(--color-accent)] text-white"><Icon size={12}><path d="m20 6-11 11-5-5" /></Icon></span>}</button>;
                 })}
             </div> : <p className="my-3 rounded-[8px] border border-dashed border-[#d9d0c9] px-3 py-5 text-center text-[11px] text-[#958b83]">{t('productEditPage.variantPhotos.noProductPhotos')}</p>}
-            <footer className="mt-[9px] flex items-center justify-between border-t border-[#f0ece8] pt-2 text-[11px] text-[#847a72]"><span>{t('productEditPage.variantPhotos.selectedCount', { count: selectedImageIds.length })}</span><button type="button" onClick={onApply} className="min-h-[31px] rounded-[8px] border-0 bg-[color:var(--color-accent)] px-3 text-[11px] font-bold text-white">{t('productEditPage.variantPhotos.done')}</button></footer>
+            <footer className="mt-[9px] flex items-center justify-between border-t border-[#f0ece8] pt-2 text-[11px] text-[#847a72]"><span>{t('productEditPage.variantPhotos.selectedCount', { count: selectedImageIds.length })}</span><button type="button" onClick={onClose} className="min-h-[31px] rounded-[8px] border-0 bg-[color:var(--color-accent)] px-3 text-[11px] font-bold text-white">{t('productEditPage.variantPhotos.done')}</button></footer>
         </section>
     );
 }
 
-function PhotosSection({ options, images, photoState, setPhotoState, onOpenImage, onChange }) {
+function PhotosSection({ options, images, photoState, setPhotoState, dirtyAssignmentKeys, onOpenImage, onChange }) {
     const { t } = useTranslation();
     const [openPicker, setOpenPicker] = useState(null);
-    const [draftImageIds, setDraftImageIds] = useState([]);
     const areVariantPhotosEnabled = photoState.enabled;
     const selectedOptionId = photoState.selectedOptionId;
     const mainValueIds = photoState.mainValueIds;
@@ -476,11 +502,6 @@ function PhotosSection({ options, images, photoState, setPhotoState, onOpenImage
 
             return hasChanges ? { ...current, assignments } : current;
         });
-        setDraftImageIds((current) => {
-            const selectedIdSet = new Set(current);
-            const next = orderedImageIds.filter((imageId) => selectedIdSet.has(imageId));
-            return next.length !== current.length || next.some((imageId, index) => imageId !== current[index]) ? next : current;
-        });
     }, [images, setPhotoState]);
 
     const setMainValue = (valueId) => {
@@ -498,34 +519,39 @@ function PhotosSection({ options, images, photoState, setPhotoState, onOpenImage
     const openPhotoPicker = (valueId) => {
         const normalizedValueId = String(valueId);
         setOpenPicker({ optionId: selectedOptionValue, valueId: normalizedValueId });
-        setDraftImageIds([...(photoAssignments[selectedOptionValue]?.[normalizedValueId] ?? [])]);
     };
     const closePhotoPicker = () => {
         setOpenPicker(null);
-        setDraftImageIds([]);
     };
-    const toggleDraftImage = (imageId) => {
-        setDraftImageIds((current) => current.includes(imageId)
-            ? current.filter((currentId) => currentId !== imageId)
-            : [...current, imageId]);
-    };
-    const applyPhotoPicker = () => {
-        if (!openPicker) return;
-
+    const toggleAssignedPhoto = (valueId, imageId) => {
+        const normalizedValueId = String(valueId);
+        const normalizedImageId = String(imageId);
         onChange();
-        const selectedImageIdSet = new Set(draftImageIds);
-        const orderedImageIds = images.map((image) => String(image.id)).filter((imageId) => selectedImageIdSet.has(imageId));
-        setPhotoState((current) => ({
-            ...current,
-            assignments: {
-                ...current.assignments,
-                [openPicker.optionId]: {
-                    ...current.assignments[openPicker.optionId],
-                    [openPicker.valueId]: orderedImageIds,
+        setPhotoState((current) => {
+            const assignedIds = current.assignments[selectedOptionValue]?.[normalizedValueId] ?? [];
+            const selectedImageIdSet = new Set(assignedIds);
+
+            if (selectedImageIdSet.has(normalizedImageId)) {
+                selectedImageIdSet.delete(normalizedImageId);
+            } else {
+                selectedImageIdSet.add(normalizedImageId);
+            }
+
+            const orderedImageIds = images
+                .map((image) => String(image.id))
+                .filter((currentImageId) => selectedImageIdSet.has(currentImageId));
+
+            return {
+                ...current,
+                assignments: {
+                    ...current.assignments,
+                    [selectedOptionValue]: {
+                        ...current.assignments[selectedOptionValue],
+                        [normalizedValueId]: orderedImageIds,
+                    },
                 },
-            },
-        }));
-        closePhotoPicker();
+            };
+        });
     };
     const removeAssignedPhoto = (valueId, imageId) => {
         const normalizedValueId = String(valueId);
@@ -541,9 +567,6 @@ function PhotosSection({ options, images, photoState, setPhotoState, onOpenImage
                 },
             },
         }));
-        if (openPicker?.optionId === selectedOptionValue && openPicker.valueId === normalizedValueId) {
-            setDraftImageIds((current) => current.filter((assignedId) => assignedId !== normalizedImageId));
-        }
     };
     const toggleVariantPhotos = () => {
         onChange();
@@ -571,8 +594,9 @@ function PhotosSection({ options, images, photoState, setPhotoState, onOpenImage
                         const assignedImageIdSet = new Set(selectedOptionAssignments[valueId] ?? []);
                         const assignedImages = images.filter((image) => assignedImageIdSet.has(String(image.id)));
                         const pickerIsOpen = openPicker?.optionId === selectedOptionValue && openPicker.valueId === valueId;
+                        const hasUnsavedPhotoChanges = dirtyAssignmentKeys.has(photoAssignmentKey(selectedOptionValue, valueId));
 
-                        return <article key={value.id} className={`min-w-0 rounded-[11px] border p-[8px_10px] ${isMain ? 'border-[#dcae92] bg-[#fffaf7]' : 'border-[color:var(--color-border)] bg-[#fcfbfa]'}`}><div className="flex min-w-0 flex-wrap items-center gap-x-[10px] gap-y-[7px]"><span className="min-w-[105px] max-w-full shrink-0 break-words"><strong className="block text-[12px]">{value.label}</strong>{assignedImages.length > 0 && <small className="text-[11px] text-[#928981]">{t('productEditPage.variantPhotos.valuePhotoCount', { count: assignedImages.length })}</small>}</span><div className="flex min-w-[150px] flex-1 flex-wrap items-center gap-[6px]">{assignedImages.map((image, index) => { const galleryIndex = images.findIndex((galleryImage) => galleryImage.id === image.id); return <div key={image.id} data-media-id={image.id} className="relative h-[54px] w-[44px] shrink-0 overflow-hidden rounded-[7px] border border-[#d9d1cb] bg-[#f5f1ee]"><button type="button" className="block h-full w-full cursor-zoom-in border-0 bg-transparent p-0" onClick={() => onOpenImage(galleryIndex)} aria-label={t('productEditPage.variantPhotos.openPhoto', { number: galleryIndex + 1 })}><img className="h-full w-full object-cover" src={image.small_url} alt="" draggable={false} /><b className="absolute bottom-[3px] left-[3px] grid h-[16px] min-w-[16px] place-items-center rounded-[4px] bg-white/95 text-[10px] text-[#594f48]">{index + 1}</b></button><button type="button" onClick={() => removeAssignedPhoto(valueId, image.id)} className="absolute right-[2px] top-[2px] grid h-[18px] w-[18px] place-items-center rounded-full border-0 bg-white/95 text-[#766b63]" aria-label={t('productEditPage.variantPhotos.removePhoto', { value: value.label })}><CloseIcon width={10} height={10} /></button></div>; })}<button type="button" onClick={() => openPhotoPicker(valueId)} className="inline-flex min-h-[54px] max-w-full min-w-0 cursor-pointer items-center justify-center gap-[6px] break-words rounded-[7px] border border-dashed border-[#d0b09d] bg-white px-[10px] text-[11px] font-bold text-[color:var(--color-accent)]"><PlusIcon size={13} />{t('productEditPage.variantPhotos.addPhoto')}</button></div><button type="button" onClick={() => setMainValue(valueId)} className={`ml-auto inline-flex min-h-[30px] max-w-full min-w-0 cursor-pointer items-center gap-[5px] break-words rounded-[8px] px-2 text-left text-[11px] font-bold ${isMain ? 'border border-[#c4531c] bg-[#fff4ec] text-[color:var(--color-accent)]' : 'border border-transparent bg-transparent text-[#8d837b]'}`}><Icon size={13} className={`shrink-0 ${isMain ? 'fill-current' : ''}`}><path d="m12 2.5 3 6 6.5.9-4.7 4.6 1.1 6.5-5.9-3.1-5.9 3.1 1.1-6.5-4.7-4.6 6.5-.9 3-6Z" /></Icon>{isMain ? t('productEditPage.variantPhotos.mainValue') : t('productEditPage.variantPhotos.setMainValue')}</button></div>{pickerIsOpen && <PhotoPicker valueLabel={value.label} images={images} selectedImageIds={draftImageIds} onToggle={toggleDraftImage} onCancel={closePhotoPicker} onApply={applyPhotoPicker} t={t} />}</article>;
+                        return <article key={value.id} className={`min-w-0 rounded-[11px] border p-[8px_10px] ${isMain ? 'border-[#dcae92] bg-[#fffaf7]' : 'border-[color:var(--color-border)] bg-[#fcfbfa]'}`}><div className="flex min-w-0 flex-wrap items-center gap-x-[10px] gap-y-[7px]"><span className="min-w-[105px] max-w-full shrink-0 break-words"><strong className="block text-[12px]">{value.label}</strong>{assignedImages.length > 0 && <small className="text-[11px] text-[#928981]">{t('productEditPage.variantPhotos.valuePhotoCount', { count: assignedImages.length })}</small>}</span><div className="flex min-w-[150px] flex-1 flex-wrap items-center gap-[6px]">{assignedImages.map((image, index) => { const galleryIndex = images.findIndex((galleryImage) => galleryImage.id === image.id); return <div key={image.id} data-media-id={image.id} className="relative h-[54px] w-[44px] shrink-0 overflow-hidden rounded-[7px] border border-[#d9d1cb] bg-[#f5f1ee]"><button type="button" className="block h-full w-full cursor-zoom-in border-0 bg-transparent p-0" onClick={() => onOpenImage(galleryIndex)} aria-label={t('productEditPage.variantPhotos.openPhoto', { number: galleryIndex + 1 })}><img className="h-full w-full object-cover" src={image.small_url} alt="" draggable={false} /><b className="absolute bottom-[3px] left-[3px] grid h-[16px] min-w-[16px] place-items-center rounded-[4px] bg-white/95 text-[10px] text-[#594f48]">{index + 1}</b></button><button type="button" onClick={() => removeAssignedPhoto(valueId, image.id)} className="absolute right-[2px] top-[2px] grid h-[18px] w-[18px] place-items-center rounded-full border-0 bg-white/95 text-[#766b63]" aria-label={t('productEditPage.variantPhotos.removePhoto', { value: value.label })}><CloseIcon width={10} height={10} /></button></div>; })}<button type="button" onClick={() => openPhotoPicker(valueId)} className="inline-flex min-h-[54px] max-w-full min-w-0 cursor-pointer items-center justify-center gap-[6px] break-words rounded-[7px] border border-dashed border-[#d0b09d] bg-white px-[10px] text-[11px] font-bold text-[color:var(--color-accent)]"><PlusIcon size={13} />{t('productEditPage.variantPhotos.addPhoto')}</button>{hasUnsavedPhotoChanges && <span className="max-w-full break-words text-[11px] font-bold text-[#a5532e]" role="status">{t('productEditPage.variantPhotos.unsavedChanges')}</span>}</div><button type="button" onClick={() => setMainValue(valueId)} className={`ml-auto inline-flex min-h-[30px] max-w-full min-w-0 cursor-pointer items-center gap-[5px] break-words rounded-[8px] px-2 text-left text-[11px] font-bold ${isMain ? 'border border-[#c4531c] bg-[#fff4ec] text-[color:var(--color-accent)]' : 'border border-transparent bg-transparent text-[#8d837b]'}`}><Icon size={13} className={`shrink-0 ${isMain ? 'fill-current' : ''}`}><path d="m12 2.5 3 6 6.5.9-4.7 4.6 1.1 6.5-5.9-3.1-5.9 3.1 1.1-6.5-4.7-4.6 6.5-.9 3-6Z" /></Icon>{isMain ? t('productEditPage.variantPhotos.mainValue') : t('productEditPage.variantPhotos.setMainValue')}</button></div>{pickerIsOpen && <PhotoPicker valueLabel={value.label} images={images} selectedImageIds={selectedOptionAssignments[valueId] ?? []} onToggle={(imageId) => toggleAssignedPhoto(valueId, imageId)} onClose={closePhotoPicker} t={t} />}</article>;
                     })}
                 </div>
             </>)}
@@ -715,6 +739,7 @@ export default function ProductVariantsModal({
     const [variantsRequestVersion, setVariantsRequestVersion] = useState(0);
     const [variantData, setVariantData] = useState({});
     const [photoState, setPhotoState] = useState(emptyPhotoState);
+    const [savedPhotoAssignments, setSavedPhotoAssignments] = useState({});
     const [isSaving, setIsSaving] = useState(false);
     const [saveErrors, setSaveErrors] = useState([]);
     const [saveStatus, setSaveStatus] = useState(null);
@@ -726,6 +751,7 @@ export default function ProductVariantsModal({
     const images = useMemo(() => media.filter((item) => item.type === 'image'), [media]);
     const lightboxImages = useMemo(() => images.map((item) => ({ id: item.id, src: item.large_url, alt: '' })), [images]);
     const { combinations, totalCount } = useMemo(() => buildCombinations(addedOptions), [addedOptions]);
+    const dirtyPhotoAssignments = useMemo(() => dirtyPhotoAssignmentKeys(photoState.assignments, savedPhotoAssignments), [photoState.assignments, savedPhotoAssignments]);
     const normalizedBasePrice = basePrice === null || basePrice === undefined ? '' : String(basePrice);
     const { isTopModal, layerStyle } = useModalLayer(isOpen);
 
@@ -737,6 +763,7 @@ export default function ProductVariantsModal({
         saveOperationRef.current = null;
         setIsSaving(false);
         setSaveStatus(null);
+        setSavedPhotoAssignments({});
     }, [productContextVersion]);
 
     useEffect(() => {
@@ -765,6 +792,7 @@ export default function ProductVariantsModal({
                 setSeparatePrices(restoredState.separatePrices);
                 setAreSeparatePricesInitialized(restoredState.separatePricesInitialized);
                 setPhotoState(restoredState.photos);
+                setSavedPhotoAssignments(restoredState.photos.assignments);
                 setSaveErrors([]);
             })
             .catch((error) => {
@@ -1006,6 +1034,7 @@ export default function ProductVariantsModal({
             setSeparatePrices(restoredState.separatePrices);
             setAreSeparatePricesInitialized(restoredState.separatePricesInitialized);
             setPhotoState(restoredState.photos);
+            setSavedPhotoAssignments(restoredState.photos.assignments);
             setSaveStatus('success');
             onSaved?.(savedVariants);
         } catch (error) {
@@ -1036,7 +1065,7 @@ export default function ProductVariantsModal({
                     {addedOptions.map((option) => <OptionRow key={option.id} option={option} onAddValue={addOptionValue} onDeleteOption={removeAttribute} onDeleteValue={(optionId, valueId, optionName, valueName) => setDeleteWarning({ optionId, valueId, optionName, valueName })} />)}
                     {deleteWarning && <div className="flex min-w-0 items-start gap-3 rounded-[10px] border border-[#e5c3bd] bg-[#fff7f5] p-[11px_13px] text-[#a6402b] max-sm:grid max-sm:grid-cols-[20px_minmax(0,1fr)]" role="alert"><TrashIcon /><p className="m-0 min-w-0 flex-1 break-words text-[11px] leading-[1.45]"><strong className="block text-[12px] text-[#633b33]">{t('productEditPage.variantModal.deleteValueTitle', { value: deleteWarning.valueName })}</strong>{t('productEditPage.variantModal.deleteValueWarning', { option: deleteWarning.optionName })}</p><div className="flex min-w-0 shrink-0 gap-2 max-sm:col-start-2 max-sm:flex-wrap"><button type="button" className="max-w-full min-w-0 rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 text-[11px] font-bold text-[#5d554f]" onClick={() => setDeleteWarning(null)}>{t('productEditPage.actions.cancel')}</button><button type="button" className="max-w-full min-w-0 rounded-[7px] border border-[#d79d8e] bg-white px-2 py-1.5 text-[11px] font-bold text-[#a6402b]" onClick={() => removeOptionValue(deleteWarning.optionId, deleteWarning.valueId)}>{t('productEditPage.variantModal.deleteValue')}</button></div></div>}
                     {addedOptions.length === 0 && !showOptionPicker && <EmptyVariantsState hasAvailableAttributes={isAttributesLoading || Boolean(attributesError) || attributes.length > 0} createAttributeButtonRef={createAttributeButtonRef} onAddOption={() => setShowOptionPicker(true)} onCreateAttribute={() => setIsCreateAttributeOpen(true)} />}
-                    {addedOptions.length > 0 && <><PhotosSection options={addedOptions} images={images} photoState={photoState} setPhotoState={setPhotoState} onOpenImage={(index) => { setLightboxIndex(index); setIsLightboxOpen(true); }} onChange={markVariantsChanged} /><VariantsSection combinations={combinations} totalCount={totalCount} variantData={variantData} basePrice={normalizedBasePrice} separatePrices={separatePrices} showPriceSettings onTogglePrices={toggleSeparatePrices} onVariantChange={updateVariant} /></>}
+                    {addedOptions.length > 0 && <><PhotosSection options={addedOptions} images={images} photoState={photoState} setPhotoState={setPhotoState} dirtyAssignmentKeys={dirtyPhotoAssignments} onOpenImage={(index) => { setLightboxIndex(index); setIsLightboxOpen(true); }} onChange={markVariantsChanged} /><VariantsSection combinations={combinations} totalCount={totalCount} variantData={variantData} basePrice={normalizedBasePrice} separatePrices={separatePrices} showPriceSettings onTogglePrices={toggleSeparatePrices} onVariantChange={updateVariant} /></>}
                     </>}
                 </div></div>
                 <footer className="flex min-h-[76px] min-w-0 shrink-0 items-center gap-3 border-t border-[color:var(--color-border)] bg-white px-7 py-[11px] max-sm:grid max-sm:grid-cols-1 max-sm:px-[14px] max-sm:pb-[calc(11px+env(safe-area-inset-bottom))]"><div className="flex min-w-0 flex-1 flex-col max-sm:col-span-full"><span className="break-words text-[12px] font-bold">{t('productEditPage.variants.optionCount', { count: addedOptions.length })} · {t('productEditPage.variants.valueCount', { count: selectedValuesCount })}</span><small className="break-words text-[11px] text-[#928981]">{t('productEditPage.variantModal.footerHint')}</small></div>{(isSaving || saveStatus) && <div className={`flex min-w-0 shrink-0 items-center gap-2 break-words text-[12px] font-bold max-sm:col-span-full ${saveStatus === 'error' ? 'text-[#a6402b]' : isSaving ? 'text-[#766d66]' : 'text-[#3c8354]'}`} role={saveStatus === 'error' ? 'alert' : 'status'} aria-live="polite">{isSaving ? <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[#cfc6bf] border-t-[color:var(--color-accent)]" aria-hidden="true" /> : <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-white ${saveStatus === 'error' ? 'bg-[#b94d38]' : 'bg-[#4c9564]'}`} aria-hidden="true">{saveStatus === 'success' ? <CheckIcon /> : <CloseIcon width={12} height={12} />}</span>}<span>{isSaving ? t('productEditPage.variantSaveStatus.saving') : t(`productEditPage.variantSaveStatus.${saveStatus}`)}</span></div>}<button type="button" className="button button--secondary min-h-[42px] min-w-0 justify-center whitespace-normal max-sm:w-full" onClick={onClose} disabled={isSaving}>{t('productEditPage.variantModal.close')}</button><button type="button" className="button button--primary min-h-[42px] min-w-0 justify-center whitespace-normal disabled:cursor-wait disabled:opacity-70 max-sm:w-full" onClick={() => void saveVariants()} disabled={!productId || isSaving || isVariantsLoading || Boolean(variantsError)}>{isSaving ? <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" /> : <SaveIcon />}{isSaving ? t('productEditPage.variantSaveStatus.saving') : t('productEditPage.variantModal.save')}</button></footer>

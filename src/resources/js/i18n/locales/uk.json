@@ -764,6 +764,7 @@
             "removePhoto": "Прибрати фотографію зі значення «{{value}}»",
             "openPhoto": "Відкрити фотографію {{number}}",
             "selectedCount": "Вибрано: {{count}}",
+            "unsavedChanges": "Зміни фотографій не збережено",
             "done": "Готово"
         }
     },

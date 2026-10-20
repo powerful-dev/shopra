@@ -758,6 +758,7 @@
             "removePhoto": "Remove photo from “{{value}}”",
             "openPhoto": "Open photo {{number}}",
             "selectedCount": "Selected: {{count}}",
+            "unsavedChanges": "Photo changes have not been saved",
             "done": "Done"
         }
     },
