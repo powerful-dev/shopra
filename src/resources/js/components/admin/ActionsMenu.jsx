@@ -7,7 +7,7 @@ const DANGER_ACTION_CLASS = 'flex w-full items-center gap-2 whitespace-nowrap ro
 const TRIGGER_CLASS = 'grid h-8 w-8 place-items-center rounded-lg border-0 bg-transparent text-[#756d67] hover:bg-[#f2ede9]';
 const MENU_GAP = 8;
 
-export default function ActionsMenu({ actions, isOpen, onToggle, onClose, ariaLabel, className = '' }) {
+export default function ActionsMenu({ actions, isOpen, onToggle, onClose, ariaLabel, className = '', triggerClassName = '' }) {
     const containerRef = useRef(null);
     const triggerRef = useRef(null);
     const menuRef = useRef(null);
@@ -63,7 +63,7 @@ export default function ActionsMenu({ actions, isOpen, onToggle, onClose, ariaLa
         <div ref={containerRef} className={`relative w-8 flex items-center ${className}`.trim()}>
             <button
                 ref={triggerRef}
-                className={TRIGGER_CLASS}
+                className={`${TRIGGER_CLASS} ${triggerClassName}`.trim()}
                 type="button"
                 aria-label={ariaLabel}
                 aria-haspopup="menu"

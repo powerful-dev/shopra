@@ -380,6 +380,9 @@
             "active": "Активний",
             "archived": "В архіві"
         },
+        "actionBar": {
+            "unsaved": "Зміни не збережено"
+        },
         "actions": {
             "publish": "Опублікувати",
             "archive": "Перенести в архів",

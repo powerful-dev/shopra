@@ -163,7 +163,7 @@ export default function ProductEditPage() {
     const [isShopGroupsLoading, setIsShopGroupsLoading] = useState(true);
     const [shopGroupsLoadError, setShopGroupsLoadError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isActionsOpen, setIsActionsOpen] = useState(false);
+    const [openActionMenu, setOpenActionMenu] = useState(null);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [isArchiveConfirmOpen, setIsArchiveConfirmOpen] = useState(false);
     const [isStatusChanging, setIsStatusChanging] = useState(false);
@@ -469,7 +469,7 @@ export default function ProductEditPage() {
         setProductLoadError(null);
         setIsMediaLoading(true);
         setMediaLoadError('');
-        setIsActionsOpen(false);
+        setOpenActionMenu(null);
         setIsDeleteConfirmOpen(false);
         setIsCategoriesOpen(false);
         setIsCurrencySettingsOpen(false);
@@ -849,6 +849,25 @@ export default function ProductEditPage() {
             onClick: () => updateProductStatus('active'),
         },
     }[form.status];
+    const isPublishable = form.status === 'draft';
+    const actionBarProductName = form.name.trim() || t('productEditPage.header.newProduct');
+    const saveActionLabel = isPublishable ? t('productEditPage.actions.saveDraft') : t('common.save');
+    const isActionBarBusy = isSubmitting || isStatusChanging;
+    const saveCurrentProduct = () => saveProduct(isNew ? 'draft' : form.status);
+    const publishProduct = () => (isNew ? saveProduct('active') : updateProductStatus('active'));
+    const actionMenuItems = [
+        !isNew && !isPublishable && statusMenuAction && {
+            ...statusMenuAction,
+            disabled: isActionBarBusy,
+        },
+        !isNew && {
+            label: t('productEditPage.actions.deleteProduct'),
+            icon: <TrashIcon />,
+            variant: 'danger',
+            disabled: isDeleting || isActionBarBusy,
+            onClick: () => setIsDeleteConfirmOpen(true),
+        },
+    ].filter(Boolean);
 
     const deleteProduct = async () => {
         setIsDeleting(true);
@@ -967,7 +986,7 @@ export default function ProductEditPage() {
     };
 
     return (
-        <div className="min-w-0 max-w-full max-lg:pb-[calc(48px+env(safe-area-inset-bottom))]">
+        <div className="min-w-0 max-w-full pb-[92px] max-lg:pb-[calc(142px+env(safe-area-inset-bottom))]">
             <Breadcrumbs
                 className="mb-5 max-lg:hidden"
                 currentLabel={isNew ? t('productEditPage.header.newProduct') : form.name}
@@ -1013,35 +1032,6 @@ export default function ProductEditPage() {
                 <div className="min-w-0 flex-1">
                     <strong className="block text-[13px]">{t(isReadyForSale ? 'productEditPage.completeness.ready' : 'productEditPage.completeness.fillRequired')}</strong>
                     <small className="mt-1 block text-[12px] text-[color:var(--color-secondary)]">{completenessTone.label}. {missingCriteriaLabel}</small>
-                </div>
-                <div className="flex gap-[7px] max-lg:hidden">
-                    {isNew ? (
-                        <StatusActions status={form.status} isNew isSubmitting={isSubmitting} onSave={saveProduct} />
-                    ) : form.status && (
-                        <>
-                            <button className="button button--primary min-h-[39px] min-w-[120px] whitespace-nowrap" type="button" disabled={isSubmitting || isStatusChanging} onClick={() => saveProduct(form.status)}><SaveIcon />{t('common.save')}</button>
-                            <button className="button button--outline min-h-[39px] whitespace-nowrap" type="button"><EyeIcon />{t('productEditPage.actions.preview')}</button>
-                            <ActionsMenu
-                                ariaLabel={t('productEditPage.actions.menuAria', { name: form.name || t('common.product').toLocaleLowerCase() })}
-                                isOpen={isActionsOpen}
-                                onToggle={() => setIsActionsOpen((isOpen) => !isOpen)}
-                                onClose={() => setIsActionsOpen(false)}
-                                actions={[
-                                    statusMenuAction && {
-                                        ...statusMenuAction,
-                                        disabled: isSubmitting || isStatusChanging,
-                                    },
-                                    {
-                                        label: t('productEditPage.actions.deleteProduct'),
-                                        icon: <TrashIcon />,
-                                        variant: 'danger',
-                                        disabled: isDeleting || isSubmitting || isStatusChanging,
-                                        onClick: () => setIsDeleteConfirmOpen(true),
-                                    },
-                                ].filter(Boolean)}
-                            />
-                        </>
-                    )}
                 </div>
             </section>
 
@@ -1168,12 +1158,42 @@ export default function ProductEditPage() {
                 />
             </div>
 
-            <AdminMobileActionBar>
-                {isNew ? (
-                    <StatusActions status={form.status} isNew isSubmitting={isSubmitting} onSave={saveProduct} />
-                ) : form.status && (
-                    <button className="button button--primary min-h-[39px] w-full whitespace-nowrap" type="button" disabled={isSubmitting || isStatusChanging} onClick={() => saveProduct(form.status)}><SaveIcon />{t('common.save')}</button>
+            <div className="fixed bottom-4 left-[calc(var(--sidebar-width)+2rem)] right-8 z-30 flex min-h-[70px] items-center justify-between gap-5 rounded-[14px] border border-[color:var(--color-border)] bg-white/95 px-4 py-2.5 shadow-[0_14px_40px_rgba(45,31,22,.12)] backdrop-blur max-lg:hidden">
+                <ActionBarSummary productName={actionBarProductName} />
+                <div className="flex shrink-0 items-center gap-2">
+                    {!isNew && <button className="button button--outline h-10 w-10 px-0" type="button" aria-label={t('productEditPage.actions.preview')} title={t('productEditPage.actions.preview')}><EyeIcon size={20} className="shrink-0" /></button>}
+                    {actionMenuItems.length > 0 && (
+                        <ActionsMenu
+                            className="!w-10 shrink-0"
+                            triggerClassName="!h-10 !w-10 !rounded-[9px] !border !border-[color:var(--color-border)] !bg-white hover:!border-[#d6c7bb]"
+                            ariaLabel={t('productEditPage.actions.menuAria', { name: actionBarProductName })}
+                            isOpen={openActionMenu === 'desktop'}
+                            onToggle={() => setOpenActionMenu((placement) => placement === 'desktop' ? null : 'desktop')}
+                            onClose={() => setOpenActionMenu(null)}
+                            actions={actionMenuItems}
+                        />
+                    )}
+                    <button className="button button--outline min-h-10 min-w-[150px] whitespace-nowrap" type="button" disabled={isActionBarBusy} onClick={saveCurrentProduct}><SaveIcon />{saveActionLabel}</button>
+                    {isPublishable && <button className="button button--primary min-h-10 min-w-[140px] whitespace-nowrap" type="button" disabled={isActionBarBusy} onClick={publishProduct}><RocketIcon />{t('productEditPage.actions.publish')}</button>}
+                </div>
+            </div>
+
+            <AdminMobileActionBar
+                header={<ActionBarSummary productName={actionBarProductName} />}
+            >
+                {actionMenuItems.length > 0 && (
+                    <ActionsMenu
+                        className="!w-10 shrink-0 self-center"
+                        triggerClassName="!h-10 !w-10 !rounded-[9px] !border !border-[color:var(--color-border)] !bg-white hover:!border-[#d6c7bb]"
+                        ariaLabel={t('productEditPage.actions.menuAria', { name: actionBarProductName })}
+                        isOpen={openActionMenu === 'mobile'}
+                        onToggle={() => setOpenActionMenu((placement) => placement === 'mobile' ? null : 'mobile')}
+                        onClose={() => setOpenActionMenu(null)}
+                        actions={actionMenuItems}
+                    />
                 )}
+                <button className="button button--outline min-h-10 min-w-0 flex-1 px-2 text-center" type="button" disabled={isActionBarBusy} onClick={saveCurrentProduct}><SaveIcon />{t('common.save')}</button>
+                {isPublishable && <button className="button button--primary min-h-10 min-w-0 flex-[1.2] px-2 text-center" type="button" disabled={isActionBarBusy} onClick={publishProduct}><RocketIcon />{t('productEditPage.actions.publish')}</button>}
             </AdminMobileActionBar>
 
             <ConfirmModal
@@ -1438,20 +1458,18 @@ function ProductEditSkeleton() {
     );
 }
 
-function StatusActions({ status, isNew, isSubmitting, onSave }) {
+function ActionBarSummary({ productName }) {
     const { t } = useTranslation();
 
-    if (!isNew && !status) return null;
-
-    const currentStatus = isNew ? 'draft' : status;
-    const nextStatus = status === 'active' ? 'archived' : 'active';
-    const saveLabel = isNew ? t('productEditPage.actions.saveDraft') : t('common.save');
-    const statusLabel = status === 'active' ? t('productEditPage.actions.archive') : t('productEditPage.actions.publish');
-
-    return <>
-            <button className="button button--outline min-h-[39px] min-w-0 flex-1 whitespace-normal text-center sm:min-w-[120px]" type="button" disabled={isSubmitting} onClick={() => onSave(currentStatus)}><SaveIcon />{saveLabel}</button>
-            <button className="button button--primary min-h-[39px] min-w-[132px] whitespace-normal text-center max-sm:min-w-0 max-sm:flex-1" type="button" disabled={isSubmitting} onClick={() => onSave(nextStatus)}>{nextStatus === 'active' && <RocketIcon />}{statusLabel}</button>
-        </>;
+    return (
+        <div className="flex min-w-0 items-center gap-2.5">
+            <span className="grid h-8 w-8 shrink-0 place-items-center text-[#9a765f]" aria-hidden="true"><SaveIcon /></span>
+            <span className="flex min-w-0 flex-col">
+                <strong className="truncate text-[12px] text-[#312d29]">{t('productEditPage.actionBar.unsaved')}</strong>
+                <small className="truncate text-[11px] text-[#8d857e]">{productName}</small>
+            </span>
+        </div>
+    );
 }
 
 function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen, categoryToAddId, isAddingCategory, categoryAddError, deletingCategoryIds, categoryDeleteError, shopGroupOptions, isShopGroupsLoading, shopGroupsLoadError, onChange, onShopGroupChange, onAddCategory, onDeleteCategory, onToggleCategorySelect, onOpenCategories }) {
