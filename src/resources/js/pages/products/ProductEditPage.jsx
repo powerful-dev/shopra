@@ -1173,7 +1173,7 @@ export default function ProductEditPage() {
                             actions={actionMenuItems}
                         />
                     )}
-                    <button className="button button--outline min-h-10 min-w-[150px] whitespace-nowrap" type="button" disabled={isActionBarBusy} onClick={saveCurrentProduct}><SaveIcon />{saveActionLabel}</button>
+                    <button className="button button--primary min-h-10 min-w-[150px] whitespace-nowrap" type="button" disabled={isActionBarBusy} onClick={saveCurrentProduct}><SaveIcon />{saveActionLabel}</button>
                     {isPublishable && <button className="button button--primary min-h-10 min-w-[140px] whitespace-nowrap" type="button" disabled={isActionBarBusy} onClick={publishProduct}><RocketIcon />{t('productEditPage.actions.publish')}</button>}
                 </div>
             </div>
@@ -1192,7 +1192,7 @@ export default function ProductEditPage() {
                         actions={actionMenuItems}
                     />
                 )}
-                <button className="button button--outline min-h-10 min-w-0 flex-1 px-2 text-center" type="button" disabled={isActionBarBusy} onClick={saveCurrentProduct}><SaveIcon />{t('common.save')}</button>
+                <button className="button button--primary min-h-10 min-w-0 flex-1 px-2 text-center" type="button" disabled={isActionBarBusy} onClick={saveCurrentProduct}><SaveIcon />{t('common.save')}</button>
                 {isPublishable && <button className="button button--primary min-h-10 min-w-0 flex-[1.2] px-2 text-center" type="button" disabled={isActionBarBusy} onClick={publishProduct}><RocketIcon />{t('productEditPage.actions.publish')}</button>}
             </AdminMobileActionBar>
 
