@@ -403,7 +403,7 @@ function OptionRow({ option, onAddValue, onDeleteOption, onDeleteValue }) {
     );
 }
 
-function AttributePicker({ attributes, addedAttributeIds, isLoading, error, onAdd, onClose }) {
+function AttributePicker({ attributes, addedAttributeIds, createAttributeButtonRef, isLoading, error, onAdd, onClose, onCreateAttribute }) {
     const { t } = useTranslation();
 
     return (
@@ -432,6 +432,9 @@ function AttributePicker({ attributes, addedAttributeIds, isLoading, error, onAd
                     );
                 })}
             </div>}
+            <div className="mt-[11px] flex justify-end border-t border-[#eaded6] pt-[11px]">
+                <button ref={createAttributeButtonRef} type="button" className="button button--secondary min-h-[36px] cursor-pointer text-[12px] text-[color:var(--color-accent)]" onClick={onCreateAttribute}><PlusIcon width={14} height={14} />{t('productEditPage.variantModal.customOption')}</button>
+            </div>
         </section>
     );
 }
@@ -1062,7 +1065,7 @@ export default function ProductVariantsModal({
                     {!isVariantsLoading && !variantsError && <>
                     {saveErrors.length > 0 && <Alert variant="error" className="items-start"><span className="min-w-0"><strong className="block">{t('productEditPage.variantModal.saveErrorTitle')}</strong>{saveErrors.map((message) => <span key={message} className="mt-0.5 block font-medium text-[#766d66]">{message}</span>)}</span></Alert>}
                     <div className="flex min-w-0 items-center justify-between gap-3 max-sm:flex-col max-sm:items-stretch"><div className="min-w-0 break-words"><strong className="block text-[13px]">{t('productEditPage.variantModal.optionsTitle')}</strong><small className="text-[12px] text-[#968e87]">{t('productEditPage.variantModal.optionsDescription', { appName })}</small></div>{addedOptions.length > 0 && <button ref={addOptionButtonRef} type="button" className="button button--primary min-h-[40px] min-w-0 shrink-0 cursor-pointer justify-center whitespace-normal" onClick={() => setShowOptionPicker((current) => !current)} aria-expanded={showOptionPicker}><PlusIcon width={15} height={15} />{t('productEditPage.variantModal.addOption')}</button>}</div>
-                    {showOptionPicker && <AttributePicker attributes={attributes} addedAttributeIds={addedAttributeIds} isLoading={isAttributesLoading} error={attributesError} onAdd={addAttribute} onClose={() => setShowOptionPicker(false)} />}
+                    {showOptionPicker && <AttributePicker attributes={attributes} addedAttributeIds={addedAttributeIds} createAttributeButtonRef={createAttributeButtonRef} isLoading={isAttributesLoading} error={attributesError} onAdd={addAttribute} onClose={() => setShowOptionPicker(false)} onCreateAttribute={() => setIsCreateAttributeOpen(true)} />}
                     {addedOptions.map((option) => <OptionRow key={option.id} option={option} onAddValue={addOptionValue} onDeleteOption={removeAttribute} onDeleteValue={(optionId, valueId, optionName, valueName) => setDeleteWarning({ optionId, valueId, optionName, valueName })} />)}
                     {deleteWarning && <div className="flex min-w-0 items-start gap-3 rounded-[10px] border border-[#e5c3bd] bg-[#fff7f5] p-[11px_13px] text-[#a6402b] max-sm:grid max-sm:grid-cols-[20px_minmax(0,1fr)]" role="alert"><TrashIcon /><p className="m-0 min-w-0 flex-1 break-words text-[11px] leading-[1.45]"><strong className="block text-[12px] text-[#633b33]">{t('productEditPage.variantModal.deleteValueTitle', { value: deleteWarning.valueName })}</strong>{t('productEditPage.variantModal.deleteValueWarning', { option: deleteWarning.optionName })}</p><div className="flex min-w-0 shrink-0 gap-2 max-sm:col-start-2 max-sm:flex-wrap"><button type="button" className="max-w-full min-w-0 rounded-[7px] border border-[#d9c9bf] bg-white px-2 py-1.5 text-[11px] font-bold text-[#5d554f]" onClick={() => setDeleteWarning(null)}>{t('productEditPage.actions.cancel')}</button><button type="button" className="max-w-full min-w-0 rounded-[7px] border border-[#d79d8e] bg-white px-2 py-1.5 text-[11px] font-bold text-[#a6402b]" onClick={() => removeOptionValue(deleteWarning.optionId, deleteWarning.valueId)}>{t('productEditPage.variantModal.deleteValue')}</button></div></div>}
                     {addedOptions.length === 0 && !showOptionPicker && <EmptyVariantsState hasAvailableAttributes={isAttributesLoading || Boolean(attributesError) || attributes.length > 0} createAttributeButtonRef={createAttributeButtonRef} onAddOption={() => setShowOptionPicker(true)} onCreateAttribute={() => setIsCreateAttributeOpen(true)} />}

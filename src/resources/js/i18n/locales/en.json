@@ -725,6 +725,7 @@
             "optionsTitle": "Product options",
             "optionsDescription": "Add color, size, or another attribute. {{appName}} will automatically create every combination so you can configure prices and stock.",
             "addOption": "Add option",
+            "customOption": "Custom option",
             "deleteValueTitle": "The value “{{value}}” is used by variants",
             "deleteValueWarning": "Variants with this value of the “{{option}}” option will be deleted with it.",
             "deleteValue": "Delete value",
