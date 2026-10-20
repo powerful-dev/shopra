@@ -14,7 +14,7 @@ import Field from '../../components/form/Field';
 import Input from '../../components/form/Input';
 import useSectionScroll from '../../hooks/useSectionScroll';
 import useFileDropZone from '../../hooks/useFileDropZone';
-import usePageScrollLock from '../../hooks/usePageScrollLock';
+import useModalLayer from '../../hooks/useModalLayer';
 import CategorySlugField from './CategorySlugField';
 import AdminCard from '../../components/admin/AdminCard';
 import ImageLightbox from '../../components/admin/ImageLightbox';
@@ -54,7 +54,7 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
     const [photoError, setPhotoError] = useState('');
     const [saveError, setSaveError] = useState('');
     const [mediaConfig, setMediaConfig] = useState(null);
-    usePageScrollLock(Boolean(category));
+    const { isTopModal, layerStyle } = useModalLayer(Boolean(category));
     const scrollToSection = useSectionScroll({
         stickyRef: sectionNavigationRef,
         containerRef: scrollContainerRef,
@@ -106,6 +106,17 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
     }, [category, resetPhotoDropZone]);
 
     useEffect(() => () => window.clearTimeout(saveFeedbackTimerRef.current), []);
+
+    useEffect(() => {
+        if (!category) return undefined;
+
+        const closeOnEscape = (event) => {
+            if (event.key === 'Escape' && isTopModal && !isSaving) onClose();
+        };
+
+        document.addEventListener('keydown', closeOnEscape);
+        return () => document.removeEventListener('keydown', closeOnEscape);
+    }, [category, isSaving, isTopModal, onClose]);
 
     useEffect(() => {
         let isActive = true;
@@ -245,10 +256,13 @@ export default function CategoryEditModal({ category, parentOptions = [], isLoad
 
     return (
         <section
-            className="fixed left-1/2 top-1/2 z-[600] flex h-[min(740px,calc(100vh-76px))] w-[min(1000px,calc(100vw-84px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[16px] border border-[#ded6d0] bg-[#fbfaf8] shadow-[0_28px_90px_rgba(42,30,22,.28)] max-[620px]:h-[calc(100vh-32px)] max-[620px]:w-[calc(100vw-28px)]"
+            className="fixed left-1/2 top-1/2 flex h-[min(740px,calc(100vh-76px))] w-[min(1000px,calc(100vw-84px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[16px] border border-[#ded6d0] bg-[#fbfaf8] shadow-[0_28px_90px_rgba(42,30,22,.28)] max-[620px]:h-[calc(100vh-32px)] max-[620px]:w-[calc(100vw-28px)]"
+            style={layerStyle}
             role="dialog"
-            aria-modal="true"
+            aria-modal={isTopModal ? 'true' : undefined}
             aria-labelledby="category-edit-modal-title"
+            aria-hidden={isTopModal ? undefined : 'true'}
+            inert={!isTopModal}
             onMouseDown={(event) => event.stopPropagation()}
         >
             <header className="flex items-start justify-between gap-4 border-b border-[color:var(--color-border)] bg-white px-6 py-[18px] max-[620px]:px-4">

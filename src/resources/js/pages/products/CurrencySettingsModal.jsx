@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import CurrencySettingsForm from '../../components/settings/CurrencySettingsForm';
 import CloseIcon from '../../components/icons/CloseIcon';
-import usePageScrollLock from '../../hooks/usePageScrollLock';
+import useModalLayer from '../../hooks/useModalLayer';
 import { getCurrencySettings, saveCurrencySettings } from '../../services/settings';
 
 const emptySettings = {
@@ -24,7 +24,7 @@ export default function CurrencySettingsModal({ isOpen, initialData, onClose, on
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState('');
-    usePageScrollLock(isOpen);
+    const { isTopModal, layerStyle } = useModalLayer(isOpen);
 
     useEffect(() => {
         if (!isOpen) {
@@ -107,13 +107,15 @@ export default function CurrencySettingsModal({ isOpen, initialData, onClose, on
     };
 
     return (
-        <div className="modal-overlay" role="presentation" onMouseDown={closeModal}>
+        <div className="modal-overlay" style={layerStyle} role="presentation" onMouseDown={isTopModal ? closeModal : undefined}>
             <section
                 className="modal-dialog flex h-[min(780px,calc(100vh-44px))] max-w-[900px] flex-col bg-[#fbfaf8] max-[620px]:h-full"
                 role="dialog"
-                aria-modal="true"
+                aria-modal={isTopModal ? 'true' : undefined}
                 aria-labelledby="currency-settings-modal-title"
                 aria-busy={isDisabled}
+                aria-hidden={isTopModal ? undefined : 'true'}
+                inert={!isTopModal}
                 onMouseDown={(event) => event.stopPropagation()}
             >
                 <header className="flex items-start justify-between gap-4 border-b border-[color:var(--color-border)] bg-white px-6 py-[18px] max-[620px]:px-4">

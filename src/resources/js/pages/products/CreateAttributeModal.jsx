@@ -7,7 +7,7 @@ import Select from '../../components/form/Select';
 import CloseIcon from '../../components/icons/CloseIcon';
 import PlusIcon from '../../components/icons/PlusIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
-import usePageScrollLock from '../../hooks/usePageScrollLock';
+import useModalLayer from '../../hooks/useModalLayer';
 import { createShopAttributeWithOptions, getShopAttributeUnits, updateShopAttributeWithOptions } from '../../services/shopAttributes';
 
 const attributeTypes = ['text', 'number', 'boolean', 'select', 'multiselect'];
@@ -31,7 +31,6 @@ export default function CreateAttributeModal({
     initialType = 'text',
     allowedTypes = attributeTypes,
     attribute = null,
-    overlayClassName = '',
     returnFocusRef,
     fallbackFocusRef,
     onClose,
@@ -54,7 +53,7 @@ export default function CreateAttributeModal({
     const isListType = form.type === 'select' || form.type === 'multiselect';
     const availableTypes = attributeTypes.filter((type) => allowedTypes.includes(type));
     const defaultType = availableTypes.includes(initialType) ? initialType : (availableTypes[0] ?? 'text');
-    usePageScrollLock(isOpen);
+    const { isTopModal, layerStyle } = useModalLayer(isOpen);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -89,6 +88,8 @@ export default function CreateAttributeModal({
         if (!isOpen) return undefined;
 
         const handleKeyDown = (event) => {
+            if (!isTopModal) return;
+
             if (event.key === 'Escape' && !isSaving) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -116,7 +117,7 @@ export default function CreateAttributeModal({
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, isSaving, onClose]);
+    }, [isOpen, isSaving, isTopModal, onClose]);
 
     useEffect(() => {
         if (!isOpen) return undefined;
@@ -219,18 +220,20 @@ export default function CreateAttributeModal({
     };
 
     const close = () => {
-        if (!isSaving) onClose();
+        if (isTopModal && !isSaving) onClose();
     };
 
     return createPortal(
-        <div className={`modal-overlay ${overlayClassName}`} role="presentation" onMouseDown={close}>
+        <div className="modal-overlay" style={layerStyle} role="presentation" onMouseDown={close}>
             <section
                 ref={dialogRef}
                 className="modal-dialog flex max-h-[min(720px,calc(100vh-44px))] max-w-[560px] flex-col bg-[#fbfaf8]"
                 role="dialog"
-                aria-modal="true"
+                aria-modal={isTopModal ? 'true' : undefined}
                 aria-labelledby="attribute-form-modal-title"
                 aria-busy={isSaving}
+                aria-hidden={isTopModal ? undefined : 'true'}
+                inert={!isTopModal}
                 onMouseDown={(event) => event.stopPropagation()}
             >
                 <header className="flex items-start justify-between gap-4 border-b border-[color:var(--color-border)] bg-white px-5 py-4">

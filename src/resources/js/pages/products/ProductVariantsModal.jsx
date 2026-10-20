@@ -13,7 +13,7 @@ import LayersIcon from '../../components/icons/LayersIcon';
 import PlusIcon from '../../components/icons/PlusIcon';
 import SaveIcon from '../../components/icons/SaveIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
-import usePageScrollLock from '../../hooks/usePageScrollLock';
+import useModalLayer from '../../hooks/useModalLayer';
 import { getShopAttributes } from '../../services/shopAttributes';
 import { getProductVariants, updateProductVariants } from '../../services/shopItems';
 import CreateAttributeModal from './CreateAttributeModal';
@@ -727,7 +727,7 @@ export default function ProductVariantsModal({
     const lightboxImages = useMemo(() => images.map((item) => ({ id: item.id, src: item.large_url, alt: '' })), [images]);
     const { combinations, totalCount } = useMemo(() => buildCombinations(addedOptions), [addedOptions]);
     const normalizedBasePrice = basePrice === null || basePrice === undefined ? '' : String(basePrice);
-    usePageScrollLock(isOpen);
+    const { isTopModal, layerStyle } = useModalLayer(isOpen);
 
     useEffect(() => {
         if (!isOpen || images.length === 0) setIsLightboxOpen(false);
@@ -821,7 +821,7 @@ export default function ProductVariantsModal({
     useEffect(() => {
         if (!isOpen) return undefined;
         const handleKeyDown = (event) => {
-            if (event.key !== 'Escape' || isCreateAttributeOpen) return;
+            if (event.key !== 'Escape' || !isTopModal) return;
             if (isLightboxOpen) {
                 setIsLightboxOpen(false);
                 return;
@@ -832,7 +832,7 @@ export default function ProductVariantsModal({
         };
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [isCreateAttributeOpen, isLightboxOpen, isOpen, isSaving, onClose]);
+    }, [isLightboxOpen, isOpen, isSaving, isTopModal, onClose]);
 
     useEffect(() => {
         if (isVariantsLoading || combinations.length === 0) return;
@@ -1023,8 +1023,8 @@ export default function ProductVariantsModal({
     };
     return (
         <>
-            <div className="modal-overlay" role="presentation" onMouseDown={isSaving || isCreateAttributeOpen ? undefined : onClose}>
-                <section className="modal-dialog flex h-[min(900px,calc(100vh-40px))] max-w-full min-w-0 !w-[min(1380px,100%)] flex-col bg-[#fbfaf8] max-sm:h-full max-sm:!w-full" role="dialog" aria-modal={isCreateAttributeOpen ? undefined : 'true'} aria-labelledby="variant-manager-title" aria-hidden={isCreateAttributeOpen ? 'true' : undefined} inert={isCreateAttributeOpen} onMouseDown={(event) => event.stopPropagation()}>
+            <div className="modal-overlay" style={layerStyle} role="presentation" onMouseDown={isSaving || !isTopModal ? undefined : onClose}>
+                <section className="modal-dialog flex h-[min(900px,calc(100vh-40px))] max-w-full min-w-0 !w-[min(1380px,100%)] flex-col bg-[#fbfaf8] max-sm:h-full max-sm:!w-full" role="dialog" aria-modal={isTopModal ? 'true' : undefined} aria-labelledby="variant-manager-title" aria-hidden={isTopModal ? undefined : 'true'} inert={!isTopModal} onMouseDown={(event) => event.stopPropagation()}>
                 <header className="flex min-w-0 shrink-0 items-start justify-between gap-[18px] border-b border-[color:var(--color-border)] bg-white px-7 pb-[18px] pt-5 max-sm:px-4"><div className="min-w-0 break-words"><small className="text-[11px] font-bold uppercase tracking-[.05em] text-[color:var(--color-accent)]">{t('productEditPage.variantModal.eyebrow', { product: t('common.product') })}</small><h2 id="variant-manager-title" className="mb-1 mt-[3px] text-[28px] font-[770] tracking-[-.045em] text-[#252525] max-sm:text-[22px]">{t('productEditPage.sections.variants')}</h2><p className="m-0 text-[12px] text-[#887f78]">{t('productEditPage.variantModal.description')}</p></div><button type="button" className="grid h-[40px] w-[40px] shrink-0 place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-white text-[#716861] disabled:cursor-wait disabled:opacity-60" onClick={onClose} disabled={isSaving} aria-label={t('productEditPage.variantModal.closeAria')}><CloseIcon width={20} height={20} /></button></header>
                 <div className="min-h-0 min-w-0 flex-1 overflow-y-auto px-7 py-[20px] max-sm:px-[14px]"><div className="flex min-w-0 flex-col gap-3" aria-busy={isVariantsLoading || isSaving}>
                     {isVariantsLoading && <div className="grid min-h-[180px] place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#f8f5f2]" role="status" aria-label={t('productEditPage.variantModal.loadingAria')}><span className="h-7 w-7 animate-spin rounded-full border-[3px] border-[#d8cbc2] border-t-[color:var(--color-accent)]" aria-hidden="true" /></div>}
@@ -1046,7 +1046,6 @@ export default function ProductVariantsModal({
                 isOpen={isCreateAttributeOpen}
                 initialType="select"
                 allowedTypes={variantAttributeTypes}
-                overlayClassName="!z-[600]"
                 returnFocusRef={createAttributeButtonRef}
                 fallbackFocusRef={addOptionButtonRef}
                 onClose={() => setIsCreateAttributeOpen(false)}

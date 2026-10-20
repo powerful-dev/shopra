@@ -7,7 +7,7 @@ import CloseIcon from '../../components/icons/CloseIcon';
 import PencilIcon from '../../components/icons/PencilIcon';
 import PlusIcon from '../../components/icons/PlusIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
-import usePageScrollLock from '../../hooks/usePageScrollLock';
+import useModalLayer from '../../hooks/useModalLayer';
 import { deleteShopAttribute, getShopAttributes, getShopAttributeUnits } from '../../services/shopAttributes';
 import CreateAttributeModal from './CreateAttributeModal';
 
@@ -29,7 +29,7 @@ export default function ProductAttributesModal({ isOpen, initialAttributes = [],
     const [deleteError, setDeleteError] = useState('');
     const deleteTriggerRef = useRef(null);
     const addAttributeButtonRef = useRef(null);
-    usePageScrollLock(isOpen);
+    const { isTopModal, layerStyle } = useModalLayer(isOpen);
 
     const close = useCallback(() => {
         if (isFormOpen || attributeToDelete) return;
@@ -81,16 +81,16 @@ export default function ProductAttributesModal({ isOpen, initialAttributes = [],
     }, [isOpen]);
 
     useEffect(() => {
-        if (!isOpen || isFormOpen || attributeToDelete) return undefined;
+        if (!isOpen) return undefined;
 
         const closeOnEscape = (event) => {
-            if (event.key === 'Escape') close();
+            if (event.key === 'Escape' && isTopModal) close();
         };
 
         document.addEventListener('keydown', closeOnEscape);
 
         return () => document.removeEventListener('keydown', closeOnEscape);
-    }, [attributeToDelete, close, isFormOpen, isOpen]);
+    }, [close, isOpen, isTopModal]);
 
     if (!isOpen) return null;
 
@@ -131,15 +131,15 @@ export default function ProductAttributesModal({ isOpen, initialAttributes = [],
 
     return createPortal(
         <>
-            <div className="modal-overlay" role="presentation" onMouseDown={close}>
+            <div className="modal-overlay" style={layerStyle} role="presentation" onMouseDown={isTopModal ? close : undefined}>
                 <section
                     className="modal-dialog flex h-[min(760px,calc(100vh-44px))] max-w-[960px] flex-col bg-[#fbfaf8] max-[620px]:h-full"
                     role="dialog"
-                    aria-modal="true"
+                    aria-modal={isTopModal ? 'true' : undefined}
                     aria-labelledby="product-attributes-modal-title"
                     aria-busy={isLoading}
-                    aria-hidden={attributeToDelete ? 'true' : undefined}
-                    inert={Boolean(attributeToDelete)}
+                    aria-hidden={isTopModal ? undefined : 'true'}
+                    inert={!isTopModal}
                     onMouseDown={(event) => event.stopPropagation()}
                 >
                     <header className="flex items-start justify-between gap-4 border-b border-[color:var(--color-border)] bg-white px-7 pb-[18px] pt-[22px] max-[620px]:px-[15px] max-[620px]:pb-[14px] max-[620px]:pt-[17px]">

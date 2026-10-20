@@ -11,13 +11,13 @@ import HeroBannerModal from '../modals/Appearance/HeroBannerModal';
 import StoreHeaderModal from '../modals/Appearance/StoreHeaderModal';
 import TopBannerModal from '../modals/Appearance/TopBannerModal';
 import Breadcrumbs from '../components/admin/Breadcrumbs';
-import usePageScrollLock from '../hooks/usePageScrollLock';
+import useModalLayer from '../hooks/useModalLayer';
 
 
 export default function AppearancePage() {
 
     const [activeModal, setActiveModal] = useState(null);
-    usePageScrollLock(Boolean(activeModal));
+    const { layerStyle } = useModalLayer(Boolean(activeModal));
 
     const modalComponents = {
         'style-elements': StyleElementsModal,
@@ -921,9 +921,11 @@ export default function AppearancePage() {
             </div>
 
             {ActiveModal && (
-                <ActiveModal
-                    onClose={closeModal}
-                />
+                <div style={{ '--modal-layer-z-index': layerStyle.zIndex }}>
+                    <ActiveModal
+                        onClose={closeModal}
+                    />
+                </div>
             )}
             
         </>

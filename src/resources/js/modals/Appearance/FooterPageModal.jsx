@@ -2,7 +2,7 @@ export default function FooterPageModal() {
     return (
         <div
             id="footer-page-modal"
-            className="modal-overlay !z-[600]"
+            className="modal-overlay"
             role="presentation"
             hidden
         >

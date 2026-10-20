@@ -8,7 +8,7 @@ import CategoryEditModal from './CategoryEditModal';
 import CategoryRow from './CategoryRow';
 import CategorySlugField from './CategorySlugField';
 import CloseIcon from '../../components/icons/CloseIcon';
-import usePageScrollLock from '../../hooks/usePageScrollLock';
+import useModalLayer from '../../hooks/useModalLayer';
 import SearchIcon from '../../components/icons/SearchIcon';
 import PlusIcon from '../../components/icons/PlusIcon';
 import SparklesIcon from '../../components/icons/SparklesIcon';
@@ -38,7 +38,7 @@ export default function CategoriesModal({ isOpen, onClose, onCategoriesChanged }
     const query = search.trim();
     const isSearching = [...query].length >= 2;
     const searchGroups = searchResult?.query === query ? searchResult.groups : [];
-    usePageScrollLock(isOpen);
+    const { isTopModal, layerStyle } = useModalLayer(isOpen);
 
     useEffect(() => {
         if (!isOpen || !isSearching) return undefined;
@@ -229,7 +229,7 @@ export default function CategoriesModal({ isOpen, onClose, onCategoriesChanged }
         if (!isOpen) return undefined;
 
         const closeOnEscape = (event) => {
-            if (event.key === 'Escape') closeModal();
+            if (event.key === 'Escape' && isTopModal) closeModal();
         };
 
         document.addEventListener('keydown', closeOnEscape);
@@ -237,7 +237,7 @@ export default function CategoriesModal({ isOpen, onClose, onCategoriesChanged }
         return () => {
             document.removeEventListener('keydown', closeOnEscape);
         };
-    }, [closeModal, isOpen]);
+    }, [closeModal, isOpen, isTopModal]);
 
     useEffect(() => {
         if (!isOpen) return undefined;
@@ -284,12 +284,14 @@ export default function CategoriesModal({ isOpen, onClose, onCategoriesChanged }
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay" role="presentation" onMouseDown={closeModal}>
+        <div className="modal-overlay" style={layerStyle} role="presentation" onMouseDown={isTopModal ? closeModal : undefined}>
             <section
                 className="modal-dialog flex h-[min(820px,calc(100vh-44px))] flex-col bg-[#fbfaf8] max-[620px]:h-full"
                 role="dialog"
-                aria-modal="true"
+                aria-modal={isTopModal ? 'true' : undefined}
                 aria-labelledby="categories-modal-title"
+                aria-hidden={isTopModal ? undefined : 'true'}
+                inert={!isTopModal}
                 onMouseDown={(event) => event.stopPropagation()}
             >
                 <header className="flex items-start justify-between gap-4 border-b border-[color:var(--color-border)] bg-white px-7 pb-[18px] pt-[22px] max-[620px]:px-[15px] max-[620px]:pb-[14px] max-[620px]:pt-[17px]">
