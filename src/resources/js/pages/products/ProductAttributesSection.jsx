@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { MediaDragHandle } from '../../components/admin/MediaCardControls';
 import SearchableSelect from '../../components/admin/SearchableSelect';
 import Input from '../../components/form/Input';
+import ControlsIcon from '../../components/icons/ControlsIcon';
 import PlusIcon from '../../components/icons/PlusIcon';
 import TrashIcon from '../../components/icons/TrashIcon';
 import { createShopAttributeOption, getShopAttributes, getShopItemAttributes } from '../../services/shopAttributes';
@@ -362,10 +363,17 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                     <p className="mb-0 mt-1 text-[12px] leading-[1.45] text-[#918880]">{t('productEditPage.attributesSection.description')}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-3 max-sm:w-full max-sm:flex-col-reverse max-sm:items-stretch">
-                    <button type="button" className="cursor-pointer border-0 bg-transparent p-0 text-[12px] font-bold text-[color:var(--color-accent)] hover:underline" onClick={() => setIsManagerOpen(true)}>
-                        {t('productEditPage.attributesSection.manage')}
+                    <button
+                        type="button"
+                        className="button button--outline min-h-9 shrink-0 max-sm:w-full"
+                        title={t('productEditPage.attributesSection.manage')}
+                        aria-label={t('productEditPage.attributesSection.manage')}
+                        onClick={() => setIsManagerOpen(true)}
+                    >
+                        <ControlsIcon size={15} />
+                        {t('productEditPage.attributesSection.manageShort')}
                     </button>
-                    <button type="button" className="button button--outline min-h-9 shrink-0 max-sm:w-full" disabled={isValuesLoading} onClick={addRow}>
+                    <button type="button" className="button button--primary min-h-9 shrink-0 max-sm:w-full" disabled={isValuesLoading} onClick={addRow}>
                         <PlusIcon width="15" height="15" />{t('productEditPage.attributesSection.addAttribute')}
                     </button>
                 </div>

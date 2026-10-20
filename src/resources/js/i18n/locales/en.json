@@ -513,6 +513,7 @@
             "title": "Product attributes",
             "description": "Add details customers can use to compare products.",
             "manage": "Manage attributes",
+            "manageShort": "Manage",
             "addAttribute": "Add attribute",
             "loading": "Loading attributes…",
             "empty": "No attributes added yet.",
