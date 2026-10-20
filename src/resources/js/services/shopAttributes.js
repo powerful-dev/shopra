@@ -48,6 +48,11 @@ export async function updateShopAttribute(attributeId, attributeData) {
     return response.data;
 }
 
+export async function deleteShopAttribute(attributeId) {
+    await csrf();
+    await request(`/api/product-attributes/${attributeId}`, { method: 'DELETE' });
+}
+
 export async function updateShopAttributeOption(attributeId, optionId, optionData) {
     await csrf();
 

@@ -60,7 +60,23 @@ class ShopAttributeService
 
     public function delete(ShopAttribute $attribute): void
     {
-        $attribute->delete();
+        DB::transaction(function () use ($attribute): void {
+            $lockedAttribute = ShopAttribute::query()->lockForUpdate()->findOrFail($attribute->getKey());
+            $lockedAttribute->options()->lockForUpdate()->get();
+            $isUsedByProducts = $lockedAttribute->itemAttributes()->exists()
+                || $lockedAttribute->options()->whereHas('itemAttributes')->exists();
+            $isUsedByVariants = $lockedAttribute->variantOptions()->exists()
+                || $lockedAttribute->options()->whereHas('variantValues')->exists();
+
+            if ($isUsedByProducts || $isUsedByVariants) {
+                throw ValidationException::withMessages([
+                    'attribute' => 'The attribute is used by products or variants. Remove the corresponding product links first.',
+                ]);
+            }
+
+            $lockedAttribute->options()->delete();
+            $lockedAttribute->delete();
+        });
     }
 
     /** @param array<string, mixed> $data */

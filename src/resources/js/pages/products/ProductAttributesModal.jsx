@@ -1,11 +1,14 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import ActionsMenu from '../../components/admin/ActionsMenu';
+import ConfirmModal from '../../components/admin/ConfirmModal';
 import CloseIcon from '../../components/icons/CloseIcon';
 import PencilIcon from '../../components/icons/PencilIcon';
 import PlusIcon from '../../components/icons/PlusIcon';
+import TrashIcon from '../../components/icons/TrashIcon';
 import usePageScrollLock from '../../hooks/usePageScrollLock';
-import { getShopAttributes, getShopAttributeUnits } from '../../services/shopAttributes';
+import { deleteShopAttribute, getShopAttributes, getShopAttributeUnits } from '../../services/shopAttributes';
 import CreateAttributeModal from './CreateAttributeModal';
 
 const sortAttributes = (attributes) => [...attributes].sort((left, right) => (
@@ -20,21 +23,31 @@ export default function ProductAttributesModal({ isOpen, initialAttributes = [],
     const [loadError, setLoadError] = useState('');
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingAttribute, setEditingAttribute] = useState(null);
+    const [openActionsId, setOpenActionsId] = useState(null);
+    const [attributeToDelete, setAttributeToDelete] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
+    const deleteTriggerRef = useRef(null);
+    const addAttributeButtonRef = useRef(null);
     usePageScrollLock(isOpen);
 
     const close = useCallback(() => {
-        if (isFormOpen) return;
+        if (isFormOpen || attributeToDelete) return;
 
         setEditingAttribute(null);
+        setOpenActionsId(null);
         setLoadError('');
         onClose();
-    }, [isFormOpen, onClose]);
+    }, [attributeToDelete, isFormOpen, onClose]);
 
     useEffect(() => {
         if (!isOpen) return undefined;
 
         const controller = new AbortController();
         setAttributes(sortAttributes(initialAttributes));
+        setOpenActionsId(null);
+        setAttributeToDelete(null);
+        setDeleteError('');
         setIsLoading(true);
         setLoadError('');
 
@@ -68,7 +81,7 @@ export default function ProductAttributesModal({ isOpen, initialAttributes = [],
     }, [isOpen]);
 
     useEffect(() => {
-        if (!isOpen || isFormOpen) return undefined;
+        if (!isOpen || isFormOpen || attributeToDelete) return undefined;
 
         const closeOnEscape = (event) => {
             if (event.key === 'Escape') close();
@@ -77,7 +90,7 @@ export default function ProductAttributesModal({ isOpen, initialAttributes = [],
         document.addEventListener('keydown', closeOnEscape);
 
         return () => document.removeEventListener('keydown', closeOnEscape);
-    }, [close, isFormOpen, isOpen]);
+    }, [attributeToDelete, close, isFormOpen, isOpen]);
 
     if (!isOpen) return null;
 
@@ -94,6 +107,28 @@ export default function ProductAttributesModal({ isOpen, initialAttributes = [],
         setIsFormOpen(false);
     };
 
+    const removeAttribute = async () => {
+        if (!attributeToDelete || isDeleting) return;
+
+        setIsDeleting(true);
+        setDeleteError('');
+
+        try {
+            await deleteShopAttribute(attributeToDelete.id);
+            const nextAttributes = attributes.filter((attribute) => attribute.id !== attributeToDelete.id);
+            setAttributes(nextAttributes);
+            onAttributesChanged(nextAttributes);
+            setAttributeToDelete(null);
+        } catch (error) {
+            console.error('Unable to delete product attribute.', error);
+            setDeleteError(t(error.status === 422
+                ? 'productEditPage.attributesModal.deleteUsed'
+                : 'productEditPage.attributesModal.deleteError'));
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     return createPortal(
         <>
             <div className="modal-overlay" role="presentation" onMouseDown={close}>
@@ -103,6 +138,8 @@ export default function ProductAttributesModal({ isOpen, initialAttributes = [],
                     aria-modal="true"
                     aria-labelledby="product-attributes-modal-title"
                     aria-busy={isLoading}
+                    aria-hidden={attributeToDelete ? 'true' : undefined}
+                    inert={Boolean(attributeToDelete)}
                     onMouseDown={(event) => event.stopPropagation()}
                 >
                     <header className="flex items-start justify-between gap-4 border-b border-[color:var(--color-border)] bg-white px-7 pb-[18px] pt-[22px] max-[620px]:px-[15px] max-[620px]:pb-[14px] max-[620px]:pt-[17px]">
@@ -118,7 +155,7 @@ export default function ProductAttributesModal({ isOpen, initialAttributes = [],
 
                     <div className="flex items-center justify-between gap-4 px-7 py-4 max-[620px]:px-[14px]">
                         <strong className="text-[12px] text-[#554e48]">{t('productEditPage.attributesModal.allAttributes')}</strong>
-                        <button type="button" className="button button--primary min-h-[42px] justify-center" onClick={() => { setEditingAttribute(null); setIsFormOpen(true); }}>
+                        <button ref={addAttributeButtonRef} type="button" className="button button--primary min-h-[42px] justify-center" onClick={() => { setEditingAttribute(null); setIsFormOpen(true); }}>
                             <PlusIcon width="15" height="15" />{t('productEditPage.attributesSection.addAttribute')}
                         </button>
                     </div>
@@ -128,8 +165,8 @@ export default function ProductAttributesModal({ isOpen, initialAttributes = [],
                         {isLoading && attributes.length === 0 && <p className="m-0 rounded-xl border border-[color:var(--color-border)] bg-white p-5 text-center text-xs text-[#918880]" role="status">{t('productEditPage.attributesSection.loading')}</p>}
                         {!isLoading && !loadError && attributes.length === 0 && <p className="m-0 rounded-xl border border-dashed border-[#ded6d0] bg-white p-5 text-center text-xs text-[#918880]">{t('productEditPage.attributesModal.empty')}</p>}
                         {attributes.length > 0 && (
-                            <div className="overflow-hidden rounded-xl border border-[color:var(--color-border)] bg-white">
-                                <div className="grid grid-cols-[minmax(160px,1.35fr)_minmax(125px,.8fr)_minmax(70px,.55fr)_90px_110px_42px] items-center gap-3 border-b border-[color:var(--color-border)] bg-[#f8f5f2] px-4 py-2.5 text-[10px] font-bold uppercase tracking-[.06em] text-[#8d857e] max-[760px]:hidden">
+                            <div className="rounded-xl border border-[color:var(--color-border)] bg-white">
+                                <div className="grid grid-cols-[minmax(160px,1.35fr)_minmax(125px,.8fr)_minmax(70px,.55fr)_90px_110px_42px] items-center gap-3 rounded-t-xl border-b border-[color:var(--color-border)] bg-[#f8f5f2] px-4 py-2.5 text-[10px] font-bold uppercase tracking-[.06em] text-[#8d857e] max-[760px]:hidden">
                                     <span>{t('productEditPage.createAttribute.name')}</span>
                                     <span>{t('productEditPage.createAttribute.type')}</span>
                                     <span>{t('productEditPage.attributesModal.unit')}</span>
@@ -145,15 +182,30 @@ export default function ProductAttributesModal({ isOpen, initialAttributes = [],
                                             <span className="text-[12px] text-[#756d66] max-[760px]:col-start-1">{attribute.unit ? (unitShortNames.get(attribute.unit) ?? attribute.unit) : '—'}</span>
                                             <Status value={attribute.is_visible} trueLabel={t('productEditPage.attributesModal.visible')} falseLabel={t('productEditPage.attributesModal.hidden')} />
                                             <Status value={attribute.is_filterable} trueLabel={t('productEditPage.attributesModal.inFilter')} falseLabel={t('productEditPage.attributesModal.notInFilter')} />
-                                            <button
-                                                type="button"
-                                                className="grid h-[36px] w-[36px] place-items-center rounded-[9px] border border-[#e2d9d3] bg-white text-[#756d66] hover:border-[#d7ad94] hover:text-[color:var(--color-accent)] max-[760px]:col-start-2 max-[760px]:row-span-3 max-[760px]:row-start-1"
-                                                aria-label={t('productEditPage.attributesModal.editAria', { name: attribute.name })}
-                                                title={t('productEditPage.attributesModal.edit')}
-                                                onClick={() => { setEditingAttribute(attribute); setIsFormOpen(true); }}
-                                            >
-                                                <PencilIcon />
-                                            </button>
+                                            <ActionsMenu
+                                                className="max-[760px]:col-start-2 max-[760px]:row-span-3 max-[760px]:row-start-1"
+                                                ariaLabel={t('productEditPage.attributesModal.actionsAria', { name: attribute.name })}
+                                                isOpen={openActionsId === attribute.id}
+                                                onToggle={() => setOpenActionsId((id) => id === attribute.id ? null : attribute.id)}
+                                                actions={[
+                                                    {
+                                                        label: t('productEditPage.attributesModal.edit'),
+                                                        icon: <PencilIcon />,
+                                                        onClick: () => { setEditingAttribute(attribute); setIsFormOpen(true); },
+                                                    },
+                                                    {
+                                                        label: t('productEditPage.actions.delete'),
+                                                        icon: <TrashIcon />,
+                                                        variant: 'danger',
+                                                        onClick: (trigger) => {
+                                                            deleteTriggerRef.current = trigger;
+                                                            setAttributeToDelete(attribute);
+                                                            setDeleteError('');
+                                                        },
+                                                    },
+                                                ]}
+                                                onClose={() => setOpenActionsId(null)}
+                                            />
                                         </article>
                                     ))}
                                 </div>
@@ -161,6 +213,25 @@ export default function ProductAttributesModal({ isOpen, initialAttributes = [],
                         )}
                     </div>
                 </section>
+
+                <ConfirmModal
+                    isOpen={Boolean(attributeToDelete)}
+                    title={t('productEditPage.delete.title')}
+                    message={t('productEditPage.attributesModal.deleteMessage', { name: attributeToDelete?.name })}
+                    confirmText={t('productEditPage.actions.delete')}
+                    cancelText={t('productEditPage.actions.cancel')}
+                    isLoading={isDeleting}
+                    variant="danger"
+                    error={deleteError}
+                    returnFocusRef={deleteTriggerRef}
+                    fallbackFocusRef={addAttributeButtonRef}
+                    onConfirm={removeAttribute}
+                    onClose={() => {
+                        if (isDeleting) return;
+                        setAttributeToDelete(null);
+                        setDeleteError('');
+                    }}
+                />
             </div>
 
             <CreateAttributeModal

@@ -214,7 +214,23 @@ class ShopAttributeApiTest extends TestCase
         $this->assertDatabaseMissing('shop_attribute_options', ['id' => $blueId]);
     }
 
-    public function test_deleting_an_attribute_cascades_to_options_and_item_values(): void
+    public function test_deleting_an_unused_attribute_also_deletes_its_options(): void
+    {
+        $this->authenticateProductAdmin();
+
+        $attribute = ShopAttribute::query()->create([
+            'name' => 'Color',
+            'type' => ShopAttributeType::Select,
+        ]);
+        $option = $attribute->options()->create(['value' => 'Black']);
+
+        $this->deleteJson("/api/product-attributes/{$attribute->id}")->assertNoContent();
+
+        $this->assertDatabaseMissing('shop_attributes', ['id' => $attribute->id]);
+        $this->assertDatabaseMissing('shop_attribute_options', ['id' => $option->id]);
+    }
+
+    public function test_an_attribute_used_by_a_product_cannot_be_deleted(): void
     {
         $this->authenticateProductAdmin();
 
@@ -231,11 +247,50 @@ class ShopAttributeApiTest extends TestCase
         $itemAttribute = $item->itemAttributes()->create(['attribute_id' => $attribute->id]);
         $itemAttribute->options()->attach($option);
 
-        $this->deleteJson("/api/product-attributes/{$attribute->id}")->assertNoContent();
+        $this->deleteJson("/api/product-attributes/{$attribute->id}")
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('attribute');
 
-        $this->assertDatabaseMissing('shop_attribute_options', ['id' => $option->id]);
-        $this->assertDatabaseMissing('shop_item_attributes', ['id' => $itemAttribute->id]);
-        $this->assertDatabaseCount('shop_item_attribute_options', 0);
+        $this->assertDatabaseHas('shop_items', ['id' => $item->id]);
+        $this->assertDatabaseHas('shop_attributes', ['id' => $attribute->id]);
+        $this->assertDatabaseHas('shop_attribute_options', ['id' => $option->id]);
+        $this->assertDatabaseHas('shop_item_attributes', ['id' => $itemAttribute->id]);
+        $this->assertDatabaseHas('shop_item_attribute_options', [
+            'item_attribute_id' => $itemAttribute->id,
+            'option_id' => $option->id,
+        ]);
+    }
+
+    public function test_an_attribute_used_by_variants_cannot_be_deleted(): void
+    {
+        $this->authenticateProductAdmin();
+
+        $attribute = ShopAttribute::query()->create([
+            'name' => 'Color',
+            'type' => ShopAttributeType::Select,
+        ]);
+        $option = $attribute->options()->create(['value' => 'Black']);
+        $item = ShopItem::query()->create([
+            'name' => 'T-shirt',
+            'url' => 't-shirt',
+            'price' => 25,
+        ]);
+        $variantOption = $item->variantOptions()->create([
+            'shop_attribute_id' => $attribute->id,
+        ]);
+        $variantValue = $variantOption->values()->create([
+            'shop_attribute_option_id' => $option->id,
+        ]);
+
+        $this->deleteJson("/api/product-attributes/{$attribute->id}")
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('attribute');
+
+        $this->assertDatabaseHas('shop_items', ['id' => $item->id]);
+        $this->assertDatabaseHas('shop_attributes', ['id' => $attribute->id]);
+        $this->assertDatabaseHas('shop_attribute_options', ['id' => $option->id]);
+        $this->assertDatabaseHas('shop_item_variant_options', ['id' => $variantOption->id]);
+        $this->assertDatabaseHas('shop_item_variant_values', ['id' => $variantValue->id]);
     }
 
     private function authenticateProductAdmin(): User

@@ -74,7 +74,7 @@ class ShopAttributeModelTest extends TestCase
         ]);
     }
 
-    public function test_deleting_an_attribute_cascades_to_its_values_and_options(): void
+    public function test_database_prevents_deleting_an_attribute_used_by_an_item(): void
     {
         $item = ShopItem::query()->create([
             'name' => 'T-shirt',
@@ -91,10 +91,19 @@ class ShopAttributeModelTest extends TestCase
         ]);
         $itemAttribute->options()->attach($option);
 
-        $attribute->delete();
+        try {
+            $attribute->delete();
+            $this->fail('Deleting an attribute used by an item should violate its foreign key.');
+        } catch (QueryException) {
+            // The database is the final safeguard against cascading product data.
+        }
 
-        $this->assertDatabaseMissing('shop_attribute_options', ['id' => $option->getKey()]);
-        $this->assertDatabaseMissing('shop_item_attributes', ['id' => $itemAttribute->getKey()]);
-        $this->assertDatabaseCount('shop_item_attribute_options', 0);
+        $this->assertDatabaseHas('shop_attributes', ['id' => $attribute->getKey()]);
+        $this->assertDatabaseHas('shop_attribute_options', ['id' => $option->getKey()]);
+        $this->assertDatabaseHas('shop_item_attributes', ['id' => $itemAttribute->getKey()]);
+        $this->assertDatabaseHas('shop_item_attribute_options', [
+            'item_attribute_id' => $itemAttribute->getKey(),
+            'option_id' => $option->getKey(),
+        ]);
     }
 }

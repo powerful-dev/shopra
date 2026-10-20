@@ -130,7 +130,7 @@ class ShopItemVariantModelTest extends TestCase
         ]);
     }
 
-    public function test_reference_deletion_is_safe_and_photo_detaching_keeps_media(): void
+    public function test_attribute_reference_deletion_is_restricted_and_photo_detaching_keeps_media(): void
     {
         [$item, $attribute, , $variantOption, $variantValue] = $this->createVariantValue();
         $media = $item->media()->create([
@@ -151,10 +151,15 @@ class ShopItemVariantModelTest extends TestCase
         $this->assertDatabaseMissing('shop_item_variant_photos', ['id' => $photo->getKey()]);
 
         $variantValue->photos()->create(['shop_item_media_id' => $media->getKey()]);
-        $attribute->delete();
+        try {
+            $attribute->delete();
+            $this->fail('Deleting an attribute used by variants should violate its foreign key.');
+        } catch (QueryException) {
+            // The database is the final safeguard against detaching variant data.
+        }
 
-        $this->assertNull($variantOption->refresh()->shop_attribute_id);
-        $this->assertNull($variantValue->refresh()->shop_attribute_option_id);
+        $this->assertSame($attribute->getKey(), $variantOption->refresh()->shop_attribute_id);
+        $this->assertSame($attribute->options()->firstOrFail()->getKey(), $variantValue->refresh()->shop_attribute_option_id);
     }
 
     public function test_force_deleting_an_item_cascades_to_all_variant_data(): void

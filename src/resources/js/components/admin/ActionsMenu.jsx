@@ -56,7 +56,7 @@ export default function ActionsMenu({ actions, isOpen, onToggle, onClose, ariaLa
 
     const selectAction = (action) => {
         onClose();
-        action.onClick?.();
+        action.onClick?.(triggerRef.current);
     };
 
     return (

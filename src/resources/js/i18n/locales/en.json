@@ -590,8 +590,12 @@
             "hidden": "Hidden",
             "inFilter": "In filter",
             "notInFilter": "Not in filter",
+            "actionsAria": "Actions for attribute “{{name}}”",
             "editAria": "Edit attribute “{{name}}”",
-            "edit": "Edit"
+            "edit": "Edit",
+            "deleteMessage": "Delete the “{{name}}” attribute and its values?",
+            "deleteUsed": "This attribute is used by products or variants. Remove the corresponding product links first.",
+            "deleteError": "Unable to delete the attribute. Try again."
         },
         "media": {
             "imageRequirements": "Photos: {{formats}} · up to {{size}} MB",
