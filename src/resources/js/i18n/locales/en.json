@@ -5,7 +5,11 @@
         "categories": "Categories",
         "stock": "Stock",
         "price": "Price",
-        "status": "Status"
+        "status": "Status",
+        "saveStatus": {
+            "saving": "Saving…",
+            "success": "Changes saved"
+        }
     },
     "currencies": {
         "UAH": "Ukrainian hryvnia",
@@ -661,11 +665,6 @@
             "cancel": "Cancel",
             "priceError": "Enter a price of 0 or more.",
             "stockError": "Enter a whole number of 0 or more."
-        },
-        "variantSaveStatus": {
-            "saving": "Saving…",
-            "success": "Changes saved",
-            "error": "Failed to save changes"
         },
         "variantModal": {
             "fallbackOption": "Option #{{id}}",

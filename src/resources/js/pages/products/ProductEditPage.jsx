@@ -13,6 +13,7 @@ import { MediaDeleteButton, MediaDragHandle } from '../../components/admin/Media
 import ProductStatusBadge from '../../components/admin/ProductStatusBadge';
 import RichTextEditor from '../../components/admin/RichTextEditor';
 import SearchableSelect from '../../components/admin/SearchableSelect';
+import SaveStatus from '../../components/admin/SaveStatus';
 import SectionNavigation from '../../components/admin/SectionNavigation';
 import SeoFields from '../../components/admin/SeoFields';
 import Skeleton from '../../components/admin/Skeleton';
@@ -169,6 +170,7 @@ export default function ProductEditPage() {
     const [isStatusChanging, setIsStatusChanging] = useState(false);
     const [statusActionError, setStatusActionError] = useState(null);
     const [saveNotification, setSaveNotification] = useState(null);
+    const [saveStatus, setSaveStatus] = useState(null);
     const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
     const [isCurrencySettingsOpen, setIsCurrencySettingsOpen] = useState(false);
     const [isVariantsOpen, setIsVariantsOpen] = useState(false);
@@ -261,6 +263,12 @@ export default function ProductEditPage() {
     const currentSaveNotification = saveNotification?.productId === saveNotificationProductId
         ? saveNotification
         : null;
+    const currentSaveStatus = saveStatus?.contextIds.includes(saveNotificationProductId)
+        ? saveStatus.status
+        : null;
+    const resetSuccessfulSaveStatus = () => {
+        setSaveStatus((current) => current?.status === 'success' ? null : current);
+    };
     const localizedSectionLinks = useMemo(() => sectionLinks.map((section) => ({
         ...section,
         label: t(`productEditPage.sections.${section.labelKey}`),
@@ -523,6 +531,7 @@ export default function ProductEditPage() {
     }, [id, isNew]);
 
     const updateField = ({ target }) => {
+        resetSuccessfulSaveStatus();
         setForm((current) => ({
             ...current,
             [target.name]: target.type === 'checkbox' ? target.checked : target.value,
@@ -681,6 +690,10 @@ export default function ProductEditPage() {
 
         saveInProgressRef.current = savingContextVersion;
         setSaveNotification(null);
+        setSaveStatus({
+            contextIds: [savingProductId ?? 'new'],
+            status: 'saving',
+        });
         beginSubmitting(savingContextVersion);
 
         try {
@@ -750,10 +763,9 @@ export default function ProductEditPage() {
 
             attributesSectionRef.current?.markSaved(product.id);
 
-            setSaveNotification({
-                productId: String(product.id),
-                type: 'success',
-                message: t(isNew ? 'productEditPage.created' : 'productEditPage.saved'),
+            setSaveStatus({
+                contextIds: [...new Set([savingProductId ?? 'new', String(product.id)])],
+                status: 'success',
             });
 
             if (isNew) {
@@ -763,6 +775,7 @@ export default function ProductEditPage() {
             console.error(error);
             if (isSaveContextCurrent()) {
                 attributesSectionRef.current?.handleSaveError(error);
+                setSaveStatus(null);
                 setSaveNotification({
                     productId: savingProductId ?? 'new',
                     type: 'error',
@@ -1006,7 +1019,7 @@ export default function ProductEditPage() {
                 </div>
             </header>
 
-            {currentSaveNotification && (
+            {currentSaveNotification?.type === 'error' && (
                 <Alert variant={currentSaveNotification.type} className="mb-5 h-[40px] py-0">
                     {currentSaveNotification.message}
                 </Alert>
@@ -1055,7 +1068,10 @@ export default function ProductEditPage() {
                         isShopGroupsLoading={isShopGroupsLoading}
                         shopGroupsLoadError={shopGroupsLoadError}
                         onChange={updateField}
-                        onShopGroupChange={(shopGroupId) => setForm((current) => ({ ...current, shop_group_id: shopGroupId }))}
+                        onShopGroupChange={(shopGroupId) => {
+                            resetSuccessfulSaveStatus();
+                            setForm((current) => ({ ...current, shop_group_id: shopGroupId }));
+                        }}
                         onDeleteCategory={detachProductCategory}
                         onAddCategory={attachProductCategory}
                         onToggleCategorySelect={() => setIsCategorySelectOpen((isOpen) => !isOpen)}
@@ -1090,7 +1106,7 @@ export default function ProductEditPage() {
                         onOpenCurrencySettings={() => setIsCurrencySettingsOpen(true)}
                     />
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title={t('productEditPage.sections.features')} icon={ControlsIcon}>
-                        <ProductAttributesSection ref={attributesSectionRef} productId={isNew ? null : id} productContextVersion={productContextRef.current.version} onFilledChange={setHasFilledAttribute} />
+                        <ProductAttributesSection ref={attributesSectionRef} productId={isNew ? null : id} productContextVersion={productContextRef.current.version} onFilledChange={setHasFilledAttribute} onChange={resetSuccessfulSaveStatus} />
                     </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.variants = element; }} id="variants" title={t('productEditPage.sections.variants')} icon={LayersIcon} open>
                         {variantsOpenError && <Alert variant="error" className="mb-3">{variantsOpenError}</Alert>}
@@ -1126,7 +1142,10 @@ export default function ProductEditPage() {
                             <RichTextEditor
                                 instanceKey="product-description"
                                 value={form.description}
-                                onChange={(description) => setForm((current) => ({ ...current, description }))}
+                                onChange={(description) => {
+                                    resetSuccessfulSaveStatus();
+                                    setForm((current) => ({ ...current, description }));
+                                }}
                                 disabled={isSubmitting}
                             />
                         </label>
@@ -1141,8 +1160,14 @@ export default function ProductEditPage() {
                             titleName="seo_title"
                             descriptionName="seo_description"
                             disabled={isSubmitting}
-                            onTitleChange={(seoTitle) => setForm((current) => ({ ...current, seo_title: seoTitle }))}
-                            onDescriptionChange={(seoDescription) => setForm((current) => ({ ...current, seo_description: seoDescription }))}
+                            onTitleChange={(seoTitle) => {
+                                resetSuccessfulSaveStatus();
+                                setForm((current) => ({ ...current, seo_title: seoTitle }));
+                            }}
+                            onDescriptionChange={(seoDescription) => {
+                                resetSuccessfulSaveStatus();
+                                setForm((current) => ({ ...current, seo_description: seoDescription }));
+                            }}
                         />
                     </AccordionSection>
                 </form>
@@ -1161,6 +1186,7 @@ export default function ProductEditPage() {
             <div className="fixed bottom-4 left-[calc(var(--sidebar-width)+2rem)] right-8 z-30 flex min-h-[70px] items-center justify-between gap-5 rounded-[14px] border border-[color:var(--color-border)] bg-white/95 px-4 py-2.5 shadow-[0_14px_40px_rgba(45,31,22,.12)] backdrop-blur max-lg:hidden">
                 <ActionBarSummary productName={actionBarProductName} />
                 <div className="flex shrink-0 items-center gap-2">
+                    <SaveStatus status={currentSaveStatus} className="mr-1" />
                     {!isNew && <button className="button button--outline h-10 w-10 px-0" type="button" aria-label={t('productEditPage.actions.preview')} title={t('productEditPage.actions.preview')}><EyeIcon size={20} className="shrink-0" /></button>}
                     {actionMenuItems.length > 0 && (
                         <ActionsMenu
@@ -1180,6 +1206,7 @@ export default function ProductEditPage() {
 
             <AdminMobileActionBar
                 header={<ActionBarSummary productName={actionBarProductName} />}
+                status={currentSaveStatus ? <SaveStatus status={currentSaveStatus} /> : null}
             >
                 {actionMenuItems.length > 0 && (
                     <ActionsMenu

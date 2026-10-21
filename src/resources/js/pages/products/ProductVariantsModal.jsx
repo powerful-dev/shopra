@@ -4,9 +4,9 @@ import { appName } from '../../adminConfig';
 import Alert from '../../components/admin/Alert';
 import BulkActionsBar from '../../components/admin/BulkActionsBar';
 import ImageLightbox from '../../components/admin/ImageLightbox';
+import SaveStatus from '../../components/admin/SaveStatus';
 import Field from '../../components/form/Field';
 import Select from '../../components/form/Select';
-import CheckIcon from '../../components/icons/CheckIcon';
 import CloseIcon from '../../components/icons/CloseIcon';
 import ImageIcon from '../../components/icons/ImageIcon';
 import InfoIcon from '../../components/icons/InfoIcon';
@@ -1046,7 +1046,7 @@ export default function ProductVariantsModal({
 
             console.error('Unable to save product variants.', error);
             setSaveErrors(validationMessages(error, t('productEditPage.variantModal.saveFallbackError')));
-            setSaveStatus('error');
+            setSaveStatus(null);
         } finally {
             if (saveOperationRef.current === operation) {
                 saveOperationRef.current = null;
@@ -1072,7 +1072,7 @@ export default function ProductVariantsModal({
                     {addedOptions.length > 0 && <><PhotosSection options={addedOptions} images={images} photoState={photoState} setPhotoState={setPhotoState} dirtyAssignmentKeys={dirtyPhotoAssignments} onOpenImage={(index) => { setLightboxIndex(index); setIsLightboxOpen(true); }} onChange={markVariantsChanged} /><VariantsSection combinations={combinations} totalCount={totalCount} variantData={variantData} basePrice={normalizedBasePrice} separatePrices={separatePrices} showPriceSettings onTogglePrices={toggleSeparatePrices} onVariantChange={updateVariant} /></>}
                     </>}
                 </div></div>
-                <footer className="flex min-h-[76px] min-w-0 shrink-0 items-center gap-3 border-t border-[color:var(--color-border)] bg-white px-7 py-[11px] max-sm:grid max-sm:grid-cols-1 max-sm:px-[14px] max-sm:pb-[calc(11px+env(safe-area-inset-bottom))]"><div className="flex min-w-0 flex-1 flex-col max-sm:col-span-full"><span className="break-words text-[12px] font-bold">{t('productEditPage.variants.optionCount', { count: addedOptions.length })} · {t('productEditPage.variants.valueCount', { count: selectedValuesCount })}</span><small className="break-words text-[11px] text-[#928981]">{t('productEditPage.variantModal.footerHint')}</small></div>{(isSaving || saveStatus) && <div className={`flex min-w-0 shrink-0 items-center gap-2 break-words text-[12px] font-bold max-sm:col-span-full ${saveStatus === 'error' ? 'text-[#a6402b]' : isSaving ? 'text-[#766d66]' : 'text-[#3c8354]'}`} role={saveStatus === 'error' ? 'alert' : 'status'} aria-live="polite">{isSaving ? <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[#cfc6bf] border-t-[color:var(--color-accent)]" aria-hidden="true" /> : <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-white ${saveStatus === 'error' ? 'bg-[#b94d38]' : 'bg-[#4c9564]'}`} aria-hidden="true">{saveStatus === 'success' ? <CheckIcon /> : <CloseIcon width={12} height={12} />}</span>}<span>{isSaving ? t('productEditPage.variantSaveStatus.saving') : t(`productEditPage.variantSaveStatus.${saveStatus}`)}</span></div>}<button type="button" className="button button--secondary min-h-[42px] min-w-0 justify-center whitespace-normal max-sm:w-full" onClick={onClose} disabled={isSaving}>{t('productEditPage.variantModal.close')}</button><button type="button" className="button button--primary min-h-[42px] min-w-0 justify-center whitespace-normal disabled:cursor-wait disabled:opacity-70 max-sm:w-full" onClick={() => void saveVariants()} disabled={!productId || isSaving || isVariantsLoading || Boolean(variantsError)}>{isSaving ? <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" /> : <SaveIcon />}{isSaving ? t('productEditPage.variantSaveStatus.saving') : t('productEditPage.variantModal.save')}</button></footer>
+                <footer className="flex min-h-[76px] min-w-0 shrink-0 items-center gap-3 border-t border-[color:var(--color-border)] bg-white px-7 py-[11px] max-sm:grid max-sm:grid-cols-1 max-sm:px-[14px] max-sm:pb-[calc(11px+env(safe-area-inset-bottom))]"><div className="flex min-w-0 flex-1 flex-col max-sm:col-span-full"><span className="break-words text-[12px] font-bold">{t('productEditPage.variants.optionCount', { count: addedOptions.length })} · {t('productEditPage.variants.valueCount', { count: selectedValuesCount })}</span><small className="break-words text-[11px] text-[#928981]">{t('productEditPage.variantModal.footerHint')}</small></div><SaveStatus status={isSaving ? 'saving' : saveStatus} className="max-sm:col-span-full" /><button type="button" className="button button--secondary min-h-[42px] min-w-0 justify-center whitespace-normal max-sm:w-full" onClick={onClose} disabled={isSaving}>{t('productEditPage.variantModal.close')}</button><button type="button" className="button button--primary min-h-[42px] min-w-0 justify-center whitespace-normal disabled:cursor-wait disabled:opacity-70 max-sm:w-full" onClick={() => void saveVariants()} disabled={!productId || isSaving || isVariantsLoading || Boolean(variantsError)}>{isSaving ? <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" /> : <SaveIcon />}{isSaving ? t('common.saveStatus.saving') : t('productEditPage.variantModal.save')}</button></footer>
                 </section>
             </div>
             <CreateAttributeModal

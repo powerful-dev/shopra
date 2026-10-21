@@ -5,7 +5,11 @@
         "categories": "Категории",
         "stock": "Остаток",
         "price": "Цена",
-        "status": "Статус"
+        "status": "Статус",
+        "saveStatus": {
+            "saving": "Сохранение…",
+            "success": "Изменения сохранены"
+        }
     },
     "currencies": {
         "UAH": "Украинская гривна",
@@ -665,11 +669,6 @@
             "cancel": "Отмена",
             "priceError": "Укажите цену не меньше 0.",
             "stockError": "Укажите целое количество не меньше 0."
-        },
-        "variantSaveStatus": {
-            "saving": "Сохранение…",
-            "success": "Изменения сохранены",
-            "error": "Не удалось сохранить изменения"
         },
         "variantModal": {
             "fallbackOption": "Опция #{{id}}",

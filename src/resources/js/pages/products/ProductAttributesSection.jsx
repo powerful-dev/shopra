@@ -48,7 +48,7 @@ const mergeAttributes = (current, savedAttributes) => sortAttributes([
         .filter((attribute) => attribute && !current.some((item) => item.id === attribute.id)),
 ]);
 
-const ProductAttributesSection = forwardRef(function ProductAttributesSection({ productId, productContextVersion, onFilledChange }, ref) {
+const ProductAttributesSection = forwardRef(function ProductAttributesSection({ productId, productContextVersion, onFilledChange, onChange }, ref) {
     const { t } = useTranslation();
     const translationRef = useRef(t);
     const [attributes, setAttributes] = useState([]);
@@ -222,12 +222,14 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
     ), [attributes]);
 
     const addRow = () => {
+        onChange?.();
         const id = nextRowIdRef.current;
         nextRowIdRef.current += 1;
         updateRows((current) => [...current, { id, attributeId: null, value: '' }]);
     };
 
     const updateRowAttribute = (rowId, attributeId) => {
+        onChange?.();
         const attribute = attributesById.get(attributeId);
 
         updateRows((current) => current.map((row) => row.id === rowId
@@ -236,10 +238,12 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
     };
 
     const updateRowValue = (rowId, value) => {
+        onChange?.();
         updateRows((current) => current.map((row) => row.id === rowId ? { ...row, value } : row));
     };
 
     const handleCreated = (attribute) => {
+        onChange?.();
         setAttributes((current) => sortAttributes([
             ...current.filter((item) => item.id !== attribute.id),
             attribute,
@@ -251,6 +255,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
     };
 
     const handleAttributesChanged = (nextAttributes) => {
+        onChange?.();
         const sortedAttributes = sortAttributes(nextAttributes);
         const nextById = new Map(sortedAttributes.map((attribute) => [attribute.id, attribute]));
 
@@ -298,6 +303,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
             setAttributes((current) => current.map((item) => item.id === attribute.id
                 ? { ...item, options: [...(item.options ?? []), option] }
                 : item));
+            onChange?.();
             updateRows((current) => current.map((row) => {
                 if (row.id !== rowId) return row;
 
@@ -350,6 +356,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
 
         reorderedRows.splice(targetIndex + (position === 'after' ? 1 : 0), 0, draggedRow);
         endRowDrag();
+        onChange?.();
         updateRows(reorderedRows);
     };
 
@@ -464,7 +471,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                                         onCreateOption={(value) => createOptionForRow(row.id, attribute, value)}
                                     />
                                 </div>
-                                <button type="button" className="mt-[24px] grid h-[41px] w-[38px] cursor-pointer place-items-center rounded-[9px] border border-[#e2d9d3] bg-white text-[#8b8179] hover:border-[#e1b9ad] hover:text-[#b7483f] disabled:cursor-wait disabled:opacity-50 max-md:col-start-3 max-md:row-start-2 max-md:mt-[22px]" disabled={isValuesLoading} onClick={() => updateRows((current) => current.filter((item) => item.id !== row.id))} aria-label={t('productEditPage.attributesSection.deleteAttribute')}>
+                                <button type="button" className="mt-[24px] grid h-[41px] w-[38px] cursor-pointer place-items-center rounded-[9px] border border-[#e2d9d3] bg-white text-[#8b8179] hover:border-[#e1b9ad] hover:text-[#b7483f] disabled:cursor-wait disabled:opacity-50 max-md:col-start-3 max-md:row-start-2 max-md:mt-[22px]" disabled={isValuesLoading} onClick={() => { onChange?.(); updateRows((current) => current.filter((item) => item.id !== row.id)); }} aria-label={t('productEditPage.attributesSection.deleteAttribute')}>
                                     <TrashIcon />
                                 </button>
                                 {rowDropTarget?.id === row.id && (
