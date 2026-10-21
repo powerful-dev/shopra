@@ -7,7 +7,18 @@ const DANGER_ACTION_CLASS = 'flex w-full items-center gap-2 whitespace-nowrap ro
 const TRIGGER_CLASS = 'grid h-8 w-8 place-items-center rounded-lg border-0 bg-transparent text-[#756d67] hover:bg-[#f2ede9]';
 const MENU_GAP = 8;
 
-export default function ActionsMenu({ actions, isOpen, onToggle, onClose, ariaLabel, className = '', triggerClassName = '' }) {
+export default function ActionsMenu({
+    actions,
+    isOpen,
+    onToggle,
+    onClose,
+    ariaLabel,
+    className = '',
+    triggerClassName = '',
+    menuAlignment = 'end',
+    menuPlacement = 'auto',
+    constrainToViewport = false,
+}) {
     const containerRef = useRef(null);
     const triggerRef = useRef(null);
     const menuRef = useRef(null);
@@ -17,6 +28,11 @@ export default function ActionsMenu({ actions, isOpen, onToggle, onClose, ariaLa
         if (!isOpen) return undefined;
 
         const updatePlacement = () => {
+            if (menuPlacement !== 'auto') {
+                setPlacement(menuPlacement);
+                return;
+            }
+
             const trigger = triggerRef.current;
             const menu = menuRef.current;
 
@@ -37,7 +53,7 @@ export default function ActionsMenu({ actions, isOpen, onToggle, onClose, ariaLa
             window.removeEventListener('resize', updatePlacement);
             window.removeEventListener('scroll', updatePlacement, true);
         };
-    }, [isOpen, actions.length]);
+    }, [isOpen, actions.length, menuPlacement]);
 
     useEffect(() => {
         if (!isOpen) return undefined;
@@ -76,7 +92,7 @@ export default function ActionsMenu({ actions, isOpen, onToggle, onClose, ariaLa
             {isOpen && (
                 <div
                     ref={menuRef}
-                    className={`absolute right-0 z-30 w-max min-w-[150px] max-w-[400px] rounded-2xl border border-[color:var(--color-border)] bg-white p-1.5 shadow-[var(--shadow-md)] ${placement === 'bottom' ? 'top-[calc(100%+8px)]' : 'bottom-[calc(100%+8px)]'}`}
+                    className={`absolute z-30 w-max rounded-2xl border border-[color:var(--color-border)] bg-white p-1.5 shadow-[var(--shadow-md)] ${menuAlignment === 'start' ? 'left-0' : 'right-0'} ${constrainToViewport ? 'min-w-0 max-w-[calc(100vw-1.5rem)]' : 'min-w-[150px] max-w-[400px]'} ${placement === 'bottom' ? 'top-[calc(100%+8px)]' : 'bottom-[calc(100%+8px)]'}`}
                     role="menu"
                 >
                     {actions.map((action) => (

@@ -1190,6 +1190,9 @@ export default function ProductEditPage() {
                         onToggle={() => setOpenActionMenu((placement) => placement === 'mobile' ? null : 'mobile')}
                         onClose={() => setOpenActionMenu(null)}
                         actions={actionMenuItems}
+                        menuAlignment="start"
+                        menuPlacement="top"
+                        constrainToViewport
                     />
                 )}
                 <button className="button button--primary min-h-10 min-w-0 flex-1 px-2 text-center" type="button" disabled={isActionBarBusy} onClick={saveCurrentProduct}><SaveIcon />{t('common.save')}</button>
