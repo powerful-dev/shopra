@@ -38,6 +38,7 @@ import RocketIcon from '../../components/icons/RocketIcon';
 import ChevronIcon from '../../components/icons/ChevronIcon';
 import SaveIcon from '../../components/icons/SaveIcon';
 import PencilIcon from '../../components/icons/PencilIcon';
+import PackageIcon from '../../components/icons/PackageIcon';
 import { ApiError, csrf, request } from '../../services/api';
 import { getShopAttributes } from '../../services/shopAttributes';
 import { getShopGroups } from '../../services/shopGroups';
@@ -1493,10 +1494,10 @@ function ActionBarSummary({ productName }) {
 
     return (
         <div className="flex min-w-0 items-center gap-2.5">
-            <span className="grid h-8 w-8 shrink-0 place-items-center text-[#9a765f]" aria-hidden="true"><SaveIcon /></span>
+            <span className="grid h-8 w-8 shrink-0 place-items-center text-[#9a765f]" aria-hidden="true"><PackageIcon /></span>
             <span className="flex min-w-0 flex-col">
-                <strong className="truncate text-[12px] text-[#312d29]">{t('productEditPage.actionBar.unsaved')}</strong>
-                <small className="truncate text-[11px] text-[#8d857e]">{productName}</small>
+                <strong className="truncate text-[12px] text-[#312d29]">{productName}</strong>
+                <small className="truncate text-[11px] text-[#8d857e]">{t('productEditPage.header.editProduct')}</small>
             </span>
         </div>
     );

@@ -384,9 +384,6 @@
             "active": "Active",
             "archived": "Archived"
         },
-        "actionBar": {
-            "unsaved": "Changes not saved"
-        },
         "actions": {
             "publish": "Publish",
             "archive": "Move to archive",
