@@ -205,9 +205,6 @@ class SaveProductVariantsRequest extends FormRequest
                         }
                         $seenAttributeOptionIds[$attributeOptionId] = true;
                     } elseif ($value !== null) {
-                        if ($attributeId !== null) {
-                            $validator->errors()->add("{$valuePath}.value", 'A referenced attribute requires referenced values.');
-                        }
                         if (isset($seenLocalValues[$value])) {
                             $validator->errors()->add("{$valuePath}.value", 'The local value is duplicated.');
                         }

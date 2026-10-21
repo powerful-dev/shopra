@@ -62,6 +62,91 @@ class SaveProductVariantsApiTest extends TestCase
         ]);
     }
 
+    public function test_referenced_attribute_can_have_local_values_without_changing_global_options(): void
+    {
+        $this->authenticateProductAdmin();
+        [$item, $color, $red, $blue] = $this->createCatalogData();
+        $blue->delete();
+        $color->update(['name' => 'Цвет']);
+        $red->update(['value' => 'Красный']);
+
+        $payload = [
+            'settings' => [
+                'individual_prices_enabled' => false,
+                'photos_enabled' => false,
+                'photo_option_id' => null,
+                'default_photo_value_id' => null,
+            ],
+            'options' => [[
+                'id' => 'option-color',
+                'shop_attribute_id' => $color->id,
+                'name' => null,
+                'sort_order' => 0,
+                'values' => [
+                    ['id' => 'color-red', 'shop_attribute_option_id' => $red->id, 'value' => null, 'sort_order' => 0],
+                    ['id' => 'color-purple', 'shop_attribute_option_id' => null, 'value' => 'Фиолетовый', 'sort_order' => 1],
+                ],
+            ]],
+            'variants' => [
+                [
+                    'selections' => [['option_id' => 'option-color', 'value_id' => 'color-red']],
+                    'price' => '110.00',
+                    'quantity' => 5,
+                    'sku' => 'RED',
+                    'is_active' => true,
+                    'sort_order' => 0,
+                ],
+                [
+                    'selections' => [['option_id' => 'option-color', 'value_id' => 'color-purple']],
+                    'price' => '120.00',
+                    'quantity' => 2,
+                    'sku' => 'PURPLE',
+                    'is_active' => true,
+                    'sort_order' => 1,
+                ],
+            ],
+            'photos' => [],
+        ];
+
+        $savedState = $this->putJson("/api/products/{$item->id}/variants", $payload)
+            ->assertOk()
+            ->assertJsonPath('data.options.0.shop_attribute_id', $color->id)
+            ->assertJsonPath('data.options.0.values.0.shop_attribute_option_id', $red->id)
+            ->assertJsonPath('data.options.0.values.0.value', null)
+            ->assertJsonPath('data.options.0.values.1.shop_attribute_option_id', null)
+            ->assertJsonPath('data.options.0.values.1.value', 'Фиолетовый')
+            ->assertJsonCount(2, 'data.options.0.values')
+            ->assertJsonCount(2, 'data.variants')
+            ->json('data');
+
+        $purpleValueId = $savedState['options'][0]['values'][1]['id'];
+
+        $this->assertSame($purpleValueId, $savedState['variants'][1]['selections'][0]['value_id']);
+        $this->assertDatabaseHas('shop_item_variant_values', [
+            'id' => $purpleValueId,
+            'shop_attribute_option_id' => null,
+            'value' => 'Фиолетовый',
+        ]);
+        $this->assertDatabaseMissing('shop_attribute_options', [
+            'attribute_id' => $color->id,
+            'value' => 'Фиолетовый',
+        ]);
+
+        $this->getJson("/api/products/{$item->id}/variants")
+            ->assertOk()
+            ->assertJsonPath('data.options.0.shop_attribute_id', $color->id)
+            ->assertJsonPath('data.options.0.values.0.shop_attribute_option_id', $red->id)
+            ->assertJsonPath('data.options.0.values.0.value', null)
+            ->assertJsonPath('data.options.0.values.1.id', $purpleValueId)
+            ->assertJsonPath('data.options.0.values.1.shop_attribute_option_id', null)
+            ->assertJsonPath('data.options.0.values.1.value', 'Фиолетовый')
+            ->assertJsonPath('data.variants.1.selections.0.value_id', $purpleValueId)
+            ->assertJsonCount(2, 'data.options.0.values')
+            ->assertJsonCount(2, 'data.variants');
+
+        $this->assertDatabaseCount('shop_attribute_options', 1);
+    }
+
     public function test_repeated_save_preserves_ids_updates_values_and_deletes_missing_records(): void
     {
         $this->authenticateProductAdmin();
