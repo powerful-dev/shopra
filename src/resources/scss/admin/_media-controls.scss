@@ -1,5 +1,6 @@
 .product-media-grid {
     --media-card-width: 139px;
+    --media-column-count: 0;
     --media-upload-column-span: 3;
 
     position: relative;
@@ -15,6 +16,14 @@
 }
 
 .media-card {
+    user-select: none;
+    -webkit-user-select: none;
+
+    img,
+    video {
+        -webkit-user-drag: none;
+    }
+
     .media-control {
         position: absolute;
         top: 8px;
@@ -43,6 +52,8 @@
             left: 8px;
             color: #766d66;
             cursor: grab;
+            touch-action: none;
+            -webkit-touch-callout: none;
 
             &:active {
                 cursor: grabbing;
@@ -81,7 +92,66 @@
 
 @media (max-width: 639px) {
     .product-media-grid {
-        --media-card-width: 119px;
+        --media-column-count: 2;
         --media-upload-column-span: 2;
+    }
+
+    .media-card {
+        .media-control {
+            top: 2px;
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            box-shadow: none;
+            backdrop-filter: none;
+
+            &::before {
+                position: absolute;
+                inset: 6px;
+                border-radius: 7px;
+                background: rgba(255, 255, 255, 0.78);
+                box-shadow: 0 1px 3px rgba(48, 35, 27, 0.12);
+                backdrop-filter: blur(4px);
+                content: '';
+            }
+
+            svg {
+                position: relative;
+                z-index: 1;
+                width: 14px;
+                height: 14px;
+            }
+
+            &--drag {
+                left: 2px;
+            }
+
+            &--delete {
+                right: 2px;
+
+                &:hover {
+                    background: transparent;
+                }
+            }
+        }
+    }
+
+    .media-main-badge {
+        bottom: 4px;
+        right: 4px;
+        max-width: calc(100% - 8px);
+        overflow: hidden;
+        padding: 2px 4px;
+        font-size: 9px;
+        line-height: 1.2;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+@media (min-width: 360px) and (max-width: 639px) {
+    .product-media-grid {
+        --media-column-count: 3;
+        --media-upload-column-span: 3;
     }
 }

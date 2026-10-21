@@ -1574,6 +1574,7 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
     const mediaGridRef = useRef(null);
     const uploadInProgressRef = useRef(null);
     const draggedMediaIdRef = useRef(null);
+    const dragPointerIdRef = useRef(null);
     const deletedMediaIdsRef = useRef(new Set());
     const deletingMediaIdsRef = useRef(new Set());
     const [pendingMedia, setPendingMedia] = useState([]);
@@ -1667,12 +1668,21 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
 
         const updateUploadSpan = () => {
             const styles = window.getComputedStyle(grid);
-            const cardWidth = Number.parseFloat(styles.getPropertyValue('--media-card-width'));
             const columnGap = Number.parseFloat(styles.columnGap);
+            const mobileColumnCount = Number.parseInt(styles.getPropertyValue('--media-column-count'), 10);
+            const configuredCardWidth = Number.parseFloat(styles.getPropertyValue('--media-card-width'));
 
-            if (!cardWidth || Number.isNaN(columnGap)) return;
+            if (Number.isNaN(columnGap)) return;
 
-            const columnCount = Math.max(1, Math.floor((grid.clientWidth + columnGap) / (cardWidth + columnGap)));
+            const columnCount = mobileColumnCount > 0
+                ? mobileColumnCount
+                : Math.max(1, Math.floor((grid.clientWidth + columnGap) / (configuredCardWidth + columnGap)));
+            const cardWidth = mobileColumnCount > 0
+                ? (grid.clientWidth - (columnGap * (columnCount - 1))) / columnCount
+                : configuredCardWidth;
+
+            if (!cardWidth) return;
+
             const occupiedLastRow = occupiedMediaSlots % columnCount;
             const availableUploadWidth = grid.clientWidth - (occupiedLastRow * (cardWidth + columnGap));
             const uploadSpan = occupiedLastRow > 0 && availableUploadWidth >= 280
@@ -1680,9 +1690,11 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
                 : columnCount;
             const flexibleColumn = `minmax(${cardWidth}px, 1fr)`;
 
-            grid.style.gridTemplateColumns = columnCount > 1
-                ? `repeat(${columnCount - 1}, ${cardWidth}px) ${flexibleColumn}`
-                : flexibleColumn;
+            grid.style.gridTemplateColumns = mobileColumnCount > 0
+                ? `repeat(${columnCount}, minmax(0, 1fr))`
+                : columnCount > 1
+                    ? `repeat(${columnCount - 1}, ${cardWidth}px) ${flexibleColumn}`
+                    : flexibleColumn;
 
             grid.style.setProperty('--media-upload-column-span', String(uploadSpan));
         };
@@ -1697,21 +1709,38 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
 
     const endMediaDrag = () => {
         draggedMediaIdRef.current = null;
+        dragPointerIdRef.current = null;
         setDraggedMediaId(null);
         setMediaDropTarget(null);
     };
 
-    const moveMedia = async (event, target) => {
+    const getMediaDropTarget = (clientX, clientY) => {
+        const element = document.elementFromPoint(clientX, clientY);
+        const card = element?.closest?.('[data-media-card]');
+
+        if (!card) return null;
+
+        const item = media.find((mediaItem) => idsMatch(mediaItem.id, card.dataset.mediaId));
+        if (!item || idsMatch(item.id, draggedMediaIdRef.current)) return null;
+
+        const rect = card.getBoundingClientRect();
+
+        return {
+            item,
+            card,
+            position: clientX < rect.left + rect.width / 2 ? 'before' : 'after',
+        };
+    };
+
+    const moveMedia = async (target, clientX, targetElement) => {
         const draggedId = draggedMediaIdRef.current;
 
         if (draggedId === null || draggedId === target.id || isSortingMedia || isDeletingMedia) return;
 
-        event.preventDefault();
-        event.stopPropagation();
         const previousMedia = media;
         const contextVersion = getProductContextVersion();
-        const targetRect = event.currentTarget.getBoundingClientRect();
-        const position = event.clientX < targetRect.left + targetRect.width / 2 ? 'before' : 'after';
+        const targetRect = targetElement.getBoundingClientRect();
+        const position = clientX < targetRect.left + targetRect.width / 2 ? 'before' : 'after';
         const reordered = media.filter((item) => item.id !== draggedId);
         const targetIndex = reordered.findIndex((item) => item.id === target.id);
         const insertIndex = targetIndex + (position === 'after' ? 1 : 0);
@@ -1997,7 +2026,8 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
                         <div
                             key={item.id}
                             data-media-card
-                            className={`media-card relative h-[178px] w-[139px] overflow-hidden rounded-[10px] border bg-[#f5f1ee] transition-[border-color,box-shadow,opacity,transform] max-sm:h-[153px] max-sm:w-[119px] ${draggedMediaId === item.id ? 'scale-[.97] border-[color:var(--color-accent)] opacity-45' : 'border-[color:var(--color-border)]'} ${mediaDropTarget?.id === item.id ? 'border-[color:var(--color-accent)] ring-2 ring-[rgba(184,79,24,.18)]' : ''}`}
+                            data-media-id={item.id}
+                            className={`media-card relative h-[178px] w-[139px] overflow-hidden rounded-[10px] border bg-[#f5f1ee] transition-[border-color,box-shadow,opacity,transform] max-sm:aspect-[119/153] max-sm:h-auto max-sm:w-full ${draggedMediaId === item.id ? 'scale-[.97] border-[color:var(--color-accent)] opacity-45' : 'border-[color:var(--color-border)]'} ${mediaDropTarget?.id === item.id ? 'border-[color:var(--color-accent)] ring-2 ring-[rgba(184,79,24,.18)]' : ''}`}
                             onDragOver={(event) => {
                                 if (draggedMediaIdRef.current === null || isSortingMedia || isDeletingMedia) return;
 
@@ -2008,7 +2038,11 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
                                 event.dataTransfer.dropEffect = draggedMediaIdRef.current === item.id ? 'none' : 'move';
                                 setMediaDropTarget(draggedMediaIdRef.current === item.id ? null : { id: item.id, position });
                             }}
-                            onDrop={(event) => void moveMedia(event, item)}
+                            onDrop={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                void moveMedia(item, event.clientX, event.currentTarget);
+                            }}
                         >
                             {item.type === 'image' ? (
                                 <button
@@ -2031,6 +2065,45 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
                                 aria-label={t('productEditPage.media.reorder')}
                                 title={t('productEditPage.media.drag')}
                                 draggable={!isSortingMedia && !isUploading && !isDeletingMedia}
+                                onPointerDown={(event) => {
+                                    if (event.pointerType === 'mouse') return;
+                                    if (isSortingMedia || isUploading || isDeletingMedia) return;
+
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    event.currentTarget.setPointerCapture(event.pointerId);
+                                    dragPointerIdRef.current = event.pointerId;
+                                    draggedMediaIdRef.current = item.id;
+                                    setDraggedMediaId(item.id);
+                                    setSortError('');
+                                }}
+                                onPointerMove={(event) => {
+                                    if (dragPointerIdRef.current !== event.pointerId) return;
+
+                                    event.preventDefault();
+                                    const dropTarget = getMediaDropTarget(event.clientX, event.clientY);
+                                    setMediaDropTarget(dropTarget
+                                        ? { id: dropTarget.item.id, position: dropTarget.position }
+                                        : null);
+                                }}
+                                onPointerUp={(event) => {
+                                    if (dragPointerIdRef.current !== event.pointerId) return;
+
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    const dropTarget = getMediaDropTarget(event.clientX, event.clientY);
+
+                                    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                                        event.currentTarget.releasePointerCapture(event.pointerId);
+                                    }
+
+                                    if (dropTarget) {
+                                        void moveMedia(dropTarget.item, event.clientX, dropTarget.card);
+                                    } else {
+                                        endMediaDrag();
+                                    }
+                                }}
+                                onPointerCancel={endMediaDrag}
                                 onDragStart={(event) => {
                                     if (isDeletingMedia) {
                                         event.preventDefault();
@@ -2056,7 +2129,7 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
                             {mediaDropTarget?.id === item.id && (
                                 <span className={`pointer-events-none absolute inset-y-2 z-30 w-0.5 rounded-full bg-[color:var(--color-accent)] ${mediaDropTarget.position === 'before' ? 'left-1' : 'right-1'}`} aria-hidden="true" />
                             )}
-                            {item.is_main && <span className="pointer-events-none absolute bottom-[5px] right-[5px] rounded-[5px] bg-white/90 px-[5px] py-[3px] text-[11px] font-[750] text-[#9b3f14]">{t('productEditPage.media.main')}</span>}
+                            {item.is_main && <span className="media-main-badge pointer-events-none absolute bottom-[5px] right-[5px] rounded-[5px] bg-white/90 px-[5px] py-[3px] text-[11px] font-[750] text-[#9b3f14]">{t('productEditPage.media.main')}</span>}
                             {isDeleting && (
                                 <div className="absolute inset-0 z-30 grid place-items-center bg-black/35" role="status" aria-label={t('productEditPage.media.deleting')}>
                                     <span className="h-7 w-7 animate-spin rounded-full border-[3px] border-white/40 border-t-white" aria-hidden="true" />
@@ -2066,7 +2139,7 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
                     );
                 })}
                 {pendingMedia.map((item) => (
-                    <div key={item.id} className="relative h-[178px] w-[139px] overflow-hidden rounded-[10px] border border-[color:var(--color-border)] bg-[#f5f1ee] max-sm:h-[153px] max-sm:w-[119px]">
+                    <div key={item.id} className="relative h-[178px] w-[139px] overflow-hidden rounded-[10px] border border-[color:var(--color-border)] bg-[#f5f1ee] max-sm:aspect-[119/153] max-sm:h-auto max-sm:w-full">
                         {item.type === 'video' ? (
                             <video className="h-full w-full bg-black object-cover" src={item.previewUrl} muted preload="metadata" draggable={false} />
                         ) : item.type === 'image' && item.previewUrl ? (
@@ -2078,7 +2151,7 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
                     </div>
                 ))}
                 {isLoading && (
-                    <div className="grid h-[178px] w-[139px] place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#f8f5f2] max-sm:h-[153px] max-sm:w-[119px]" role="status" aria-label={t('productEditPage.media.loading')}>
+                    <div className="grid h-[178px] w-[139px] place-items-center rounded-[10px] border border-[color:var(--color-border)] bg-[#f8f5f2] max-sm:aspect-[119/153] max-sm:h-auto max-sm:w-full" role="status" aria-label={t('productEditPage.media.loading')}>
                         <span className="h-7 w-7 animate-spin rounded-full border-[3px] border-[#d8cbc2] border-t-[color:var(--color-accent)]" aria-hidden="true" />
                     </div>
                 )}
