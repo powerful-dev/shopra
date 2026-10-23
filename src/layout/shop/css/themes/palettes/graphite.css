@@ -1,0 +1,25 @@
+/* Графит: current showcase palette. Action and readable accent are separate roles. */
+:root {
+  --shopra-color-primary: #333333;
+  --shopra-color-primary-hover: color-mix(in srgb, #333333 90%, #171717);
+  --shopra-color-primary-active: color-mix(in srgb, #333333 80%, #171717);
+  --shopra-color-on-primary: #FFFFFF;
+  --shopra-color-accent: #333333;
+  --shopra-color-accent-hover: color-mix(in srgb, #333333 85%, #171717);
+  --shopra-color-secondary: #171717;
+  --shopra-color-secondary-hover: color-mix(in srgb, #171717 90%, #000000);
+  --shopra-color-on-secondary: #FFFFFF;
+  --shopra-color-surface: #F7F7F7;
+  --shopra-color-muted: #E5E5E5;
+  --shopra-color-text: #171717;
+  --shopra-color-text-muted: color-mix(in srgb, #171717 70%, #F7F7F7);
+  --shopra-color-border: color-mix(in srgb, #171717 18%, #F7F7F7);
+  --shopra-color-focus: #333333;
+  --shopra-color-header: #FFFFFF;
+  --shopra-color-footer: #E9E9E9;
+  --shopra-color-footer-text: #171717;
+  --shopra-color-hero-start: #111111;
+  --shopra-color-hero-end: #3F3F3F;
+  --shopra-shadow-card: 0 10px 30px color-mix(in srgb, #171717 7%, transparent);
+  --shopra-shadow-floating: 0 20px 50px color-mix(in srgb, #171717 16%, transparent);
+}

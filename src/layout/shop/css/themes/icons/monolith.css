@@ -1,0 +1,18 @@
+:root {
+  --shopra-icon-set: bold;
+  --shopra-icon-stroke-width: 2.8;
+  --shopra-icon-linecap: round;
+  --shopra-icon-linejoin: round;
+  --shopra-icon-fill: none;
+  --shopra-icon-button-size: 46px;
+  --shopra-icon-button-background: var(--shopra-color-muted);
+  --shopra-icon-button-border: transparent;
+  --shopra-icon-button-border-width: 2px;
+  --shopra-icon-button-scale: 1;
+  --shopra-radius-icon: 999px;
+  --shopra-icon-source-search: search-large;
+  --shopra-icon-source-heart: heart;
+  --shopra-icon-source-user: user;
+  --shopra-icon-source-settings: nut;
+  --shopra-icon-source-cart: album;
+}

@@ -1,0 +1,16 @@
+/* The hit area and quantity badge stay intact; only the icon surface disappears. */
+:root {
+  --shopra-icon-background: bare;
+  --shopra-card-icon-background: transparent;
+  --shopra-card-icon-active-background: transparent;
+  --shopra-card-icon-active-color: var(--shopra-color-on-secondary);
+  --shopra-card-icon-shadow: drop-shadow(0 1px 1px color-mix(in srgb, var(--shopra-color-secondary) 80%, transparent));
+  --shopra-card-favorite-active-fill: currentColor;
+  --shopra-delivery-icon-background: transparent;
+  --shopra-delivery-icon-inverse-background: transparent;
+}
+
+/* Inverse theme ink and a subtle shadow remain legible over light or dark photography. */
+.uk-card-media-top > :is(a, button).uk-icon-button:not(.uk-button-primary) {
+  color: var(--shopra-color-on-secondary);
+}

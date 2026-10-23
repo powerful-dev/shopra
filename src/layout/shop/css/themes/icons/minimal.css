@@ -1,0 +1,18 @@
+:root {
+  --shopra-icon-set: minimal;
+  --shopra-icon-stroke-width: 1.25;
+  --shopra-icon-linecap: round;
+  --shopra-icon-linejoin: round;
+  --shopra-icon-fill: none;
+  --shopra-icon-button-size: 36px;
+  --shopra-icon-button-background: transparent;
+  --shopra-icon-button-border: transparent;
+  --shopra-icon-button-border-width: 0;
+  --shopra-icon-button-scale: 0.92;
+  --shopra-radius-icon: 999px;
+  --shopra-icon-source-search: search;
+  --shopra-icon-source-heart: heart;
+  --shopra-icon-source-user: user;
+  --shopra-icon-source-settings: menu;
+  --shopra-icon-source-cart: bag;
+}

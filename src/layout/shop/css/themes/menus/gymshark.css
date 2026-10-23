@@ -1,0 +1,104 @@
+/* Independent navigation preset: sliding category rails and mobile drill-down. */
+:root {
+  --shopra-menu-layout: gymshark;
+  --shopra-menu-rail-width: 300px;
+  --shopra-menu-backdrop: rgba(15, 18, 22, 0.32);
+  --shopra-menu-blur: 3px;
+}
+
+@media (min-width: 960px) {
+  [data-shopra-menu="gymshark"] .shopra-menu-header .uk-navbar-left > .uk-logo {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  [data-shopra-menu="gymshark"] .shopra-menu-header .uk-navbar-left > a[href^="tel:"] {
+    display: none;
+  }
+
+  [data-shopra-menu="gymshark"] .shopra-menu-header .uk-navbar-nav {
+    gap: 24px;
+  }
+
+  [data-shopra-menu="gymshark"] .shopra-menu-header .uk-navbar-nav > li > a {
+    font-size: 13px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  [data-shopra-menu="gymshark"] .shopra-menu-desktop {
+    width: var(--shopra-menu-rail-width) !important;
+    height: calc(100dvh - var(--shopra-menu-top));
+    max-height: calc(100dvh - var(--shopra-menu-top));
+    border-top: 1px solid var(--shopra-color-border);
+    overflow: visible;
+  }
+
+  [data-shopra-menu="gymshark"] .shopra-menu-desktop[data-expanded="true"] {
+    width: calc(var(--shopra-menu-rail-width) * 2) !important;
+  }
+
+  [data-shopra-menu="gymshark"] .shopra-menu-rail {
+    width: var(--shopra-menu-rail-width);
+    height: 100%;
+    box-sizing: border-box;
+    padding: 24px 24px 28px 40px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  [data-shopra-menu="gymshark"] .shopra-menu-secondary {
+    position: absolute;
+    top: 0;
+    left: var(--shopra-menu-rail-width);
+    border-left: 1px solid var(--shopra-color-border);
+    background: var(--shopra-color-surface);
+  }
+
+  [data-shopra-menu="gymshark"] .shopra-menu-rail .shopra-menu-row {
+    min-height: 48px;
+  }
+}
+
+[data-shopra-menu="gymshark"] #mobile-menu .shopra-menu-mobile-head {
+  grid-template-columns: 44px 1fr 44px;
+}
+
+[data-shopra-menu="gymshark"] #mobile-menu .uk-offcanvas-close {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+[data-shopra-menu="gymshark"] #mobile-menu .uk-logo {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
+}
+
+[data-shopra-menu="gymshark"] #mobile-menu .shopra-menu-mobile-favorite {
+  display: inline-flex;
+}
+
+[data-shopra-menu="gymshark"] #mobile-menu .shopra-menu-search {
+  margin: 8px 16px 20px;
+  min-height: 52px;
+}
+
+[data-shopra-menu="gymshark"] #mobile-menu .shopra-menu-row {
+  min-height: 54px;
+  border-bottom: 1px solid var(--shopra-color-border);
+}
+
+[data-shopra-menu="gymshark"] #mobile-menu .shopra-menu-promos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 24px 0;
+}
+
+[data-shopra-menu="gymshark"] #mobile-menu .shopra-menu-promo img {
+  height: 148px;
+}

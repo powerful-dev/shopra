@@ -1,0 +1,25 @@
+/* Чернильный: current showcase palette. Action and readable accent are separate roles. */
+:root {
+  --shopra-color-primary: #5B6034;
+  --shopra-color-primary-hover: color-mix(in srgb, #5B6034 90%, #242321);
+  --shopra-color-primary-active: color-mix(in srgb, #5B6034 80%, #242321);
+  --shopra-color-on-primary: #FFFFFF;
+  --shopra-color-accent: #5B6034;
+  --shopra-color-accent-hover: color-mix(in srgb, #5B6034 85%, #242321);
+  --shopra-color-secondary: #242321;
+  --shopra-color-secondary-hover: color-mix(in srgb, #242321 90%, #000000);
+  --shopra-color-on-secondary: #FFFFFF;
+  --shopra-color-surface: #F8F8F2;
+  --shopra-color-muted: #E6E6D5;
+  --shopra-color-text: #242321;
+  --shopra-color-text-muted: color-mix(in srgb, #242321 70%, #F8F8F2);
+  --shopra-color-border: color-mix(in srgb, #242321 18%, #F8F8F2);
+  --shopra-color-focus: #5B6034;
+  --shopra-color-header: #FDFDF9;
+  --shopra-color-footer: #DDDDBF;
+  --shopra-color-footer-text: #242321;
+  --shopra-color-hero-start: #1F201C;
+  --shopra-color-hero-end: #494D34;
+  --shopra-shadow-card: 0 10px 30px color-mix(in srgb, #242321 7%, transparent);
+  --shopra-shadow-floating: 0 20px 50px color-mix(in srgb, #242321 16%, transparent);
+}

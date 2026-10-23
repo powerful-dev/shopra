@@ -1,0 +1,100 @@
+/*
+ * Shared font roles, imported by every font selection.
+ * Compact sizes stay compatible with the existing UIkit storefront.
+ * The optical heading scale/leading come from the chosen font preset.
+ * This file deliberately has no spacing, colour or component-size rules.
+ */
+html {
+  font-synthesis: none;
+}
+
+body {
+  line-height: var(--shopra-font-line-height);
+}
+
+h1, .uk-h1 { font-size: calc(28px * var(--shopra-heading-scale)); }
+h2, .uk-h2 { font-size: calc(24px * var(--shopra-heading-scale)); }
+h3, .uk-h3, .uk-card-title { font-size: calc(18px * var(--shopra-heading-scale)); }
+h4, .uk-h4 { font-size: calc(16px * var(--shopra-heading-scale)); }
+h5, h6, .uk-h5, .uk-h6 { font-size: calc(14px * var(--shopra-heading-scale)); }
+.uk-heading-small { font-size: calc(36px * var(--shopra-heading-scale)); }
+.uk-heading-medium { font-size: calc(48px * var(--shopra-heading-scale)); }
+.uk-heading-large { font-size: calc(64px * var(--shopra-heading-scale)); }
+.uk-heading-xlarge, .uk-heading-2xlarge, .uk-heading-3xlarge { font-size: calc(72px * var(--shopra-heading-scale)); }
+
+h1, h2, h3, h4, h5, h6,
+.uk-h1, .uk-h2, .uk-h3, .uk-h4, .uk-h5, .uk-h6,
+.uk-heading-small, .uk-heading-medium, .uk-heading-large,
+.uk-heading-xlarge, .uk-heading-2xlarge, .uk-heading-3xlarge,
+.uk-modal-title, .uk-card-title {
+  line-height: var(--shopra-heading-line-height);
+}
+
+/* Optional character of a font selection; never transforms product names or UI labels. */
+h1, h2, h3, h4, h5, h6,
+.uk-h1, .uk-h2, .uk-h3, .uk-h4, .uk-h5, .uk-h6,
+.uk-heading-small, .uk-heading-medium, .uk-heading-large,
+.uk-heading-xlarge, .uk-heading-2xlarge, .uk-heading-3xlarge,
+.uk-modal-title {
+  text-transform: var(--shopra-heading-transform, none);
+}
+
+.uk-logo, .uk-logo > strong {
+  font-weight: var(--shopra-font-weight-heading);
+}
+
+.uk-button, .uk-form-label, .uk-legend, .uk-label, .uk-badge,
+.uk-navbar-nav > li > a, .uk-nav-header,
+[data-shopra-menu] .shopra-menu-row, [data-shopra-menu] .shopra-menu-back,
+[data-shopra-menu] .shopra-menu-tab {
+  font-family: var(--shopra-font-body);
+  font-weight: var(--shopra-font-weight-ui);
+}
+
+/* Product names are readable UI text; editorial fonts belong to headings. */
+:is(#products, #capsule, [data-catalog-grid]) .uk-card-title,
+:is(#products, #capsule, [data-catalog-grid]) .uk-card-body h3,
+main .uk-card-media-top + .uk-card-body .uk-card-title,
+#cart-modal [data-cart-item] h3,
+[data-order-lines] [data-order-line] h3 {
+  font-family: var(--shopra-font-body);
+  font-weight: var(--shopra-font-weight-ui);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+#cart-modal [data-cart-quantity] > .uk-button,
+#variant-modal [data-variant-option],
+[data-variant-form] [data-variant-option] {
+  font-weight: var(--shopra-font-weight-ui);
+}
+
+[data-variant-price], [data-cart-subtotal], [data-order-subtotal], [data-order-total],
+[data-order-lines] [data-order-line] strong,
+#cart-modal [data-cart-item] strong,
+:is(#products, #capsule, [data-catalog-grid]) .uk-card-body strong,
+main .uk-card-media-top + .uk-card-body strong {
+  font-family: var(--shopra-font-body);
+  font-weight: var(--shopra-font-weight-price);
+  letter-spacing: 0;
+}
+
+[data-order-lines] [data-order-line] > .uk-width-expand > strong {
+  font-weight: var(--shopra-font-weight-ui);
+}
+
+#footer h3 {
+  font-family: var(--shopra-font-body);
+  font-weight: var(--shopra-font-weight-ui);
+}
+
+@media (max-width: 639px) {
+  h1, .uk-h1 { font-size: calc(24px * var(--shopra-heading-scale)); }
+  h2, .uk-h2 { font-size: calc(22px * var(--shopra-heading-scale)); }
+  h3, .uk-h3, .uk-card-title { font-size: calc(17px * var(--shopra-heading-scale)); }
+  .uk-heading-small { font-size: calc(30px * var(--shopra-heading-scale)); }
+  .uk-heading-medium { font-size: calc(36px * var(--shopra-heading-scale)); }
+  .uk-heading-large, .uk-heading-xlarge, .uk-heading-2xlarge, .uk-heading-3xlarge {
+    font-size: calc(44px * var(--shopra-heading-scale));
+  }
+}

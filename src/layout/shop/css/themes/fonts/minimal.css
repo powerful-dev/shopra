@@ -1,0 +1,18 @@
+/* Минимализм: Inter / Inter. Font files and SIL OFL licenses are local. */
+@import url("../shopra-font-faces.css");
+@import url("../shopra-typography.css");
+
+:root {
+  --shopra-font-heading: "Inter", Arial, sans-serif;
+  --shopra-font-body: "Inter", "Inter", Arial, sans-serif;
+  --shopra-font-weight-body: 400;
+  --shopra-font-weight-heading: 600;
+  --shopra-font-weight-ui: 500;
+  --shopra-font-weight-price: 600;
+  --shopra-font-weight-strong: 600;
+  --shopra-font-line-height: 1.5;
+  --shopra-heading-line-height: 1.12;
+  --shopra-heading-letter-spacing: -0.03em;
+  --shopra-heading-scale: 0.98;
+  --shopra-meta-letter-spacing: 0.08em;
+}

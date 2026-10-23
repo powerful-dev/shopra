@@ -1,0 +1,25 @@
+/* Сливовая: current showcase palette. Action and readable accent are separate roles. */
+:root {
+  --shopra-color-primary: #653663;
+  --shopra-color-primary-hover: color-mix(in srgb, #653663 90%, #41223F);
+  --shopra-color-primary-active: color-mix(in srgb, #653663 80%, #41223F);
+  --shopra-color-on-primary: #FFFFFF;
+  --shopra-color-accent: #653663;
+  --shopra-color-accent-hover: color-mix(in srgb, #653663 85%, #2E2030);
+  --shopra-color-secondary: #41223F;
+  --shopra-color-secondary-hover: color-mix(in srgb, #41223F 90%, #000000);
+  --shopra-color-on-secondary: #FFFFFF;
+  --shopra-color-surface: #FBF6F8;
+  --shopra-color-muted: #EEE0E6;
+  --shopra-color-text: #2E2030;
+  --shopra-color-text-muted: color-mix(in srgb, #2E2030 70%, #FBF6F8);
+  --shopra-color-border: color-mix(in srgb, #2E2030 18%, #FBF6F8);
+  --shopra-color-focus: #653663;
+  --shopra-color-header: #FFFAFC;
+  --shopra-color-footer: #E8CFDC;
+  --shopra-color-footer-text: #2E2030;
+  --shopra-color-hero-start: #281A29;
+  --shopra-color-hero-end: #563050;
+  --shopra-shadow-card: 0 10px 30px color-mix(in srgb, #2E2030 7%, transparent);
+  --shopra-shadow-floating: 0 20px 50px color-mix(in srgb, #2E2030 16%, transparent);
+}

@@ -1,0 +1,226 @@
+[
+  {
+    "family": "Noto Sans",
+    "subset": "cyrillic-ext",
+    "weight": "400 700",
+    "file": "noto-sans-brand-cyrillic-ext.woff2",
+    "source": "https://fonts.gstatic.com/s/notosans/v42/o-0bIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjc5aPdu3mhPy1Fig.woff2",
+    "bytes": 70648
+  },
+  {
+    "family": "Noto Sans",
+    "subset": "cyrillic",
+    "weight": "400 700",
+    "file": "noto-sans-brand-cyrillic.woff2",
+    "source": "https://fonts.gstatic.com/s/notosans/v42/o-0bIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjc5ardu3mhPy1Fig.woff2",
+    "bytes": 20028
+  },
+  {
+    "family": "Noto Sans",
+    "subset": "latin-ext",
+    "weight": "400 700",
+    "file": "noto-sans-brand-latin-ext.woff2",
+    "source": "https://fonts.gstatic.com/s/notosans/v42/o-0bIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjc5aDdu3mhPy1Fig.woff2",
+    "bytes": 168144
+  },
+  {
+    "family": "Noto Sans",
+    "subset": "latin",
+    "weight": "400 700",
+    "file": "noto-sans-brand-latin.woff2",
+    "source": "https://fonts.gstatic.com/s/notosans/v42/o-0bIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjc5a7du3mhPy0.woff2",
+    "bytes": 35856
+  },
+  {
+    "family": "Roboto",
+    "subset": "cyrillic-ext",
+    "weight": "300 700",
+    "file": "roboto-brand-cyrillic-ext.woff2",
+    "source": "https://fonts.gstatic.com/s/roboto/v51/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3GUBHMdazTgWw.woff2",
+    "bytes": 31472
+  },
+  {
+    "family": "Roboto",
+    "subset": "cyrillic",
+    "weight": "300 700",
+    "file": "roboto-brand-cyrillic.woff2",
+    "source": "https://fonts.gstatic.com/s/roboto/v51/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3iUBHMdazTgWw.woff2",
+    "bytes": 19624
+  },
+  {
+    "family": "Roboto",
+    "subset": "latin-ext",
+    "weight": "300 700",
+    "file": "roboto-brand-latin-ext.woff2",
+    "source": "https://fonts.gstatic.com/s/roboto/v51/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3KUBHMdazTgWw.woff2",
+    "bytes": 24444
+  },
+  {
+    "family": "Roboto",
+    "subset": "latin",
+    "weight": "300 700",
+    "file": "roboto-brand-latin.woff2",
+    "source": "https://fonts.gstatic.com/s/roboto/v51/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3yUBHMdazQ.woff2",
+    "bytes": 37520
+  },
+  {
+    "family": "PT Serif",
+    "subset": "cyrillic-ext",
+    "weight": "400",
+    "file": "pt-serif-brand-cyrillic-ext.woff2",
+    "source": "https://fonts.gstatic.com/s/ptserif/v19/EJRVQgYoZZY2vCFuvAFbzr-_dSb_nco.woff2",
+    "bytes": 11292
+  },
+  {
+    "family": "PT Serif",
+    "subset": "cyrillic",
+    "weight": "400",
+    "file": "pt-serif-brand-cyrillic.woff2",
+    "source": "https://fonts.gstatic.com/s/ptserif/v19/EJRVQgYoZZY2vCFuvAFSzr-_dSb_nco.woff2",
+    "bytes": 9348
+  },
+  {
+    "family": "PT Serif",
+    "subset": "latin-ext",
+    "weight": "400",
+    "file": "pt-serif-brand-latin-ext.woff2",
+    "source": "https://fonts.gstatic.com/s/ptserif/v19/EJRVQgYoZZY2vCFuvAFYzr-_dSb_nco.woff2",
+    "bytes": 8632
+  },
+  {
+    "family": "PT Serif",
+    "subset": "latin",
+    "weight": "400",
+    "file": "pt-serif-brand-latin.woff2",
+    "source": "https://fonts.gstatic.com/s/ptserif/v19/EJRVQgYoZZY2vCFuvAFWzr-_dSb_.woff2",
+    "bytes": 13400
+  },
+  {
+    "family": "Oswald",
+    "subset": "cyrillic-ext",
+    "weight": "700",
+    "file": "oswald-brand-cyrillic-ext.woff2",
+    "source": "https://fonts.gstatic.com/s/oswald/v57/TK3_WkUHHAIjg75cFRf3bXL8LICs1xZosUtiZSSUhiCXABTV.woff2",
+    "bytes": 7980
+  },
+  {
+    "family": "Oswald",
+    "subset": "cyrillic",
+    "weight": "700",
+    "file": "oswald-brand-cyrillic.woff2",
+    "source": "https://fonts.gstatic.com/s/oswald/v57/TK3_WkUHHAIjg75cFRf3bXL8LICs1xZosUJiZSSUhiCXABTV.woff2",
+    "bytes": 6808
+  },
+  {
+    "family": "Oswald",
+    "subset": "latin-ext",
+    "weight": "700",
+    "file": "oswald-brand-latin-ext.woff2",
+    "source": "https://fonts.gstatic.com/s/oswald/v57/TK3_WkUHHAIjg75cFRf3bXL8LICs1xZosUhiZSSUhiCXABTV.woff2",
+    "bytes": 11996
+  },
+  {
+    "family": "Oswald",
+    "subset": "latin",
+    "weight": "700",
+    "file": "oswald-brand-latin.woff2",
+    "source": "https://fonts.gstatic.com/s/oswald/v57/TK3_WkUHHAIjg75cFRf3bXL8LICs1xZosUZiZSSUhiCXAA.woff2",
+    "bytes": 12716
+  },
+  {
+    "family": "Golos Text",
+    "subset": "cyrillic-ext",
+    "weight": "400 700",
+    "file": "golos-text-brand-cyrillic-ext.woff2",
+    "source": "https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcEx58hK5SAMqbpw.woff2",
+    "bytes": 17532
+  },
+  {
+    "family": "Golos Text",
+    "subset": "cyrillic",
+    "weight": "400 700",
+    "file": "golos-text-brand-cyrillic.woff2",
+    "source": "https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcExd8hK5SAMqbpw.woff2",
+    "bytes": 22028
+  },
+  {
+    "family": "Golos Text",
+    "subset": "latin-ext",
+    "weight": "400 700",
+    "file": "golos-text-brand-latin-ext.woff2",
+    "source": "https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcEx18hK5SAMqbpw.woff2",
+    "bytes": 19204
+  },
+  {
+    "family": "Golos Text",
+    "subset": "latin",
+    "weight": "400 700",
+    "file": "golos-text-brand-latin.woff2",
+    "source": "https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcExN8hK5SAMo.woff2",
+    "bytes": 38084
+  },
+  {
+    "family": "Caveat",
+    "subset": "cyrillic-ext",
+    "weight": "700",
+    "file": "caveat-brand-cyrillic-ext.woff2",
+    "source": "https://fonts.gstatic.com/s/caveat/v23/WnznHAc5bAfYB2QRah7pcpNvOx-pjRV6eIipYT5Kmgq3s84t.woff2",
+    "bytes": 25380
+  },
+  {
+    "family": "Caveat",
+    "subset": "cyrillic",
+    "weight": "700",
+    "file": "caveat-brand-cyrillic.woff2",
+    "source": "https://fonts.gstatic.com/s/caveat/v23/WnznHAc5bAfYB2QRah7pcpNvOx-pjRV6eIGpYT5Kmgq3s84t.woff2",
+    "bytes": 45504
+  },
+  {
+    "family": "Caveat",
+    "subset": "latin-ext",
+    "weight": "700",
+    "file": "caveat-brand-latin-ext.woff2",
+    "source": "https://fonts.gstatic.com/s/caveat/v23/WnznHAc5bAfYB2QRah7pcpNvOx-pjRV6eIupYT5Kmgq3s84t.woff2",
+    "bytes": 19672
+  },
+  {
+    "family": "Caveat",
+    "subset": "latin",
+    "weight": "700",
+    "file": "caveat-brand-latin.woff2",
+    "source": "https://fonts.gstatic.com/s/caveat/v23/WnznHAc5bAfYB2QRah7pcpNvOx-pjRV6eIWpYT5Kmgq3sw.woff2",
+    "bytes": 51068
+  },
+  {
+    "family": "Nunito",
+    "subset": "cyrillic-ext",
+    "weight": "800",
+    "file": "nunito-brand-cyrillic-ext.woff2",
+    "source": "https://fonts.gstatic.com/s/nunito/v32/XRXI3I6Li01BKofiOc5wtlZ2di8HDDsmdTk3j6zbXWjgevT5.woff2",
+    "bytes": 11304
+  },
+  {
+    "family": "Nunito",
+    "subset": "cyrillic",
+    "weight": "800",
+    "file": "nunito-brand-cyrillic.woff2",
+    "source": "https://fonts.gstatic.com/s/nunito/v32/XRXI3I6Li01BKofiOc5wtlZ2di8HDDsmdTA3j6zbXWjgevT5.woff2",
+    "bytes": 8472
+  },
+  {
+    "family": "Nunito",
+    "subset": "latin-ext",
+    "weight": "800",
+    "file": "nunito-brand-latin-ext.woff2",
+    "source": "https://fonts.gstatic.com/s/nunito/v32/XRXI3I6Li01BKofiOc5wtlZ2di8HDDsmdTo3j6zbXWjgevT5.woff2",
+    "bytes": 16324
+  },
+  {
+    "family": "Nunito",
+    "subset": "latin",
+    "weight": "800",
+    "file": "nunito-brand-latin.woff2",
+    "source": "https://fonts.gstatic.com/s/nunito/v32/XRXI3I6Li01BKofiOc5wtlZ2di8HDDsmdTQ3j6zbXWjgeg.woff2",
+    "bytes": 16508
+  }
+]

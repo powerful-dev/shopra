@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Шрифты, палитры и иконки · SHOPRA</title>
+    <link rel="stylesheet" href="../css/uikit.min.css">
+    <style>
+      body { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+      form { flex: none; display: flex; flex-wrap: wrap; gap: 12px; align-items: end; border-bottom: 1px solid #ddd; }
+      label { display: grid; gap: 4px; font-size: 12px; }
+      output { flex-basis: 100%; font-size: 12px; }
+      #preview { display: block; flex: 1; min-height: 0; width: 100%; border: 0; margin: auto; }
+    </style>
+  </head>
+  <body>
+    <form class="uk-padding-small" aria-label="Проверка независимых настроек оформления">
+      <label>Магазин<select class="uk-select uk-width-small" id="site">
+        <option value="">Одежда</option><option value="food/">Еда</option><option value="jewelry/">Украшения</option>
+      </select></label>
+      <label>Страница<select class="uk-select uk-width-small" id="page">
+        <option value="catalog">Каталог</option><option value="index">Главная</option>
+        <option value="product">Товар</option><option value="checkout">Заказ</option>
+      </select></label>
+      <label>Шрифты<select class="uk-select uk-width-medium" id="font" disabled></select></label>
+      <label>Палитра<select class="uk-select uk-width-small" id="palette" disabled></select></label>
+      <label>Иконки<select class="uk-select uk-width-small" id="icons" disabled></select></label>
+      <label>Фон иконок<select class="uk-select uk-width-small" id="icon-background" disabled></select></label>
+      <label>Ширина<select class="uk-select uk-width-small" id="width">
+        <option value="100%">Десктоп</option><option value="960px">960 px</option>
+        <option value="390px">390 px</option><option value="320px">320 px</option>
+      </select></label>
+      <output id="status" aria-live="polite">Загрузка наборов…</output>
+    </form>
+    <iframe id="preview" title="Предпросмотр новых наборов"></iframe>
+    <script>
+      const preview = document.querySelector('#preview');
+      const font = document.querySelector('#font');
+      const palette = document.querySelector('#palette');
+      const icons = document.querySelector('#icons');
+      const iconBackground = document.querySelector('#icon-background');
+      const site = document.querySelector('#site');
+      const page = document.querySelector('#page');
+      const status = document.querySelector('#status');
+      let manifest;
+      let revision = 0;
+      const storeSelections = new Map();
+      // These are starting choices, not coupled presets: either selector can change alone.
+      function selectStoreThemes() {
+        const defaults = manifest.storeDefaults.find(item => item.path === site.value);
+        if (!defaults) throw new Error('Неизвестный магазин: ' + site.value);
+        const selected = storeSelections.get(site.value) || defaults;
+        font.value = selected.font;
+        palette.value = selected.palette;
+      }
+      function rememberStoreThemes() {
+        storeSelections.set(site.value, { font: font.value, palette: palette.value });
+      }
+      // Static hosting may redirect .html URLs to clean paths, including index.html to /.
+      const pagePath = pathname => pathname.replace(/\/index(?:\.html)?$/, '/')
+        .replace(/\.html$/, '').replace(/\/$/, '') || '/';
+      async function applyThemes() {
+        const current = ++revision;
+        const doc = preview.contentDocument;
+        if (!manifest || !doc?.querySelector('main')) return;
+        const fontId = font.value;
+        const paletteId = palette.value;
+        const iconsId = icons.value;
+        const backgroundId = iconBackground.value;
+        const path = doc.location.pathname;
+        status.removeAttribute('data-ready');
+        status.removeAttribute('data-ready-icons');
+        status.value = 'Применение оформления…';
+        const selections = [
+          ['fonts', fontId, manifest.fonts],
+          ['palettes', paletteId, manifest.palettes],
+          ['icons', iconsId, manifest.icons],
+          ['icon-backgrounds', backgroundId, manifest.iconBackgrounds]
+        ];
+        await Promise.all(selections.map(([group, id, items]) => new Promise((resolve, reject) => {
+          const item = items.find(item => item.id === id);
+          const link = doc.querySelector('link[href*="themes/' + group + '/"]');
+          const resource = new URL('../' + item.file, location.href);
+          resource.searchParams.set('v', manifest.version);
+          const url = resource.href;
+          if (link.href === url && link.sheet) { resolve(); return; }
+          link.onload = resolve;
+          link.onerror = reject;
+          link.href = url;
+        })));
+        // Force style resolution before awaiting the newly selected font files.
+        preview.contentWindow.getComputedStyle(doc.body).fontFamily;
+        await doc.fonts.ready;
+        await new Promise(resolve => preview.contentWindow.requestAnimationFrame(() =>
+          preview.contentWindow.requestAnimationFrame(resolve)));
+        if (current !== revision || preview.contentDocument !== doc ||
+            pagePath(path) !== pagePath(new URL('../' + site.value + page.value + '.html', location.href).pathname)) return;
+        const faces = Array.from(doc.fonts);
+        if (faces.some(face => face.status === 'error')) {
+          throw new Error(faces.filter(face => face.status === 'error').map(face => face.family + ' ' + face.weight + ' ' + face.unicodeRange).join('; '));
+        }
+        status.dataset.loadedFonts = JSON.stringify([...new Set(faces.filter(face => face.status === 'loaded').map(face => face.family))]);
+        const selectedFont = manifest.fonts.find(item => item.id === fontId);
+        const selectedPalette = manifest.palettes.find(item => item.id === paletteId);
+        const selectedIcons = manifest.icons.find(item => item.id === iconsId);
+        const selectedBackground = manifest.iconBackgrounds.find(item => item.id === backgroundId);
+        status.value = selectedFont.pair + ' · ' + selectedPalette.name + ' · ' + selectedIcons.name +
+          ' · ' + selectedBackground.name + ' · локальные шрифты загружены';
+        status.dataset.readyIcons = iconsId + ':' + backgroundId;
+        status.dataset.ready = path + ':' + fontId + ':' + paletteId;
+      }
+      function showPage() {
+        revision++;
+        status.removeAttribute('data-ready');
+        status.removeAttribute('data-ready-icons');
+        preview.src = '../' + site.value + page.value + '.html';
+      }
+      function reportError(error) { status.value = 'Не удалось загрузить набор: ' + error.message; }
+      preview.addEventListener('load', () => applyThemes().catch(reportError));
+      font.addEventListener('change', () => { rememberStoreThemes(); applyThemes().catch(reportError); });
+      palette.addEventListener('change', () => { rememberStoreThemes(); applyThemes().catch(reportError); });
+      icons.addEventListener('change', () => applyThemes().catch(reportError));
+      iconBackground.addEventListener('change', () => applyThemes().catch(reportError));
+      site.addEventListener('change', () => { selectStoreThemes(); showPage(); });
+      page.addEventListener('change', showPage);
+      document.querySelector('#width').addEventListener('change', event => { preview.style.width = event.target.value; });
+      fetch('../css/themes/theme-manifest.json').then(response => {
+        if (!response.ok) throw new Error(response.status);
+        return response.json();
+      }).then(data => {
+        manifest = data;
+        for (const [select, items] of [[font, data.fonts], [palette, data.palettes],
+          [icons, data.icons], [iconBackground, data.iconBackgrounds]]) {
+          for (const item of items) select.add(new Option(item.name, item.id));
+          select.disabled = false;
+        }
+        selectStoreThemes();
+        icons.value = 'organic';
+        iconBackground.value = 'filled';
+        showPage();
+      }).catch(reportError);
+    </script>
+  </body>
+</html>

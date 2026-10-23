@@ -1,0 +1,25 @@
+/* Шафран: current showcase palette. Action and readable accent are separate roles. */
+:root {
+  --shopra-color-primary: #EBC246;
+  --shopra-color-primary-hover: color-mix(in srgb, #EBC246 90%, #29271F);
+  --shopra-color-primary-active: color-mix(in srgb, #EBC246 80%, #29271F);
+  --shopra-color-on-primary: #23221D;
+  --shopra-color-accent: #805500;
+  --shopra-color-accent-hover: color-mix(in srgb, #805500 85%, #23221D);
+  --shopra-color-secondary: #29271F;
+  --shopra-color-secondary-hover: color-mix(in srgb, #29271F 90%, #000000);
+  --shopra-color-on-secondary: #FFFFFF;
+  --shopra-color-surface: #FFFCF2;
+  --shopra-color-muted: #F5E9BD;
+  --shopra-color-text: #23221D;
+  --shopra-color-text-muted: color-mix(in srgb, #23221D 70%, #FFFCF2);
+  --shopra-color-border: color-mix(in srgb, #23221D 18%, #FFFCF2);
+  --shopra-color-focus: #805500;
+  --shopra-color-header: #FFFFFF;
+  --shopra-color-footer: #EEDBA2;
+  --shopra-color-footer-text: #23221D;
+  --shopra-color-hero-start: #24221B;
+  --shopra-color-hero-end: #64552D;
+  --shopra-shadow-card: 0 10px 30px color-mix(in srgb, #23221D 7%, transparent);
+  --shopra-shadow-floating: 0 20px 50px color-mix(in srgb, #23221D 16%, transparent);
+}

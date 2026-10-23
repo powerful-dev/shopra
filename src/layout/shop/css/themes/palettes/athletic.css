@@ -1,0 +1,33 @@
+/* Атлетик: neutral Gymshark-inspired surfaces and inverse actions on photography. */
+:root {
+  --shopra-color-primary: #000000;
+  --shopra-color-primary-hover: color-mix(in srgb, #000000 90%, #0D1012);
+  --shopra-color-primary-active: color-mix(in srgb, #000000 80%, #0D1012);
+  --shopra-color-on-primary: #FFFFFF;
+  --shopra-color-accent: #000000;
+  --shopra-color-accent-hover: color-mix(in srgb, #000000 85%, #191919);
+  --shopra-color-secondary: #0D1012;
+  --shopra-color-secondary-hover: color-mix(in srgb, #0D1012 90%, #000000);
+  --shopra-color-on-secondary: #FFFFFF;
+  --shopra-color-surface: #FFFFFF;
+  --shopra-color-muted: #F5F5F5;
+  --shopra-color-text: #191919;
+  --shopra-color-text-muted: color-mix(in srgb, #191919 70%, #FFFFFF);
+  --shopra-color-border: color-mix(in srgb, #191919 18%, #FFFFFF);
+  --shopra-color-focus: #000000;
+  --shopra-color-header: #FFFFFF;
+  --shopra-color-footer: #FFFFFF;
+  --shopra-color-footer-text: #0D1012;
+  --shopra-color-hero-start: #0D1012;
+  --shopra-color-hero-end: #333638;
+  --shopra-color-hero-action: #FFFFFF;
+  --shopra-color-hero-action-hover: #F5F5F5;
+  --shopra-color-hero-action-active: #ECECEC;
+  --shopra-color-on-hero-action: #0D1012;
+  --shopra-color-hero-text: #FFFFFF;
+  --shopra-color-hero-outline: #FFFFFF;
+  --shopra-hero-gradient-left: linear-gradient(0deg, rgb(13 16 18 / 65%) 0%, rgb(13 16 18 / 32%) 35%, rgb(13 16 18 / 4%) 75%, transparent 100%);
+  --shopra-hero-gradient-left-mobile: linear-gradient(0deg, rgb(13 16 18 / 75%) 0%, rgb(13 16 18 / 42%) 45%, rgb(13 16 18 / 8%) 85%, transparent 100%);
+  --shopra-shadow-card: 0 10px 30px color-mix(in srgb, #191919 7%, transparent);
+  --shopra-shadow-floating: 0 20px 50px color-mix(in srgb, #191919 16%, transparent);
+}

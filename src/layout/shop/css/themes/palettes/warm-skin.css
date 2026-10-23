@@ -1,0 +1,25 @@
+/* Тёплая кожа: current showcase palette. Action and readable accent are separate roles. */
+:root {
+  --shopra-color-primary: #A44124;
+  --shopra-color-primary-hover: color-mix(in srgb, #A44124 90%, #46271D);
+  --shopra-color-primary-active: color-mix(in srgb, #A44124 80%, #46271D);
+  --shopra-color-on-primary: #FFFFFF;
+  --shopra-color-accent: #A44124;
+  --shopra-color-accent-hover: color-mix(in srgb, #A44124 85%, #2B211D);
+  --shopra-color-secondary: #46271D;
+  --shopra-color-secondary-hover: color-mix(in srgb, #46271D 90%, #000000);
+  --shopra-color-on-secondary: #FFFFFF;
+  --shopra-color-surface: #FFFAF4;
+  --shopra-color-muted: #F1DECC;
+  --shopra-color-text: #2B211D;
+  --shopra-color-text-muted: color-mix(in srgb, #2B211D 70%, #FFFAF4);
+  --shopra-color-border: color-mix(in srgb, #2B211D 18%, #FFFAF4);
+  --shopra-color-focus: #A44124;
+  --shopra-color-header: #FFFDFA;
+  --shopra-color-footer: #E9CDB0;
+  --shopra-color-footer-text: #2B211D;
+  --shopra-color-hero-start: #2B211D;
+  --shopra-color-hero-end: #643820;
+  --shopra-shadow-card: 0 10px 30px color-mix(in srgb, #2B211D 7%, transparent);
+  --shopra-shadow-floating: 0 20px 50px color-mix(in srgb, #2B211D 16%, transparent);
+}

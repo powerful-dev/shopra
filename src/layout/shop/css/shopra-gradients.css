@@ -1,0 +1,29 @@
+.shopra-gradient--left {
+  background: var(--shopra-hero-gradient-left, linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--shopra-color-hero-start, #101217) 88%, transparent) 0%,
+    color-mix(in srgb, var(--shopra-color-hero-start, #101217) 72%, transparent) 34%,
+    color-mix(in srgb, var(--shopra-color-hero-end, #101217) 28%, transparent) 60%,
+    transparent 82%
+  ));
+  pointer-events: none;
+}
+
+.shopra-gradient--bottom {
+  background: linear-gradient(
+    0deg,
+    color-mix(in srgb, var(--shopra-color-hero-start, #101217) 86%, transparent) 0%,
+    color-mix(in srgb, var(--shopra-color-hero-start, #101217) 62%, transparent) 28%,
+    color-mix(in srgb, var(--shopra-color-hero-end, #101217) 16%, transparent) 60%,
+    transparent 82%
+  );
+  pointer-events: none;
+}
+
+@media (max-width: 639px) {
+  .shopra-gradient--left {
+    background: var(--shopra-hero-gradient-left-mobile,
+      linear-gradient(0deg, color-mix(in srgb, var(--shopra-color-hero-start, #101217) 88%, transparent) 0%, color-mix(in srgb, var(--shopra-color-hero-start, #101217) 48%, transparent) 58%, color-mix(in srgb, var(--shopra-color-hero-end, #101217) 12%, transparent) 100%),
+      linear-gradient(90deg, color-mix(in srgb, var(--shopra-color-hero-start, #101217) 72%, transparent) 0%, color-mix(in srgb, var(--shopra-color-hero-end, #101217) 18%, transparent) 100%));
+  }
+}

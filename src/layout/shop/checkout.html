@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Оформление заказа VERA: контакты, доставка и оплата.">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Оформление заказа — VERA</title>
+    <link rel="stylesheet" href="css/uikit.min.css">
+    <link rel="stylesheet" href="css/themes/shopra-theme-core.css">
+    <link rel="stylesheet" href="css/shopra-spacing.css">
+    <link rel="stylesheet" href="css/themes/palettes/athletic.css">
+    <link rel="stylesheet" href="css/themes/shapes/straight.css">
+    <link rel="stylesheet" href="css/themes/fonts/fashion.css">
+    <link rel="stylesheet" href="css/themes/icons/soft.css">
+    <link rel="stylesheet" href="css/themes/icon-backgrounds/bare.css">
+    <link rel="stylesheet" href="css/themes/menus/gymshark.css">
+  </head>
+  <body class="uk-background-muted" data-checkout-page>
+    <header class="uk-background-default uk-box-shadow-small">
+      <div class="uk-container uk-container-expand">
+        <nav class="uk-navbar-container uk-navbar-transparent" uk-navbar>
+          <div class="uk-navbar-left">
+            <a class="uk-navbar-item uk-logo uk-flex uk-flex-column uk-flex-middle" href="index.html">
+              <strong>VERA</strong>
+              <small class="uk-text-meta">modern uniform</small>
+            </a>
+          </div>
+          <div class="uk-navbar-right">
+            <span class="uk-navbar-item uk-visible@s"><span class="uk-margin-small-right" uk-icon="icon: lock"></span>Защищённое оформление</span>
+            <a class="uk-navbar-item uk-link-text uk-visible@m" href="tel:+380671234567">Нужна помощь?</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main class="uk-section">
+      <div class="uk-container uk-container-large">
+        <nav aria-label="Хлебные крошки">
+          <ul class="uk-breadcrumb">
+            <li><a href="index.html#products">Корзина</a></li>
+            <li><span>Оформление заказа</span></li>
+          </ul>
+        </nav>
+
+        <section class="uk-card uk-card-default uk-card-body uk-text-center uk-padding-large" data-checkout-empty hidden>
+          <span uk-icon="icon: cart; ratio: 2.5"></span>
+          <h1 class="uk-heading-small uk-margin-small-top">Нечего оформлять</h1>
+          <p class="uk-text-lead">Корзина пуста. Добавьте товары и вернитесь к оформлению.</p>
+          <a class="uk-button uk-button-primary uk-button-large" href="catalog.html">Перейти в каталог</a>
+        </section>
+
+        <section class="uk-card uk-card-default uk-card-body uk-text-center uk-padding-large" data-checkout-success hidden>
+          <span class="uk-icon-button uk-button-primary" uk-icon="icon: check; ratio: 1.5"></span>
+          <p class="uk-text-meta uk-text-uppercase uk-text-bold uk-margin-medium-top uk-margin-remove-bottom">Заказ принят</p>
+          <h1 class="uk-heading-small uk-margin-small-top">Спасибо за заказ.</h1>
+          <p class="uk-text-lead">Номер <strong data-order-number>SH-0000</strong></p>
+          <p>Детали заказа будут отправлены на указанный email. Сумма заказа — <strong data-success-total>0 ₴</strong>.</p>
+          <div class="uk-grid-small uk-flex-center" uk-grid>
+            <div><a class="uk-button uk-button-primary" href="index.html">Вернуться в магазин</a></div>
+            <div><a class="uk-button uk-button-default" href="catalog.html">Продолжить покупки</a></div>
+          </div>
+        </section>
+
+        <form class="uk-form-stacked" data-checkout-form>
+          <div class="uk-grid-large" uk-grid data-checkout-layout>
+            <div class="uk-width-2-3@m">
+              <div class="uk-grid-medium" uk-grid data-checkout-sections>
+                <div class="uk-width-1-1">
+                  <section class="uk-card uk-card-default uk-card-body">
+                    <header class="uk-flex uk-flex-top">
+                      <span class="uk-label uk-margin-small-right">01</span>
+                      <div>
+                        <h1 class="uk-h2 uk-margin-remove">Контактные данные</h1>
+                        <p class="uk-text-muted uk-margin-small-top">Для подтверждения и уведомлений о заказе.</p>
+                      </div>
+                    </header>
+                    <div class="uk-grid-small uk-child-width-1-2@s uk-margin-medium-top" uk-grid>
+                      <div class="uk-width-1-1">
+                        <label class="uk-form-label" for="checkout-email">Email</label>
+                        <div class="uk-form-controls"><input id="checkout-email" class="uk-input" name="email" type="email" placeholder="name@example.com" autocomplete="email" required></div>
+                      </div>
+                      <div>
+                        <label class="uk-form-label" for="checkout-first-name">Имя</label>
+                        <div class="uk-form-controls"><input id="checkout-first-name" class="uk-input" name="firstName" type="text" placeholder="Ваше имя" autocomplete="given-name" required></div>
+                      </div>
+                      <div>
+                        <label class="uk-form-label" for="checkout-last-name">Фамилия</label>
+                        <div class="uk-form-controls"><input id="checkout-last-name" class="uk-input" name="lastName" type="text" placeholder="Ваша фамилия" autocomplete="family-name" required></div>
+                      </div>
+                      <div class="uk-width-1-1">
+                        <label class="uk-form-label" for="checkout-phone">Телефон</label>
+                        <div class="uk-form-controls"><input id="checkout-phone" class="uk-input" name="phone" type="tel" placeholder="+380 00 000 00 00" autocomplete="tel" required></div>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+
+                <div class="uk-width-1-1">
+                  <section class="uk-card uk-card-default uk-card-body">
+                    <header class="uk-flex uk-flex-top">
+                      <span class="uk-label uk-margin-small-right">02</span>
+                      <div>
+                        <h2 class="uk-h2 uk-margin-remove">Доставка</h2>
+                        <p class="uk-text-muted uk-margin-small-top" data-delivery-note>Выберите удобный способ получения.</p>
+                      </div>
+                    </header>
+
+                    <div class="uk-grid-small uk-child-width-1-1 uk-margin-medium-top" uk-grid>
+                      <div>
+                        <label class="uk-card uk-card-primary uk-card-body uk-padding-small uk-display-block uk-light" data-delivery-option>
+                          <div class="uk-grid-small uk-flex-middle" uk-grid>
+                            <div class="uk-width-auto"><input class="uk-radio" type="radio" name="delivery" value="nova" checked></div>
+                            <div class="uk-width-expand"><strong class="uk-display-block">Новая почта</strong><small>В отделение или почтомат · 1–2 дня</small></div>
+                            <div class="uk-width-auto"><strong data-delivery-price="nova">90 ₴</strong></div>
+                          </div>
+                        </label>
+                      </div>
+                      <div>
+                        <label class="uk-card uk-card-default uk-card-body uk-padding-small uk-display-block" data-delivery-option>
+                          <div class="uk-grid-small uk-flex-middle" uk-grid>
+                            <div class="uk-width-auto"><input class="uk-radio" type="radio" name="delivery" value="courier"></div>
+                            <div class="uk-width-expand"><strong class="uk-display-block">Курьер по адресу</strong><small>По городу · выбранный интервал</small></div>
+                            <div class="uk-width-auto"><strong data-delivery-price="courier">180 ₴</strong></div>
+                          </div>
+                        </label>
+                      </div>
+                      <div>
+                        <label class="uk-card uk-card-default uk-card-body uk-padding-small uk-display-block" data-delivery-option>
+                          <div class="uk-grid-small uk-flex-middle" uk-grid>
+                            <div class="uk-width-auto"><input class="uk-radio" type="radio" name="delivery" value="ukrposhta"></div>
+                            <div class="uk-width-expand"><strong class="uk-display-block">Укрпошта</strong><small>В отделение · 2–4 дня</small></div>
+                            <div class="uk-width-auto"><strong data-delivery-price="ukrposhta">70 ₴</strong></div>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="uk-grid-small uk-child-width-1-2@s uk-margin-medium-top" uk-grid>
+                      <div>
+                        <label class="uk-form-label" for="checkout-city">Город</label>
+                        <div class="uk-form-controls"><input id="checkout-city" class="uk-input" name="city" type="text" placeholder="Киев" autocomplete="address-level2" required></div>
+                      </div>
+                      <div>
+                        <label class="uk-form-label" for="checkout-branch" data-branch-label>Номер отделения</label>
+                        <div class="uk-form-controls"><input id="checkout-branch" class="uk-input" name="branch" type="text" placeholder="Например, №12" required data-branch-input></div>
+                      </div>
+                      <div class="uk-width-1-1">
+                        <label class="uk-form-label" for="checkout-address" data-address-label>Адрес или название отделения</label>
+                        <div class="uk-form-controls"><input id="checkout-address" class="uk-input" name="address" type="text" placeholder="Улица и номер отделения" autocomplete="street-address" required data-address-input></div>
+                      </div>
+                      <div class="uk-width-1-1">
+                        <label class="uk-form-label" for="checkout-comment">Комментарий курьеру или магазину <span class="uk-text-muted">необязательно</span></label>
+                        <div class="uk-form-controls"><textarea id="checkout-comment" class="uk-textarea" name="comment" rows="3" placeholder="Пожелания к заказу"></textarea></div>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+
+                <div class="uk-width-1-1">
+                  <section class="uk-card uk-card-default uk-card-body">
+                    <header class="uk-flex uk-flex-top">
+                      <span class="uk-label uk-margin-small-right">03</span>
+                      <div>
+                        <h2 class="uk-h2 uk-margin-remove">Оплата</h2>
+                        <p class="uk-text-muted uk-margin-small-top">Все транзакции защищены и зашифрованы.</p>
+                      </div>
+                    </header>
+
+                    <div class="uk-grid-small uk-child-width-1-1 uk-margin-medium-top" uk-grid>
+                      <div>
+                        <label class="uk-card uk-card-primary uk-card-body uk-padding-small uk-display-block uk-light" data-payment-option>
+                          <div class="uk-grid-small uk-flex-middle" uk-grid>
+                            <div class="uk-width-auto"><input class="uk-radio" type="radio" name="payment" value="card" checked></div>
+                            <div class="uk-width-expand"><strong class="uk-display-block">Банковская карта</strong><small>Visa · Mastercard</small></div>
+                            <div class="uk-width-auto"><strong>VISA · MC</strong></div>
+                          </div>
+                        </label>
+                      </div>
+
+                      <div class="uk-width-1-1" data-card-fields>
+                        <div class="uk-card uk-card-default uk-card-body uk-padding-small">
+                          <div class="uk-grid-small" uk-grid>
+                            <div class="uk-width-1-1">
+                              <label class="uk-form-label" for="checkout-card-number">Номер карты</label>
+                              <input id="checkout-card-number" class="uk-input" name="cardNumber" inputmode="numeric" placeholder="0000 0000 0000 0000" autocomplete="cc-number" required data-card-input>
+                            </div>
+                            <div class="uk-width-1-2">
+                              <label class="uk-form-label" for="checkout-card-expiry">Срок действия</label>
+                              <input id="checkout-card-expiry" class="uk-input" name="expiry" inputmode="numeric" placeholder="MM / YY" autocomplete="cc-exp" required data-card-input>
+                            </div>
+                            <div class="uk-width-1-2">
+                              <label class="uk-form-label" for="checkout-card-cvc">CVC</label>
+                              <input id="checkout-card-cvc" class="uk-input" name="cvc" inputmode="numeric" placeholder="123" autocomplete="cc-csc" required data-card-input>
+                            </div>
+                            <div class="uk-width-1-1"><small class="uk-text-muted">Демо-форма: данные карты никуда не отправляются.</small></div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label class="uk-card uk-card-default uk-card-body uk-padding-small uk-display-block" data-payment-option>
+                          <div class="uk-grid-small uk-flex-middle" uk-grid>
+                            <div class="uk-width-auto"><input class="uk-radio" type="radio" name="payment" value="wallet"></div>
+                            <div class="uk-width-expand"><strong class="uk-display-block">Apple Pay / Google Pay</strong><small>Быстрая оплата с устройства</small></div>
+                            <div class="uk-width-auto"><strong>PAY</strong></div>
+                          </div>
+                        </label>
+                      </div>
+                      <div>
+                        <label class="uk-card uk-card-default uk-card-body uk-padding-small uk-display-block" data-payment-option>
+                          <div class="uk-grid-small uk-flex-middle" uk-grid>
+                            <div class="uk-width-auto"><input class="uk-radio" type="radio" name="payment" value="cod"></div>
+                            <div class="uk-width-expand"><strong class="uk-display-block">При получении</strong><small>Картой или наличными после осмотра</small></div>
+                            <div class="uk-width-auto"><strong>+20 ₴</strong></div>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </div>
+
+            <aside class="uk-width-1-3@m">
+              <div class="uk-card uk-card-default uk-card-body" uk-sticky="offset: 24; end: true; media: @m" data-checkout-summary>
+                <header class="uk-flex uk-flex-between uk-flex-middle">
+                  <h2 class="uk-h2 uk-margin-remove">Ваш заказ</h2>
+                  <a class="uk-button uk-button-text" href="index.html#products">Изменить</a>
+                </header>
+
+                <div class="uk-margin-medium-top" data-order-lines></div>
+
+                <div class="uk-grid-small uk-margin-medium-top" uk-grid>
+                  <div class="uk-width-expand"><input class="uk-input" type="text" placeholder="Промокод" aria-label="Промокод" data-promo-input></div>
+                  <div class="uk-width-auto"><button class="uk-button uk-button-default" type="button" data-promo-apply>Применить</button></div>
+                  <div class="uk-width-1-1"><small data-promo-message hidden></small></div>
+                </div>
+
+                <hr>
+
+                <dl class="uk-description-list">
+                  <div class="uk-flex uk-flex-between"><dt>Товары · <span data-order-count>0</span></dt><dd class="uk-margin-remove" data-order-subtotal>0 ₴</dd></div>
+                  <div class="uk-flex uk-flex-between uk-text-success" data-discount-row hidden><dt>Скидка SHOPRA10</dt><dd class="uk-margin-remove" data-order-discount>−0 ₴</dd></div>
+                  <div class="uk-flex uk-flex-between"><dt>Доставка</dt><dd class="uk-margin-remove" data-order-delivery>Бесплатно</dd></div>
+                  <div class="uk-flex uk-flex-between" data-cod-row hidden><dt>Наложенный платёж</dt><dd class="uk-margin-remove">20 ₴</dd></div>
+                </dl>
+
+                <hr>
+
+                <div class="uk-flex uk-flex-between uk-flex-bottom">
+                  <span class="uk-text-large">Итого</span>
+                  <strong class="uk-heading-small uk-margin-remove" data-order-total>0 ₴</strong>
+                </div>
+
+                <button class="uk-button uk-button-primary uk-button-large uk-width-1-1 uk-margin-medium-top uk-flex uk-flex-between uk-flex-middle" type="submit">
+                  <span>Подтвердить заказ</span><span uk-icon="icon: arrow-right"></span>
+                </button>
+                <p class="uk-text-meta uk-text-center">Нажимая кнопку, вы соглашаетесь с условиями продажи и политикой конфиденциальности.</p>
+              </div>
+            </aside>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <script src="js/uikit.min.js"></script>
+    <script src="js/uikit-icons.min.js"></script>
+    <script src="js/themes/shopra-icon-bridge.js"></script>
+    <script src="js/themes/shopra-menu-bridge.js"></script>
+    <script src="js/checkout.js"></script>
+  </body>
+</html>

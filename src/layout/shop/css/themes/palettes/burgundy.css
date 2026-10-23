@@ -1,0 +1,25 @@
+/* Бордо: current showcase palette. Action and readable accent are separate roles. */
+:root {
+  --shopra-color-primary: #7B283C;
+  --shopra-color-primary-hover: color-mix(in srgb, #7B283C 90%, #4D1D2A);
+  --shopra-color-primary-active: color-mix(in srgb, #7B283C 80%, #4D1D2A);
+  --shopra-color-on-primary: #FFFFFF;
+  --shopra-color-accent: #7B283C;
+  --shopra-color-accent-hover: color-mix(in srgb, #7B283C 85%, #2D2022);
+  --shopra-color-secondary: #4D1D2A;
+  --shopra-color-secondary-hover: color-mix(in srgb, #4D1D2A 90%, #000000);
+  --shopra-color-on-secondary: #FFFFFF;
+  --shopra-color-surface: #FCF8F5;
+  --shopra-color-muted: #F1E1DA;
+  --shopra-color-text: #2D2022;
+  --shopra-color-text-muted: color-mix(in srgb, #2D2022 70%, #FCF8F5);
+  --shopra-color-border: color-mix(in srgb, #2D2022 18%, #FCF8F5);
+  --shopra-color-focus: #7B283C;
+  --shopra-color-header: #FFFAF7;
+  --shopra-color-footer: #EBD2C6;
+  --shopra-color-footer-text: #2D2022;
+  --shopra-color-hero-start: #2C1720;
+  --shopra-color-hero-end: #642D3A;
+  --shopra-shadow-card: 0 10px 30px color-mix(in srgb, #2D2022 7%, transparent);
+  --shopra-shadow-floating: 0 20px 50px color-mix(in srgb, #2D2022 16%, transparent);
+}

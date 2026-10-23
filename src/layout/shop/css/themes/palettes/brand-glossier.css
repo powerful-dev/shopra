@@ -1,0 +1,31 @@
+/* Glossier: adaptation from the supplied reference, not an official brand stylesheet. */
+:root {
+  --shopra-color-primary: #EBC0D0;
+  --shopra-color-primary-hover: color-mix(in srgb, #EBC0D0 90%, #222222);
+  --shopra-color-primary-active: color-mix(in srgb, #EBC0D0 80%, #222222);
+  --shopra-color-on-primary: #222222;
+  --shopra-color-accent: #222222;
+  --shopra-color-accent-hover: color-mix(in srgb, #222222 85%, #222222);
+  --shopra-color-secondary: #222222;
+  --shopra-color-secondary-hover: color-mix(in srgb, #222222 90%, #000000);
+  --shopra-color-on-secondary: #FFFDFC;
+  --shopra-color-surface: #FFFDFC;
+  --shopra-color-muted: #F2E3E6;
+  --shopra-color-text: #222222;
+  --shopra-color-text-muted: color-mix(in srgb, #222222 70%, #FFFDFC);
+  --shopra-color-border: color-mix(in srgb, #222222 18%, #FFFDFC);
+  --shopra-color-focus: #222222;
+  --shopra-color-header: #FFFDFC;
+  --shopra-color-footer: #F2E3E6;
+  --shopra-color-footer-text: #222222;
+  --shopra-color-hero-start: #222222;
+  --shopra-color-hero-end: #222222;
+  --shopra-color-hero-action: #FFFDFC;
+  --shopra-color-hero-action-hover: color-mix(in srgb, #FFFDFC 92%, #222222);
+  --shopra-color-hero-action-active: color-mix(in srgb, #FFFDFC 84%, #222222);
+  --shopra-color-on-hero-action: #222222;
+  --shopra-color-hero-text: #FFFDFC;
+  --shopra-color-hero-outline: #FFFDFC;
+  --shopra-shadow-card: 0 10px 30px color-mix(in srgb, #222222 7%, transparent);
+  --shopra-shadow-floating: 0 20px 50px color-mix(in srgb, #222222 16%, transparent);
+}

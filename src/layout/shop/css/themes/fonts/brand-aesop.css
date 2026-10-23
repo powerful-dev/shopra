@@ -1,0 +1,20 @@
+/* Aesop: Noto Sans 400 / Noto Sans 400, from the supplied adaptation. */
+@import url("../shopra-font-faces.css");
+@import url("../shopra-brand-font-faces.css");
+@import url("../shopra-typography.css");
+
+:root {
+  --shopra-font-heading: "Noto Sans", Arial, sans-serif;
+  --shopra-font-body: "Noto Sans", "Inter", Arial, sans-serif;
+  --shopra-font-weight-body: 400;
+  --shopra-font-weight-heading: 400;
+  --shopra-font-weight-ui: 500;
+  --shopra-font-weight-price: 700;
+  --shopra-font-weight-strong: 700;
+  --shopra-font-line-height: 1.5;
+  --shopra-heading-line-height: 1.18;
+  --shopra-heading-letter-spacing: -0.02em;
+  --shopra-heading-scale: 1;
+  --shopra-heading-transform: none;
+  --shopra-meta-letter-spacing: 0.08em;
+}

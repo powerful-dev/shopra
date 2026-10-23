@@ -1,0 +1,20 @@
+/* Tiffany & Co.: Cormorant Garamond 500 / Manrope 400, from the supplied adaptation. */
+@import url("../shopra-font-faces.css");
+@import url("../shopra-brand-font-faces.css");
+@import url("../shopra-typography.css");
+
+:root {
+  --shopra-font-heading: "Cormorant Garamond", Georgia, serif;
+  --shopra-font-body: "Manrope", "Inter", Arial, sans-serif;
+  --shopra-font-weight-body: 400;
+  --shopra-font-weight-heading: 500;
+  --shopra-font-weight-ui: 500;
+  --shopra-font-weight-price: 600;
+  --shopra-font-weight-strong: 600;
+  --shopra-font-line-height: 1.5;
+  --shopra-heading-line-height: 1.12;
+  --shopra-heading-letter-spacing: -0.015em;
+  --shopra-heading-scale: 1.15;
+  --shopra-heading-transform: none;
+  --shopra-meta-letter-spacing: 0.08em;
+}

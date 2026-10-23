@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Проверка пресетов меню · SHOPRA</title>
+    <link rel="stylesheet" href="../css/uikit.min.css">
+    <style>
+      body { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+      form { flex: none; }
+      #preview { display: block; flex: 1; min-height: 0; width: 100%; border: 0; margin: auto; }
+    </style>
+  </head>
+  <body>
+    <form class="uk-padding-small uk-flex uk-flex-middle uk-flex-wrap" aria-label="Проверка выбора в Визуале">
+      <label class="uk-margin-small-right">Магазин
+        <select class="uk-select uk-width-small" id="site">
+          <option value="../index.html">Одежда</option>
+          <option value="../food/index.html">Еда</option>
+          <option value="../jewelry/index.html">Украшения</option>
+        </select>
+      </label>
+      <label class="uk-margin-small-right">Тип меню
+        <select class="uk-select uk-width-medium" id="menu">
+          <option value="gymshark">Боковые панели · Gymshark</option>
+          <option value="md-fashion">Мега-меню · MD Fashion</option>
+        </select>
+      </label>
+      <label class="uk-margin-small-right">Фон иконок
+        <select class="uk-select uk-width-small" id="icon-background">
+          <option value="filled">С фоном</option>
+          <option value="bare">Без фона</option>
+        </select>
+      </label>
+      <label>Ширина
+        <select class="uk-select uk-width-small" id="width">
+          <option value="100%">Десктоп</option>
+          <option value="390px">Телефон</option>
+          <option value="320px">Узкий телефон</option>
+        </select>
+      </label>
+      <output class="uk-margin-small-left" id="status" aria-live="polite"></output>
+    </form>
+    <iframe id="preview" src="../index.html" title="Предпросмотр магазина"></iframe>
+    <script>
+      const preview = document.querySelector('#preview');
+      const menu = document.querySelector('#menu');
+      const iconBackground = document.querySelector('#icon-background');
+      const themeManifest = fetch('../css/themes/theme-manifest.json').then(response => response.json());
+      const status = document.querySelector('#status');
+      let changes = 0;
+      function applyMenu() {
+        const link = preview.contentDocument.querySelector('link[href*="themes/menus/"]');
+        const url = new URL(link.href);
+        url.pathname = url.pathname.replace(/[^/]+\.css$/, menu.value + '.css');
+        link.href = url.href;
+      }
+      menu.addEventListener('change', applyMenu);
+      iconBackground.addEventListener('change', async () => {
+        const manifest = await themeManifest;
+        const link = preview.contentDocument.querySelector('link[href*="themes/icon-backgrounds/"]');
+        const url = new URL(link.href);
+        url.pathname = url.pathname.replace(/[^/]+\.css$/, iconBackground.value + '.css');
+        url.searchParams.set('v', manifest.version);
+        link.href = url.href;
+      });
+      document.querySelector('#site').addEventListener('change', event => { preview.src = event.target.value; });
+      document.querySelector('#width').addEventListener('change', event => { preview.style.width = event.target.value; });
+      preview.addEventListener('load', () => {
+        changes = 0;
+        preview.contentDocument.addEventListener('shopra:menu-change', event => {
+          changes++;
+          status.value = event.detail.layout + ' · смен без перезагрузки: ' + changes;
+        });
+        menu.value = preview.contentWindow.getComputedStyle(preview.contentDocument.documentElement).getPropertyValue('--shopra-menu-layout').trim();
+        iconBackground.value = preview.contentWindow.getComputedStyle(preview.contentDocument.documentElement).getPropertyValue('--shopra-icon-background').trim();
+        status.value = menu.value;
+      });
+    </script>
+  </body>
+</html>

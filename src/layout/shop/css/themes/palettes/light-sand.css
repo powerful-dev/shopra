@@ -1,0 +1,25 @@
+/* Светлый песок: current showcase palette. Action and readable accent are separate roles. */
+:root {
+  --shopra-color-primary: #805632;
+  --shopra-color-primary-hover: color-mix(in srgb, #805632 90%, #4D3829);
+  --shopra-color-primary-active: color-mix(in srgb, #805632 80%, #4D3829);
+  --shopra-color-on-primary: #FFFFFF;
+  --shopra-color-accent: #805632;
+  --shopra-color-accent-hover: color-mix(in srgb, #805632 85%, #302820);
+  --shopra-color-secondary: #4D3829;
+  --shopra-color-secondary-hover: color-mix(in srgb, #4D3829 90%, #000000);
+  --shopra-color-on-secondary: #FFFFFF;
+  --shopra-color-surface: #FFFAF0;
+  --shopra-color-muted: #F0E3CC;
+  --shopra-color-text: #302820;
+  --shopra-color-text-muted: color-mix(in srgb, #302820 70%, #FFFAF0);
+  --shopra-color-border: color-mix(in srgb, #302820 18%, #FFFAF0);
+  --shopra-color-focus: #805632;
+  --shopra-color-header: #FFFDF7;
+  --shopra-color-footer: #E9D5B4;
+  --shopra-color-footer-text: #302820;
+  --shopra-color-hero-start: #30251D;
+  --shopra-color-hero-end: #665037;
+  --shopra-shadow-card: 0 10px 30px color-mix(in srgb, #302820 7%, transparent);
+  --shopra-shadow-floating: 0 20px 50px color-mix(in srgb, #302820 16%, transparent);
+}

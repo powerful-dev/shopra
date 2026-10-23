@@ -1,0 +1,25 @@
+/* Морская: current showcase palette. Action and readable accent are separate roles. */
+:root {
+  --shopra-color-primary: #176963;
+  --shopra-color-primary-hover: color-mix(in srgb, #176963 90%, #174741);
+  --shopra-color-primary-active: color-mix(in srgb, #176963 80%, #174741);
+  --shopra-color-on-primary: #FFFFFF;
+  --shopra-color-accent: #176963;
+  --shopra-color-accent-hover: color-mix(in srgb, #176963 85%, #19312E);
+  --shopra-color-secondary: #174741;
+  --shopra-color-secondary-hover: color-mix(in srgb, #174741 90%, #000000);
+  --shopra-color-on-secondary: #FFFFFF;
+  --shopra-color-surface: #F2F8F5;
+  --shopra-color-muted: #D7E9E3;
+  --shopra-color-text: #19312E;
+  --shopra-color-text-muted: color-mix(in srgb, #19312E 70%, #F2F8F5);
+  --shopra-color-border: color-mix(in srgb, #19312E 18%, #F2F8F5);
+  --shopra-color-focus: #176963;
+  --shopra-color-header: #FAFDFC;
+  --shopra-color-footer: #CFE3DA;
+  --shopra-color-footer-text: #19312E;
+  --shopra-color-hero-start: #132F2B;
+  --shopra-color-hero-end: #216057;
+  --shopra-shadow-card: 0 10px 30px color-mix(in srgb, #19312E 7%, transparent);
+  --shopra-shadow-floating: 0 20px 50px color-mix(in srgb, #19312E 16%, transparent);
+}

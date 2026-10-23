@@ -1,0 +1,11 @@
+/* Product actions keep their current theme-coloured background. */
+:root {
+  --shopra-icon-background: filled;
+  --shopra-card-icon-background: var(--shopra-color-surface);
+  --shopra-card-icon-active-background: var(--shopra-color-primary);
+  --shopra-card-icon-active-color: var(--shopra-color-on-primary);
+  --shopra-card-icon-shadow: none;
+  --shopra-card-favorite-active-fill: var(--shopra-icon-fill);
+  --shopra-delivery-icon-background: color-mix(in srgb, var(--shopra-color-primary) 12%, transparent);
+  --shopra-delivery-icon-inverse-background: color-mix(in srgb, currentColor 14%, transparent);
+}

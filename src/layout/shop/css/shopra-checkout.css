@@ -1,0 +1,365 @@
+/* Checkout-only scale. UIkit owns grids, forms, validation and sticky behaviour.
+   Font families/weights and all colours/radii remain independent theme roles. */
+body[data-checkout-page] main.uk-section {
+  padding-top: 32px;
+  padding-bottom: 40px;
+}
+
+body[data-checkout-page] .uk-breadcrumb {
+  margin: 0 0 20px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+body[data-checkout-page] :is([data-checkout-empty], [data-checkout-success]) {
+  padding: 24px !important;
+}
+
+body[data-checkout-page] :is([data-checkout-empty], [data-checkout-success]) .uk-heading-small {
+  font-size: calc(28px * var(--shopra-heading-scale));
+  line-height: 1.2;
+}
+
+body[data-checkout-page] :is([data-checkout-empty], [data-checkout-success]) .uk-text-lead {
+  font-size: 14px;
+  line-height: 21px;
+}
+
+body[data-checkout-page] [data-checkout-layout],
+body[data-checkout-page] [data-checkout-sections] {
+  display: grid;
+  gap: 24px;
+  margin: 0;
+}
+
+body[data-checkout-page] [data-checkout-layout] > *,
+body[data-checkout-page] [data-checkout-sections] > * {
+  width: auto;
+  min-width: 0;
+  margin-top: 0;
+  padding-left: 0;
+}
+
+body[data-checkout-page] [data-checkout-form] .uk-card-body {
+  padding: 24px;
+}
+
+body[data-checkout-page] [data-checkout-form] .uk-padding-small {
+  padding: 14px !important;
+}
+
+body[data-checkout-page] [data-checkout-form] section > header {
+  gap: 8px;
+}
+
+body[data-checkout-page] [data-checkout-form] section > header > .uk-label {
+  display: inline-flex;
+  min-width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  margin: 1px 0 0 !important;
+  padding: 0 4px;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+body[data-checkout-page] [data-checkout-form] :is(h1, h2) {
+  font-family: var(--shopra-font-body);
+  font-size: 18px;
+  font-weight: var(--shopra-font-weight-ui);
+  line-height: 24px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+body[data-checkout-page] [data-checkout-form] section > header p {
+  margin: 4px 0 0 !important;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+body[data-checkout-page] [data-checkout-form] .uk-margin-medium-top {
+  margin-top: 18px !important;
+}
+
+body[data-checkout-page] [data-checkout-form] .uk-grid-small > .uk-grid-margin {
+  margin-top: 14px;
+}
+
+body[data-checkout-page] [data-checkout-form] .uk-form-label {
+  margin-bottom: 6px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+body[data-checkout-page] [data-checkout-form] :is(.uk-input, .uk-select) {
+  height: 42px;
+  padding-right: 12px;
+  padding-left: 12px;
+  font-family: var(--shopra-font-body);
+  font-size: 14px;
+  line-height: normal;
+}
+
+body[data-checkout-page] [data-checkout-form] .uk-textarea {
+  min-height: 88px;
+  padding: 10px 12px;
+  font-family: var(--shopra-font-body);
+  font-size: 14px;
+  line-height: 20px;
+  resize: vertical;
+}
+
+body[data-checkout-page] :is([data-delivery-option], [data-payment-option]) {
+  font-size: 13px;
+  line-height: 18px;
+}
+
+body[data-checkout-page] :is([data-delivery-option], [data-payment-option]) .uk-width-expand {
+  min-width: 0;
+}
+
+body[data-checkout-page] :is([data-delivery-option], [data-payment-option]) strong {
+  font-weight: var(--shopra-font-weight-ui);
+}
+
+body[data-checkout-page] :is([data-delivery-option], [data-payment-option]) small {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 17px;
+}
+
+/* UIkit's uk-light is always white; pale action palettes need their own on-primary role. */
+body[data-checkout-page] :is([data-delivery-option], [data-payment-option]).uk-card-primary,
+body[data-checkout-page] :is([data-delivery-option], [data-payment-option]).uk-card-primary :is(strong, small) {
+  color: var(--shopra-color-on-primary);
+}
+
+body[data-checkout-page] [data-checkout-summary] > header {
+  gap: 12px;
+}
+
+body[data-checkout-page] [data-checkout-summary] > header > a {
+  min-height: 28px;
+  font-size: 12px;
+  line-height: 28px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+body[data-checkout-page] [data-order-line] {
+  column-gap: 12px;
+  row-gap: 6px;
+  margin: 0;
+}
+
+body[data-checkout-page] [data-order-line] > * {
+  margin-top: 0;
+  padding-left: 0;
+}
+
+body[data-checkout-page] [data-order-line] > .uk-width-expand {
+  min-width: 0;
+}
+
+body[data-checkout-page] [data-order-image] {
+  display: block;
+  width: 56px;
+  height: 76px;
+  border-radius: var(--shopra-radius-media);
+  object-fit: cover;
+}
+
+body[data-checkout-page] [data-order-quantity] {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  padding: 0 3px;
+  border: 2px solid var(--shopra-color-surface);
+  border-radius: 50%;
+  font-size: 10px;
+  line-height: 14px;
+}
+
+body[data-checkout-page] [data-order-name] {
+  font-size: 14px;
+  font-weight: var(--shopra-font-weight-ui);
+  line-height: 20px;
+  overflow-wrap: anywhere;
+}
+
+body[data-checkout-page] [data-order-options] {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 18px;
+  overflow-wrap: anywhere;
+}
+
+body[data-checkout-page] [data-order-line-footer] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 8px;
+  margin-top: 6px;
+}
+
+body[data-checkout-page] [data-order-line-total] {
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+body[data-checkout-page] [data-checkout-remove] {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  min-height: 28px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--shopra-radius-button);
+  background: transparent;
+  color: var(--shopra-color-text-muted);
+  font-family: var(--shopra-font-body);
+  font-size: 12px;
+  line-height: 28px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+body[data-checkout-page] [data-checkout-remove]:hover,
+body[data-checkout-page] [data-checkout-remove]:focus-visible {
+  background: var(--shopra-color-muted);
+  color: var(--shopra-color-accent);
+}
+
+body[data-checkout-page] [data-order-lines] > hr {
+  margin: 16px 0 !important;
+}
+
+body[data-checkout-page] [data-order-lines] > hr:last-child {
+  display: none;
+}
+
+body[data-checkout-page] [data-checkout-summary] hr {
+  margin-top: 18px;
+  margin-bottom: 18px;
+}
+
+body[data-checkout-page] [data-checkout-summary] .uk-description-list {
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+body[data-checkout-page] [data-checkout-summary] .uk-description-list > div {
+  gap: 12px;
+}
+
+body[data-checkout-page] [data-checkout-summary] .uk-description-list > div + div {
+  margin-top: 8px;
+}
+
+body[data-checkout-page] [data-checkout-summary] .uk-description-list dd {
+  flex: none;
+  font-family: var(--shopra-font-body);
+  font-weight: var(--shopra-font-weight-ui);
+}
+
+body[data-checkout-page] [data-checkout-summary] .uk-text-large {
+  font-size: 14px;
+  line-height: 22px;
+}
+
+body[data-checkout-page] [data-order-total] {
+  font-size: 22px;
+  line-height: 28px;
+  white-space: nowrap;
+}
+
+body[data-checkout-page] [data-checkout-summary] .uk-button-large {
+  min-height: 44px;
+  padding-right: 16px;
+  padding-left: 16px;
+  font-size: 13px;
+  line-height: 42px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+body[data-checkout-page] [data-checkout-summary] > p.uk-text-meta {
+  margin: 12px 0 0;
+  font-family: var(--shopra-font-body);
+  font-size: 11px;
+  line-height: 17px;
+  letter-spacing: 0;
+}
+
+@media (min-width: 960px) {
+  body[data-checkout-page] [data-checkout-layout] {
+    grid-template-columns: minmax(0, 1fr) minmax(310px, 0.5fr);
+  }
+}
+
+@media (max-width: 639px) {
+  body[data-checkout-page] main.uk-section {
+    padding-top: 20px;
+    padding-bottom: 28px;
+  }
+
+  body[data-checkout-page] [data-checkout-layout],
+  body[data-checkout-page] [data-checkout-sections] {
+    gap: 20px;
+  }
+
+  body[data-checkout-page] [data-checkout-form] .uk-card-body {
+    padding: 18px 16px;
+  }
+
+  body[data-checkout-page] [data-checkout-form] .uk-padding-small {
+    padding: 12px !important;
+  }
+
+  /* A real 16px input prevents iOS from zooming the entire checkout on focus. */
+  body[data-checkout-page] [data-checkout-form] :is(.uk-input, .uk-select, .uk-textarea) {
+    font-size: 16px;
+  }
+
+  body[data-checkout-page] [data-checkout-form] :is(.uk-input, .uk-select) {
+    height: 44px;
+  }
+
+  body[data-checkout-page] :is([data-delivery-option], [data-payment-option]) > .uk-grid {
+    flex-wrap: nowrap;
+  }
+
+  body[data-checkout-page] :is([data-delivery-option], [data-payment-option]) > .uk-grid > .uk-width-auto:last-child {
+    max-width: 74px;
+    font-size: 11px;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+
+  body[data-checkout-page] [data-checkout-summary] > .uk-grid:has([data-promo-input]) {
+    margin-left: -8px;
+  }
+
+  body[data-checkout-page] [data-checkout-summary] > .uk-grid:has([data-promo-input]) > * {
+    padding-left: 8px;
+  }
+
+  body[data-checkout-page] [data-promo-apply] {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+}

@@ -1,0 +1,101 @@
+/* Independent navigation preset: full-width columns and mobile accordions. */
+:root {
+  --shopra-menu-layout: md-fashion;
+  --shopra-menu-backdrop: rgba(15, 18, 22, 0.26);
+  --shopra-menu-blur: 0px;
+}
+
+@media (min-width: 960px) {
+  [data-shopra-menu="md-fashion"] .shopra-menu-header .uk-navbar-nav {
+    gap: 28px;
+  }
+
+  [data-shopra-menu="md-fashion"] .shopra-menu-header .uk-navbar-nav > li > a {
+    font-size: 12px;
+    font-weight: var(--shopra-font-weight-ui);
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+  }
+
+  [data-shopra-menu="md-fashion"] .shopra-menu-desktop {
+    width: 100% !important;
+    max-height: calc(100dvh - var(--shopra-menu-top));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-top: 1px solid var(--shopra-color-border);
+    border-bottom: 1px solid var(--shopra-color-border);
+  }
+
+  [data-shopra-menu="md-fashion"] .shopra-menu-columns {
+    display: grid;
+    grid-template-columns: repeat(var(--shopra-menu-columns, 5), minmax(0, 1fr));
+    gap: 36px;
+    max-width: var(--shopra-content-width);
+    box-sizing: border-box;
+    margin: 0 auto;
+    padding: 32px var(--shopra-page-gutter) 36px;
+  }
+
+  [data-shopra-menu="md-fashion"] .shopra-menu-column-title {
+    margin: 0 0 14px;
+    font-family: var(--shopra-font-body);
+    font-size: 14px;
+    font-weight: var(--shopra-font-weight-ui);
+    line-height: 20px;
+    letter-spacing: 0;
+  }
+
+  [data-shopra-menu="md-fashion"] .shopra-menu-column .shopra-menu-row {
+    min-height: 33px;
+    color: var(--shopra-color-text-muted);
+    font-size: 13px;
+  }
+
+  [data-shopra-menu="md-fashion"] .shopra-menu-column .shopra-menu-row:hover {
+    color: var(--shopra-color-accent);
+  }
+
+  [data-shopra-menu="md-fashion"] .shopra-menu-column-extra {
+    margin-top: 18px;
+    border-top: 1px solid var(--shopra-color-border);
+    padding-top: 12px;
+  }
+}
+
+[data-shopra-menu="md-fashion"] #mobile-menu .shopra-menu-mobile-head {
+  border-bottom: 1px solid var(--shopra-color-border);
+}
+
+[data-shopra-menu="md-fashion"] #mobile-menu .shopra-menu-search {
+  min-height: 44px;
+  margin: 16px;
+}
+
+[data-shopra-menu="md-fashion"] #mobile-menu .shopra-menu-home > .shopra-menu-row {
+  min-height: 48px;
+  border-bottom: 1px solid var(--shopra-color-border);
+  font-size: 12px;
+  font-weight: var(--shopra-font-weight-ui);
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+[data-shopra-menu="md-fashion"] #mobile-menu .shopra-menu-row .shopra-menu-chevron {
+  color: var(--shopra-color-accent);
+}
+
+[data-shopra-menu="md-fashion"] #mobile-menu .shopra-menu-back {
+  min-height: 48px;
+  margin: 0 -16px 8px;
+  width: calc(100% + 32px);
+  padding: 0 16px;
+  border-bottom: 1px solid var(--shopra-color-border);
+  background: var(--shopra-color-muted);
+  font-size: 12px;
+  font-weight: var(--shopra-font-weight-ui);
+  text-transform: uppercase;
+}
+
+[data-shopra-menu="md-fashion"] #mobile-menu .shopra-menu-accordion-toggle {
+  min-height: 48px;
+}

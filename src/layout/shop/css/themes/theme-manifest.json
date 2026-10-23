@@ -1,0 +1,1196 @@
+{
+  "version": 8,
+  "base": "css/themes/shopra-theme-core.css",
+  "spacing": "css/shopra-spacing.css",
+  "iconBridge": "js/themes/shopra-icon-bridge.js",
+  "menuBridge": "js/themes/shopra-menu-bridge.js",
+  "selectionMode": "independent",
+  "storeDefaults": [
+    {
+      "id": "clothing",
+      "name": "Одежда",
+      "path": "",
+      "palette": "athletic",
+      "font": "fashion"
+    },
+    {
+      "id": "food",
+      "name": "Еда",
+      "path": "food/",
+      "palette": "warm-skin",
+      "font": "soft"
+    },
+    {
+      "id": "jewelry",
+      "name": "Украшения",
+      "path": "jewelry/",
+      "palette": "plum",
+      "font": "elegant"
+    }
+  ],
+  "loadOrder": [
+    "base",
+    "spacing",
+    "palette",
+    "shape",
+    "font",
+    "icons",
+    "iconBackground",
+    "menu"
+  ],
+  "selectionGroups": [
+    {
+      "key": "palette",
+      "source": "palettes",
+      "required": true,
+      "multiple": false
+    },
+    {
+      "key": "shape",
+      "source": "shapes",
+      "required": true,
+      "multiple": false
+    },
+    {
+      "key": "font",
+      "source": "fonts",
+      "required": true,
+      "multiple": false
+    },
+    {
+      "key": "icons",
+      "source": "icons",
+      "required": true,
+      "multiple": false
+    },
+    {
+      "key": "iconBackground",
+      "name": "Фон иконок товаров и доставки",
+      "source": "iconBackgrounds",
+      "required": true,
+      "multiple": false,
+      "default": "filled"
+    },
+    {
+      "key": "menu",
+      "source": "menus",
+      "required": true,
+      "multiple": false
+    }
+  ],
+  "palettes": [
+    {
+      "id": "warm-skin",
+      "sourceId": "copper",
+      "name": "Тёплая кожа",
+      "description": "Эспрессо, обожжённая терракота и сливочный. Для кожи, ремесленных изделий и еды.",
+      "file": "css/themes/palettes/warm-skin.css",
+      "swatches": [
+        "#2B211D",
+        "#A44124",
+        "#F1DECC"
+      ],
+      "tokens": {
+        "ink": "#2B211D",
+        "accent": "#A44124",
+        "dark": "#46271D",
+        "pale": "#F1DECC",
+        "cream": "#FFFAF4",
+        "header": "#FFFDFA",
+        "footer": "#E9CDB0",
+        "hero-1": "#2B211D",
+        "hero-2": "#643820"
+      }
+    },
+    {
+      "id": "forest",
+      "sourceId": "forest",
+      "name": "Лес",
+      "description": "Хвойный, мох и светлая олива. Для натуральных продуктов и товаров для дома.",
+      "file": "css/themes/palettes/forest.css",
+      "swatches": [
+        "#1F2C25",
+        "#3E5B37",
+        "#E2E8CE"
+      ],
+      "tokens": {
+        "ink": "#1F2C25",
+        "accent": "#3E5B37",
+        "dark": "#243C2D",
+        "pale": "#E2E8CE",
+        "cream": "#F5F7ED",
+        "header": "#FBFCF7",
+        "footer": "#DDE6CA",
+        "hero-1": "#1C2E23",
+        "hero-2": "#405034"
+      }
+    },
+    {
+      "id": "ink",
+      "sourceId": "navy",
+      "name": "Чернильный",
+      "description": "Угольный, олива и меловой белый. Для одежды, аксессуаров и лаконичных брендов.",
+      "file": "css/themes/palettes/ink.css",
+      "swatches": [
+        "#242321",
+        "#5B6034",
+        "#E6E6D5"
+      ],
+      "tokens": {
+        "ink": "#242321",
+        "accent": "#5B6034",
+        "dark": "#242321",
+        "pale": "#E6E6D5",
+        "cream": "#F8F8F2",
+        "header": "#FDFDF9",
+        "footer": "#DDDDBF",
+        "hero-1": "#1F201C",
+        "hero-2": "#494D34"
+      }
+    },
+    {
+      "id": "graphite",
+      "sourceId": "mono",
+      "name": "Графит",
+      "description": "Чёрный, графит и чистый белый. Нейтральная основа для любых фотографий.",
+      "file": "css/themes/palettes/graphite.css",
+      "swatches": [
+        "#171717",
+        "#333333",
+        "#E5E5E5"
+      ],
+      "tokens": {
+        "ink": "#171717",
+        "accent": "#333333",
+        "dark": "#171717",
+        "pale": "#E5E5E5",
+        "cream": "#F7F7F7",
+        "header": "#FFFFFF",
+        "footer": "#E9E9E9",
+        "hero-1": "#111111",
+        "hero-2": "#3F3F3F"
+      }
+    },
+    {
+      "id": "burgundy",
+      "sourceId": "wine",
+      "name": "Бордо",
+      "description": "Шоколад, насыщенное бордо и шампань. Для моды, косметики и подарков.",
+      "file": "css/themes/palettes/burgundy.css",
+      "swatches": [
+        "#2D2022",
+        "#7B283C",
+        "#F1E1DA"
+      ],
+      "tokens": {
+        "ink": "#2D2022",
+        "accent": "#7B283C",
+        "dark": "#4D1D2A",
+        "pale": "#F1E1DA",
+        "cream": "#FCF8F5",
+        "header": "#FFFAF7",
+        "footer": "#EBD2C6",
+        "hero-1": "#2C1720",
+        "hero-2": "#642D3A"
+      }
+    },
+    {
+      "id": "light-sand",
+      "sourceId": "sand",
+      "name": "Светлый песок",
+      "description": "Эспрессо, карамель и светлый песок. Для интерьера, керамики и спокойных коллекций.",
+      "file": "css/themes/palettes/light-sand.css",
+      "swatches": [
+        "#302820",
+        "#805632",
+        "#F0E3CC"
+      ],
+      "tokens": {
+        "ink": "#302820",
+        "accent": "#805632",
+        "dark": "#4D3829",
+        "pale": "#F0E3CC",
+        "cream": "#FFFAF0",
+        "header": "#FFFDF7",
+        "footer": "#E9D5B4",
+        "hero-1": "#30251D",
+        "hero-2": "#665037"
+      }
+    },
+    {
+      "id": "marine",
+      "sourceId": "sea",
+      "name": "Морская",
+      "description": "Глубокая зелёная бирюза, эвкалипт и белый. Для ухода, спорта и свежих коллекций.",
+      "file": "css/themes/palettes/marine.css",
+      "swatches": [
+        "#19312E",
+        "#176963",
+        "#D7E9E3"
+      ],
+      "tokens": {
+        "ink": "#19312E",
+        "accent": "#176963",
+        "dark": "#174741",
+        "pale": "#D7E9E3",
+        "cream": "#F2F8F5",
+        "header": "#FAFDFC",
+        "footer": "#CFE3DA",
+        "hero-1": "#132F2B",
+        "hero-2": "#216057"
+      }
+    },
+    {
+      "id": "plum",
+      "sourceId": "plum",
+      "name": "Сливовая",
+      "description": "Баклажан, тёмная слива и розовый жемчуг. Для украшений и парфюмерии.",
+      "file": "css/themes/palettes/plum.css",
+      "swatches": [
+        "#2E2030",
+        "#653663",
+        "#EEE0E6"
+      ],
+      "tokens": {
+        "ink": "#2E2030",
+        "accent": "#653663",
+        "dark": "#41223F",
+        "pale": "#EEE0E6",
+        "cream": "#FBF6F8",
+        "header": "#FFFAFC",
+        "footer": "#E8CFDC",
+        "hero-1": "#281A29",
+        "hero-2": "#563050"
+      }
+    },
+    {
+      "id": "athletic",
+      "sourceId": "athletic",
+      "name": "Атлетик",
+      "description": "Чёрный, чистый белый и нейтральный серый. Белые кнопки на фотобаннерах, чёрные — на светлом фоне. Для спорта и активной одежды.",
+      "file": "css/themes/palettes/athletic.css",
+      "swatches": [
+        "#191919",
+        "#000000",
+        "#FFFFFF"
+      ],
+      "tokens": {
+        "ink": "#191919",
+        "accent": "#000000",
+        "dark": "#0D1012",
+        "pale": "#F5F5F5",
+        "cream": "#FFFFFF",
+        "header": "#FFFFFF",
+        "footer": "#FFFFFF",
+        "footer-ink": "#0D1012",
+        "hero-1": "#0D1012",
+        "hero-2": "#333638",
+        "hero-action": "#FFFFFF",
+        "on-hero-action": "#0D1012",
+        "hero-text": "#FFFFFF",
+        "hero-outline": "#FFFFFF"
+      },
+      "reference": {
+        "name": "Gymshark",
+        "url": "https://www.gymshark.com/"
+      }
+    },
+    {
+      "id": "saffron",
+      "sourceId": "saffron",
+      "name": "Шафран",
+      "description": "Антрацит, солнечный шафран и белый. Яркие кнопки с тёмным текстом для одежды, аксессуаров и выразительных коллекций.",
+      "file": "css/themes/palettes/saffron.css",
+      "swatches": [
+        "#23221D",
+        "#EBC246",
+        "#F5E9BD"
+      ],
+      "tokens": {
+        "ink": "#23221D",
+        "accent": "#805500",
+        "action": "#EBC246",
+        "on-action": "#23221D",
+        "dark": "#29271F",
+        "pale": "#F5E9BD",
+        "cream": "#FFFCF2",
+        "header": "#FFFFFF",
+        "footer": "#EEDBA2",
+        "hero-1": "#24221B",
+        "hero-2": "#64552D"
+      }
+    },
+    {
+      "id": "brand-aesop",
+      "name": "Aesop",
+      "description": "Тёплый минимализм — дополнительная адаптация из предоставленного референса.",
+      "file": "css/themes/palettes/brand-aesop.css",
+      "swatches": [
+        "#F3F0E6",
+        "#33332E",
+        "#DDD7CA",
+        "#756550"
+      ],
+      "sourceKind": "user-provided-adaptation",
+      "tokens": {
+        "ink": "#33332E",
+        "accent": "#756550",
+        "action": "#756550",
+        "on-action": "#FFFFFF",
+        "dark": "#33332E",
+        "pale": "#DDD7CA",
+        "cream": "#F3F0E6",
+        "header": "#F3F0E6",
+        "footer": "#DDD7CA",
+        "hero-1": "#33332E",
+        "hero-2": "#33332E",
+        "hero-action": "#F3F0E6",
+        "on-hero-action": "#33332E",
+        "hero-text": "#F3F0E6",
+        "hero-outline": "#F3F0E6"
+      },
+      "reference": {
+        "name": "Aesop",
+        "url": "https://www.aesop.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-tiffany",
+      "name": "Tiffany & Co.",
+      "description": "Бирюзовая классика — дополнительная адаптация из предоставленного референса.",
+      "file": "css/themes/palettes/brand-tiffany.css",
+      "swatches": [
+        "#FBFBF7",
+        "#212121",
+        "#D9F2EF",
+        "#81CFC5"
+      ],
+      "sourceKind": "user-provided-adaptation",
+      "tokens": {
+        "ink": "#212121",
+        "accent": "#212121",
+        "action": "#81CFC5",
+        "on-action": "#212121",
+        "dark": "#212121",
+        "pale": "#D9F2EF",
+        "cream": "#FBFBF7",
+        "header": "#FBFBF7",
+        "footer": "#D9F2EF",
+        "hero-1": "#212121",
+        "hero-2": "#212121",
+        "hero-action": "#FBFBF7",
+        "on-hero-action": "#212121",
+        "hero-text": "#FBFBF7",
+        "hero-outline": "#FBFBF7"
+      },
+      "reference": {
+        "name": "Tiffany & Co.",
+        "url": "https://www.tiffany.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-glossier",
+      "name": "Glossier",
+      "description": "Мягкий бьюти — дополнительная адаптация из предоставленного референса.",
+      "file": "css/themes/palettes/brand-glossier.css",
+      "swatches": [
+        "#FFFDFC",
+        "#222222",
+        "#F2E3E6",
+        "#EBC0D0"
+      ],
+      "sourceKind": "user-provided-adaptation",
+      "tokens": {
+        "ink": "#222222",
+        "accent": "#222222",
+        "action": "#EBC0D0",
+        "on-action": "#222222",
+        "dark": "#222222",
+        "pale": "#F2E3E6",
+        "cream": "#FFFDFC",
+        "header": "#FFFDFC",
+        "footer": "#F2E3E6",
+        "hero-1": "#222222",
+        "hero-2": "#222222",
+        "hero-action": "#FFFDFC",
+        "on-hero-action": "#222222",
+        "hero-text": "#FFFDFC",
+        "hero-outline": "#FFFDFC"
+      },
+      "reference": {
+        "name": "Glossier",
+        "url": "https://www.glossier.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-nike",
+      "name": "Nike",
+      "description": "Спортивная графика — дополнительная адаптация из предоставленного референса.",
+      "file": "css/themes/palettes/brand-nike.css",
+      "swatches": [
+        "#FFFFFF",
+        "#111111",
+        "#F2F2F2",
+        "#707072"
+      ],
+      "sourceKind": "user-provided-adaptation",
+      "tokens": {
+        "ink": "#111111",
+        "accent": "#111111",
+        "action": "#111111",
+        "on-action": "#FFFFFF",
+        "dark": "#111111",
+        "pale": "#F2F2F2",
+        "cream": "#FFFFFF",
+        "header": "#FFFFFF",
+        "footer": "#F2F2F2",
+        "hero-1": "#111111",
+        "hero-2": "#111111",
+        "hero-action": "#FFFFFF",
+        "on-hero-action": "#111111",
+        "hero-text": "#FFFFFF",
+        "hero-outline": "#FFFFFF"
+      },
+      "reference": {
+        "name": "Nike",
+        "url": "https://www.nike.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-ralph-lauren",
+      "name": "Ralph Lauren",
+      "description": "Сдержанная классика — дополнительная адаптация из предоставленного референса.",
+      "file": "css/themes/palettes/brand-ralph-lauren.css",
+      "swatches": [
+        "#F7F5EF",
+        "#18243A",
+        "#E5E1D7",
+        "#1F3358"
+      ],
+      "sourceKind": "user-provided-adaptation",
+      "tokens": {
+        "ink": "#18243A",
+        "accent": "#1F3358",
+        "action": "#1F3358",
+        "on-action": "#FFFFFF",
+        "dark": "#18243A",
+        "pale": "#E5E1D7",
+        "cream": "#F7F5EF",
+        "header": "#F7F5EF",
+        "footer": "#E5E1D7",
+        "hero-1": "#18243A",
+        "hero-2": "#18243A",
+        "hero-action": "#F7F5EF",
+        "on-hero-action": "#18243A",
+        "hero-text": "#F7F5EF",
+        "hero-outline": "#F7F5EF"
+      },
+      "reference": {
+        "name": "Ralph Lauren",
+        "url": "https://www.ralphlauren.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-loccitane",
+      "name": "L’Occitane",
+      "description": "Солнечный Прованс — дополнительная адаптация из предоставленного референса.",
+      "file": "css/themes/palettes/brand-loccitane.css",
+      "swatches": [
+        "#FFF9EA",
+        "#25334A",
+        "#F1E6CB",
+        "#F7D15B"
+      ],
+      "sourceKind": "user-provided-adaptation",
+      "tokens": {
+        "ink": "#25334A",
+        "accent": "#25334A",
+        "action": "#F7D15B",
+        "on-action": "#25334A",
+        "dark": "#25334A",
+        "pale": "#F1E6CB",
+        "cream": "#FFF9EA",
+        "header": "#FFF9EA",
+        "footer": "#F1E6CB",
+        "hero-1": "#25334A",
+        "hero-2": "#25334A",
+        "hero-action": "#FFF9EA",
+        "on-hero-action": "#25334A",
+        "hero-text": "#FFF9EA",
+        "hero-outline": "#FFF9EA"
+      },
+      "reference": {
+        "name": "L’Occitane",
+        "url": "https://www.loccitane.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-zara",
+      "name": "Zara",
+      "description": "Модный монохром — дополнительная адаптация из предоставленного референса.",
+      "file": "css/themes/palettes/brand-zara.css",
+      "swatches": [
+        "#FFFFFF",
+        "#111111",
+        "#F4F4F4",
+        "#A6A6A6"
+      ],
+      "sourceKind": "user-provided-adaptation",
+      "tokens": {
+        "ink": "#111111",
+        "accent": "#111111",
+        "action": "#111111",
+        "on-action": "#FFFFFF",
+        "dark": "#111111",
+        "pale": "#F4F4F4",
+        "cream": "#FFFFFF",
+        "header": "#FFFFFF",
+        "footer": "#F4F4F4",
+        "hero-1": "#111111",
+        "hero-2": "#111111",
+        "hero-action": "#FFFFFF",
+        "on-hero-action": "#111111",
+        "hero-text": "#FFFFFF",
+        "hero-outline": "#FFFFFF"
+      },
+      "reference": {
+        "name": "Zara",
+        "url": "https://www.zara.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-ikea",
+      "name": "IKEA",
+      "description": "Практичный каталог — дополнительная адаптация из предоставленного референса.",
+      "file": "css/themes/palettes/brand-ikea.css",
+      "swatches": [
+        "#FFFFFF",
+        "#111111",
+        "#0058A3",
+        "#FFDB00"
+      ],
+      "sourceKind": "user-provided-adaptation",
+      "tokens": {
+        "ink": "#111111",
+        "accent": "#0058A3",
+        "action": "#0058A3",
+        "on-action": "#FFFFFF",
+        "dark": "#111111",
+        "pale": "#F2F2F2",
+        "cream": "#FFFFFF",
+        "header": "#FFFFFF",
+        "footer": "#F2F2F2",
+        "hero-1": "#111111",
+        "hero-2": "#111111",
+        "hero-action": "#FFFFFF",
+        "on-hero-action": "#111111",
+        "hero-text": "#FFFFFF",
+        "hero-outline": "#FFFFFF"
+      },
+      "reference": {
+        "name": "IKEA",
+        "url": "https://www.ikea.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-lego",
+      "name": "LEGO",
+      "description": "Яркий и дружелюбный — дополнительная адаптация из предоставленного референса.",
+      "file": "css/themes/palettes/brand-lego.css",
+      "swatches": [
+        "#FFFFFF",
+        "#1A1A1A",
+        "#FFD500",
+        "#E3000B"
+      ],
+      "sourceKind": "user-provided-adaptation",
+      "tokens": {
+        "ink": "#1A1A1A",
+        "accent": "#E3000B",
+        "action": "#FFD500",
+        "on-action": "#1A1A1A",
+        "dark": "#1A1A1A",
+        "pale": "#FFD500",
+        "cream": "#FFFFFF",
+        "header": "#FFFFFF",
+        "footer": "#FFD500",
+        "hero-1": "#1A1A1A",
+        "hero-2": "#1A1A1A",
+        "hero-action": "#FFFFFF",
+        "on-hero-action": "#1A1A1A",
+        "hero-text": "#FFFFFF",
+        "hero-outline": "#FFFFFF"
+      },
+      "reference": {
+        "name": "LEGO",
+        "url": "https://www.lego.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-lush",
+      "name": "Lush",
+      "description": "Ремесленный характер — дополнительная адаптация из предоставленного референса.",
+      "file": "css/themes/palettes/brand-lush.css",
+      "swatches": [
+        "#FFFDF5",
+        "#111111",
+        "#F1F0E7",
+        "#FFFFFF"
+      ],
+      "sourceKind": "user-provided-adaptation",
+      "tokens": {
+        "ink": "#111111",
+        "accent": "#111111",
+        "action": "#111111",
+        "on-action": "#FFFFFF",
+        "dark": "#111111",
+        "pale": "#F1F0E7",
+        "cream": "#FFFDF5",
+        "header": "#FFFDF5",
+        "footer": "#F1F0E7",
+        "hero-1": "#111111",
+        "hero-2": "#111111",
+        "hero-action": "#FFFDF5",
+        "on-hero-action": "#111111",
+        "hero-text": "#FFFDF5",
+        "hero-outline": "#FFFDF5"
+      },
+      "reference": {
+        "name": "Lush",
+        "url": "https://www.lush.com/",
+        "inspirationOnly": true
+      }
+    }
+  ],
+  "shapes": [
+    {
+      "id": "rounded",
+      "name": "Скруглённые",
+      "description": "Мягкий современный вид",
+      "file": "css/themes/shapes/rounded.css"
+    },
+    {
+      "id": "straight",
+      "name": "Прямые",
+      "description": "Строгий редакционный вид",
+      "file": "css/themes/shapes/straight.css"
+    }
+  ],
+  "fonts": [
+    {
+      "id": "modern",
+      "name": "Ритейл",
+      "pair": "PT Sans · PT Sans",
+      "description": "Спокойные заголовки, компактный текст и заметные цены. Для магазинов с большим ассортиментом.",
+      "file": "css/themes/fonts/modern.css",
+      "heading": "PT Sans",
+      "body": "PT Sans",
+      "headingWeight": 400,
+      "bodyWeight": 400,
+      "uiWeight": 400,
+      "priceWeight": 700,
+      "tracking": "-0.01em",
+      "leading": 1.18,
+      "scale": 0.96,
+      "reference": {
+        "name": "MD Fashion",
+        "url": "https://md-fashion.ua/"
+      }
+    },
+    {
+      "id": "fashion",
+      "name": "Fashion",
+      "pair": "Onest · Onest",
+      "description": "Чистая геометрия и сдержанная насыщенность. Для моды, аксессуаров и коллекций. Onest передаёт характер референса.",
+      "file": "css/themes/fonts/fashion.css",
+      "heading": "Onest",
+      "body": "Onest",
+      "headingWeight": 600,
+      "bodyWeight": 400,
+      "uiWeight": 500,
+      "priceWeight": 600,
+      "tracking": "-0.035em",
+      "leading": 1.14,
+      "scale": 1,
+      "reference": {
+        "name": "Answear",
+        "url": "https://answear.ua/"
+      }
+    },
+    {
+      "id": "editorial",
+      "name": "Редакционный",
+      "pair": "Playfair Display · Source Sans 3",
+      "description": "Контрастная антиква и открытый гротеск. Для коллекций, историй и авторских брендов.",
+      "file": "css/themes/fonts/editorial.css",
+      "heading": "Playfair Display",
+      "body": "Source Sans 3",
+      "headingWeight": 600,
+      "bodyWeight": 400,
+      "uiWeight": 600,
+      "priceWeight": 600,
+      "tracking": "-0.02em",
+      "leading": 1.15,
+      "scale": 1.04
+    },
+    {
+      "id": "minimal",
+      "name": "Минимализм",
+      "pair": "Inter · Inter",
+      "description": "Одна гарнитура, разная насыщенность. Для лаконичных витрин и акцента на товаре.",
+      "file": "css/themes/fonts/minimal.css",
+      "heading": "Inter",
+      "body": "Inter",
+      "headingWeight": 600,
+      "bodyWeight": 400,
+      "uiWeight": 500,
+      "priceWeight": 600,
+      "tracking": "-0.03em",
+      "leading": 1.12,
+      "scale": 0.98
+    },
+    {
+      "id": "classic",
+      "name": "Классический",
+      "pair": "Lora · Source Sans 3",
+      "description": "Мягкие засечки и читаемый текст. Для ремесленных изделий, книг и товаров для дома.",
+      "file": "css/themes/fonts/classic.css",
+      "heading": "Lora",
+      "body": "Source Sans 3",
+      "headingWeight": 500,
+      "bodyWeight": 400,
+      "uiWeight": 600,
+      "priceWeight": 600,
+      "tracking": "-0.015em",
+      "leading": 1.2,
+      "scale": 1.02
+    },
+    {
+      "id": "soft",
+      "name": "Мягкий",
+      "pair": "Nunito · Nunito Sans",
+      "description": "Родственные округлые формы. Для пекарен, детских товаров и повседневных радостей.",
+      "file": "css/themes/fonts/soft.css",
+      "heading": "Nunito",
+      "body": "Nunito Sans",
+      "headingWeight": 700,
+      "bodyWeight": 400,
+      "uiWeight": 600,
+      "priceWeight": 600,
+      "tracking": "-0.025em",
+      "leading": 1.15,
+      "scale": 1
+    },
+    {
+      "id": "geometric",
+      "name": "Геометричный",
+      "pair": "Montserrat · Open Sans",
+      "description": "Структурные заголовки и нейтральный текст. Для спорта, аксессуаров и техники.",
+      "file": "css/themes/fonts/geometric.css",
+      "heading": "Montserrat",
+      "body": "Open Sans",
+      "headingWeight": 600,
+      "bodyWeight": 400,
+      "uiWeight": 600,
+      "priceWeight": 600,
+      "tracking": "-0.03em",
+      "leading": 1.15,
+      "scale": 0.97
+    },
+    {
+      "id": "elegant",
+      "name": "Элегантный",
+      "pair": "Cormorant Garamond · Montserrat",
+      "description": "Тонкая антиква и сдержанный гротеск. Для украшений, парфюмерии и бутиков.",
+      "file": "css/themes/fonts/elegant.css",
+      "heading": "Cormorant Garamond",
+      "body": "Montserrat",
+      "headingWeight": 500,
+      "bodyWeight": 400,
+      "uiWeight": 500,
+      "priceWeight": 600,
+      "tracking": "-0.015em",
+      "leading": 1.12,
+      "scale": 1.15
+    },
+    {
+      "id": "business",
+      "name": "Деловой",
+      "pair": "IBM Plex Serif · IBM Plex Sans",
+      "description": "Гарнитуры одной семьи с ясной иерархией. Для оборудования и профессиональных товаров.",
+      "file": "css/themes/fonts/business.css",
+      "heading": "IBM Plex Serif",
+      "body": "IBM Plex Sans",
+      "headingWeight": 500,
+      "bodyWeight": 400,
+      "uiWeight": 500,
+      "priceWeight": 600,
+      "tracking": "-0.02em",
+      "leading": 1.18,
+      "scale": 0.98
+    },
+    {
+      "id": "brand-aesop",
+      "name": "Aesop",
+      "pair": "Noto Sans · Noto Sans",
+      "description": "Тёплый минимализм. Заголовки 400, текст 400.",
+      "file": "css/themes/fonts/brand-aesop.css",
+      "heading": "Noto Sans",
+      "body": "Noto Sans",
+      "headingWeight": 400,
+      "bodyWeight": 400,
+      "uiWeight": 500,
+      "priceWeight": 700,
+      "tracking": "-0.02em",
+      "leading": 1.18,
+      "scale": 1,
+      "transform": "none",
+      "sourceKind": "user-provided-adaptation",
+      "reference": {
+        "name": "Aesop",
+        "url": "https://www.aesop.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-tiffany",
+      "name": "Tiffany & Co.",
+      "pair": "Cormorant Garamond · Manrope",
+      "description": "Бирюзовая классика. Заголовки 500, текст 400.",
+      "file": "css/themes/fonts/brand-tiffany.css",
+      "heading": "Cormorant Garamond",
+      "body": "Manrope",
+      "headingWeight": 500,
+      "bodyWeight": 400,
+      "uiWeight": 500,
+      "priceWeight": 600,
+      "tracking": "-0.015em",
+      "leading": 1.12,
+      "scale": 1.15,
+      "transform": "none",
+      "sourceKind": "user-provided-adaptation",
+      "reference": {
+        "name": "Tiffany & Co.",
+        "url": "https://www.tiffany.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-glossier",
+      "name": "Glossier",
+      "pair": "Golos Text · Golos Text",
+      "description": "Мягкий бьюти. Заголовки 500, текст 400.",
+      "file": "css/themes/fonts/brand-glossier.css",
+      "heading": "Golos Text",
+      "body": "Golos Text",
+      "headingWeight": 500,
+      "bodyWeight": 400,
+      "uiWeight": 500,
+      "priceWeight": 600,
+      "tracking": "-0.025em",
+      "leading": 1.15,
+      "scale": 1,
+      "transform": "none",
+      "sourceKind": "user-provided-adaptation",
+      "reference": {
+        "name": "Glossier",
+        "url": "https://www.glossier.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-nike",
+      "name": "Nike",
+      "pair": "Oswald · Inter",
+      "description": "Спортивная графика. Заголовки 700, текст 400.",
+      "file": "css/themes/fonts/brand-nike.css",
+      "heading": "Oswald",
+      "body": "Inter",
+      "headingWeight": 700,
+      "bodyWeight": 400,
+      "uiWeight": 500,
+      "priceWeight": 600,
+      "tracking": "0.01em",
+      "leading": 1.08,
+      "scale": 1,
+      "transform": "uppercase",
+      "sourceKind": "user-provided-adaptation",
+      "reference": {
+        "name": "Nike",
+        "url": "https://www.nike.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-ralph-lauren",
+      "name": "Ralph Lauren",
+      "pair": "PT Serif · IBM Plex Sans",
+      "description": "Сдержанная классика. Заголовки 400, текст 400.",
+      "file": "css/themes/fonts/brand-ralph-lauren.css",
+      "heading": "PT Serif",
+      "body": "IBM Plex Sans",
+      "headingWeight": 400,
+      "bodyWeight": 400,
+      "uiWeight": 500,
+      "priceWeight": 600,
+      "tracking": "-0.015em",
+      "leading": 1.2,
+      "scale": 1,
+      "transform": "none",
+      "sourceKind": "user-provided-adaptation",
+      "reference": {
+        "name": "Ralph Lauren",
+        "url": "https://www.ralphlauren.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-loccitane",
+      "name": "L’Occitane",
+      "pair": "PT Serif · Source Sans 3",
+      "description": "Солнечный Прованс. Заголовки 400, текст 400.",
+      "file": "css/themes/fonts/brand-loccitane.css",
+      "heading": "PT Serif",
+      "body": "Source Sans 3",
+      "headingWeight": 400,
+      "bodyWeight": 400,
+      "uiWeight": 600,
+      "priceWeight": 600,
+      "tracking": "-0.015em",
+      "leading": 1.2,
+      "scale": 1,
+      "transform": "none",
+      "sourceKind": "user-provided-adaptation",
+      "reference": {
+        "name": "L’Occitane",
+        "url": "https://www.loccitane.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-zara",
+      "name": "Zara",
+      "pair": "Roboto · Roboto",
+      "description": "Модный монохром. Заголовки 300, текст 400.",
+      "file": "css/themes/fonts/brand-zara.css",
+      "heading": "Roboto",
+      "body": "Roboto",
+      "headingWeight": 300,
+      "bodyWeight": 400,
+      "uiWeight": 400,
+      "priceWeight": 600,
+      "tracking": "0.045em",
+      "leading": 1.16,
+      "scale": 1,
+      "transform": "uppercase",
+      "sourceKind": "user-provided-adaptation",
+      "reference": {
+        "name": "Zara",
+        "url": "https://www.zara.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-ikea",
+      "name": "IKEA",
+      "pair": "Noto Sans · Noto Sans",
+      "description": "Практичный каталог. Заголовки 700, текст 400.",
+      "file": "css/themes/fonts/brand-ikea.css",
+      "heading": "Noto Sans",
+      "body": "Noto Sans",
+      "headingWeight": 700,
+      "bodyWeight": 400,
+      "uiWeight": 500,
+      "priceWeight": 700,
+      "tracking": "-0.02em",
+      "leading": 1.15,
+      "scale": 1,
+      "transform": "none",
+      "sourceKind": "user-provided-adaptation",
+      "reference": {
+        "name": "IKEA",
+        "url": "https://www.ikea.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-lego",
+      "name": "LEGO",
+      "pair": "Nunito · Nunito Sans",
+      "description": "Яркий и дружелюбный. Заголовки 800, текст 400.",
+      "file": "css/themes/fonts/brand-lego.css",
+      "heading": "Nunito",
+      "body": "Nunito Sans",
+      "headingWeight": 800,
+      "bodyWeight": 400,
+      "uiWeight": 600,
+      "priceWeight": 700,
+      "tracking": "-0.02em",
+      "leading": 1.15,
+      "scale": 1,
+      "transform": "none",
+      "sourceKind": "user-provided-adaptation",
+      "reference": {
+        "name": "LEGO",
+        "url": "https://www.lego.com/",
+        "inspirationOnly": true
+      }
+    },
+    {
+      "id": "brand-lush",
+      "name": "Lush",
+      "pair": "Caveat · Roboto",
+      "description": "Ремесленный характер. Заголовки 700, текст 400.",
+      "file": "css/themes/fonts/brand-lush.css",
+      "heading": "Caveat",
+      "body": "Roboto",
+      "headingWeight": 700,
+      "bodyWeight": 400,
+      "uiWeight": 500,
+      "priceWeight": 700,
+      "tracking": "0em",
+      "leading": 1.1,
+      "scale": 1.12,
+      "transform": "none",
+      "sourceKind": "user-provided-adaptation",
+      "reference": {
+        "name": "Lush",
+        "url": "https://www.lush.com/",
+        "inspirationOnly": true
+      }
+    }
+  ],
+  "icons": [
+    {
+      "id": "graphic",
+      "name": "Графичный",
+      "description": "Угловые линии",
+      "file": "css/themes/icons/graphic.css"
+    },
+    {
+      "id": "soft",
+      "name": "Мягкий",
+      "description": "Округлые линии",
+      "file": "css/themes/icons/soft.css"
+    },
+    {
+      "id": "luxury",
+      "name": "Люкс",
+      "description": "Тонкий штрих",
+      "file": "css/themes/icons/luxury.css"
+    },
+    {
+      "id": "monolith",
+      "name": "Монолит",
+      "description": "Плотная линия",
+      "file": "css/themes/icons/monolith.css"
+    },
+    {
+      "id": "minimal",
+      "name": "Минимал",
+      "description": "Лаконичный штрих",
+      "file": "css/themes/icons/minimal.css"
+    },
+    {
+      "id": "techno",
+      "name": "Техно",
+      "description": "Угловая геометрия",
+      "file": "css/themes/icons/techno.css"
+    },
+    {
+      "id": "organic",
+      "name": "Органик",
+      "description": "Живая форма",
+      "file": "css/themes/icons/organic.css"
+    },
+    {
+      "id": "classic",
+      "name": "Классика",
+      "description": "Строгий контур",
+      "file": "css/themes/icons/classic.css"
+    },
+    {
+      "id": "silhouette",
+      "name": "Силуэт",
+      "description": "Плотные пиктограммы",
+      "file": "css/themes/icons/silhouette.css"
+    },
+    {
+      "id": "retro",
+      "name": "Ретро",
+      "description": "Контрастный контур",
+      "file": "css/themes/icons/retro.css"
+    }
+  ],
+  "iconBackgrounds": [
+    {
+      "id": "filled",
+      "name": "С фоном",
+      "description": "Корзина, избранное и машинка доставки на подложке в цветах темы.",
+      "file": "css/themes/icon-backgrounds/filled.css"
+    },
+    {
+      "id": "bare",
+      "name": "Без фона",
+      "description": "Только иконки без подложки, включая выбранное состояние. Область нажатия и счётчики сохраняются.",
+      "file": "css/themes/icon-backgrounds/bare.css"
+    }
+  ],
+  "menus": [
+    {
+      "id": "gymshark",
+      "name": "Боковые панели · Gymshark",
+      "description": "На десктопе — две боковые панели рубрик. На телефоне — вкладки и отдельные экраны подрубрик.",
+      "file": "css/themes/menus/gymshark.css",
+      "reference": "https://www.gymshark.com/"
+    },
+    {
+      "id": "md-fashion",
+      "name": "Мега-меню · MD Fashion",
+      "description": "На десктопе — широкое меню с колонками. На телефоне — список разделов и сворачиваемые подрубрики.",
+      "file": "css/themes/menus/md-fashion.css",
+      "reference": "https://md-fashion.ua/"
+    }
+  ],
+  "capabilities": {
+    "changesMarkupClasses": false,
+    "changesUikitVendorFiles": false,
+    "cssOnlyIconGeometry": false,
+    "iconGeometryFromCssSelection": true,
+    "iconBackgroundFromCssSelection": true,
+    "iconBackgroundScope": "productCardActions",
+    "deliveryIconBackgroundFromCssSelection": true,
+    "iconRegistry": "UIkit.icon.add",
+    "menuLayoutFromCssSelection": true,
+    "menuGeneratesRuntimeMarkup": true,
+    "menuContentSource": "existingNavbar",
+    "menuComponents": [
+      "UIkit.drop",
+      "UIkit.offcanvas",
+      "UIkit.accordion"
+    ],
+    "iconVisualStyle": [
+      "stroke",
+      "fill",
+      "linecap",
+      "linejoin",
+      "buttonShape",
+      "buttonSize"
+    ]
+  },
+  "fontFaces": "css/themes/shopra-font-faces.css",
+  "typography": "css/themes/shopra-typography.css",
+  "fontAssets": "assets/fonts/manifest.json",
+  "paletteSource": "https://shopra-store-showcase.aslaugbeauty.chatgpt.site/",
+  "brandFontFaces": "css/themes/shopra-brand-font-faces.css",
+  "brandFontAssets": "assets/fonts/brand-manifest.json"
+}

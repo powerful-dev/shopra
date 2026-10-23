@@ -1,0 +1,20 @@
+/* Zara: Roboto 300 / Roboto 400, from the supplied adaptation. */
+@import url("../shopra-font-faces.css");
+@import url("../shopra-brand-font-faces.css");
+@import url("../shopra-typography.css");
+
+:root {
+  --shopra-font-heading: "Roboto", Arial, sans-serif;
+  --shopra-font-body: "Roboto", "Inter", Arial, sans-serif;
+  --shopra-font-weight-body: 400;
+  --shopra-font-weight-heading: 300;
+  --shopra-font-weight-ui: 400;
+  --shopra-font-weight-price: 600;
+  --shopra-font-weight-strong: 600;
+  --shopra-font-line-height: 1.5;
+  --shopra-heading-line-height: 1.16;
+  --shopra-heading-letter-spacing: 0.045em;
+  --shopra-heading-scale: 1;
+  --shopra-heading-transform: uppercase;
+  --shopra-meta-letter-spacing: 0.08em;
+}

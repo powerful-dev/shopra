@@ -1,0 +1,284 @@
+/*
+ * Shared storefront spacing, loaded after theme-core and before all presets.
+ * No typography, colours, component sizes or container widths belong here.
+ * UIkit remains responsible for grids, breakpoints and component behaviour.
+ * MD Fashion heading rhythm: 12/40 desktop, 6/23 tablet, 9/24 mobile.
+ */
+:root {
+  --shopra-page-gutter: 72px;
+  --shopra-section-space: 55px;
+  --shopra-section-space-small: 32px;
+  --shopra-home-start-space: 96px;
+  --shopra-label-gap: 12px;
+  --shopra-heading-gap: 40px;
+  --shopra-grid-gutter: 32px;
+  --shopra-grid-row-gap: 40px;
+  --shopra-panel-space: 24px;
+  --shopra-padding-large: 32px;
+  --shopra-anchor-space: 84px;
+}
+
+.uk-container,
+.uk-container-expand {
+  padding-right: var(--shopra-page-gutter);
+  padding-left: var(--shopra-page-gutter);
+}
+
+.uk-container .uk-container {
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.uk-section,
+.uk-section-large {
+  padding-top: var(--shopra-section-space);
+  padding-bottom: var(--shopra-section-space);
+}
+
+.uk-section-small {
+  padding-top: var(--shopra-section-space-small);
+  padding-bottom: var(--shopra-section-space-small);
+}
+
+/* Sticky navigation must not cover a section reached by an anchor link. */
+main > section[id] {
+  scroll-margin-top: var(--shopra-anchor-space);
+}
+
+/* The first category block has its own separation from the hero. */
+main > .uk-cover-container:first-child + #catalog {
+  padding-top: var(--shopra-home-start-space);
+}
+
+.uk-card-body {
+  padding: var(--shopra-panel-space);
+}
+
+.uk-card-small.uk-card-body,
+.uk-card-small .uk-card-body {
+  padding: 18px;
+}
+
+.uk-grid-medium,
+.uk-grid-large {
+  margin-top: 0;
+  margin-left: calc(-1 * var(--shopra-grid-gutter));
+}
+
+.uk-grid-medium > *,
+.uk-grid-large > * {
+  padding-left: var(--shopra-grid-gutter);
+}
+
+.uk-grid + .uk-grid-medium,
+.uk-grid + .uk-grid-large,
+.uk-grid-medium > .uk-grid-margin,
+.uk-grid-row-medium > .uk-grid-margin,
+.uk-grid-large > .uk-grid-margin,
+.uk-grid-row-large > .uk-grid-margin {
+  margin-top: var(--shopra-grid-row-gap);
+}
+
+.uk-button {
+  padding-right: 18px;
+  padding-left: 18px;
+}
+
+.uk-button-small {
+  padding-right: 12px;
+  padding-left: 12px;
+}
+
+.uk-button-large {
+  padding-right: 24px;
+  padding-left: 24px;
+}
+
+.uk-modal-header,
+.uk-modal-body,
+.uk-modal-footer {
+  padding: 24px;
+}
+
+.uk-dropdown,
+.uk-navbar-dropdown {
+  padding: 20px;
+}
+
+hr,
+.uk-hr {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+/* Rescale existing utilities inside pages, not specialised menus/modals. */
+:where(main, #footer) .uk-margin-medium-top { margin-top: 24px !important; }
+:where(main, #footer) .uk-margin-medium-bottom { margin-bottom: 24px !important; }
+:where(main, #footer) .uk-margin-large-top { margin-top: 40px !important; }
+:where(main, #footer) .uk-margin-large-bottom { margin-bottom: 40px !important; }
+:where(main, #footer) .uk-padding-large { padding: var(--shopra-padding-large) !important; }
+:where(main, #footer) .uk-padding-remove { padding: 0 !important; }
+:where(main, #footer) .uk-padding-remove-top { padding-top: 0 !important; }
+:where(main, #footer) .uk-padding-remove-bottom { padding-bottom: 0 !important; }
+:where(main, #footer) .uk-padding-remove-left { padding-left: 0 !important; }
+:where(main, #footer) .uk-padding-remove-right { padding-right: 0 !important; }
+:where(main, #footer) .uk-padding-remove-vertical { padding-top: 0 !important; padding-bottom: 0 !important; }
+:where(main, #footer) .uk-padding-remove-horizontal { padding-right: 0 !important; padding-left: 0 !important; }
+
+/* Section headings: prevent default paragraph/heading margins accumulating. */
+:is(#catalog, #products) > .uk-container > .uk-flex.uk-margin-large-bottom {
+  margin-bottom: var(--shopra-heading-gap) !important;
+}
+
+:is(#catalog, #products) > .uk-container > .uk-flex > div > .uk-text-meta,
+#products > .uk-container > .uk-text-meta,
+#capsule > .uk-container > .uk-grid > div > .uk-padding-large > .uk-text-meta,
+#about > .uk-container > .uk-text-meta {
+  margin: 0 0 var(--shopra-label-gap);
+}
+
+:is(#catalog, #products) > .uk-container > .uk-flex > div > h2 {
+  margin: 0 !important;
+}
+
+#products > .uk-container > h2,
+#capsule > .uk-container > .uk-grid > div > .uk-padding-large > h2 {
+  margin: 0 0 var(--shopra-heading-gap) !important;
+}
+
+:is(#catalog, #products) > .uk-container > .uk-grid,
+#capsule > .uk-container > .uk-grid > div > .uk-padding-large > .uk-grid {
+  margin-top: 0;
+}
+
+/* One page gutter, not a container gutter plus UIkit's 70 px inner padding. */
+#capsule > .uk-container > .uk-grid.uk-flex-middle {
+  align-items: flex-start;
+}
+
+#capsule > .uk-container > .uk-grid > div > .uk-padding-large {
+  padding: 0 var(--shopra-grid-gutter) 0 0 !important;
+}
+
+#capsule .uk-overlay > .uk-text-meta {
+  margin: 0 0 var(--shopra-label-gap);
+}
+
+#about > .uk-container > h2 {
+  margin: 0 0 24px;
+}
+
+#about > .uk-container > .uk-text-lead {
+  margin: 0;
+}
+
+/* Preserve the compact product-card rhythm across all three storefronts. */
+:is(#products, #capsule, [data-catalog-grid]) .uk-card-body.uk-padding-small {
+  padding: 12px 0 0 !important;
+}
+
+:is(#products, #capsule, [data-catalog-grid]) .uk-card-title,
+:is(#products, #capsule, [data-catalog-grid]) .uk-card-body h3 {
+  margin: 0 0 8px !important;
+}
+
+:is(#products, #capsule, [data-catalog-grid]) .uk-card-body > .uk-text-meta {
+  margin: 0 0 12px;
+}
+
+:is(#products, #capsule, [data-catalog-grid]) .uk-card-body p {
+  margin-top: 0 !important;
+  margin-bottom: 8px;
+}
+
+:is(#products, #capsule, [data-catalog-grid]) .uk-card-body > .uk-flex:first-child > strong {
+  margin-top: 0;
+}
+
+/* Newsletter, link columns and copyright share the same footer rhythm. */
+#footer.uk-section {
+  padding-top: 48px;
+  padding-bottom: 36px;
+}
+
+#footer > .uk-container {
+  padding-right: var(--shopra-page-gutter);
+  padding-left: var(--shopra-page-gutter);
+}
+
+#footer > .uk-container > .uk-grid-large {
+  margin-top: 0;
+}
+
+#footer .uk-logo,
+#footer .uk-logo + p {
+  margin: 0 0 24px;
+}
+
+#footer h3 {
+  margin: 0 0 20px;
+}
+
+#footer .uk-list {
+  margin: 0;
+}
+
+#footer .uk-list > li:nth-child(n+2) {
+  margin-top: 12px;
+}
+
+#footer > .uk-container > hr {
+  margin-top: 40px !important;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1199px) {
+  :root {
+    --shopra-page-gutter: 24px;
+    --shopra-section-space: 36.5px;
+    --shopra-section-space-small: 28px;
+    --shopra-home-start-space: 64px;
+    --shopra-label-gap: 6px;
+    --shopra-heading-gap: 23px;
+    --shopra-padding-large: 24px;
+  }
+}
+
+@media (max-width: 959px) {
+  #capsule > .uk-container > .uk-grid > div > .uk-padding-large {
+    padding: 24px 0 0 !important;
+  }
+
+  #footer > .uk-container > .uk-grid-large > :first-child {
+    margin-bottom: 0;
+  }
+
+  #footer > .uk-container > .uk-grid-large > .uk-grid-margin {
+    margin-top: 32px;
+  }
+}
+
+@media (max-width: 639px) {
+  :root {
+    --shopra-page-gutter: 16px;
+    --shopra-section-space: 26px;
+    --shopra-section-space-small: 24px;
+    --shopra-home-start-space: 48px;
+    --shopra-label-gap: 9px;
+    --shopra-heading-gap: 24px;
+    --shopra-grid-gutter: 16px;
+    --shopra-grid-row-gap: 24px;
+    --shopra-panel-space: 18px;
+    --shopra-anchor-space: 80px;
+  }
+
+  .uk-modal-header,
+  .uk-modal-body,
+  .uk-modal-footer {
+    padding: 18px 16px;
+  }
+
+  #footer.uk-section {
+    padding-bottom: 40px;
+  }
+}

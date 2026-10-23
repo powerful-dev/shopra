@@ -1,5 +1,10 @@
 *.log
 .DS_Store
+*:Zone.Identifier
+Desktop.ini
+/layout/shop/**/.git/
+/layout/shop/sites/theme-presets/.openai/
+/layout/shop/sites/theme-presets/dist/
 .env
 .env.backup
 .env.production
