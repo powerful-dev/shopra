@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Module;
+use App\Models\Shop;
 use App\Models\ShopGroup;
 use App\Models\ShopItem;
 use App\Models\ShopItemMedia;
@@ -100,6 +101,60 @@ class ShopItemApiTest extends TestCase
             ->assertOk()
             ->assertJsonCount(0, 'data')
             ->assertJsonPath('meta.total', 0);
+    }
+
+    public function test_primary_category_is_persisted_when_creating_a_product_or_automatic_draft(): void
+    {
+        Shop::query()->create(['name' => 'Test shop', 'theme' => 'other', 'currency' => 'UAH']);
+        $admin = User::factory()->create(['is_active' => true]);
+        $admin->modules()->attach(Module::query()->create([
+            'code' => 'products',
+            'show_in_menu' => true,
+            'is_required' => false,
+        ]));
+        $group = ShopGroup::query()->create(['name' => 'Женские сумки', 'slug' => 'zhenskie-sumki']);
+        $this->actingAs($admin, 'sanctum');
+
+        foreach ([
+            ['name' => 'Сумка', 'price' => 1000, 'status' => 'active'],
+            ['name' => null, 'price' => 0, 'status' => 'draft'],
+        ] as $itemData) {
+            $productId = $this->postJson('/api/products', [
+                ...$itemData,
+                'currency' => 'UAH',
+                'shop_group_id' => $group->id,
+            ])
+                ->assertCreated()
+                ->assertJsonPath('data.shop_group_id', $group->id)
+                ->json('data.id');
+
+            $this->assertDatabaseHas('shop_items', [
+                'id' => $productId,
+                'shop_group_id' => $group->id,
+            ]);
+        }
+
+        $draftId = $this->postJson('/api/products', [
+            'name' => null,
+            'price' => 0,
+            'currency' => 'UAH',
+            'status' => 'draft',
+        ])->assertCreated()->json('data.id');
+
+        $this->putJson("/api/products/{$draftId}", [
+            'name' => 'Новая сумка',
+            'price' => 1000,
+            'currency' => 'UAH',
+            'shop_group_id' => $group->id,
+            'status' => 'draft',
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.shop_group_id', $group->id);
+
+        $this->assertDatabaseHas('shop_items', [
+            'id' => $draftId,
+            'shop_group_id' => $group->id,
+        ]);
     }
 
     public function test_products_are_returned_with_all_their_categories(): void

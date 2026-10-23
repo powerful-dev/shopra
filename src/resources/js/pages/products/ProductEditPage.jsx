@@ -720,7 +720,8 @@ export default function ProductEditPage() {
 
                 if (!isSaveContextCurrent()) return;
 
-                if (idsMatch(automaticallyCreatedProductIdRef.current, product.id)) {
+                if (idsMatch(automaticallyCreatedProductIdRef.current, product.id)
+                    || !nullableIdsMatch(product.shop_group_id, payload.shop_group_id)) {
                     await csrf();
 
                     if (!isSaveContextCurrent()) return;
