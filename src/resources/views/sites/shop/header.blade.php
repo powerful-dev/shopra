@@ -1,3 +1,4 @@
+@php($shopCatalogUrl = isset($category) ? route('catalog.show', ['slug' => $category->slug]) : 'catalog.html')
 <header class="uk-background-default uk-box-shadow-small" uk-sticky="start: 0; animation: uk-animation-slide-top">
       <div class="uk-container uk-container-expand">
         <nav class="uk-navbar-container uk-navbar-transparent" uk-navbar>
@@ -10,8 +11,8 @@
               <small class="uk-text-meta uk-text-uppercase">modern uniform</small>
             </a>
             <ul class="uk-navbar-nav uk-visible@m">
-              <li>
-                <a href="catalog.html">Каталог <span uk-navbar-parent-icon></span></a>
+              <li @class(['uk-active' => isset($category)])>
+                <a href="{{ $shopCatalogUrl }}">Каталог <span uk-navbar-parent-icon></span></a>
                 <div class="uk-navbar-dropdown uk-navbar-dropdown-width-2">
                   <div class="uk-drop-grid uk-child-width-1-2" uk-grid>
                     <div>
@@ -20,20 +21,20 @@
                         <li class="uk-parent uk-open">
                           <a href="#">Новая коллекция <span uk-nav-parent-icon></span></a>
                           <ul class="uk-nav-sub">
-                            <li><a href="catalog.html?category=0">Смотреть всё</a></li>
-                            <li><a href="catalog.html?category=1">Жакеты Form</a></li>
-                            <li><a href="catalog.html?category=2">Мягкий трикотаж</a></li>
+                            <li><a href="{{ $shopCatalogUrl }}?category=0">Смотреть всё</a></li>
+                            <li><a href="{{ $shopCatalogUrl }}?category=1">Жакеты Form</a></li>
+                            <li><a href="{{ $shopCatalogUrl }}?category=2">Мягкий трикотаж</a></li>
                           </ul>
                         </li>
                         <li class="uk-parent">
                           <a href="#">Капсула Cobalt <span uk-nav-parent-icon></span></a>
                           <ul class="uk-nav-sub">
-                            <li><a href="#capsule">О капсуле</a></li>
-                            <li><a href="catalog.html">Все сочетания</a></li>
+                            <li><a href="{{ route('home') }}#capsule">О капсуле</a></li>
+                            <li><a href="{{ $shopCatalogUrl }}">Все сочетания</a></li>
                           </ul>
                         </li>
                         <li class="uk-nav-divider"></li>
-                        <li><a href="catalog.html">Все товары</a></li>
+                        <li><a href="{{ $shopCatalogUrl }}">Все товары</a></li>
                       </ul>
                     </div>
                     <div>
@@ -41,15 +42,15 @@
                         <li class="uk-nav-header">Категории</li>
                         <li class="uk-parent">
                           <a href="#">Одежда <span uk-nav-parent-icon></span></a>
-                          <ul class="uk-nav-sub"><li><a href="catalog.html?category=1">Жакеты</a></li><li><a href="catalog.html">Брюки</a></li><li><a href="catalog.html">Юбки</a></li></ul>
+                          <ul class="uk-nav-sub"><li><a href="{{ $shopCatalogUrl }}?category=1">Жакеты</a></li><li><a href="{{ $shopCatalogUrl }}">Брюки</a></li><li><a href="{{ $shopCatalogUrl }}">Юбки</a></li></ul>
                         </li>
                         <li class="uk-parent">
                           <a href="#">Трикотаж <span uk-nav-parent-icon></span></a>
-                          <ul class="uk-nav-sub"><li><a href="catalog.html?category=2">Топы</a></li><li><a href="catalog.html?category=2">Кардиганы</a></li><li><a href="catalog.html?category=2">Гольфы</a></li></ul>
+                          <ul class="uk-nav-sub"><li><a href="{{ $shopCatalogUrl }}?category=2">Топы</a></li><li><a href="{{ $shopCatalogUrl }}?category=2">Кардиганы</a></li><li><a href="{{ $shopCatalogUrl }}?category=2">Гольфы</a></li></ul>
                         </li>
                         <li class="uk-parent">
                           <a href="#">Аксессуары <span uk-nav-parent-icon></span></a>
-                          <ul class="uk-nav-sub"><li><a href="catalog.html?category=3">Сумки</a></li><li><a href="catalog.html?category=3">ONE SIZE</a></li></ul>
+                          <ul class="uk-nav-sub"><li><a href="{{ $shopCatalogUrl }}?category=3">Сумки</a></li><li><a href="{{ $shopCatalogUrl }}?category=3">ONE SIZE</a></li></ul>
                         </li>
                       </ul>
                     </div>
@@ -57,12 +58,12 @@
                 </div>
               </li>
               <li>
-                <a href="catalog.html?category=0">Новинки <span uk-navbar-parent-icon></span></a>
+                <a href="{{ $shopCatalogUrl }}?category=0">Новинки <span uk-navbar-parent-icon></span></a>
                 <div class="uk-navbar-dropdown">
                   <ul class="uk-nav uk-navbar-dropdown-nav uk-nav-parent-icon" uk-nav="multiple: true">
                     <li class="uk-nav-header">Подборки</li>
-                    <li class="uk-parent uk-open"><a href="#">Новая коллекция <span uk-nav-parent-icon></span></a><ul class="uk-nav-sub"><li><a href="catalog.html?category=0">Новые модели</a></li><li><a href="catalog.html?category=1">Жакеты Form</a></li></ul></li>
-                    <li class="uk-parent"><a href="#">Выбор редакции <span uk-nav-parent-icon></span></a><ul class="uk-nav-sub"><li><a href="catalog.html">Бестселлеры</a></li><li><a href="#capsule">Лимитированный выпуск</a></li></ul></li>
+                    <li class="uk-parent uk-open"><a href="#">Новая коллекция <span uk-nav-parent-icon></span></a><ul class="uk-nav-sub"><li><a href="{{ $shopCatalogUrl }}?category=0">Новые модели</a></li><li><a href="{{ $shopCatalogUrl }}?category=1">Жакеты Form</a></li></ul></li>
+                    <li class="uk-parent"><a href="#">Выбор редакции <span uk-nav-parent-icon></span></a><ul class="uk-nav-sub"><li><a href="{{ $shopCatalogUrl }}">Бестселлеры</a></li><li><a href="{{ route('home') }}#capsule">Лимитированный выпуск</a></li></ul></li>
                   </ul>
                 </div>
               </li>
@@ -77,7 +78,7 @@
                   </ul>
                 </div>
               </li>
-              <li><a href="#about">О бренде</a></li>
+              <li><a href="{{ route('home') }}#about">О бренде</a></li>
             </ul>
             <a class="uk-navbar-item uk-link-muted uk-visible@xl" href="tel:+380671234567">+380 67 123 45 67</a>
           </div>
@@ -86,7 +87,7 @@
             <a class="uk-navbar-toggle uk-text-emphasis" href="#search-modal" aria-label="Поиск" uk-toggle>
               <span uk-icon="icon: search"></span>
             </a>
-            <a id="header-favorite" class="uk-navbar-toggle uk-text-emphasis" href="#header-favorite" role="button" aria-label="Избранное" uk-toggle="target: #header-favorite; cls: uk-text-primary">
+            <a id="{{ isset($category) ? 'catalog-favorite' : 'header-favorite' }}" class="uk-navbar-toggle uk-text-emphasis" href="#{{ isset($category) ? 'catalog-favorite' : 'header-favorite' }}" role="button" aria-label="Избранное" uk-toggle="target: #{{ isset($category) ? 'catalog-favorite' : 'header-favorite' }}; cls: uk-text-primary">
               <span uk-icon="icon: heart"></span>
             </a>
             <a class="uk-navbar-toggle uk-text-emphasis" href="#footer" aria-label="Профиль" uk-tooltip="Профиль покупателя">

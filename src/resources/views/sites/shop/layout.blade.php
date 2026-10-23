@@ -1,3 +1,5 @@
+@php($shopAppearance = config('shop.appearance'))
+
 <!doctype html>
 <html lang="ru" data-shopra-store="fashion" data-shopra-asset-base="{{ $shopAssetBase }}">
   <head>
@@ -10,25 +12,31 @@
         'layout/shop/css/shopra-gradients.css',
         'layout/shop/css/themes/shopra-theme-core.css',
         'layout/shop/css/shopra-spacing.css',
-        'layout/shop/css/themes/palettes/athletic.css',
-        'layout/shop/css/themes/shapes/straight.css',
-        'layout/shop/css/themes/fonts/fashion.css',
-        'layout/shop/css/themes/icons/organic.css',
-        'layout/shop/css/themes/icon-backgrounds/bare.css',
-        'layout/shop/css/themes/menus/gymshark.css',
+        'layout/shop/css/themes/palettes/'.$shopAppearance['palette'].'.css',
+        'layout/shop/css/themes/shapes/'.$shopAppearance['shape'].'.css',
+        'layout/shop/css/themes/fonts/'.$shopAppearance['font'].'.css',
+        'layout/shop/css/themes/icons/'.$shopAppearance['icons'].'.css',
+        'layout/shop/css/themes/icon-backgrounds/'.$shopAppearance['icon_background'].'.css',
+        'layout/shop/css/themes/menus/'.$shopAppearance['menu'].'.css',
     ])
     @stack('head')
   </head>
   <body>
+    @yield('before-header')
+
     @include('sites.shop.header')
 
     @yield('content')
 
-    @include('sites.shop.footer')
+    @hasSection('footer')
+      @yield('footer')
+    @else
+      @include('sites.shop.footer')
+    @endif
     @include('sites.shop.mobile-menu')
 
     @stack('modals')
-    @vite('resources/js/sites/shop.js')
+    @vite($shopScript ?? 'resources/js/sites/shop.js')
   </body>
 </html>
 
