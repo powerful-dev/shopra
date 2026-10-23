@@ -1,9 +1,14 @@
 <?php
 
+use Illuminate\Foundation\Vite;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', function (Vite $vite) {
+    $shopAssetBase = $vite->isRunningHot()
+        ? rtrim($vite->asset(''), '/')
+        : rtrim(asset('build'), '/');
+
+    return view('sites.shop.home', compact('shopAssetBase'));
 })->name('home');
 
 Route::view('/catalog/{slug}', 'welcome')
