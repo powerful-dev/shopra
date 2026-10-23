@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Module;
 use App\Models\ShopGroup;
 use App\Models\ShopItem;
+use App\Models\ShopItemMedia;
 use App\Models\ShopUnit;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,6 +14,45 @@ use Tests\TestCase;
 class ShopItemApiTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_product_list_includes_unique_primary_and_additional_categories_and_main_image(): void
+    {
+        $admin = User::factory()->create(['is_active' => true]);
+        $admin->modules()->attach(Module::query()->create([
+            'code' => 'products',
+            'show_in_menu' => true,
+            'is_required' => false,
+        ]));
+
+        $primary = ShopGroup::query()->create(['name' => 'Сумки', 'slug' => 'sumki']);
+        $additional = ShopGroup::query()->create(['name' => 'Рюкзаки', 'slug' => 'ryukzaki']);
+        $item = ShopItem::query()->create([
+            'name' => 'Рюкзак',
+            'url' => 'ryukzak',
+            'price' => 1000,
+            'currency' => 'UAH',
+            'status' => 'active',
+            'shop_group_id' => $primary->id,
+        ]);
+        $item->groups()->attach([$primary->id, $additional->id]);
+        $item->media()->createMany([
+            ['type' => ShopItemMedia::TYPE_IMAGE, 'filename' => 'other.webp', 'sort_order' => 0, 'is_main' => false],
+            ['type' => ShopItemMedia::TYPE_IMAGE, 'filename' => 'main.webp', 'sort_order' => 1, 'is_main' => true],
+            ['type' => ShopItemMedia::TYPE_VIDEO, 'filename' => 'demo.mp4', 'sort_order' => 2, 'is_main' => false],
+        ]);
+
+        $this->actingAs($admin, 'sanctum');
+
+        $this->getJson('/api/products')
+            ->assertOk()
+            ->assertJsonPath('data.0.url', 'ryukzak')
+            ->assertJsonCount(2, 'data.0.categories')
+            ->assertJsonPath('data.0.categories.0.name', 'Сумки')
+            ->assertJsonPath('data.0.categories.1.name', 'Рюкзаки')
+            ->assertJsonCount(2, 'data.0.media')
+            ->assertJsonPath('data.0.media.0.is_main', true)
+            ->assertJsonPath('data.0.media.0.small_url', fn (string $url): bool => str_ends_with($url, "/shop/products/{$item->id}/small/main.webp"));
+    }
 
     public function test_products_are_returned_with_all_their_categories(): void
     {

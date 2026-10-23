@@ -22,6 +22,7 @@ import AllProductsIcon from '../../components/icons/AllProductsIcon';
 import ActiveProductsIcon from '../../components/icons/ActiveProductsIcon';
 import DraftProductsIcon from '../../components/icons/DraftProductsIcon';
 import LowStockProductsIcon from '../../components/icons/LowStockProductsIcon';
+import OpenLinkIcon from '../../components/icons/OpenLinkIcon';
 import CategoriesModal from './CategoriesModal';
 import { buildShopGroupOptions } from '../../utils/shopGroups';
 
@@ -451,6 +452,8 @@ function ProductRow({ product, index, isSelected, onSelectionChange, isActionsOp
     const { t } = useTranslation();
     const thumb = productThumbs[index % productThumbs.length];
     const categories = product.categories.map((category) => category.name).join(', ');
+    const mainImage = product.media?.find((media) => media.type === 'image' && media.is_main)
+        ?? product.media?.find((media) => media.type === 'image');
     const lowStock = product.quantity > 0 && product.quantity <= 3;
     const price = `${Number(product.price).toLocaleString('uk-UA')} ₴`;
     const unitShortName = product.unit?.is_system
@@ -466,11 +469,18 @@ function ProductRow({ product, index, isSelected, onSelectionChange, isActionsOp
                 aria-label={t('productsPage.selectProduct', { name: product.name })}
                 onChange={onSelectionChange}
             />
-            <button className="flex min-w-0 items-center gap-[11px] border-0 bg-transparent p-0 text-left" type="button">
-                <ProductThumb product={thumb} />
-                <span className="flex min-w-0 flex-col"><strong className="truncate text-[13px] text-[#312d29] max-md:text-xs">{product.name}</strong>
-                <small className="mt-[3px] text-xs text-[#9d9690]">{product.sku}</small></span>
-            </button>
+            <div className="flex min-w-0 items-center gap-[11px] text-left">
+                {mainImage?.small_url
+                    ? <img className="h-[51px] w-12 flex-none rounded-lg object-cover" src={mainImage.small_url} alt="" />
+                    : <ProductThumb product={thumb} />}
+                <span className="flex min-w-0 flex-col">
+                    <span className="flex min-w-0 items-center gap-1">
+                        <strong className="truncate text-[13px] text-[#312d29] max-md:text-xs">{product.name}</strong>
+                        {product.url && <a className="flex-none text-[#756d67] hover:text-[color:var(--color-accent)]" href={`/product/${encodeURIComponent(product.url)}`} target="_blank" rel="noopener noreferrer" aria-label={t('productsPage.openProduct', { name: product.name })}><OpenLinkIcon /></a>}
+                    </span>
+                    <small className="mt-[3px] text-xs text-[#9d9690]">{product.sku}</small>
+                </span>
+            </div>
             <span className="text-xs">{categories}</span>
             <span className={`text-xs ${lowStock ? 'font-[720] text-[#a95b12]' : ''}`}>{product.quantity}{unitShortName ? ` ${unitShortName}` : ''}</span>
             <strong className="text-[13px] text-[#312d29]">{price}</strong>

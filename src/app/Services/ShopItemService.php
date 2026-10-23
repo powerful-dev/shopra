@@ -107,7 +107,11 @@ class ShopItemService
         $lowStockThreshold = $this->lowStockThreshold();
 
         return ShopItem::query()
-            ->with(['groups', 'unit'])
+            ->with(['groups', 'shopGroup', 'unit', 'media' => fn ($query) => $query
+                ->where('type', 'image')
+                ->orderByDesc('is_main')
+                ->orderBy('sort_order')
+                ->orderBy('id')])
             ->withExists('variants')
             ->withSum('activeVariants', 'quantity')
             ->when($search !== '', function ($query) use ($search) {

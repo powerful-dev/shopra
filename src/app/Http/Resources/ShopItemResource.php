@@ -35,11 +35,15 @@ class ShopItemResource extends JsonResource
                 'short_name' => $this->unit->short_name,
                 'is_system' => $this->unit->is_system,
             ]),
-            'categories' => $this->groups->map(fn ($group) => [
-                'id' => $group->id,
-                'name' => $group->name,
-                'url' => $group->url,
-            ])->values(),
+            'categories' => collect([$this->shopGroup])
+                ->concat($this->groups)
+                ->filter()
+                ->unique('id')
+                ->map(fn ($group) => [
+                    'id' => $group->id,
+                    'name' => $group->name,
+                    'url' => $group->url,
+                ])->values(),
             'media' => ShopItemMediaResource::collection($this->whenLoaded('media')),
         ];
     }

@@ -53,6 +53,7 @@
         "bulkDeleteMessage": "Are you sure you want to delete the selected products ({{count}})?",
         "bulkDeleteError": "Unable to delete the selected products. Please try again.",
         "productActions": "Actions for {{name}}",
+        "openProduct": "Open {{name}} in a new tab",
         "edit": "Edit",
         "delete": "Delete",
         "cancel": "Cancel",
