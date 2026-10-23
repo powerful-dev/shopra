@@ -103,7 +103,7 @@ class ShopItemApiTest extends TestCase
             ->assertJsonPath('meta.total', 0);
     }
 
-    public function test_primary_category_is_persisted_when_creating_a_product_or_automatic_draft(): void
+    public function test_all_product_fields_are_persisted_on_creation_and_after_automatic_draft(): void
     {
         Shop::query()->create(['name' => 'Test shop', 'theme' => 'other', 'currency' => 'UAH']);
         $admin = User::factory()->create(['is_active' => true]);
@@ -115,21 +115,46 @@ class ShopItemApiTest extends TestCase
         $group = ShopGroup::query()->create(['name' => 'Женские сумки', 'slug' => 'zhenskie-sumki']);
         $this->actingAs($admin, 'sanctum');
 
+        $filledFields = [
+            'name' => 'Кожаная сумка',
+            'price' => 1234.50,
+            'old_price' => 1500,
+            'currency' => 'UAH',
+            'quantity' => 7,
+            'show_stock' => false,
+            'description' => '<p>Описание сумки</p>',
+            'seo_title' => 'Кожаная сумка',
+            'seo_description' => 'Описание для поиска',
+            'shop_group_id' => $group->id,
+            'status' => 'draft',
+        ];
+
         foreach ([
-            ['name' => 'Сумка', 'price' => 1000, 'status' => 'active'],
-            ['name' => null, 'price' => 0, 'status' => 'draft'],
+            $filledFields,
+            [...$filledFields, 'status' => 'active'],
+            [...$filledFields, 'name' => null],
         ] as $itemData) {
             $productId = $this->postJson('/api/products', [
                 ...$itemData,
-                'currency' => 'UAH',
-                'shop_group_id' => $group->id,
             ])
                 ->assertCreated()
+                ->assertJsonPath('data.price', '1234.50')
+                ->assertJsonPath('data.currency', 'UAH')
+                ->assertJsonPath('data.quantity', 7)
                 ->assertJsonPath('data.shop_group_id', $group->id)
                 ->json('data.id');
 
             $this->assertDatabaseHas('shop_items', [
                 'id' => $productId,
+                'name' => $itemData['name'],
+                'price' => '1234.50',
+                'old_price' => '1500.00',
+                'currency' => 'UAH',
+                'quantity' => 7,
+                'show_stock' => false,
+                'description' => '<p>Описание сумки</p>',
+                'seo_title' => 'Кожаная сумка',
+                'seo_description' => 'Описание для поиска',
                 'shop_group_id' => $group->id,
             ]);
         }
@@ -141,18 +166,23 @@ class ShopItemApiTest extends TestCase
             'status' => 'draft',
         ])->assertCreated()->json('data.id');
 
-        $this->putJson("/api/products/{$draftId}", [
-            'name' => 'Новая сумка',
-            'price' => 1000,
-            'currency' => 'UAH',
-            'shop_group_id' => $group->id,
-            'status' => 'draft',
-        ])
+        $this->putJson("/api/products/{$draftId}", $filledFields)
             ->assertOk()
+            ->assertJsonPath('data.name', 'Кожаная сумка')
+            ->assertJsonPath('data.price', '1234.50')
             ->assertJsonPath('data.shop_group_id', $group->id);
 
         $this->assertDatabaseHas('shop_items', [
             'id' => $draftId,
+            'name' => 'Кожаная сумка',
+            'price' => '1234.50',
+            'old_price' => '1500.00',
+            'currency' => 'UAH',
+            'quantity' => 7,
+            'show_stock' => false,
+            'description' => '<p>Описание сумки</p>',
+            'seo_title' => 'Кожаная сумка',
+            'seo_description' => 'Описание для поиска',
             'shop_group_id' => $group->id,
         ]);
     }

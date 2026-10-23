@@ -591,7 +591,7 @@ export default function ProductEditPage() {
             attributesSectionRef.current?.preserveForProduct(product.id);
             setForm((current) => ({
                 ...current,
-                currency: product.currency ?? current.currency,
+                currency: current.currency || product.currency || '',
                 status: product.status,
             }));
             return product;
@@ -720,8 +720,7 @@ export default function ProductEditPage() {
 
                 if (!isSaveContextCurrent()) return;
 
-                if (idsMatch(automaticallyCreatedProductIdRef.current, product.id)
-                    || !nullableIdsMatch(product.shop_group_id, payload.shop_group_id)) {
+                if (idsMatch(automaticallyCreatedProductIdRef.current, product.id)) {
                     await csrf();
 
                     if (!isSaveContextCurrent()) return;

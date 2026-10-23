@@ -16,7 +16,7 @@ import ImageSettingsPage from '../pages/settings/ImageSettingsPage';
 
 export const adminRoutes = [
     { path: '/admin/products', module: 'products', component: ProductsPage },
-    { path: '/admin/products/new', module: 'products', component: ProductEditPage },
+    // /new uses the same component instance as /:id to preserve form state when a draft is created.
     { path: '/admin/products/:id', module: 'products', component: ProductEditPage },
     { path: '/admin/orders', module: 'orders', component: OrdersPage },
     { path: '/admin/administrators', module: 'administrators', component: AdministratorsPage },
