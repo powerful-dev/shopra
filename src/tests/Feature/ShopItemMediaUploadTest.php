@@ -6,6 +6,7 @@ use App\Enums\ImageFit;
 use App\Enums\ImageFormat;
 use App\Models\Module;
 use App\Models\Shop;
+use App\Models\ShopGroup;
 use App\Models\ShopItem;
 use App\Models\ShopItemMedia;
 use App\Models\User;
@@ -18,6 +19,64 @@ use Tests\TestCase;
 class ShopItemMediaUploadTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_first_photo_draft_can_be_saved_with_all_locally_entered_fields(): void
+    {
+        Storage::fake('public');
+        $this->createShopWithImageSettings()->update(['currency' => 'UAH']);
+        $group = ShopGroup::query()->create(['name' => 'Сумки', 'slug' => 'sumki']);
+        $this->authenticateWithProductsAccess();
+
+        $filledFields = [
+            'name' => 'Кожаная сумка',
+            'price' => 1290,
+            'old_price' => 1490,
+            'currency' => 'UAH',
+            'quantity' => 7,
+            'show_stock' => false,
+            'description' => '<p>Описание</p>',
+            'shop_group_id' => $group->id,
+            'status' => 'draft',
+        ];
+        $draftId = $this->postJson('/api/products', [
+            'name' => null,
+            'price' => 0,
+            'quantity' => 0,
+            'currency' => '',
+            'shop_group_id' => null,
+            'status' => 'draft',
+        ])
+            ->assertCreated()
+            ->assertJsonPath('data.price', '0.00')
+            ->json('data.id');
+
+        $this->post("/api/products/{$draftId}/media", [
+            'type' => ShopItemMedia::TYPE_IMAGE,
+            'file' => UploadedFile::fake()->image('first.jpg', 120, 80),
+        ], ['Accept' => 'application/json'])
+            ->assertCreated()
+            ->assertJsonPath('data.is_main', true);
+
+        // The user enters every field only after the draft and first photo exist.
+        $this->putJson("/api/products/{$draftId}", $filledFields)
+            ->assertOk()
+            ->assertJsonPath('data.price', '1290.00')
+            ->assertJsonPath('data.shop_group_id', $group->id);
+
+        $this->assertDatabaseHas('shop_items', [
+            'id' => $draftId,
+            'name' => 'Кожаная сумка',
+            'price' => '1290.00',
+            'old_price' => '1490.00',
+            'currency' => 'UAH',
+            'quantity' => 7,
+            'show_stock' => false,
+            'description' => '<p>Описание</p>',
+            'shop_group_id' => $group->id,
+        ]);
+        $this->assertSame(1, ShopItem::query()->count());
+        $this->assertSame(1, ShopItemMedia::query()->where('shop_item_id', $draftId)->count());
+    }
 
     // Real 32x32 HEIC/HEVC fixture kept inline so the API test has no filesystem or network dependency.
     // Source: https://www.sampleyogi.com/samples/heic/heic-icon-32x32.heic

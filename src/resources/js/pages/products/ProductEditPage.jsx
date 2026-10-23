@@ -50,6 +50,7 @@ import { formatMediaExtensions } from '../../utils/media';
 import { convertPriceToStoreCurrency, findCurrencyRate, isValidCurrencyRate, parsePrice } from '../../utils/prices';
 import calculateProductCompleteness from '../../utils/productCompleteness';
 import { buildShopGroupOptions } from '../../utils/shopGroups';
+import { buildProductPayload, resolveProductSaveTarget } from '../../utils/productCreation';
 import CategoriesModal from './CategoriesModal';
 import CurrencySettingsModal from './CurrencySettingsModal';
 import ProductAttributesSection from './ProductAttributesSection';
@@ -132,10 +133,6 @@ function buildVariantsSummary(variants, attributes = [], formatOptionFallback = 
     };
 }
 
-function normalizeNullableQuantity(quantity) {
-    return quantity === '' || quantity === null || quantity === undefined ? null : quantity;
-}
-
 function buildStatusUpdatePayload(product, status) {
     return {
         name: product.name,
@@ -158,6 +155,8 @@ export default function ProductEditPage() {
     const navigate = useNavigate();
     const isNew = id === 'new' || !id;
     const currentProductId = isNew ? null : String(id);
+    const [draftProductId, setDraftProductId] = useState(null);
+    const editorProductId = isNew ? draftProductId : currentProductId;
     const [form, setForm] = useState({ name: '', price: '', old_price: '', currency: '', quantity: '', show_stock: true, description: '', seo_title: '', seo_description: '', shop_group_id: null, status: isNew ? 'draft' : null });
     const [loadedProductId, setLoadedProductId] = useState(null);
     const [productLoadError, setProductLoadError] = useState(null);
@@ -177,7 +176,6 @@ export default function ProductEditPage() {
     const [isVariantsOpen, setIsVariantsOpen] = useState(false);
     const [isPreparingVariants, setIsPreparingVariants] = useState(false);
     const [variantsOpenError, setVariantsOpenError] = useState('');
-    const [pendingVariantsProductId, setPendingVariantsProductId] = useState(null);
     const [variantsSummary, setVariantsSummary] = useState(emptyVariantsSummary);
     const [variantsSummaryStatus, setVariantsSummaryStatus] = useState(isNew ? 'loaded' : 'loading');
     const [currencySettings, setCurrencySettings] = useState({ currency: null, currency_rates: [] });
@@ -381,27 +379,13 @@ export default function ProductEditPage() {
             && variantsOpenOperationRef.current.contextVersion !== productContextRef.current.version) {
             variantsOpenOperationRef.current = null;
             setIsPreparingVariants(false);
-            setPendingVariantsProductId(null);
         }
 
         setIsSubmitting((submittingOperationsRef.current.get(productContextRef.current.version) ?? 0) > 0);
     }, [id, isNew]);
 
     useEffect(() => {
-        if (!pendingVariantsProductId) return;
-
-        if (idsMatch(currentProductId, pendingVariantsProductId)) {
-            setPendingVariantsProductId(null);
-            setIsPreparingVariants(false);
-            setIsVariantsOpen(true);
-        } else if (currentProductId !== null) {
-            setPendingVariantsProductId(null);
-            setIsPreparingVariants(false);
-        }
-    }, [currentProductId, pendingVariantsProductId]);
-
-    useEffect(() => {
-        if (isNew) {
+        if (!editorProductId) {
             variantAttributesRef.current = [];
             setVariantsSummary(emptyVariantsSummary());
             setVariantsSummaryStatus('loaded');
@@ -414,7 +398,7 @@ export default function ProductEditPage() {
         setVariantsSummaryStatus('loading');
 
         Promise.all([
-            getProductVariants(id),
+            getProductVariants(editorProductId),
             getShopAttributes({ signal: controller.signal }),
         ])
             .then(([variants, attributes]) => {
@@ -439,12 +423,13 @@ export default function ProductEditPage() {
             isActive = false;
             controller.abort();
         };
-    }, [id, isNew]);
+    }, [editorProductId]);
 
     useEffect(() => {
         if (isNew) {
             createdProductIdRef.current = null;
             automaticallyCreatedProductIdRef.current = null;
+            setDraftProductId(null);
             setLoadedProductId(null);
             setProductLoadError(null);
             setMedia([]);
@@ -462,6 +447,7 @@ export default function ProductEditPage() {
 
         createdProductIdRef.current = id;
 
+        // A successful save already has the latest form data and does not need a second load.
         if (skipProductLoadIdRef.current === String(id)) {
             skipProductLoadIdRef.current = null;
             setLoadedProductId(String(id));
@@ -532,10 +518,11 @@ export default function ProductEditPage() {
     }, [id, isNew]);
 
     const updateField = ({ target }) => {
+        const { name, type, checked, value } = target;
         resetSuccessfulSaveStatus();
         setForm((current) => ({
             ...current,
-            [target.name]: target.type === 'checkbox' ? target.checked : target.value,
+            [name]: type === 'checkbox' ? checked : value,
         }));
     };
 
@@ -560,18 +547,7 @@ export default function ProductEditPage() {
             return productCreationPromiseRef.current;
         }
 
-        const payload = {
-            ...form,
-            name: form.name.trim() || null,
-            price: useDraftDefaults && form.price === '' ? 0 : form.price,
-            old_price: form.old_price || null,
-            quantity: useDraftDefaults && form.quantity === '' ? 0 : normalizeNullableQuantity(form.quantity),
-            show_stock: form.show_stock,
-            seo_title: form.seo_title || null,
-            seo_description: form.seo_description || null,
-            status,
-            ...(attributes === undefined ? {} : { attributes }),
-        };
+        const payload = buildProductPayload(form, status, { useDraftDefaults, attributes });
         let creationPromise;
 
         creationPromise = (async () => {
@@ -585,6 +561,7 @@ export default function ProductEditPage() {
             if (!isProductContextVersionCurrent(creationContextVersion)) return product;
 
             createdProductIdRef.current = product.id;
+            setDraftProductId(String(product.id));
             automaticallyCreatedProductIdRef.current = useDraftDefaults ? String(product.id) : null;
             skipProductLoadIdRef.current = String(product.id);
             setLoadedProductId(String(product.id));
@@ -614,13 +591,7 @@ export default function ProductEditPage() {
         const contextVersion = productContextRef.current.version;
 
         if (createdProductIdRef.current) {
-            const productId = createdProductIdRef.current;
-
-            if (activeProductIdRef.current === null && saveInProgressRef.current !== contextVersion) {
-                navigateToCreatedProduct(productId, contextVersion);
-            }
-
-            return productId;
+            return createdProductIdRef.current;
         }
 
         beginSubmitting(contextVersion);
@@ -629,10 +600,6 @@ export default function ProductEditPage() {
             const product = await createProduct('draft', true);
 
             if (!isProductContextCurrent(contextVersion, product.id)) return null;
-
-            if (saveInProgressRef.current !== contextVersion) {
-                navigateToCreatedProduct(product.id, contextVersion);
-            }
 
             return product.id;
         } finally {
@@ -651,7 +618,6 @@ export default function ProductEditPage() {
 
         const contextVersion = productContextRef.current.version;
         const operation = { contextVersion };
-        let isWaitingForRoute = false;
         variantsOpenOperationRef.current = operation;
         setIsPreparingVariants(true);
         setVariantsOpenError('');
@@ -663,8 +629,7 @@ export default function ProductEditPage() {
                 || !productId
                 || !isProductContextCurrent(contextVersion, productId)) return;
 
-            isWaitingForRoute = true;
-            setPendingVariantsProductId(String(productId));
+            setIsVariantsOpen(true);
         } catch (error) {
             if (variantsOpenOperationRef.current !== operation
                 || !isProductContextVersionCurrent(contextVersion)) return;
@@ -674,7 +639,7 @@ export default function ProductEditPage() {
         } finally {
             if (variantsOpenOperationRef.current === operation) {
                 variantsOpenOperationRef.current = null;
-                if (!isWaitingForRoute && isProductContextVersionCurrent(contextVersion)) {
+                if (isProductContextVersionCurrent(contextVersion)) {
                     setIsPreparingVariants(false);
                 }
             }
@@ -687,7 +652,9 @@ export default function ProductEditPage() {
         const isSaveContextCurrent = () => isProductContextVersionCurrent(savingContextVersion)
             && activeProductIdRef.current === savingProductId;
 
-        if (saveInProgressRef.current === savingContextVersion || !isSaveContextCurrent() || (!isNew && loadedProductId !== savingProductId)) return;
+        if (saveInProgressRef.current === savingContextVersion || !isSaveContextCurrent()
+            || (savingProductId && loadedProductId !== savingProductId
+                && !idsMatch(createdProductIdRef.current, savingProductId))) return;
 
         saveInProgressRef.current = savingContextVersion;
         setSaveNotification(null);
@@ -703,19 +670,11 @@ export default function ProductEditPage() {
 
             if (!isSaveContextCurrent()) return;
 
-            const payload = {
-                ...form,
-                name: form.name.trim() || null,
-                old_price: form.old_price || null,
-                quantity: normalizeNullableQuantity(form.quantity),
-                show_stock: form.show_stock,
-                seo_title: form.seo_title || null,
-                seo_description: form.seo_description || null,
-                status,
-                attributes,
-            };
+            const payload = buildProductPayload(form, status, { attributes });
 
-            if (isNew) {
+            const existingProductId = resolveProductSaveTarget(savingProductId, createdProductIdRef.current);
+
+            if (existingProductId === null) {
                 product = await createProduct(status, false, attributes);
 
                 if (!isSaveContextCurrent()) return;
@@ -745,7 +704,7 @@ export default function ProductEditPage() {
 
                 if (!isSaveContextCurrent()) return;
 
-                ({ data: product } = await request(`/api/products/${id}`, {
+                ({ data: product } = await request(`/api/products/${existingProductId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload),
@@ -753,6 +712,7 @@ export default function ProductEditPage() {
 
                 if (!isSaveContextCurrent()) return;
 
+                automaticallyCreatedProductIdRef.current = null;
                 setForm((current) => ({
                     ...current,
                     currency: product.currency ?? current.currency,
@@ -1080,8 +1040,6 @@ export default function ProductEditPage() {
                     />
                     <MediaSection
                         sectionRef={(element) => { sectionRefs.current.photo = element; }}
-                        productId={id}
-                        isNew={isNew}
                         media={media}
                         isLoading={isMediaLoading}
                         loadError={mediaLoadError}
@@ -1107,7 +1065,7 @@ export default function ProductEditPage() {
                         onOpenCurrencySettings={() => setIsCurrencySettingsOpen(true)}
                     />
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title={t('productEditPage.sections.features')} icon={ControlsIcon}>
-                        <ProductAttributesSection ref={attributesSectionRef} productId={isNew ? null : id} productContextVersion={productContextRef.current.version} onFilledChange={setHasFilledAttribute} onChange={resetSuccessfulSaveStatus} />
+                        <ProductAttributesSection ref={attributesSectionRef} productId={editorProductId} productContextVersion={productContextRef.current.version} onFilledChange={setHasFilledAttribute} onChange={resetSuccessfulSaveStatus} />
                     </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.variants = element; }} id="variants" title={t('productEditPage.sections.variants')} icon={LayersIcon} open>
                         {variantsOpenError && <Alert variant="error" className="mb-3">{variantsOpenError}</Alert>}
@@ -1268,7 +1226,7 @@ export default function ProductEditPage() {
             />
             <ProductVariantsModal
                 isOpen={isVariantsOpen}
-                productId={isNew ? null : id}
+                productId={editorProductId}
                 basePrice={form.price}
                 media={media}
                 productContextVersion={productContextRef.current.version}
@@ -1596,7 +1554,7 @@ function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen
     );
 }
 
-function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadError, resolveProductId, productContextVersion, getProductContextVersion, isProductContextCurrent, onMediaUploaded, onMediaOrderChanged }) {
+function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductId, productContextVersion, getProductContextVersion, isProductContextCurrent, onMediaUploaded, onMediaOrderChanged }) {
     const { t, i18n } = useTranslation();
     const inputRef = useRef(null);
     const mediaGridRef = useRef(null);
@@ -1606,7 +1564,6 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
     const deletedMediaIdsRef = useRef(new Set());
     const deletingMediaIdsRef = useRef(new Set());
     const [pendingMedia, setPendingMedia] = useState([]);
-    const [pendingUploadProductId, setPendingUploadProductId] = useState(null);
     const [uploadErrors, setUploadErrors] = useState([]);
     const [sortError, setSortError] = useState('');
     const [deleteError, setDeleteError] = useState('');
@@ -1664,21 +1621,12 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
 
     useEffect(() => {
         const uploadOperation = uploadInProgressRef.current;
-        const isCreatingCurrentProduct = uploadOperation?.sourceWasNew
-            && !uploadOperation.started
-            && (uploadOperation.targetProductId === null
-                || isNew
-                || idsMatch(productId, uploadOperation.targetProductId));
-
-        if (!isCreatingCurrentProduct) {
-            uploadOperation?.pending.forEach((item) => {
-                if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
-            });
-            uploadInProgressRef.current = null;
-            setPendingUploadProductId(null);
-            setPendingMedia([]);
-            setUploadErrors([]);
-        }
+        uploadOperation?.pending.forEach((item) => {
+            if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+        });
+        uploadInProgressRef.current = null;
+        setPendingMedia([]);
+        setUploadErrors([]);
 
         setSortError('');
         setDeleteError('');
@@ -1820,7 +1768,6 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
             if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
         });
         if (uploadInProgressRef.current === operation) uploadInProgressRef.current = null;
-        setPendingUploadProductId(null);
         setPendingMedia([]);
     };
 
@@ -1880,7 +1827,6 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
         });
         if (uploadInProgressRef.current === operation) {
             uploadInProgressRef.current = null;
-            setPendingUploadProductId(null);
             if (isProductContextCurrent(contextVersion, targetProductId)) {
                 setPendingMedia((current) => current.filter((pendingItem) => !pending.some((item) => item.id === pendingItem.id)));
             }
@@ -1912,9 +1858,7 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
         const operation = {
             contextVersion,
             pending,
-            sourceWasNew: isNew,
             targetProductId: null,
-            started: false,
         };
 
         uploadInProgressRef.current = operation;
@@ -1932,17 +1876,11 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
 
             operation.targetProductId = String(resolvedProductId);
 
-            if (operation.sourceWasNew) {
-                setPendingUploadProductId(operation.targetProductId);
-                return;
-            }
-
             if (!isProductContextCurrent(contextVersion, operation.targetProductId)) {
                 discardUploadOperation(operation);
                 return;
             }
 
-            operation.started = true;
             await uploadPendingFiles(operation);
         } catch (error) {
             if (uploadInProgressRef.current !== operation) return;
@@ -1959,25 +1897,6 @@ function MediaSection({ sectionRef, productId, isNew, media, isLoading, loadErro
             discardUploadOperation(operation);
         }
     };
-
-    useEffect(() => {
-        const operation = uploadInProgressRef.current;
-
-        if (!operation || operation.started || !pendingUploadProductId || isNew) return;
-
-        if (!idsMatch(productId, pendingUploadProductId)) {
-            discardUploadOperation(operation);
-            return;
-        }
-
-        const contextVersion = getProductContextVersion();
-        if (!isProductContextCurrent(contextVersion, pendingUploadProductId)) return;
-
-        operation.contextVersion = contextVersion;
-        operation.started = true;
-        setPendingUploadProductId(null);
-        void uploadPendingFiles(operation);
-    }, [isNew, pendingUploadProductId, productContextVersion, productId]);
 
     const deleteMedia = async (item) => {
         if (deletingMediaIdsRef.current.has(item.id)) return;
