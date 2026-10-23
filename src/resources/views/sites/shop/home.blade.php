@@ -388,28 +388,7 @@
 @endsection
 
 @push('modals')
-<div id="search-modal" class="uk-flex-top" uk-modal>
-      <div class="uk-modal-dialog uk-width-xlarge uk-height-1-1 uk-flex uk-flex-column uk-overflow-hidden">
-        <button class="uk-modal-close-default uk-icon-button uk-close-large uk-position-small" type="button" aria-label="Закрыть поиск" uk-close></button>
-
-        <header class="uk-modal-header">
-          <p class="uk-text-meta uk-text-uppercase uk-text-bold uk-margin-remove-bottom">VERA</p>
-          <h2 class="uk-modal-title uk-margin-small-top">Поиск</h2>
-        </header>
-
-        <div class="uk-modal-body uk-background-muted uk-flex uk-flex-column uk-flex-1 uk-overflow-hidden">
-          <form class="uk-search uk-search-default uk-width-1-1" data-search-form>
-            <span class="uk-search-icon-flip" uk-search-icon></span>
-            <input class="uk-search-input uk-form-large" type="search" placeholder="Поиск товаров" aria-label="Поиск товаров" autocomplete="off" data-search-input>
-          </form>
-
-          <h3 class="uk-h5 uk-text-meta uk-text-uppercase uk-text-bold uk-margin-top" data-search-title>Популярные товары</h3>
-          <div class="uk-overflow-auto uk-flex-1">
-            <ul class="uk-list uk-list-divider uk-margin-remove-bottom" data-search-results></ul>
-          </div>
-        </div>
-      </div>
-    </div>
+    @include('sites.shop.partials.search-modal')
 
     <div id="variant-modal" uk-modal>
       <div class="uk-modal-dialog uk-width-xlarge uk-margin-auto-vertical">
@@ -460,32 +439,6 @@
       </div>
     </div>
 
-    <div id="cart-modal" uk-modal>
-      <aside class="uk-modal-dialog uk-position-top-right uk-width-1-1 uk-width-large@s uk-height-viewport uk-flex uk-flex-column">
-        <button class="uk-modal-close-default" type="button" aria-label="Закрыть корзину" uk-close></button>
-
-        <header class="uk-card-header">
-          <p class="uk-text-meta uk-text-uppercase uk-text-bold uk-margin-remove-bottom">VERA</p>
-          <h2 class="uk-card-title uk-margin-small-top">Корзина <span class="uk-badge" data-cart-count>0</span></h2>
-        </header>
-
-        <section class="uk-card-header uk-background-muted">
-          <p class="uk-margin-small-bottom" data-cart-shipping></p>
-          <progress class="uk-progress uk-margin-remove" value="0" max="3000" data-cart-progress></progress>
-        </section>
-
-        <div class="uk-card-body uk-height-max-large uk-overflow-auto uk-flex-1" data-cart-items></div>
-
-        <footer class="uk-card-footer">
-          <div class="uk-grid-small uk-child-width-1-2 uk-flex-middle" uk-grid>
-            <div><strong>Предварительный итог</strong></div>
-            <div class="uk-text-right"><strong class="uk-h3 uk-margin-remove" data-cart-subtotal>0 ₴</strong></div>
-          </div>
-          <p class="uk-text-meta">Доставка и скидки рассчитываются при оформлении.</p>
-          <button class="uk-button uk-button-primary uk-button-large uk-width-1-1" type="button" data-cart-checkout>Оформить заказ <span uk-icon="icon: arrow-right"></span></button>
-          <button class="uk-button uk-button-default uk-width-1-1 uk-margin-small-top uk-modal-close" type="button" data-cart-continue>Продолжить покупки</button>
-        </footer>
-      </aside>
-    </div>
+    @include('sites.shop.partials.cart-modal')
 @endpush
 

@@ -1,4 +1,7 @@
-@php($shopCatalogUrl = isset($category) ? route('catalog.show', ['slug' => $category->slug]) : 'catalog.html')
+@php
+  $shopCatalogUrl = isset($category) ? route('catalog.show', ['slug' => $category->slug]) : 'catalog.html';
+  $shopFavoriteId = isset($category) ? 'catalog-favorite' : (isset($product) ? 'product-favorite' : 'header-favorite');
+@endphp
 <header class="uk-background-default uk-box-shadow-small" uk-sticky="start: 0; animation: uk-animation-slide-top">
       <div class="uk-container uk-container-expand">
         <nav class="uk-navbar-container uk-navbar-transparent" uk-navbar>
@@ -87,7 +90,7 @@
             <a class="uk-navbar-toggle uk-text-emphasis" href="#search-modal" aria-label="Поиск" uk-toggle>
               <span uk-icon="icon: search"></span>
             </a>
-            <a id="{{ isset($category) ? 'catalog-favorite' : 'header-favorite' }}" class="uk-navbar-toggle uk-text-emphasis" href="#{{ isset($category) ? 'catalog-favorite' : 'header-favorite' }}" role="button" aria-label="Избранное" uk-toggle="target: #{{ isset($category) ? 'catalog-favorite' : 'header-favorite' }}; cls: uk-text-primary">
+            <a id="{{ $shopFavoriteId }}" class="uk-navbar-toggle uk-text-emphasis" href="#{{ $shopFavoriteId }}" role="button" aria-label="Избранное" uk-toggle="target: #{{ $shopFavoriteId }}; cls: uk-text-primary">
               <span uk-icon="icon: heart"></span>
             </a>
             <a class="uk-navbar-toggle uk-text-emphasis" href="#footer" aria-label="Профиль" uk-tooltip="Профиль покупателя">
