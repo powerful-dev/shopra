@@ -122,10 +122,10 @@ class ShopItemService
                 });
             })
             ->when($status, fn ($query) => $query->where('status', $status))
-            ->when($categoryId, fn ($query) => $query->whereHas(
-                'groups',
-                fn ($query) => $query->where('shop_groups.id', $categoryId),
-            ))
+            ->when($categoryId, fn (Builder $query) => $query->where(function (Builder $query) use ($categoryId) {
+                $query->where('shop_group_id', $categoryId)
+                    ->orWhereHas('groups', fn ($query) => $query->where('shop_groups.id', $categoryId));
+            }))
             ->when($stock === 'low', fn (Builder $query) => $this->whereLowStock($query, $lowStockThreshold))
             ->orderBy('id')
             ->paginate();

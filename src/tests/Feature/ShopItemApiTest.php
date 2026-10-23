@@ -54,6 +54,54 @@ class ShopItemApiTest extends TestCase
             ->assertJsonPath('data.0.media.0.small_url', fn (string $url): bool => str_ends_with($url, "/shop/products/{$item->id}/small/main.webp"));
     }
 
+    public function test_category_filter_matches_primary_and_additional_categories_without_duplicates(): void
+    {
+        $admin = User::factory()->create(['is_active' => true]);
+        $admin->modules()->attach(Module::query()->create([
+            'code' => 'products',
+            'show_in_menu' => true,
+            'is_required' => false,
+        ]));
+
+        $parent = ShopGroup::query()->create(['name' => 'Сумки', 'slug' => 'sumki']);
+        $women = ShopGroup::query()->create(['name' => 'Женские сумки', 'slug' => 'zhenskie-sumki', 'parent_id' => $parent->id]);
+        $other = ShopGroup::query()->create(['name' => 'Аксессуары', 'slug' => 'aksessuary']);
+
+        $createItem = fn (string $name, ShopGroup $group) => ShopItem::query()->create([
+            'name' => $name,
+            'url' => str($name)->slug(),
+            'price' => 1000,
+            'currency' => 'UAH',
+            'status' => 'active',
+            'shop_group_id' => $group->id,
+        ]);
+
+        $primaryOnly = $createItem('Primary bag', $women);
+        $additionalOnly = $createItem('Additional bag', $other);
+        $additionalOnly->groups()->attach($women);
+        $both = $createItem('Both bag', $women);
+        $both->groups()->attach($women);
+        $createItem('Unrelated accessory', $other);
+
+        $this->actingAs($admin, 'sanctum');
+
+        $this->getJson('/api/products?category_id='.$women->id)
+            ->assertOk()
+            ->assertJsonCount(3, 'data')
+            ->assertJsonPath('data.0.id', $primaryOnly->id)
+            ->assertJsonPath('data.1.id', $additionalOnly->id)
+            ->assertJsonPath('data.2.id', $both->id)
+            ->assertJsonPath('meta.total', 3);
+
+        $this->getJson('/api/products?'.http_build_query([
+            'category_id' => $women->id,
+            'search' => 'Unrelated',
+        ]))
+            ->assertOk()
+            ->assertJsonCount(0, 'data')
+            ->assertJsonPath('meta.total', 0);
+    }
+
     public function test_products_are_returned_with_all_their_categories(): void
     {
         $admin = User::factory()->create(['is_active' => true]);
