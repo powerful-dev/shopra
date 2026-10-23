@@ -1,18 +1,7 @@
 @extends('sites.shop.layout')
 
 @php
-    $shopScript = 'resources/js/sites/shop-catalog.js';
     $catalogUrl = route('catalog.show', ['slug' => $category->slug]);
-    $demoProducts = [
-        ['id' => 0, 'category' => 'new', 'price' => 4900, 'oldPrice' => 5600, 'name' => 'Жакет Form 02', 'badge' => 'NEW', 'sizes' => ['XS', 'S', 'M', 'L'], 'colors' => ['uk-background-primary', 'uk-background-secondary', 'uk-background-default']],
-        ['id' => 1, 'category' => 'jackets', 'price' => 6800, 'oldPrice' => 7600, 'name' => 'Пальто Axis', 'badge' => 'LIMITED', 'sizes' => ['S', 'M', 'L'], 'colors' => ['uk-background-muted', 'uk-background-secondary']],
-        ['id' => 2, 'category' => 'knit', 'price' => 1850, 'oldPrice' => 2200, 'name' => 'Топ Line Wine', 'badge' => null, 'sizes' => ['XS', 'S', 'M', 'L'], 'colors' => ['uk-label-danger', 'uk-background-secondary', 'uk-background-muted']],
-        ['id' => 3, 'category' => 'new', 'price' => 2950, 'oldPrice' => 3400, 'name' => 'Брюки Wide', 'badge' => null, 'sizes' => ['S', 'M', 'L', 'XL'], 'colors' => ['uk-background-secondary', 'uk-background-primary', 'uk-background-muted']],
-        ['id' => 4, 'category' => 'accessories', 'price' => 2300, 'oldPrice' => 2700, 'name' => 'Сумка Mini Fold', 'badge' => 'BEST', 'sizes' => ['ONE SIZE'], 'colors' => ['uk-background-primary', 'uk-background-secondary', 'uk-label-danger']],
-        ['id' => 5, 'category' => 'knit', 'price' => 3200, 'oldPrice' => 3700, 'name' => 'Кардиган Soft 08', 'badge' => null, 'sizes' => ['XS/S', 'M/L'], 'colors' => ['uk-background-muted', 'uk-background-default', 'uk-background-primary']],
-        ['id' => 6, 'category' => 'accessories', 'price' => 1600, 'oldPrice' => 1950, 'name' => 'Гольф Base', 'badge' => null, 'sizes' => ['XS', 'S', 'M', 'L'], 'colors' => ['uk-background-default', 'uk-background-secondary', 'uk-label-danger']],
-        ['id' => 7, 'category' => 'jackets', 'price' => 2700, 'oldPrice' => 3150, 'name' => 'Юбка Column', 'badge' => null, 'sizes' => ['XS', 'S', 'M', 'L'], 'colors' => ['uk-background-primary', 'uk-background-secondary']],
-    ];
 @endphp
 
 @section('title', ($category->seo_title ?: $category->name).' — VERA')
@@ -48,7 +37,7 @@
           <div class="uk-flex uk-flex-between uk-flex-middle uk-flex-wrap">
             <div class="uk-flex uk-flex-middle">
               <a class="uk-button uk-button-default" href="#filter-modal" uk-toggle><span class="uk-margin-small-right" uk-icon="icon: settings"></span>Фильтры</a>
-              <span class="uk-margin-left"><b data-catalog-count>8</b> товаров</span>
+              <span class="uk-margin-left"><b data-catalog-count>{{ $products->total() }}</b> товаров</span>
             </div>
             <label class="uk-flex uk-flex-middle uk-margin-small-top uk-margin-remove-top@m">
               <span class="uk-margin-small-right uk-visible@s">Сортировать</span>
@@ -72,35 +61,57 @@
                 </div>
                 <hr>
                 @include('sites.shop.partials.catalog-filters', ['name' => 'desktop-category'])
-                <button class="uk-button uk-button-primary uk-width-1-1 uk-margin-medium-top" type="button" data-filter-apply>Показать 8 товаров</button>
+                <button class="uk-button uk-button-primary uk-width-1-1 uk-margin-medium-top" type="button" data-filter-apply>Показать {{ $products->total() }} товаров</button>
               </form>
             </aside>
 
             <div class="uk-width-expand">
               <div id="products" class="uk-grid-medium uk-child-width-1-2@s uk-child-width-1-3@l" data-catalog-grid uk-grid>
-                @foreach ($demoProducts as $product)
-                  <div data-catalog-product data-category="{{ $product['category'] }}" data-price="{{ $product['price'] }}" data-sale="true" data-sizes="{{ implode(',', $product['sizes']) }}" data-order="{{ $product['id'] }}">
+                @forelse ($products as $product)
+                  <div>
                     <article class="uk-card uk-card-default">
                       <div class="uk-card-media-top uk-inline uk-width-1-1">
-                        <a href="product.html?id={{ $product['id'] }}"><img src="{{ $shopAssetBase.'/products/fashion-0'.$product['id'].'.webp' }}" alt="{{ $product['name'] }}" width="720" height="960"></a>
-                        @if ($product['badge'])
-                          <span class="uk-label uk-border-pill uk-position-top-left uk-position-small">{{ $product['badge'] }}</span>
-                        @endif
+                        <a href="{{ route('product.show', ['url' => $product['url']]) }}">
+                          @if ($product['image_url'])
+                            <img src="{{ $product['image_url'] }}" alt="{{ $product['name'] }}" width="720" height="960">
+                          @else
+                            <svg class="uk-width-1-1 uk-background-muted uk-text-muted" viewBox="0 0 720 960" role="img" aria-label="Изображение товара отсутствует">
+                              <rect width="720" height="960" fill="currentColor" opacity=".08"></rect>
+                              <g fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity=".5">
+                                <rect x="230" y="330" width="260" height="220" rx="12"></rect><circle cx="315" cy="410" r="28"></circle><path d="m250 520 95-90 65 60 45-40 35 35"></path>
+                              </g>
+                              <text x="360" y="610" text-anchor="middle" fill="currentColor" font-size="28">Нет изображения</text>
+                            </svg>
+                          @endif
+                        </a>
                         <button id="catalog-wish-{{ $product['id'] }}" class="uk-icon-button uk-position-top-right uk-position-small" type="button" aria-label="Добавить {{ $product['name'] }} в избранное" uk-toggle="target: #catalog-wish-{{ $product['id'] }}; cls: uk-button-primary" uk-icon="heart"></button>
-                        <button class="uk-icon-button uk-position-bottom-right uk-position-small" type="button" aria-label="Добавить {{ $product['name'] }} в корзину" data-cart-configure="fashion-{{ $product['id'] }}" uk-toggle="target: #variant-modal" uk-icon="cart"></button>
+                        <button class="uk-icon-button uk-position-bottom-right uk-position-small" type="button" aria-label="Добавление в корзину пока недоступно" uk-icon="cart"></button>
                       </div>
                       <div class="uk-card-body uk-padding-small">
-                        <h3 class="uk-card-title uk-margin-remove-bottom"><a class="uk-link-reset" href="product.html?id={{ $product['id'] }}">{{ $product['name'] }}</a></h3>
-                        <p class="uk-margin-small"><del class="uk-text-muted">{{ number_format($product['oldPrice'], 0, ',', ' ') }} ₴</del> <strong>{{ number_format($product['price'], 0, ',', ' ') }} ₴</strong></p>
-                        <div class="uk-flex uk-flex-between uk-flex-middle">
-                          <span>@foreach ($product['colors'] as $color)<i class="uk-badge {{ $color }}">&nbsp;</i>@if (! $loop->last) @endif @endforeach</span>
-                          <small>{{ implode(' · ', $product['sizes']) }}</small>
-                        </div>
+                        <h3 class="uk-card-title uk-margin-remove-bottom"><a class="uk-link-reset" href="{{ route('product.show', ['url' => $product['url']]) }}">{{ $product['name'] }}</a></h3>
+                        @if ($product['formatted_price'])
+                          <p class="uk-margin-small">
+                            @if ($product['formatted_old_price'])<del class="uk-text-muted">{{ $product['formatted_old_price'] }}</del>@endif
+                            <strong>{{ $product['formatted_price'] }}</strong>
+                          </p>
+                        @else
+                          <p class="uk-margin-small uk-text-muted">Цена недоступна</p>
+                        @endif
                       </div>
                     </article>
                   </div>
-                @endforeach
+                @empty
+                  <div class="uk-width-1-1">
+                    <div class="uk-card uk-card-default uk-card-body uk-text-center uk-padding-large">
+                      <span class="uk-text-muted" uk-icon="icon: cart; ratio: 2"></span>
+                      <h2 class="uk-h3 uk-margin-small-top">В этой категории пока нет товаров</h2>
+                      <p class="uk-text-muted uk-margin-remove-bottom">Загляните позже или выберите другую категорию.</p>
+                    </div>
+                  </div>
+                @endforelse
               </div>
+
+              {{ $products->links('sites.shop.partials.pagination') }}
             </div>
           </div>
         </div>
@@ -135,7 +146,7 @@
             @include('sites.shop.partials.catalog-filters', ['name' => 'mobile-category'])
           </form>
         </div>
-        <footer class="uk-modal-footer"><button class="uk-button uk-button-primary uk-width-1-1 uk-modal-close" type="button" data-filter-apply>Показать 8 товаров</button></footer>
+        <footer class="uk-modal-footer"><button class="uk-button uk-button-primary uk-width-1-1 uk-modal-close" type="button" data-filter-apply>Показать {{ $products->total() }} товаров</button></footer>
       </aside>
     </div>
 

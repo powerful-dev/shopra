@@ -50,7 +50,6 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/admin.jsx',
                 'resources/js/sites/shop.js',
-                'resources/js/sites/shop-catalog.js',
                 'layout/shop/css/uikit.min.css',
                 'layout/shop/css/shopra-gradients.css',
                 'layout/shop/css/themes/shopra-theme-core.css',
