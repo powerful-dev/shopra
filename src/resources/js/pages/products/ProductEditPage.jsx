@@ -37,6 +37,7 @@ import CloseIcon from '../../components/icons/CloseIcon';
 import RocketIcon from '../../components/icons/RocketIcon';
 import ChevronIcon from '../../components/icons/ChevronIcon';
 import SaveIcon from '../../components/icons/SaveIcon';
+import CircleAlertIcon from '../../components/icons/CircleAlertIcon';
 import PencilIcon from '../../components/icons/PencilIcon';
 import PackageIcon from '../../components/icons/PackageIcon';
 import { ApiError, csrf, request } from '../../services/api';
@@ -94,6 +95,41 @@ const emptyVariantsSummary = () => ({
     optionNames: [],
     mainPhotoValue: null,
 });
+
+const productFieldOrder = [
+    'name',
+    'shop_group_id',
+    'currency',
+    'price',
+    'old_price',
+    'quantity',
+    'show_stock',
+    'attributes',
+    'description',
+    'seo_title',
+    'seo_description',
+];
+
+const productFieldSections = {
+    name: 'main',
+    shop_group_id: 'main',
+    currency: 'price',
+    price: 'price',
+    old_price: 'price',
+    quantity: 'price',
+    show_stock: 'price',
+    attributes: 'features',
+    description: 'description',
+    seo_title: 'seo',
+    seo_description: 'seo',
+};
+
+const errorForField = (errors, field) => errors[field]
+    ?? Object.entries(errors).find(([key]) => key.startsWith(`${field}.`))?.[1];
+
+function firstValidationField(errors) {
+    return productFieldOrder.find((field) => errorForField(errors, field));
+}
 
 const idsMatch = (left, right) => left !== null && left !== undefined
     && right !== null && right !== undefined
@@ -171,6 +207,7 @@ export default function ProductEditPage() {
     const [statusActionError, setStatusActionError] = useState(null);
     const [saveNotification, setSaveNotification] = useState(null);
     const [saveStatus, setSaveStatus] = useState(null);
+    const [formErrors, setFormErrors] = useState({});
     const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
     const [isCurrencySettingsOpen, setIsCurrencySettingsOpen] = useState(false);
     const [isVariantsOpen, setIsVariantsOpen] = useState(false);
@@ -193,6 +230,7 @@ export default function ProductEditPage() {
     const [isMediaLoading, setIsMediaLoading] = useState(!isNew);
     const [mediaLoadError, setMediaLoadError] = useState('');
     const sectionNavigationRef = useRef(null);
+    const formRef = useRef(null);
     const sectionRefs = useRef({});
     const shopGroupsRequestRef = useRef(null);
     const productCategoriesRequestRef = useRef(null);
@@ -267,6 +305,43 @@ export default function ProductEditPage() {
         : null;
     const resetSuccessfulSaveStatus = () => {
         setSaveStatus((current) => current?.status === 'success' ? null : current);
+    };
+    const clearFieldError = (field) => {
+        const matchingKeys = Object.keys(formErrors).filter((key) => key === field || key.startsWith(`${field}.`));
+        if (matchingKeys.length === 0) return;
+
+        const next = { ...formErrors };
+        matchingKeys.forEach((key) => delete next[key]);
+        setFormErrors(next);
+
+        if (Object.keys(next).length === 0) {
+            setSaveNotification((notification) => notification?.kind === 'validation' ? null : notification);
+        }
+    };
+    const scrollToValidationError = (errors) => {
+        const field = firstValidationField(errors);
+        if (!field) return;
+
+        const sectionId = productFieldSections[field];
+        const section = sectionRefs.current[sectionId];
+        if (section?.tagName === 'DETAILS' && !section.open) section.open = true;
+
+        window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+            const target = field === 'attributes'
+                ? sectionRefs.current.features?.querySelector('[data-validation-error="true"]') ?? sectionRefs.current.features
+                : formRef.current?.querySelector(`[data-validation-field="${field}"]`);
+            if (!target) return;
+
+            const navigationHeight = sectionNavigationRef.current?.getBoundingClientRect().height ?? 0;
+            const headerHeight = window.innerWidth <= 1024
+                ? 62
+                : Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 72;
+            const top = target.getBoundingClientRect().top + window.scrollY - headerHeight - navigationHeight - 12;
+
+            window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+            target.querySelector('input:not([type="hidden"]), select, textarea, button, [contenteditable="true"]')
+                ?.focus({ preventScroll: true });
+        }));
     };
     const localizedSectionLinks = useMemo(() => sectionLinks.map((section) => ({
         ...section,
@@ -373,6 +448,7 @@ export default function ProductEditPage() {
         setIsStatusChanging(false);
         setIsArchiveConfirmOpen(false);
         setStatusActionError(null);
+        setFormErrors({});
         setVariantsOpenError('');
 
         if (variantsOpenOperationRef.current
@@ -520,6 +596,7 @@ export default function ProductEditPage() {
     const updateField = ({ target }) => {
         const { name, type, checked, value } = target;
         resetSuccessfulSaveStatus();
+        clearFieldError(name);
         setForm((current) => ({
             ...current,
             [name]: type === 'checkbox' ? checked : value,
@@ -658,6 +735,7 @@ export default function ProductEditPage() {
 
         saveInProgressRef.current = savingContextVersion;
         setSaveNotification(null);
+        setFormErrors({});
         setSaveStatus({
             contextIds: [savingProductId ?? 'new'],
             status: 'saving',
@@ -723,6 +801,8 @@ export default function ProductEditPage() {
             if (!isSaveContextCurrent()) return;
 
             attributesSectionRef.current?.markSaved(product.id);
+            setFormErrors({});
+            setSaveNotification(null);
 
             setSaveStatus({
                 contextIds: [...new Set([savingProductId ?? 'new', String(product.id)])],
@@ -737,11 +817,20 @@ export default function ProductEditPage() {
             if (isSaveContextCurrent()) {
                 attributesSectionRef.current?.handleSaveError(error);
                 setSaveStatus(null);
+                const validationErrors = error instanceof ApiError && error.status === 422
+                    ? error.errors ?? {}
+                    : {};
+                const isValidationError = Object.keys(validationErrors).length > 0;
+                setFormErrors(validationErrors);
                 setSaveNotification({
                     productId: savingProductId ?? 'new',
                     type: 'error',
-                    message: error.message || t('productEditPage.saveError'),
+                    kind: isValidationError ? 'validation' : 'api',
+                    message: t(isValidationError
+                        ? 'productEditPage.errors.saveValidation'
+                        : 'productEditPage.errors.saveRequest'),
                 });
+                if (isValidationError) scrollToValidationError(validationErrors);
             }
         } finally {
             if (saveInProgressRef.current === savingContextVersion) saveInProgressRef.current = null;
@@ -980,12 +1069,6 @@ export default function ProductEditPage() {
                 </div>
             </header>
 
-            {currentSaveNotification?.type === 'error' && (
-                <Alert variant={currentSaveNotification.type} className="mb-5 h-[40px] py-0">
-                    {currentSaveNotification.message}
-                </Alert>
-            )}
-
             <SectionNavigation
                 navigationRef={sectionNavigationRef}
                 sections={localizedSectionLinks}
@@ -1014,7 +1097,7 @@ export default function ProductEditPage() {
             )}
 
             <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
-                <form className="min-w-0 space-y-3" aria-label={t('productEditPage.formAria')} onSubmit={(event) => event.preventDefault()}>
+                <form ref={formRef} className="min-w-0 space-y-3" aria-label={t('productEditPage.formAria')} onSubmit={(event) => event.preventDefault()}>
                     <MainSection
                         sectionRef={(element) => { sectionRefs.current.main = element; }}
                         form={form}
@@ -1028,9 +1111,11 @@ export default function ProductEditPage() {
                         shopGroupOptions={shopGroupOptions}
                         isShopGroupsLoading={isShopGroupsLoading}
                         shopGroupsLoadError={shopGroupsLoadError}
+                        errors={formErrors}
                         onChange={updateField}
                         onShopGroupChange={(shopGroupId) => {
                             resetSuccessfulSaveStatus();
+                            clearFieldError('shop_group_id');
                             setForm((current) => ({ ...current, shop_group_id: shopGroupId }));
                         }}
                         onDeleteCategory={detachProductCategory}
@@ -1061,11 +1146,21 @@ export default function ProductEditPage() {
                         hasVariants={variantsSummary.hasVariants}
                         variantsQuantity={variantsSummary.activeQuantity}
                         isVariantsLoading={variantsSummaryStatus !== 'loaded'}
+                        errors={formErrors}
                         onChange={updateField}
                         onOpenCurrencySettings={() => setIsCurrencySettingsOpen(true)}
                     />
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.features = element; }} id="features" title={t('productEditPage.sections.features')} icon={ControlsIcon}>
-                        <ProductAttributesSection ref={attributesSectionRef} productId={editorProductId} productContextVersion={productContextRef.current.version} onFilledChange={setHasFilledAttribute} onChange={resetSuccessfulSaveStatus} />
+                        <ProductAttributesSection
+                            ref={attributesSectionRef}
+                            productId={editorProductId}
+                            productContextVersion={productContextRef.current.version}
+                            onFilledChange={setHasFilledAttribute}
+                            onChange={(field = 'attributes') => {
+                                resetSuccessfulSaveStatus();
+                                clearFieldError(field);
+                            }}
+                        />
                     </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.variants = element; }} id="variants" title={t('productEditPage.sections.variants')} icon={LayersIcon} open>
                         {variantsOpenError && <Alert variant="error" className="mb-3">{variantsOpenError}</Alert>}
@@ -1096,17 +1191,19 @@ export default function ProductEditPage() {
                         </article>
                     </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.description = element; }} id="description" title={t('productEditPage.sections.description')} icon={DraftProductsIcon}>
-                        <label className="flex flex-col gap-[7px]">
+                        <label className={`flex flex-col gap-[7px] ${errorForField(formErrors, 'description') ? '[&_.tox-tinymce]:!border-red-500' : ''}`} data-validation-field="description">
                             <span className="flex items-center justify-between text-[12px] font-bold text-[#554e48]">{t('productEditPage.description.label')}</span>
                             <RichTextEditor
                                 instanceKey="product-description"
                                 value={form.description}
                                 onChange={(description) => {
                                     resetSuccessfulSaveStatus();
+                                    clearFieldError('description');
                                     setForm((current) => ({ ...current, description }));
                                 }}
                                 disabled={isSubmitting}
                             />
+                            {errorForField(formErrors, 'description')?.[0] && <span className="text-[11px] text-red-600" role="alert">{errorForField(formErrors, 'description')[0]}</span>}
                         </label>
                     </AccordionSection>
                     <AccordionSection sectionRef={(element) => { sectionRefs.current.seo = element; }} id="seo" title={t('productEditPage.sections.seo')} icon={LinkIcon}>
@@ -1118,13 +1215,17 @@ export default function ProductEditPage() {
                             descriptionLabel={t('productEditPage.seo.description')}
                             titleName="seo_title"
                             descriptionName="seo_description"
+                            titleError={errorForField(formErrors, 'seo_title')}
+                            descriptionError={errorForField(formErrors, 'seo_description')}
                             disabled={isSubmitting}
                             onTitleChange={(seoTitle) => {
                                 resetSuccessfulSaveStatus();
+                                clearFieldError('seo_title');
                                 setForm((current) => ({ ...current, seo_title: seoTitle }));
                             }}
                             onDescriptionChange={(seoDescription) => {
                                 resetSuccessfulSaveStatus();
+                                clearFieldError('seo_description');
                                 setForm((current) => ({ ...current, seo_description: seoDescription }));
                             }}
                         />
@@ -1145,6 +1246,7 @@ export default function ProductEditPage() {
             <div className="fixed bottom-4 left-[calc(var(--sidebar-width)+2rem)] right-8 z-30 flex min-h-[70px] items-center justify-between gap-5 rounded-[14px] border border-[color:var(--color-border)] bg-white/95 px-4 py-2.5 shadow-[0_14px_40px_rgba(45,31,22,.12)] backdrop-blur max-lg:hidden">
                 <ActionBarSummary productName={actionBarProductName} />
                 <div className="flex shrink-0 items-center gap-2">
+                    {currentSaveNotification?.type === 'error' && <SaveErrorMessage message={currentSaveNotification.message} />}
                     <SaveStatus status={currentSaveStatus} className="mr-1" />
                     {!isNew && <button className="button button--outline h-10 w-10 px-0" type="button" aria-label={t('productEditPage.actions.preview')} title={t('productEditPage.actions.preview')}><EyeIcon size={20} className="shrink-0" /></button>}
                     {actionMenuItems.length > 0 && (
@@ -1165,7 +1267,9 @@ export default function ProductEditPage() {
 
             <AdminMobileActionBar
                 header={<ActionBarSummary productName={actionBarProductName} />}
-                status={currentSaveStatus ? <SaveStatus status={currentSaveStatus} /> : null}
+                status={currentSaveNotification?.type === 'error'
+                    ? <SaveErrorMessage message={currentSaveNotification.message} />
+                    : currentSaveStatus ? <SaveStatus status={currentSaveStatus} /> : null}
             >
                 {actionMenuItems.length > 0 && (
                     <ActionsMenu
@@ -1461,7 +1565,16 @@ function ActionBarSummary({ productName }) {
     );
 }
 
-function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen, categoryToAddId, isAddingCategory, categoryAddError, deletingCategoryIds, categoryDeleteError, shopGroupOptions, isShopGroupsLoading, shopGroupsLoadError, onChange, onShopGroupChange, onAddCategory, onDeleteCategory, onToggleCategorySelect, onOpenCategories }) {
+function SaveErrorMessage({ message }) {
+    return (
+        <span className="flex min-w-0 items-center gap-2 text-[12px] font-[650] leading-[1.35] text-[#b7483f]" role="alert" aria-live="polite">
+            <CircleAlertIcon className="shrink-0" />
+            <span>{message}</span>
+        </span>
+    );
+}
+
+function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen, categoryToAddId, isAddingCategory, categoryAddError, deletingCategoryIds, categoryDeleteError, shopGroupOptions, isShopGroupsLoading, shopGroupsLoadError, errors, onChange, onShopGroupChange, onAddCategory, onDeleteCategory, onToggleCategorySelect, onOpenCategories }) {
     const { t } = useTranslation();
     const appCategoryLabel = t('productEditPage.main.appCategory', { appName });
     const productCategoryIds = new Set(productCategories.map((category) => category.id));
@@ -1491,14 +1604,14 @@ function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen
 
     return (
         <AdminCard sectionRef={sectionRef} id="main" title={t('productEditPage.sections.main')} icon={BoxIcon} required requiredLabel={t('productEditPage.required')} className="!scroll-mt-0">
-            <Field label={<>{t('productEditPage.main.productName')} <b className="text-[color:var(--color-accent)]">*</b></>}>
-                <Input name="name" value={form.name} onChange={onChange} />
+            <Field label={<>{t('productEditPage.main.productName')} <b className="text-[color:var(--color-accent)]">*</b></>} error={errorForField(errors, 'name')} data-validation-field="name">
+                <Input className={errorForField(errors, 'name') ? '!border-red-500' : ''} name="name" value={form.name} onChange={onChange} aria-invalid={Boolean(errorForField(errors, 'name'))} />
             </Field>
-            <div className="relative mt-[15px]">
+            <div className="relative mt-[15px]" data-validation-field="shop_group_id">
                 <div className="mb-[7px] text-[12px] font-bold text-[#554e48]">{appCategoryLabel}</div>
                 <SearchableSelect
                     name="group_id"
-                    className="searchable-select--product-category w-full"
+                    className={`searchable-select--product-category w-full ${errorForField(errors, 'shop_group_id') ? '[&_.searchable-select__trigger]:!border-red-500' : ''}`}
                     options={shopGroupOptions}
                     value={form.shop_group_id}
                     onChange={onShopGroupChange}
@@ -1508,7 +1621,9 @@ function MainSection({ sectionRef, form, productCategories, isCategorySelectOpen
                     ariaLabel={appCategoryLabel}
                     disabled={isShopGroupsLoading || Boolean(shopGroupsLoadError)}
                     ariaBusy={isShopGroupsLoading}
+                    ariaInvalid={Boolean(errorForField(errors, 'shop_group_id'))}
                 />
+                {errorForField(errors, 'shop_group_id')?.[0] && <p className="mb-0 mt-1.5 text-[11px] text-red-600" role="alert">{errorForField(errors, 'shop_group_id')[0]}</p>}
                 {shopGroupsLoadError && <p className="mt-1.5 text-[12px] text-[#8d857e]" role="alert">{shopGroupsLoadError}</p>}
             </div>
             <div className="mt-[17px] border-t border-[#f0ece8] pt-[15px]">
@@ -2160,7 +2275,7 @@ function MediaSection({ sectionRef, media, isLoading, loadError, resolveProductI
     );
 }
 
-function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasVariants, variantsQuantity, isVariantsLoading, onChange, onOpenCurrencySettings }) {
+function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasVariants, variantsQuantity, isVariantsLoading, errors, onChange, onOpenCurrencySettings }) {
     const { t, i18n } = useTranslation();
     const storeCurrency = currencySettings.currency;
     const currencyRates = currencySettings.currency_rates;
@@ -2217,14 +2332,15 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasV
 
             <div className="p-[17px] max-sm:p-[13px]">
                 <div className="flex items-end justify-between gap-6 max-sm:flex-col max-sm:items-stretch max-sm:gap-4">
-                    <Field className="w-[182px] max-sm:w-full" label={t('productEditPage.price.priceCurrency')}>
+                    <Field className="w-[182px] max-sm:w-full" label={t('productEditPage.price.priceCurrency')} error={errorForField(errors, 'currency')} data-validation-field="currency">
                         <Select
-                            className="cursor-pointer pr-9 font-[700]"
+                            className={`cursor-pointer pr-9 font-[700] ${errorForField(errors, 'currency') ? '!border-red-500' : ''}`}
                             name="currency"
                             value={priceCurrency}
                             disabled={currencyStatus !== 'loaded' || priceCurrencies.length === 0}
                             onChange={onChange}
                             aria-label={t('productEditPage.price.priceCurrency')}
+                            aria-invalid={Boolean(errorForField(errors, 'currency'))}
                         >
                             {priceCurrencies.length === 0 && (
                                 <option value="">
@@ -2255,8 +2371,8 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasV
                 </div>
 
                 <div className="mt-[18px] grid grid-cols-2 gap-x-5 gap-y-3 max-md:grid-cols-1">
-                    <PriceField label={t('common.price')} name="price" value={form.price} onChange={onChange} required />
-                    <PriceField label={t('productEditPage.price.oldPrice')} name="old_price" value={form.old_price} onChange={onChange} />
+                    <PriceField label={t('common.price')} name="price" value={form.price} onChange={onChange} error={errorForField(errors, 'price')} required />
+                    <PriceField label={t('productEditPage.price.oldPrice')} name="old_price" value={form.old_price} onChange={onChange} error={errorForField(errors, 'old_price')} />
                 </div>
 
                 {shouldShowPricePreview && (
@@ -2315,21 +2431,26 @@ function PriceSection({ sectionRef, form, currencySettings, currencyStatus, hasV
                             onChange={onChange}
                             suffix={t('shopUnits.piece.shortName')}
                             disabled={hasVariants || isVariantsLoading}
+                            error={errorForField(errors, 'quantity')}
                             required
                         />
                         {hasVariants && <small className="mt-1.5 block text-[11px] leading-[1.4] text-[#8c837c]">{t('productEditPage.price.variantQuantityHint')}</small>}
                         {!hasVariants && !isVariantsLoading && form.quantity === '' && <small className="mt-1.5 block text-[11px] leading-[1.4] text-[#8c837c]">{t('productEditPage.price.quantityHint')}</small>}
                     </div>
-                    <label className="mt-3 flex items-center gap-[7px] text-[12px] text-[#6d655e]">
-                        <input
-                            className="h-[14px] w-[14px] accent-[color:var(--color-accent)]"
-                            type="checkbox"
-                            name="show_stock"
-                            checked={form.show_stock}
-                            onChange={onChange}
-                        />
-                        {t('productEditPage.price.showStock')}
-                    </label>
+                    <div className="mt-3" data-validation-field="show_stock">
+                        <label className="flex items-center gap-[7px] text-[12px] text-[#6d655e]">
+                            <input
+                                className={`h-[14px] w-[14px] accent-[color:var(--color-accent)] ${errorForField(errors, 'show_stock') ? 'outline outline-1 outline-red-500' : ''}`}
+                                type="checkbox"
+                                name="show_stock"
+                                checked={form.show_stock}
+                                onChange={onChange}
+                                aria-invalid={Boolean(errorForField(errors, 'show_stock'))}
+                            />
+                            {t('productEditPage.price.showStock')}
+                        </label>
+                        {errorForField(errors, 'show_stock')?.[0] && <span className="mt-1 block text-[11px] text-red-600" role="alert">{errorForField(errors, 'show_stock')[0]}</span>}
+                    </div>
                 </div>
             </div>
         </AdminCard>
@@ -2455,4 +2576,4 @@ function AccordionSection({ sectionRef, id, title, icon: Icon, children, open = 
     return <details ref={sectionRef} id={id} className="accordion" open={open}><summary className="accordion__summary"><span className="accordion__icon [&_svg]:h-[14px] [&_svg]:w-[14px]"><Icon /></span><strong className="accordion__title">{title}</strong><em className="accordion__badge">{t('productEditPage.optional')}</em><ChevronIcon /></summary><div className="accordion__body">{children}</div></details>;
 }
 
-function PriceField({ label, name, value, onChange, suffix, required, disabled = false }) { return <Field label={<>{label} {required && <b className="text-[color:var(--color-accent)]">*</b>}</>}><span className="relative"><Input className={`${suffix ? 'pr-11' : ''} font-bold disabled:cursor-not-allowed disabled:bg-[#f2efec] disabled:text-[#817870]`} name={name} value={value} onChange={onChange} disabled={disabled} />{suffix && <b className="absolute right-[11px] top-1/2 -translate-y-1/2 text-[11px] text-[#8d857f]">{suffix}</b>}</span></Field>; }
+function PriceField({ label, name, value, onChange, suffix, required, error, disabled = false }) { return <Field label={<>{label} {required && <b className="text-[color:var(--color-accent)]">*</b>}</>} error={error} data-validation-field={name}><span className="relative"><Input className={`${suffix ? 'pr-11' : ''} font-bold disabled:cursor-not-allowed disabled:bg-[#f2efec] disabled:text-[#817870] ${error ? '!border-red-500' : ''}`} name={name} value={value} onChange={onChange} disabled={disabled} aria-invalid={Boolean(error)} />{suffix && <b className="absolute right-[11px] top-1/2 -translate-y-1/2 text-[11px] text-[#8d857f]">{suffix}</b>}</span></Field>; }

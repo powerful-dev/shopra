@@ -58,6 +58,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
     const [loadError, setLoadError] = useState('');
     const [valuesError, setValuesError] = useState('');
     const [saveError, setSaveError] = useState('');
+    const [validationErrors, setValidationErrors] = useState({});
     const [optionError, setOptionError] = useState('');
     const [creatingForRow, setCreatingForRow] = useState(null);
     const [isManagerOpen, setIsManagerOpen] = useState(false);
@@ -75,6 +76,10 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
     productIdRef.current = productId;
     productContextVersionRef.current = productContextVersion;
     translationRef.current = t;
+
+    useEffect(() => {
+        setValidationErrors({});
+    }, [productContextVersion]);
 
     const updateRows = (value) => {
         setRows((current) => {
@@ -179,6 +184,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                     && productContextVersionRef.current === savingContextVersion;
             };
             setSaveError('');
+            setValidationErrors({});
 
             try {
                 if (valuesLoadPromiseRef.current && ! await valuesLoadPromiseRef.current) {
@@ -202,17 +208,14 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
             }
         },
         handleSaveError: (error) => {
-            const messages = Object.entries(error.errors ?? {})
-                .filter(([field]) => field === 'attributes' || field.startsWith('attributes.'))
-                .flatMap(([, fieldMessages]) => fieldMessages)
-                .filter(Boolean);
-
-            if (messages.length > 0) {
-                setSaveError([...new Set(messages)].join(' '));
-            }
+            setValidationErrors(Object.fromEntries(
+                Object.entries(error.errors ?? {})
+                    .filter(([field]) => field === 'attributes' || field.startsWith('attributes.')),
+            ));
         },
         markSaved: (savedProductId) => {
             setSaveError('');
+            setValidationErrors({});
             lastSavedProductIdRef.current = productIdRef.current ? null : String(savedProductId);
         },
     }), []);
@@ -222,14 +225,23 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
     ), [attributes]);
 
     const addRow = () => {
-        onChange?.();
+        onChange?.('attributes');
+        setValidationErrors({});
         const id = nextRowIdRef.current;
         nextRowIdRef.current += 1;
         updateRows((current) => [...current, { id, attributeId: null, value: '' }]);
     };
 
     const updateRowAttribute = (rowId, attributeId) => {
-        onChange?.();
+        const rowIndex = rowsRef.current.findIndex((row) => row.id === rowId);
+        const errorKey = `attributes.${rowIndex}.attribute_id`;
+        onChange?.(errorKey);
+        setValidationErrors((current) => {
+            if (!current[errorKey]) return current;
+            const next = { ...current };
+            delete next[errorKey];
+            return next;
+        });
         const attribute = attributesById.get(attributeId);
 
         updateRows((current) => current.map((row) => row.id === rowId
@@ -238,7 +250,15 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
     };
 
     const updateRowValue = (rowId, value) => {
-        onChange?.();
+        const rowIndex = rowsRef.current.findIndex((row) => row.id === rowId);
+        const errorKey = `attributes.${rowIndex}.value`;
+        onChange?.(errorKey);
+        setValidationErrors((current) => {
+            if (!current[errorKey]) return current;
+            const next = { ...current };
+            delete next[errorKey];
+            return next;
+        });
         updateRows((current) => current.map((row) => row.id === rowId ? { ...row, value } : row));
     };
 
@@ -303,7 +323,15 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
             setAttributes((current) => current.map((item) => item.id === attribute.id
                 ? { ...item, options: [...(item.options ?? []), option] }
                 : item));
-            onChange?.();
+            const rowIndex = rowsRef.current.findIndex((row) => row.id === rowId);
+            const errorKey = `attributes.${rowIndex}.value`;
+            onChange?.(errorKey);
+            setValidationErrors((current) => {
+                if (!current[errorKey]) return current;
+                const next = { ...current };
+                delete next[errorKey];
+                return next;
+            });
             updateRows((current) => current.map((row) => {
                 if (row.id !== rowId) return row;
 
@@ -356,7 +384,8 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
 
         reorderedRows.splice(targetIndex + (position === 'after' ? 1 : 0), 0, draggedRow);
         endRowDrag();
-        onChange?.();
+        onChange?.('attributes');
+        setValidationErrors({});
         updateRows(reorderedRows);
     };
 
@@ -389,6 +418,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
             {loadError && <p className="mb-3 mt-0 rounded-lg bg-[#fff5ef] px-3 py-2 text-[12px] text-[#9a3b12]" role="alert">{loadError}</p>}
             {valuesError && <p className="mb-3 mt-0 rounded-lg bg-[#fff5ef] px-3 py-2 text-[12px] text-[#9a3b12]" role="alert">{valuesError}</p>}
             {saveError && <p className="mb-3 mt-0 rounded-lg bg-[#fff5ef] px-3 py-2 text-[12px] text-[#9a3b12]" role="alert">{saveError}</p>}
+            {validationErrors.attributes?.[0] && <p className="mb-3 mt-0 rounded-lg bg-[#fff5ef] px-3 py-2 text-[12px] text-[#9a3b12]" role="alert" data-validation-error="true">{validationErrors.attributes[0]}</p>}
             {optionError && <p className="mb-3 mt-0 rounded-lg bg-[#fff5ef] px-3 py-2 text-[12px] text-[#9a3b12]" role="alert">{optionError}</p>}
 
             {rows.length === 0 ? (
@@ -397,8 +427,12 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                 </div>
             ) : (
                 <div className="space-y-2.5">
-                    {rows.map((row) => {
+                    {rows.map((row, rowIndex) => {
                         const attribute = attributesById.get(row.attributeId);
+                        const attributeError = validationErrors[`attributes.${rowIndex}.attribute_id`];
+                        const valueError = validationErrors[`attributes.${rowIndex}.value`];
+                        const sortOrderError = validationErrors[`attributes.${rowIndex}.sort_order`];
+                        const hasRowError = attributeError || valueError || sortOrderError;
                         const selectedByOtherRows = new Set(rows
                             .filter((item) => item.id !== row.id && item.attributeId !== null)
                             .map((item) => item.attributeId));
@@ -410,7 +444,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
 
                         return (
                             <article
-                                className={`relative grid grid-cols-[30px_minmax(180px,.9fr)_minmax(220px,1.1fr)_38px] items-start gap-2.5 rounded-[12px] border bg-[#fcfbfa] p-3 transition-[border-color,box-shadow,opacity,transform] max-md:grid-cols-[30px_minmax(0,1fr)_38px] ${draggedRowId === row.id ? 'scale-[.99] border-[color:var(--color-accent)] opacity-45' : 'border-[#e3dcd6]'} ${rowDropTarget?.id === row.id ? 'border-[color:var(--color-accent)] ring-2 ring-[rgba(184,79,24,.12)]' : ''}`}
+                                className={`relative grid grid-cols-[30px_minmax(180px,.9fr)_minmax(220px,1.1fr)_38px] items-start gap-2.5 rounded-[12px] border bg-[#fcfbfa] p-3 transition-[border-color,box-shadow,opacity,transform] max-md:grid-cols-[30px_minmax(0,1fr)_38px] ${draggedRowId === row.id ? 'scale-[.99] border-[color:var(--color-accent)] opacity-45' : hasRowError ? 'border-red-500' : 'border-[#e3dcd6]'} ${rowDropTarget?.id === row.id ? 'border-[color:var(--color-accent)] ring-2 ring-[rgba(184,79,24,.12)]' : ''}`}
                                 key={row.id}
                                 data-attribute-row
                                 onDragOver={(event) => {
@@ -444,9 +478,10 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                                     }}
                                     onDragEnd={endRowDrag}
                                 />
-                                <div className="max-md:col-span-2 max-md:col-start-2 max-md:row-start-1">
+                                <div className="max-md:col-span-2 max-md:col-start-2 max-md:row-start-1" data-validation-error={attributeError ? 'true' : undefined}>
                                     <span className="mb-1.5 block text-[11px] font-bold text-[#756d66]">{t('productEditPage.attributesSection.attribute')}</span>
                                     <SearchableSelect
+                                        className={attributeError ? '[&_.searchable-select__trigger]:!border-red-500' : ''}
                                         options={attributeOptions}
                                         value={row.attributeId}
                                         onChange={(attributeId) => updateRowAttribute(row.id, attributeId)}
@@ -456,24 +491,29 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
                                         ariaLabel={t('productEditPage.attributesSection.selectAttribute')}
                                         ariaBusy={isBusy}
                                         disabled={isBusy}
+                                        ariaInvalid={Boolean(attributeError)}
                                         actionLabel={t('productEditPage.attributesSection.createAttribute')}
                                         onAction={(query) => setCreatingForRow({ rowId: row.id, initialName: query })}
                                     />
+                                    {attributeError?.[0] && <span className="mt-1 block text-[11px] text-red-600" role="alert">{attributeError[0]}</span>}
                                 </div>
-                                <div className="max-md:col-span-2 max-md:col-start-1 max-md:row-start-2">
+                                <div className="max-md:col-span-2 max-md:col-start-1 max-md:row-start-2" data-validation-error={valueError ? 'true' : undefined}>
                                     <span className="mb-1.5 block text-[11px] font-bold text-[#756d66]">{t('productEditPage.attributesSection.value')}</span>
                                     <AttributeValueControl
                                         attribute={attribute}
                                         value={row.value}
                                         disabled={isValuesLoading}
                                         isCreatingOption={creatingOptionRowIds.has(row.id)}
+                                        error={valueError}
                                         onChange={(value) => updateRowValue(row.id, value)}
                                         onCreateOption={(value) => createOptionForRow(row.id, attribute, value)}
                                     />
+                                    {valueError?.[0] && <span className="mt-1 block text-[11px] text-red-600" role="alert">{valueError[0]}</span>}
                                 </div>
-                                <button type="button" className="mt-[24px] grid h-[41px] w-[38px] cursor-pointer place-items-center rounded-[9px] border border-[#e2d9d3] bg-white text-[#8b8179] hover:border-[#e1b9ad] hover:text-[#b7483f] disabled:cursor-wait disabled:opacity-50 max-md:col-start-3 max-md:row-start-2 max-md:mt-[22px]" disabled={isValuesLoading} onClick={() => { onChange?.(); updateRows((current) => current.filter((item) => item.id !== row.id)); }} aria-label={t('productEditPage.attributesSection.deleteAttribute')}>
+                                <button type="button" className="mt-[24px] grid h-[41px] w-[38px] cursor-pointer place-items-center rounded-[9px] border border-[#e2d9d3] bg-white text-[#8b8179] hover:border-[#e1b9ad] hover:text-[#b7483f] disabled:cursor-wait disabled:opacity-50 max-md:col-start-3 max-md:row-start-2 max-md:mt-[22px]" disabled={isValuesLoading} onClick={() => { onChange?.('attributes'); setValidationErrors({}); updateRows((current) => current.filter((item) => item.id !== row.id)); }} aria-label={t('productEditPage.attributesSection.deleteAttribute')}>
                                     <TrashIcon />
                                 </button>
+                                {sortOrderError?.[0] && <span className="col-start-2 col-end-4 text-[11px] text-red-600 max-md:col-start-1 max-md:col-end-4" role="alert" data-validation-error="true">{sortOrderError[0]}</span>}
                                 {rowDropTarget?.id === row.id && (
                                     <span className={`pointer-events-none absolute inset-x-2 z-10 h-0.5 rounded-full bg-[color:var(--color-accent)] ${rowDropTarget.position === 'before' ? 'top-0' : 'bottom-0'}`} aria-hidden="true" />
                                 )}
@@ -501,7 +541,7 @@ const ProductAttributesSection = forwardRef(function ProductAttributesSection({ 
 
 export default ProductAttributesSection;
 
-function AttributeValueControl({ attribute, value, disabled, isCreatingOption, onChange, onCreateOption }) {
+function AttributeValueControl({ attribute, value, disabled, isCreatingOption, error, onChange, onCreateOption }) {
     const { t } = useTranslation();
 
     if (!attribute) {
@@ -516,6 +556,7 @@ function AttributeValueControl({ attribute, value, disabled, isCreatingOption, o
     if (attribute.type === 'select') {
         return (
             <SearchableSelect
+                className={error ? '[&_.searchable-select__trigger]:!border-red-500' : ''}
                 options={options}
                 value={value || null}
                 onChange={onChange}
@@ -525,6 +566,7 @@ function AttributeValueControl({ attribute, value, disabled, isCreatingOption, o
                 ariaLabel={t('productEditPage.attributesSection.valueAria', { name: attribute.name })}
                 ariaBusy={isCreatingOption}
                 disabled={disabled}
+                ariaInvalid={Boolean(error)}
                 actionLabel={(query) => t('productEditPage.attributesSection.createValue', { value: query })}
                 actionRequiresQuery
                 actionWhenNoResults
@@ -542,6 +584,7 @@ function AttributeValueControl({ attribute, value, disabled, isCreatingOption, o
     if (attribute.type === 'multiselect') {
         return (
             <SearchableSelect
+                className={error ? '[&_.searchable-select__trigger]:!border-red-500' : ''}
                 options={options}
                 value={Array.isArray(value) ? value : []}
                 onChange={onChange}
@@ -551,6 +594,7 @@ function AttributeValueControl({ attribute, value, disabled, isCreatingOption, o
                 ariaLabel={t('productEditPage.attributesSection.valuesAria', { name: attribute.name })}
                 ariaBusy={isCreatingOption}
                 disabled={disabled}
+                ariaInvalid={Boolean(error)}
                 multiple
                 closeOnSelect={false}
                 actionLabel={(query) => t('productEditPage.attributesSection.createValue', { value: query })}
@@ -570,7 +614,7 @@ function AttributeValueControl({ attribute, value, disabled, isCreatingOption, o
     if (attribute.type === 'number') {
         return (
             <div className="relative">
-                <Input className={attribute.unit ? 'pr-[58px]' : ''} type="number" step="any" value={value} disabled={disabled} onChange={(event) => onChange(event.target.value)} />
+                <Input className={`${attribute.unit ? 'pr-[58px]' : ''} ${error ? '!border-red-500' : ''}`} type="number" step="any" value={value} disabled={disabled} aria-invalid={Boolean(error)} onChange={(event) => onChange(event.target.value)} />
                 {attribute.unit && <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[12px] font-bold text-[#817870]">{attribute.unit}</span>}
             </div>
         );
@@ -578,9 +622,9 @@ function AttributeValueControl({ attribute, value, disabled, isCreatingOption, o
 
     if (attribute.type === 'boolean') {
         return (
-            <div className="flex h-[41px] items-center gap-2.5 rounded-[9px] border border-[#ddd5cf] bg-white px-[11px]">
+            <div className={`flex h-[41px] items-center gap-2.5 rounded-[9px] border bg-white px-[11px] ${error ? 'border-red-500' : 'border-[#ddd5cf]'}`}>
                 <label className="switch">
-                    <input className="switch__input" type="checkbox" checked={Boolean(value)} disabled={disabled} aria-label={t('productEditPage.attributesSection.booleanAria', { name: attribute.name, value: t(value ? 'productEditPage.attributesSection.yes' : 'productEditPage.attributesSection.no') })} onChange={(event) => onChange(event.target.checked)} />
+                    <input className="switch__input" type="checkbox" checked={Boolean(value)} disabled={disabled} aria-invalid={Boolean(error)} aria-label={t('productEditPage.attributesSection.booleanAria', { name: attribute.name, value: t(value ? 'productEditPage.attributesSection.yes' : 'productEditPage.attributesSection.no') })} onChange={(event) => onChange(event.target.checked)} />
                     <span className="switch__track" />
                 </label>
                 <span className="text-[12px] font-bold text-[#554e48]">{t(value ? 'productEditPage.attributesSection.yes' : 'productEditPage.attributesSection.no')}</span>
@@ -588,5 +632,5 @@ function AttributeValueControl({ attribute, value, disabled, isCreatingOption, o
         );
     }
 
-    return <Input type="text" value={value} placeholder={t('productEditPage.attributesSection.enterValue')} disabled={disabled} onChange={(event) => onChange(event.target.value)} />;
+    return <Input className={error ? '!border-red-500' : ''} type="text" value={value} placeholder={t('productEditPage.attributesSection.enterValue')} disabled={disabled} aria-invalid={Boolean(error)} onChange={(event) => onChange(event.target.value)} />;
 }

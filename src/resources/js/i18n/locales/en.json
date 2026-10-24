@@ -400,6 +400,8 @@
             "saveDraft": "Save draft"
         },
         "errors": {
+            "saveValidation": "Product not saved. Fix the errors in the form",
+            "saveRequest": "Could not save the product. Try again",
             "categoriesLoad": "Unable to load {{appName}} categories.",
             "productLoad": "Unable to load the product. Refresh the page or return to the product list.",
             "draftCreate": "Unable to create a product draft. Try again.",

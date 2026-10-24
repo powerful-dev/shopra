@@ -12,28 +12,34 @@ export default function SeoFields({
     descriptionLabel,
     titleName,
     descriptionName,
+    titleError,
+    descriptionError,
     disabled = false,
     onTitleChange,
     onDescriptionChange,
 }) {
     return (
         <>
-            <Field label={titleLabel} className={fieldWrapperClass}>
+            <Field label={titleLabel} error={titleError} className={fieldWrapperClass} data-validation-field={titleName}>
                 <Input
                     type="text"
                     name={titleName}
                     value={title}
                     onChange={(event) => onTitleChange(event.target.value)}
                     disabled={disabled}
+                    aria-invalid={Boolean(titleError)}
+                    className={titleError ? '!border-red-500' : ''}
                 />
             </Field>
             <div className="mt-[13px]">
-                <Field label={descriptionLabel} className={fieldWrapperClass}>
+                <Field label={descriptionLabel} error={descriptionError} className={fieldWrapperClass} data-validation-field={descriptionName}>
                     <Textarea
                         name={descriptionName}
                         value={description}
                         onChange={(event) => onDescriptionChange(event.target.value)}
                         disabled={disabled}
+                        aria-invalid={Boolean(descriptionError)}
+                        className={descriptionError ? '!border-red-500' : ''}
                     />
                 </Field>
             </div>

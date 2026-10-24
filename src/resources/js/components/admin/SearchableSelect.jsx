@@ -19,6 +19,7 @@ export default function SearchableSelect({
     className = '',
     disabled = false,
     ariaBusy = false,
+    ariaInvalid = false,
     closeOnSelect = true,
     multiple = false,
     actionLabel = '',
@@ -231,6 +232,7 @@ export default function SearchableSelect({
                 aria-expanded={isOpen}
                 aria-controls={isOpen ? listboxId : undefined}
                 aria-busy={ariaBusy}
+                aria-invalid={ariaInvalid || undefined}
                 disabled={disabled || isCreateBusy}
                 onClick={() => isOpen ? close() : setIsOpen(true)}
             >
