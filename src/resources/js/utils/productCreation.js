@@ -8,12 +8,17 @@ function normalizeNullableQuantity(quantity) {
     return quantity === '' || quantity === null || quantity === undefined ? null : quantity;
 }
 
+function normalizeNullableValue(value) {
+    return value === '' || value === null || value === undefined ? null : value;
+}
+
 export function buildProductPayload(form, status, { useDraftDefaults = false, attributes } = {}) {
     return {
         ...form,
         name: form.name.trim() || null,
-        price: useDraftDefaults && form.price === '' ? 0 : form.price,
-        old_price: form.old_price || null,
+        price: normalizeNullableValue(form.price),
+        old_price: normalizeNullableValue(form.old_price),
+        currency: normalizeNullableValue(form.currency),
         quantity: useDraftDefaults && form.quantity === '' ? 0 : normalizeNullableQuantity(form.quantity),
         show_stock: form.show_stock,
         seo_title: form.seo_title || null,

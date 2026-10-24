@@ -76,15 +76,18 @@ class ShopItemCurrencyTest extends TestCase
         ]);
     }
 
-    public function test_new_product_defaults_to_store_currency(): void
+    public function test_draft_product_can_be_saved_without_currency(): void
     {
-        $this->postJson('/api/products', $this->productData('Default currency product'))
+        $this->postJson('/api/products', [
+            ...$this->productData('Draft without currency'),
+            'currency' => null,
+        ])
             ->assertCreated()
-            ->assertJsonPath('data.currency', 'UAH');
+            ->assertJsonPath('data.currency', null);
 
         $this->assertDatabaseHas('shop_items', [
-            'name' => 'Default currency product',
-            'currency' => 'UAH',
+            'name' => 'Draft without currency',
+            'currency' => null,
         ]);
     }
 

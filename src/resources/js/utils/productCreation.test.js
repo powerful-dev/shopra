@@ -34,7 +34,8 @@ test('blank first-photo draft stays on /new and is updated with fields entered b
     const draftPayload = buildProductPayload(emptyForm, 'draft', { useDraftDefaults: true });
     assert.equal(resolveProductSaveTarget(null, null), null);
     assert.equal(draftPayload.name, null);
-    assert.equal(draftPayload.price, 0);
+    assert.equal(draftPayload.price, null);
+    assert.equal(draftPayload.currency, null);
     assert.equal(draftPayload.quantity, 0);
     assert.equal(draftPayload.shop_group_id, null);
 
@@ -52,6 +53,23 @@ test('blank first-photo draft stays on /new and is updated with fields entered b
     assert.deepEqual(savePayload, { ...filledForm, attributes: [] });
     // After Save, the same product is addressed by its permanent URL.
     assert.equal(resolveProductSaveTarget('42', draftId), '42');
+});
+
+test('explicit draft save keeps blank publish-only fields nullable', () => {
+    const payload = buildProductPayload({
+        name: '',
+        price: '',
+        old_price: '',
+        currency: '',
+        quantity: '',
+        status: 'draft',
+    }, 'draft');
+
+    assert.equal(payload.name, null);
+    assert.equal(payload.price, null);
+    assert.equal(payload.old_price, null);
+    assert.equal(payload.currency, null);
+    assert.equal(payload.quantity, null);
 });
 
 test('fields entered before the first photo remain in the draft payload', () => {

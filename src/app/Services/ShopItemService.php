@@ -15,7 +15,7 @@ class ShopItemService
 {
     public function __construct(private readonly ShopItemAttributeService $shopItemAttributeService) {}
 
-    /** @param array{name: string|null, price: numeric-string|int|float, old_price?: numeric-string|int|float|null, currency: string, quantity?: int|null, show_stock?: bool, description?: string|null, seo_title?: string|null, seo_description?: string|null, shop_group_id?: int|null, status: string, attributes?: array<int, array{attribute_id: int, value: mixed, sort_order: int}>} $data */
+    /** @param array{name: string|null, price: numeric-string|int|float|null, old_price?: numeric-string|int|float|null, currency: string|null, quantity?: int|null, show_stock?: bool, description?: string|null, seo_title?: string|null, seo_description?: string|null, shop_group_id?: int|null, status: string, attributes?: array<int, array{attribute_id: int, value: mixed, sort_order: int}>} $data */
     public function create(array $data): ShopItem
     {
         return DB::transaction(function () use ($data): ShopItem {
@@ -35,7 +35,7 @@ class ShopItemService
         });
     }
 
-    /** @param array{name: string|null, price: numeric-string|int|float, old_price?: numeric-string|int|float|null, currency: string, quantity?: int|null, show_stock?: bool, description?: string|null, seo_title?: string|null, seo_description?: string|null, shop_group_id?: int|null, status: string, attributes?: array<int, array{attribute_id: int, value: mixed, sort_order: int}>} $data */
+    /** @param array{name: string|null, price: numeric-string|int|float|null, old_price?: numeric-string|int|float|null, currency: string|null, quantity?: int|null, show_stock?: bool, description?: string|null, seo_title?: string|null, seo_description?: string|null, shop_group_id?: int|null, status: string, attributes?: array<int, array{attribute_id: int, value: mixed, sort_order: int}>} $data */
     public function update(ShopItem $shopItem, array $data): ShopItem
     {
         return DB::transaction(function () use ($shopItem, $data): ShopItem {

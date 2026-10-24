@@ -5,7 +5,6 @@ namespace App\Http\Requests;
 use App\Enums\ShopItemStatus;
 use App\Enums\SupportedCurrency;
 use App\Http\Requests\Concerns\ValidatesShopItemAttributes;
-use App\Models\ShopItem;
 use App\Services\SettingsService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -26,17 +25,22 @@ class SaveShopItemRequest extends FormRequest
     /** @return array<string, array<int, mixed>> */
     public function rules(): array
     {
+        $requiredForNonDraft = Rule::requiredIf(
+            $this->input('status') !== ShopItemStatus::Draft->value,
+        );
+
         return [
             'name' => [
-                Rule::requiredIf($this->input('status') !== ShopItemStatus::Draft->value),
+                $requiredForNonDraft,
                 'nullable',
                 'string',
                 'max:255',
             ],
-            'price' => ['required', 'numeric', 'min:0'],
+            'price' => [$requiredForNonDraft, 'nullable', 'numeric', 'min:0'],
             'old_price' => ['nullable', 'numeric', 'min:0'],
             'currency' => [
-                'required',
+                $requiredForNonDraft,
+                'nullable',
                 Rule::enum(SupportedCurrency::class),
                 Rule::in($this->availableCurrencyCodes()),
             ],
@@ -63,16 +67,11 @@ class SaveShopItemRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        if (! blank($this->input('currency'))) {
-            return;
-        }
-
-        $product = $this->route('product');
-        $currency = $product instanceof ShopItem
-            ? $product->currency?->value
-            : ($this->availableCurrencyCodes()[0] ?? null);
-
-        $this->merge(['currency' => $currency]);
+        $this->merge([
+            'name' => $this->input('name'),
+            'price' => $this->input('price'),
+            'currency' => $this->input('currency'),
+        ]);
     }
 
     /** @return list<string> */

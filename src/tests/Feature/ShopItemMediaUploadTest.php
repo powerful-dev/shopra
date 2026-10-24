@@ -40,14 +40,14 @@ class ShopItemMediaUploadTest extends TestCase
         ];
         $draftId = $this->postJson('/api/products', [
             'name' => null,
-            'price' => 0,
+            'price' => null,
             'quantity' => 0,
-            'currency' => '',
+            'currency' => null,
             'shop_group_id' => null,
             'status' => 'draft',
         ])
             ->assertCreated()
-            ->assertJsonPath('data.price', '0.00')
+            ->assertJsonPath('data.price', null)
             ->json('data.id');
 
         $this->post("/api/products/{$draftId}/media", [

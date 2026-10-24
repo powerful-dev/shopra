@@ -917,7 +917,7 @@ export default function ProductEditPage() {
     const saveActionLabel = isPublishable ? t('productEditPage.actions.saveDraft') : t('common.save');
     const isActionBarBusy = isSubmitting || isStatusChanging;
     const saveCurrentProduct = () => saveProduct(isNew ? 'draft' : form.status);
-    const publishProduct = () => (isNew ? saveProduct('active') : updateProductStatus('active'));
+    const publishProduct = () => saveProduct('active');
     const actionMenuItems = [
         !isNew && !isPublishable && statusMenuAction && {
             ...statusMenuAction,

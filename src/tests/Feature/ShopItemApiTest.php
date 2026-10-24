@@ -161,8 +161,8 @@ class ShopItemApiTest extends TestCase
 
         $draftId = $this->postJson('/api/products', [
             'name' => null,
-            'price' => 0,
-            'currency' => 'UAH',
+            'price' => null,
+            'currency' => null,
             'status' => 'draft',
         ])->assertCreated()->json('data.id');
 
@@ -187,8 +187,91 @@ class ShopItemApiTest extends TestCase
         ]);
     }
 
+    public function test_draft_fields_are_optional_but_required_for_publication(): void
+    {
+        Shop::query()->create(['name' => 'Test shop', 'theme' => 'other', 'currency' => 'UAH']);
+        $admin = User::factory()->create(['is_active' => true]);
+        $admin->modules()->attach(Module::query()->create([
+            'code' => 'products',
+            'show_in_menu' => true,
+            'is_required' => false,
+        ]));
+        $this->actingAs($admin, 'sanctum');
+
+        $draftId = $this->postJson('/api/products', [
+            'status' => 'draft',
+        ])
+            ->assertCreated()
+            ->assertJsonPath('data.name', null)
+            ->assertJsonPath('data.price', null)
+            ->assertJsonPath('data.currency', null)
+            ->json('data.id');
+
+        $this->assertDatabaseHas('shop_items', [
+            'id' => $draftId,
+            'name' => null,
+            'price' => null,
+            'currency' => null,
+            'status' => 'draft',
+        ]);
+
+        $this->putJson("/api/products/{$draftId}", [
+            'name' => null,
+            'price' => null,
+            'currency' => null,
+            'status' => 'draft',
+        ])->assertOk();
+
+        $this->putJson("/api/products/{$draftId}", [
+            'name' => null,
+            'price' => null,
+            'currency' => null,
+            'status' => 'active',
+        ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['name', 'price', 'currency']);
+
+        $this->assertDatabaseHas('shop_items', [
+            'id' => $draftId,
+            'price' => null,
+            'currency' => null,
+            'status' => 'draft',
+        ]);
+
+        $this->putJson("/api/products/{$draftId}", [
+            'name' => 'Published product',
+            'price' => 1200,
+            'currency' => 'UAH',
+            'status' => 'active',
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.status', 'active');
+    }
+
+    public function test_optional_draft_fields_still_validate_supplied_values(): void
+    {
+        Shop::query()->create(['name' => 'Test shop', 'theme' => 'other', 'currency' => 'UAH']);
+        $admin = User::factory()->create(['is_active' => true]);
+        $admin->modules()->attach(Module::query()->create([
+            'code' => 'products',
+            'show_in_menu' => true,
+            'is_required' => false,
+        ]));
+        $this->actingAs($admin, 'sanctum');
+
+        $this->postJson('/api/products', [
+            'name' => ['invalid'],
+            'price' => 'invalid',
+            'currency' => 'BTC',
+            'status' => 'draft',
+        ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['name', 'price', 'currency']);
+    }
+
     public function test_products_are_returned_with_all_their_categories(): void
     {
+        Shop::query()->create(['name' => 'Test shop', 'theme' => 'other', 'currency' => 'UAH']);
         $admin = User::factory()->create(['is_active' => true]);
         $productsModule = Module::query()->create([
             'code' => 'products',
@@ -255,35 +338,42 @@ class ShopItemApiTest extends TestCase
 
         $emptyDraftId = $this->postJson('/api/products', [
             'name' => null,
-            'price' => 0,
+            'price' => null,
             'old_price' => null,
+            'currency' => null,
             'quantity' => 0,
             'description' => null,
             'status' => 'draft',
         ])
             ->assertCreated()
             ->assertJsonPath('data.name', null)
+            ->assertJsonPath('data.price', null)
+            ->assertJsonPath('data.currency', null)
             ->assertJsonPath('data.status', 'draft')
             ->json('data.id');
 
         $this->assertDatabaseHas('shop_items', [
             'id' => $emptyDraftId,
             'name' => null,
+            'price' => null,
+            'currency' => null,
             'status' => 'draft',
         ]);
         ShopItem::query()->findOrFail($emptyDraftId)->forceDelete();
 
         $this->postJson('/api/products', [
             'name' => null,
-            'price' => 0,
+            'price' => null,
+            'currency' => null,
             'quantity' => 0,
             'status' => 'active',
-        ])->assertUnprocessable()->assertJsonValidationErrors('name');
+        ])->assertUnprocessable()->assertJsonValidationErrors(['name', 'price', 'currency']);
 
         $this->putJson("/api/products/{$createdProductId}", [
             'name' => 'Опубликованный товар',
             'price' => 1300,
             'old_price' => 1500,
+            'currency' => 'UAH',
             'quantity' => 4,
             'description' => '<p>Обновлённое описание товара</p>',
             'seo_title' => 'Опубликованный товар — купить',
@@ -313,6 +403,7 @@ class ShopItemApiTest extends TestCase
             'name' => 'Опубликованный товар',
             'price' => 1300,
             'old_price' => 1500,
+            'currency' => 'UAH',
             'quantity' => 4,
             'shop_group_id' => null,
             'status' => 'archived',
@@ -325,6 +416,7 @@ class ShopItemApiTest extends TestCase
             'name' => 'Опубликованный товар',
             'price' => 1300,
             'old_price' => null,
+            'currency' => 'UAH',
             'quantity' => 4,
             'status' => 'unknown',
         ])->assertUnprocessable()->assertJsonValidationErrors('status');
